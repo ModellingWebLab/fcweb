@@ -21,6 +21,7 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
 	{
 		var csvData = getCSVColumnsDownsampled (this.file);
 
+		plotPoints = true;
 
         var div = document.createElement("div");
         div.id = "choices";
@@ -39,9 +40,12 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
                 var curData = [];
                 for (var j = 0; j < csvData[i].length; j++)
                         curData.push ([csvData[i][j].x, csvData[i][j].y]);
+                if (curData.length > 100)
+                	plotPoints = false;
                 //plot.polyline("line " + i, { x: csvData[0], y: csvData[i], stroke:  colorPalette.getRgba (col), thickness: 1 });
                 datasets["line" + i] = {label : "line " + i, data: curData};
         }
+    	
 
 
 
@@ -84,7 +88,7 @@ legendContainer.id = "legend";this.div.appendChild (legendContainer);
 
                     if (data.length > 0) {
                         //$.plot("#flotplot-262", data, {
-                        $.plot("#" + id, data, {
+                        var settings = {
                             /*yaxis: {
                                 min: 0
                             },*/
@@ -94,7 +98,7 @@ legendContainer.id = "legend";this.div.appendChild (legendContainer);
 ,
 lines: { show: true},
 
-points: { show: true, radius:2},
+
 
 zoom: {
 	interactive: true
@@ -103,9 +107,16 @@ zoom: {
 	interactive: true
 	},
 legend: {backgroundOpacity: 0,container: $("#legend")}
-                        });
+                        };
+                        
+                        if (plotPoints)
+                        	settings.points = { show: true, radius:2};
+                        
+                        $.plot("#" + id, data, settings);
                     }
                 };
+                
+                
                 choiceContainer.find("input").click(plotAccordingToChoices);
 
                 plotAccordingToChoices();
