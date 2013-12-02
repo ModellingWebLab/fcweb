@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context  reloadable="false"  allowLinking="true">
+    <Resource name="jdbc/CHASTE"
+        auth="Container"
+        type="javax.sql.DataSource"
+        username="DBUSER"
+        password="DBPASSWORD"
+        driverClassName="com.mysql.jdbc.Driver"
+        url="jdbc:mysql://HOST:PORT/DBNAME?zeroDateTimeBehavior=convertToNull&amp;autoReconnect=true"
+        maxActive="30"
+        maxIdle="10"
+        minIdle="0"
+        initialSize="0"
+        maxWait="-1"
+        validationQuery="SELECT 1"
+        testOnBorrow="true"
+        poolPreparedStatements="true"
+        removeAbandoned="true"
+        removeAbandonedTimeout="60"
+        logAbandoned="true"
+        />
+    <Parameter description="Are we running in production env?"
+        name="production"
+        value="false"
+        override="false" />
+    <Parameter description="Where to put temporary files?"
+        name="tempDir"
+        value="/tmp/chaste-temp"
+        override="false" />
+    <Parameter description="Where to put files?"
+        name="storageDir"
+        value="/tmp/chaste-storage"
+        override="false" />
+    <Parameter description="Where's Chaste webservice located?"
+        name="chasteURL"
+        value="https://URLTOBACKEND/chastewebservice.py"
+        override="false" />
+    <Parameter description="What's the URL of this web interface? (include a final /)"
+        name="thisURL"
+        value="https://URLTOFRONTEND/FunctionalCuration/"
+        override="false" />
+    <Parameter description="Password for Chaste webservice?"
+        name="chastePassword"
+        value="PASSWORDFORBACKEND"
+        override="false" />
+    <Parameter description="Who's the sender of emails?"
+        name="mailSender"
+        value="noreply@CHASTESOMETHING"
+        override="false" />
+    <Parameter description="What's the name of the sender of emails?"
+        name="mailSenderName"
+        value="Chaste"
+        override="false" />
+</Context>
