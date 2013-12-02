@@ -1,0 +1,6 @@
+.flotDiv table
+{
+    width: auto;
+    min-width: 0;
+    display: table;
+}
