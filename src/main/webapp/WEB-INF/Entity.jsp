@@ -18,7 +18,7 @@
     	<h2>Versions</h2>
     	<div id="entityversionlist">
 	   		<c:forEach items="${entity.versions}" var="version" >
-	    		<p title="${version.value.created} -- Visibility: ${version.value.visibility} -- ${version.value.status}" class="entityviz-${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> experiment-${version.value.status}</c:if>">
+	    		<p title="${version.value.created} -- Visibility: ${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> -- ${version.value.status}</c:if>" class="entityviz-${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> experiment-${version.value.status}</c:if>">
 					<c:choose>
 						<c:when test="${entity.type == 'experiment' && version.value.status != 'SUCCESS'}">
 							<strong>

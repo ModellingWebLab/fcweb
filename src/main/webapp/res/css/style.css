@@ -308,9 +308,9 @@ tr:nth-child(5n+1)
 }
 
 
-#modellist ul,
+/*#modellist ul,
 #protocollist ul,
-#experimentlist ul,
+#experimentlist ul,*/
 #batchlist ul,
 #entityversionfilestable,
 #accounttable
@@ -393,14 +393,14 @@ p.entityviz-PUBLIC
 	padding-left:20px;
 	background: url(../img/green-dot.png) no-repeat left top 5px;
 }
-#modellist ul,
+/*#modellist ul,
 #protocollist ul,
 #experimentlist ul
 {
 	list-style: none;
     padding:0;
     margin:0;
-}
+}*/
 li.entityviz-RESTRICTED,
 li.entityviz-PRIVATE,
 li.entityviz-PUBLIC
