@@ -319,18 +319,21 @@ tr:nth-child(5n+1)
 }
 
 #experimentlist li.experiment-RUNNING,
-#entitydetails p.experiment-RUNNING
+#entitydetails p.experiment-RUNNING,
+.experiment-RUNNING
 {
 	background-color:#d9e3f6;
 }
 
 #experimentlist li.experiment-INAPPRORIATE,
-#entitydetails p.experiment-INAPPRORIATE
+#entitydetails p.experiment-INAPPRORIATE,
+.experiment-INAPPRORIATE
 {
 	background-color:#f1d39a;
 }
 #experimentlist li.experiment-FAILED,
-#entitydetails p.experiment-FAILED
+#entitydetails p.experiment-FAILED,
+.experiment-FAILED
 {
 	background-color:#ffe0e0;
 }
@@ -421,4 +424,7 @@ li.entityviz-PRIVATE
 {
 background-image: url(../img/red-dot.png);
 }
-
+#expversioncolorlegend
+{
+	font-size:.8em;
+}

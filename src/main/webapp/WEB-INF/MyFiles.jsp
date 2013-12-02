@@ -39,22 +39,6 @@
 		    		</c:if>
 		    	</li>
 	    	</c:forEach>
-	    	<%--<c:forEach items="${protocols}" var="protocol" >
-	    		<h3><a href="${contextPath}/protocol/${protocol.url}/${protocol.id}/">${protocol.name}</a></h3>
-	    		<ul>
-		    		<c:forEach items="${protocol.versions}" var="version" >
-			    		<li title="${version.value.version}" class="entityviz-${version.value.visibility}">
-			    			<strong><a href="${contextPath}/protocol/${protocol.url}/${protocol.id}/${version.value.url}/${version.value.id}/">${version.value.version}</a></strong> by <em>${version.value.author}</em><br/>
-			    			<span class="suppl"><small>created </small> <time>${version.value.created}</time> <small>containing</small> ${version.value.numFiles} File<c:if test="${version.value.numFiles!=1}">s</c:if>.</span>
-			    		</li>
-		    		</c:forEach>
-		    		<c:if test="${User.allowedCreateEntityVersion}"> 
-			    		<li>
-			    			<small><a href="${contextPath}/protocol/createnew/?newentityname=${protocol.id}">add new version</a></small>
-			    		</li>
-		    		</c:if>
-	    		</ul>
-	    	</c:forEach>--%>
     	</ul>
     </section>
     
@@ -65,17 +49,6 @@
 	    	<c:forEach items="${experiments}" var="experiment" >
 	    		<li title="${experiment.name}"><strong><a href="${contextPath}/experiment/${experiment.url}/${experiment.id}/${protocol.latestVersion.url}/${experiment.latestVersion.id}">${experiment.name}</a></strong></li>
 	    	</c:forEach>
-    	<%--<c:forEach items="${experiments}" var="experiment" >
-    		<h3><a href="${contextPath}/experiment/${experiment.url}/${experiment.id}/">${experiment.name}</a></h3>
-    		<ul>
-	    		<c:forEach items="${experiment.versions}" var="version" >
-		    		<li class="experiment-${version.value.status} entityviz-${version.value.visibility}" title="${version.value.created}">
-		    			<strong><a href="${contextPath}/experiment/${experiment.url}/${experiment.id}/${version.value.url}/${version.value.id}/">${version.value.version}</a></strong> by <em>${version.value.author}</em><br/>
-		    			<span class="suppl"><small>created </small> <time>${version.value.created}</time> <c:if test="${not empty version.value.finished}"><small>finished </small> <time>${version.value.finished}</time></c:if> <small>containing</small> ${version.value.numFiles} File<c:if test="${version.value.numFiles!=1}">s</c:if>.</span>
-		    		</li>
-	    		</c:forEach>
-    		</ul>
-    	</c:forEach>--%>
     	</ul>
     </section>
 </t:skeleton>

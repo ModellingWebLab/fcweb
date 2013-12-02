@@ -17,6 +17,15 @@
     <div id="entitydetails">
     	<h2>Versions</h2>
     	<div id="entityversionlist">
+    		<c:if test="${entity.type == 'experiment'}">
+    			<p id='expversioncolorlegend'>
+    				Status Legend:
+    				<span class="experiment-RUNNING">running</span>
+    				<span class="experiment-INAPPRORIATE">inappropriate</span>
+    				<span class="experiment-FAILED">failed</span>
+    				<span class="experiment-SUCCESS">success</span>
+    			</p>
+    		</c:if>
 	   		<c:forEach items="${entity.versions}" var="version" >
 	    		<p title="${version.value.created} -- Visibility: ${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> -- ${version.value.status}</c:if>" class="entityviz-${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> experiment-${version.value.status}</c:if>">
 					<c:choose>
