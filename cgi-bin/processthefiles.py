@@ -1,27 +1,32 @@
 #!/usr/bin/env python
 import os
 import sys
-import time
+import glob
+import json
 import datetime
 import requests
-import json
+import shutil
+import subprocess
+import tempfile
+import time
+import zipfile
 
+my_output_file = tempfile.NamedTemporaryFile(prefix='python-webservice-output-', delete=False)
+sys.stderr = my_output_file
+sys.stdout = my_output_file
 
 # this file is called via batch -> it is executed if there is CPU time available
 # arguments:
 # sys.argv[1] == callback url
 # sys.argv[2] == signature
-# sys.argv[3] == combine archive containing the model
-# sys.argv[4] == combine archive containing the protocol
+# sys.argv[3] == path to primary model file
+# sys.argv[4] == path to primary protocol file
+# sys.argv[5] == path to temporary folder
 # so do whatever you want to create the experiment and put it in an combine archive
 # send the archive to sys.argv[1], together with the signature (see below)
+callback_url, signature, model_path, proto_path, temp_dir = sys.argv[1:6]
 
-####################################
-####### DEBUG START ################
-####################################
-
-time.sleep (10)
-
+# Debug
 fout = open ("/tmp/python-webservice.debug", 'a+')
 fout.write ("======")
 fout.write (datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
@@ -30,43 +35,53 @@ fout.write (sys.argv[1] + "\n")
 fout.write (sys.argv[2] + "\n")
 fout.write (sys.argv[3] + "\n")
 fout.write (sys.argv[4] + "\n")
+fout.write (sys.argv[5] + "\n")
 fout.flush()
 os.fsync(fout)
 fout.close()
 
+# Call FunctionalCuration exe, writing output to the temporary folder containing inputs
+# (or rather, a subfolder thereof).
+# Also redirect stdout and stderr so we can debug any issues.
+os.environ['LD_LIBRARY_PATH'] = '/home/bob/petsc-3.1-p8/linux-gnu-opt/lib:/home/tom/eclipse/workspace/Chaste/lib'
+os.environ['CHASTE_TEST_OUTPUT'] = '/tmp/python-webservice-testoutput'
+os.environ['USER'] = 'tom'
+os.environ['GROUP'] = 'www-data'
+os.environ['HOME'] = '/home/tom'
+args = ['/home/tom/eclipse/workspace/Chaste/projects/FunctionalCuration/apps/src/FunctionalCuration',
+        model_path,
+        proto_path,
+        os.path.join(temp_dir, 'output')
+       ]
+child_stdout_name = os.path.join(temp_dir, 'stdout.txt')
+output_file = open(child_stdout_name, 'w')
+subprocess.call(args, stdout=output_file, stderr=subprocess.STDOUT)
 
-####################################
-####### DEBUG END ##################
-####################################
+# Zip up the outputs and post them to the callback
+output_path = os.path.join(temp_dir, 'output.zip')
+output_files = glob.glob(os.path.join(temp_dir, 'output', '*', '*', '*')) # Yuck!
+output_zip = zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED)
+output_zip.write(child_stdout_name, 'stdout.txt')
+for ofile in output_files:
+    if os.path.isfile(ofile):
+        output_zip.write(ofile, os.path.basename(ofile))
+output_zip.close()
 
+files = {'experiment': open(output_path, 'rb')}
+payload = {'signature': sys.argv[2], 'returntype': 'success'}
+r = requests.post(callback_url, files=files, data=payload)
 
-# since this is just a dummy, we delete the input files and send a default experiment.
-# here you should call chaste and send the correct result...
-
-os.remove (sys.argv[3])
-os.remove (sys.argv[4])
-
-# send some default experiment
-url = sys.argv[1]
-files = {'expriment': open('/var/www/cgi-bin/samplemodel.zip', 'rb')}
-payload = {'signature': 'abc123'}
-r = requests.post(url, files=files, data=payload)
-
-# if that was successful we'll receive 200 and some JSON stream
-# but i guess we shouldn't care (what should we do if it fails?)
-# so, just write some log to be able to reconstruct what happened
-
+# Debug
 fout = open ("/tmp/python-webservice-result.debug", 'a+')
 fout.write ("======")
 fout.write (datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
 fout.write ("======\n")
-fout.write (r.status_code + "\n")
-fout.write (r.content + "\n")
+fout.write (str(r.status_code) + "\n")
+fout.write (str(r.content) + "\n")
 fout.flush()
 os.fsync(fout)
 fout.close()
 
-
-# that's it so far. thanks for your attention...
-
+# Remove the temporary folder
+shutil.rmtree(temp_dir)
 
