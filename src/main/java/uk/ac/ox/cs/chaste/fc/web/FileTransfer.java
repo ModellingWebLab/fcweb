@@ -680,7 +680,7 @@ public class FileTransfer extends WebModule
 				return new SubmitResult (false, res.substring (signature.length ()).trim ());
 			}
 			LOGGER.error ("chaste backend answered w/ smth unexpected: " + res);
-			throw new IOException ("Chaste Backend respnse not expected.");
+			throw new IOException ("Chaste Backend response not expected.");
 	} 
 
 	private static String getContent(HttpResponse response) throws IOException
