@@ -1,6 +1,10 @@
 package uk.ac.ox.cs.chaste.fc.web;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -12,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -128,6 +133,7 @@ public class EntityView extends WebModule
 				return errorPage (request, response, "no entity found");
 			}
 			request.setAttribute ("entity", entity);
+			header.addScript (new PageHeaderScript ("res/js/3rd/showdown.js", "text/javascript", "UTF-8", null));
 			header.addScript (new PageHeaderScript ("res/js/entity.js", "text/javascript", "UTF-8", null));
 		}
 		catch (NumberFormatException e)
@@ -403,7 +409,7 @@ public class EntityView extends WebModule
 				if (entityName.length () < 2)
 				{
 					obj.put ("response", false);
-					obj.put ("responseText", "needs to be at least 5 characters in length");
+					obj.put ("responseText", "needs to be at least 2 characters in length");
 					createOk = false;
 				}
 				// else name ok
@@ -570,6 +576,8 @@ public class EntityView extends WebModule
 				throw new IOException ("wasn't able to create/insert "+entityMgmt.getEntityColumn ()+" version to db.");
 			}
 			
+			boolean extractReadme = entityMgmt.getEntityColumn () == "protocol";
+			
 			for (NewFile f : files.values ())
 			{
 				//copy file
@@ -601,6 +609,98 @@ public class EntityView extends WebModule
 					cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
 					LOGGER.error ("error inserting file to db: " + f.name + " -> " + f.tmpFile);
 					throw new IOException ("wasn't able to insert file " + f.name + " to db.");
+				}
+				
+				extractReadme = extractReadme && !f.name.toLowerCase ().equals ("readme.md");
+			}
+			
+			if (extractReadme)
+			{
+				for (NewFile f : files.values ())
+				{
+					//parse protocol
+					BufferedReader br = null; 
+					try
+					{
+						br = new BufferedReader (new FileReader (f.tmpFile));
+						String line = "", doc = "";
+						boolean read = false;
+						while (br.ready ())
+						{
+							line = br.readLine ();
+							
+							if (read && line.startsWith ("}"))
+								break;
+							
+							if (read)
+								doc += line + Tools.NEWLINE;
+							
+							if (line.startsWith ("documentation"))
+								read = true;
+						}
+						br.close ();
+						
+						if (doc.length () > 0)
+						{
+							// write a readme.md
+							BufferedWriter bw = null;
+							try
+							{
+								File readMeFile = new File (entityDir + File.separator + "README.md");
+								bw = new BufferedWriter (new FileWriter (readMeFile));
+								bw.write (doc);
+								bw.close ();
+								bw = null;
+								
+								// insert to db
+								int fileId = fileMgmt.addFile (readMeFile.getName (), "readme", user, readMeFile.length ());
+								if (fileId < 0)
+								{
+									readMeFile.delete ();
+									LOGGER.error ("error inserting file to db: README.md");
+									throw new IOException ("wasn't able to insert file README.md to db.");
+								}
+								
+								// associate files+version
+								if (!fileMgmt.associateFile (fileId, versionId, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ()))
+								{
+									readMeFile.delete ();
+									LOGGER.error ("error inserting file to db: README.md");
+									throw new IOException ("wasn't able to insert file README.md to db.");
+								}
+								
+								break;
+							}
+							catch (Exception e)
+							{
+								LOGGER.warn ("tried writing extracted readme from protocol", e);
+							}
+							finally
+							{
+								if (bw != null)
+									try
+									{
+										bw.close ();
+									}
+									catch (Exception e)
+									{}
+							}
+						}
+					}
+					catch (Exception e)
+					{
+						LOGGER.warn ("tried extracting readme from protocol", e);
+					}
+					finally
+					{
+						if (br != null)
+							try
+						{
+							br.close ();
+							}
+						catch (Exception e)
+						{}
+					}
 				}
 			}
 			

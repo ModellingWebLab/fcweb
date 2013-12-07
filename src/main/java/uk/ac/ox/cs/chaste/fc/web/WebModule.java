@@ -224,7 +224,7 @@ extends HttpServlet
 		}
 		else
 		{
-			String dispatch = JSP_PATH + JSP_ERR;
+			String dispatch = JSP_ERR;
 			try
 			{
 				dispatch = runWebRequest (request, response, db, notifications, user, session);

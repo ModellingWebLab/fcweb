@@ -4,6 +4,8 @@ var doc;
 var basicurl;
 var entityType;
 var entityId;
+var curVersion = null;
+var converter = new Showdown.converter();
 
 var visualizers = {};
 
@@ -74,8 +76,8 @@ function updateVisibility (jsonObject, actionIndicator)
         xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
     }
     
-    xmlhttp.open("POST", '', true);
-    xmlhttp.setRequestHeader("Content-type", "application/json");
+    xmlhttp.open ("POST", '', true);
+    xmlhttp.setRequestHeader ("Content-type", "application/json");
 
     xmlhttp.onreadystatechange = function()
     {
@@ -121,8 +123,8 @@ function deleteEntity (jsonObject)
         xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
     }
     
-    xmlhttp.open("POST", '', true);
-    xmlhttp.setRequestHeader("Content-type", "application/json");
+    xmlhttp.open ("POST", '', true);
+    xmlhttp.setRequestHeader ("Content-type", "application/json");
 
     xmlhttp.onreadystatechange = function()
     {
@@ -165,8 +167,99 @@ function deleteEntity (jsonObject)
     };
     xmlhttp.send (JSON.stringify (jsonObject));
 }
+function highlightPlots (plotDescription, showDefault)
+{
+	//console.log (plotDescription);
+	for (var i = 1; i < plotDescription.length; i++)
+	{
+		if (plotDescription[i].length < 2)
+			continue;
+		//console.log (plotDescription[i][2]);
+		var row = document.getElementById ("filerow-" + plotDescription[i][2]);
+		if (row)
+		{
+			row.setAttribute("class", "highlight-plot");
+			if (i == 1 && showDefault)
+			{
+				var viz = document.getElementById ("filerow-" + plotDescription[i][2] + "-viz-displayPlotFlot");
+				if (viz)
+					viz.click();
+			}
+		}
+	}
+}
 
-function displayVersion (id)
+function parsePlotDescription (file, version, showDefault)
+{
+	if (file.plotDescription)
+		return converter.makeHtml (file.contents);
+	
+	var goForIt = {
+			getContentsCallback : function (succ)
+			{
+				if (succ)
+				{
+					var str = file.contents.replace(/\s*#.*\n/gm,"");
+					var delimiter = ",";
+					var patterns = new RegExp(
+				    		(
+				    			// Delimiters.
+				    			"(\\" + delimiter + "|\\r?\\n|\\r|^)" +
+				    			// Quoted fields.
+				    			"(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
+				    			// Standard fields.
+				    			"([^\"\\" + delimiter + "\\r\\n]*))"
+				    		),
+				    		"gi"
+				    		);
+					var csv = [[]];
+					var matches = null;
+					while (matches = patterns.exec (str))
+					{
+						var value;
+						var matchDel = matches[1];
+						if (matchDel.length && matchDel != delimiter)
+				    			csv.push([]);
+						if (matches[2])
+							value = matches[2].replace (new RegExp ("\"\"", "g"), "\"");
+						else
+							value = matches[3];
+						
+						csv[csv.length - 1].push (value);
+					}
+					
+					version.plotDescription = csv;
+					highlightPlots (version.plotDescription, showDefault);
+					
+				}
+			}
+	};
+	getFileContent (file, goForIt);
+	
+	return null;
+}
+
+function parseReadme (file, version)
+{
+	if (file.contents)
+		return converter.makeHtml (file.contents);
+	
+	var goForIt = {
+			getContentsCallback : function (succ)
+			{
+				if (succ)
+				{
+					version.readme = converter.makeHtml (file.contents);
+					doc.version.readme.innerHTML = version.readme;
+				}
+			}
+	};
+	getFileContent (file, goForIt);
+	
+	return null;
+}
+
+function displayVersion (id, showDefault)
 {
 	var v = versions[id];
 	if (!v)
@@ -273,11 +366,11 @@ function displayVersion (id)
 	tr.appendChild(td);
 	dv.filestable.appendChild(tr);
 	
-	
 	for (var i = 0; i < v.files.length; i++)
 	{
 		var file = files[v.files[i]];
 		tr = document.createElement("tr");
+		tr.setAttribute("id", "filerow-" + file.name);
 		td = document.createElement("td");
 		td.appendChild(document.createTextNode (file.name));
 		tr.appendChild(td);
@@ -295,6 +388,14 @@ function displayVersion (id)
 		tr.appendChild(td);
 		td = document.createElement("td");
 		
+		if (!v.readme && file.name.toLowerCase () == "readme.md")
+			v.readme = parseReadme (file, v);
+		
+		if (!v.plotDescription && file.name.toLowerCase () == "outputs-default-plots.csv")
+			parsePlotDescription (file, v, showDefault);
+		
+		
+		
 		
 		for (var vi in visualizers)
 		{
@@ -302,6 +403,7 @@ function displayVersion (id)
 			if (!viz.canRead (file))
 				continue;
 			var a = document.createElement("a");
+			a.setAttribute("id", "filerow-" + file.name + "-viz-" + viz.getName ());
 			a.href = basicurl + convertForURL (v.name) + "/" + v.id + "/" + convertForURL (file.name) + "/" + file.id + "/" + vi;
 			var img = document.createElement("img");
 			img.src = contextPath + "/res/js/visualizers/" + vi + "/" + viz.getIcon ();
@@ -367,6 +469,12 @@ function displayVersion (id)
 		dv.details.style.display = "block";
 	}
 	
+	removeChildren (dv.readme);
+	if (v.readme)
+		dv.readme.innerHTML = v.readme;
+	if (v.plotDescription)
+		highlightPlots (v.plotDescription, showDefault);
+	
 	
 	doc.entity.details.style.display = "none";
 	doc.entity.version.style.display = "block";
@@ -387,6 +495,7 @@ function maxDist (val1, val2, val3)
 			(val2 < val3 ? val2 : val3);
 	return a - b;
 }
+
 
 function parseCSVContent (file)
 {
@@ -530,6 +639,7 @@ function updateVersion (rv)
 	v.created = rv.created;
 	v.visibility = rv.visibility;
 	v.id = rv.id;
+	v.readme = null;
 	v.files = new Array ();
 	for (var i = 0; i < rv.files.length; i++)
 	{
@@ -641,7 +751,7 @@ function displayFile (id, pluginName)
 	removeChildren (df.display);
 	df.display.appendChild (f.div[pluginName]);
 	
-	doc.version.files.style.display = "none";
+	// doc.version.files.style.display = "none";
 	doc.version.filedetails.style.display = "block";
 }
 
@@ -700,13 +810,14 @@ function nextPage (url)
 function render ()
 {
 	var url = parseUrl (document.location.href);
-	//console.log (basicurl);
-	//console.log (url);
-	//console.log ("entityId: " + entityId);
 	var curVersionId = getCurVersionId (url);
 	
 	if (curVersionId)
 	{
+		var curFileId = getCurFileId (url);
+		var pluginName = getCurPluginName (url);
+		
+		
 		var v = versions[curVersionId];
 		if (!v)
 		{
@@ -718,12 +829,12 @@ function render ()
 			}, render);
 			return;
 		}
-		else
-			displayVersion (curVersionId);
+		else if (v != curVersion)
+		{
+			displayVersion (curVersionId, !(curFileId && pluginName));
+			curVersion = v;
+		}
 		
-		
-		var curFileId = getCurFileId (url);
-		var pluginName = getCurPluginName (url);
 		
 		if (curFileId && pluginName)
 		{
@@ -755,6 +866,7 @@ function initModel ()
 				details : document.getElementById("entityversiondetails"),
 				files : document.getElementById("entityversionfiles"),
 				filestable : document.getElementById("entityversionfilestable"),
+				readme : document.getElementById("entityversionfilesreadme"),
 				archivelink : document.getElementById("downloadArchive"),
 				filedetails : document.getElementById("entityversionfiledetails"),
 				experimentlist: document.getElementById("entityexperimentlist"),

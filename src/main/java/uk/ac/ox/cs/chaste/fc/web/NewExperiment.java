@@ -344,7 +344,19 @@ public class NewExperiment
 		
 		
 		// send file for processing
-		FileTransfer.SubmitResult res = FileTransfer.submitExperiment (modelFile, protocolFile, signature);
+		FileTransfer.SubmitResult res = null;
+		try
+		{
+			res = FileTransfer.submitExperiment (modelFile, protocolFile, signature);
+		}
+		catch (Exception e)
+		{
+			ChasteExperimentVersion exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);
+			expMgmt.updateVersion (exp, e.getMessage (), ChasteExperimentVersion.STATUS_FAILED);
+			
+			throw e;
+		}
+		
 		if (!res.result)
 		{
 			ChasteExperimentVersion exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);

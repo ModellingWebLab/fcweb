@@ -676,11 +676,11 @@ public class FileTransfer extends WebModule
 				return new SubmitResult (true, res.substring (signature.length ()).trim ());
 			if (res.trim ().startsWith (signature))
 			{
-				LOGGER.error ("chaste backend answered with !succ: " + res);
+				LOGGER.error ("Chaste backend answered with !succ: " + res);
 				return new SubmitResult (false, res.substring (signature.length ()).trim ());
 			}
 			LOGGER.error ("chaste backend answered w/ smth unexpected: " + res);
-			throw new IOException ("Chaste Backend respnse not expected.");
+			throw new IOException ("Chaste Backend response not expected.");
 	} 
 
 	private static String getContent(HttpResponse response) throws IOException

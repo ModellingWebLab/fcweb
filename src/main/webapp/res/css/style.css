@@ -428,3 +428,17 @@ background-image: url(../img/red-dot.png);
 {
 	font-size:.8em;
 }
+#entityversionfilesreadme
+{
+	font-size:.8em;
+    background-color: #dddddd;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	padding:15px;
+	margin:10px;
+}
+.highlight-plot
+{
+	background-color: #eee;
+}
+

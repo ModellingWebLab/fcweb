@@ -70,18 +70,20 @@
 	    </div>
 	    
 	    <div id="entityversiondetails">
-		    <div id="entityversionfiles">
-			    <h3>Files attached to this version</h3>
-			    <table id="entityversionfilestable">
-				</table>
-				<a id='downloadArchive'><img src="${contextPath}/res/img/document-save-5.png" alt="download combine archive" title="download combine archive" /> Archive</a>
-			</div>
-				 
 			<div id="entityversionfiledetails">
 	    		<div class="closebtn"><small><a id="entityversionfileclose">&otimes; close</a></small></div>
 		    	<h3 id="entityversionfilename"></h3>
 			    <div class="suppl"><small>File created</small> <time id="entityversionfiletime"></time> <small>by</small> <em id="entityversionfileauthor"></em>.</div>
 			    <div id="entityversionfiledisplay"></div>
+			</div>
+			
+		    <div id="entityversionfiles">
+			    <h3>Files attached to this version</h3>
+			    <table id="entityversionfilestable">
+				</table>
+				<a id='downloadArchive'><img src="${contextPath}/res/img/document-save-5.png" alt="download combine archive" title="download combine archive" /> Archive</a>
+				
+			    <div id="entityversionfilesreadme"></div>
 			</div>
 		</div>
 		
