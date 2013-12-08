@@ -299,9 +299,9 @@ function displayVersion (id, showDefault)
 	
 	if (dv.visibility)
 	{
-		var new_element = dv.visibility.cloneNode(true);
-		dv.visibility.parentNode.replaceChild (new_element, dv.visibility);
-		dv.visibility = new_element;
+		//var new_element = dv.visibility.cloneNode(true);
+		//dv.visibility.parentNode.replaceChild (new_element, dv.visibility);
+		dv.visibility = removeListeners (dv.visibility);//new_element;
 		
 		document.getElementById("visibility-" + v.visibility).selected=true;
 		
@@ -326,9 +326,9 @@ function displayVersion (id, showDefault)
 	
 	if (dv.deleteBtn)
 	{
-		var new_element = dv.deleteBtn.cloneNode(true);
-		dv.deleteBtn.parentNode.replaceChild (new_element, dv.deleteBtn);
-		dv.deleteBtn = new_element;
+		//var new_element = dv.deleteBtn.cloneNode(true);
+		//dv.deleteBtn.parentNode.replaceChild (new_element, dv.deleteBtn);
+		dv.deleteBtn = removeListeners (dv.deleteBtn); //new_element;
 		
 		dv.deleteBtn.addEventListener("click", function () {
 			if (confirm("Are you sure to delete this version? (including all files and experiments associated to it)"))
@@ -436,17 +436,24 @@ function displayVersion (id, showDefault)
 
 	if (v.experiments.length > 0)
 	{
-		removeChildren (dv.experimentlist);
+		removeChildren (dv.experimentpartners);
+		
+		var compares = new Array();
+		
 		var ul = document.createElement ("ul");
 		for (var i = 0; i < v.experiments.length; i++)
 		{
 			
 			var li = document.createElement ("li");
+			var chk = document.createElement ("input");
+			chk.type = "checkbox";
+			chk.value = v.experiments[i].id;
+			compares.push (chk);
 			var a = document.createElement ("a");
 			if (entityType == "protocol")
 			{
 				//console.log ("protoc");
-				console.log (v.experiments[i].model);
+				//console.log (v.experiments[i].model);
 				a.appendChild(document.createTextNode(v.experiments[i].model.name + " @ " + v.experiments[i].model.version));
 			}
 			else
@@ -454,10 +461,32 @@ function displayVersion (id, showDefault)
 				a.appendChild(document.createTextNode(v.experiments[i].protocol.name + " @ " + v.experiments[i].protocol.version));
 			}
 			a.href = contextPath + "/experiment/" + v.experiments[i].model.id + v.experiments[i].protocol.id + "/" + v.experiments[i].id;
+			li.appendChild (chk);
 			li.appendChild (a);
 			ul.appendChild (li);
 		}
-		dv.experimentlist.appendChild (ul);
+
+		dv.experimentSelAll = removeListeners (dv.experimentSelAll);
+		dv.experimentSelNone = removeListeners (dv.experimentSelNone);
+		dv.experimentcompare = removeListeners (dv.experimentcompare);
+		
+		dv.experimentSelAll.addEventListener("click", function () {
+			for (var i = 0; i < compares.length; i++)
+				compares[i].checked = true;
+		});
+		dv.experimentSelNone.addEventListener("click", function () {
+			for (var i = 0; i < compares.length; i++)
+				compares[i].checked = false;
+		});
+		dv.experimentcompare.addEventListener("click", function () {
+			var url = "";
+			for (var i = 0; i < compares.length; i++)
+				if (compares[i].checked)
+					url += compares[i].value + "/";
+			document.location = contextPath + "/compare/e/" + url;
+		});
+		
+		dv.experimentpartners.appendChild (ul);
 		//dv.experimentlist.style.display = "block";
 		dv.switcher.style.display = "block";
 		//dv.details.style.display = "none";
@@ -465,7 +494,7 @@ function displayVersion (id, showDefault)
 	else
 	{
 		dv.switcher.style.display = "none";
-		dv.experimentlist.style.display = "none";
+		dv.experimentpartners.style.display = "none";
 		dv.details.style.display = "block";
 	}
 	
@@ -480,7 +509,7 @@ function displayVersion (id, showDefault)
 	doc.entity.version.style.display = "block";
 
 	doc.version.files.style.display = "block";
-	doc.version.filedetails.style.display = "none";
+	//doc.version.filedetails.style.display = "none";
 	// update address bar
 	
 }
@@ -870,6 +899,10 @@ function initModel ()
 				archivelink : document.getElementById("downloadArchive"),
 				filedetails : document.getElementById("entityversionfiledetails"),
 				experimentlist: document.getElementById("entityexperimentlist"),
+				experimentpartners: document.getElementById("entityexperimentlistpartners"),
+				experimentSelAll: document.getElementById("entityexperimentlistpartnersactall"),
+				experimentSelNone: document.getElementById("entityexperimentlistpartnersactnone"),
+				experimentcompare: document.getElementById("entityexperimentlistpartnersactcompare"),
 				switcher: document.getElementById("experiment-files-switcher"),
 				visibility: document.getElementById("versionVisibility"),
 				visibilityAction : document.getElementById("versionVisibilityAction"),
@@ -903,6 +936,7 @@ function initModel ()
 		if (ev.which == 1)
 		{
 			ev.preventDefault();
+			curVersion = null;
 			doc.entity.version.style.display = "none";
 			doc.entity.details.style.display = "block";
 			nextPage (doc.version.close.href);

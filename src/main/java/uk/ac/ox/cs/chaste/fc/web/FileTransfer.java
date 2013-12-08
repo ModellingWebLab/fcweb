@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import javax.mail.MessagingException;
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -234,7 +235,14 @@ public class FileTransfer extends WebModule
 	
 	
 	
-	
+
+	private final static String buildMailBody (String nick, String result)
+	{
+		return "Hi " + nick + ",\n\nthe experiment you submitted is finished.\nReturn message: "
+	+result
+	+"\nHave a look at your files: "+Tools.getThisUrl ()+"/myfiles.html"
+	+ "\n\nSincerely,\nChaste dev-team";
+	}
 	
 	
 	
@@ -283,11 +291,7 @@ public class FileTransfer extends WebModule
 					return answer;
 				}
 				
-				user.setRole (preRole);
-				user.setMail (preMail);
 				
-				
-
 				System.out.println ("exp: " + exp);
 				
 				String returnmsg = request.getParameter ("returnmsg");
@@ -300,6 +304,18 @@ public class FileTransfer extends WebModule
 				
 				System.out.println ("supp: " + returnmsg + " -- " + returntype + " --> " + returnType);
 				
+				
+				user.setRole (preRole);
+				user.setMail (preMail);
+				User u = exp.getAuthor ();
+				try
+				{
+					Tools.sendMail (u.getMail (), u.getNick (), "Chaste Experiment finished", buildMailBody (u.getNick (), returnmsg));
+				}
+				catch (MessagingException e)
+				{
+					LOGGER.error ("couldn't send mail to user (exp finished)", e);
+				}
 				
 				File destination = new File (expMgmt.getEntityStorageDir () + File.separator + signature);
 				destination.mkdirs ();

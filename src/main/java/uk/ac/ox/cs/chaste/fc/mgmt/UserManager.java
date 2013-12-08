@@ -59,7 +59,8 @@ public class UserManager
 					rs.getString ("acronym"),
 					rs.getString ("institution"),
 					rs.getTimestamp ("created"),
-					rs.getString ("role")
+					rs.getString ("role"),
+					rs.getBoolean ("sendMails")
 					);
 				knownUsers.put (u.getId (), u);
 			}
@@ -101,7 +102,8 @@ public class UserManager
 					rs.getString ("acronym"),
 					rs.getString ("institution"),
 					rs.getTimestamp ("created"),
-					rs.getString ("role")
+					rs.getString ("role"),
+					rs.getBoolean ("sendMails")
 					);
 				res.add (u);
 				knownUsers.put (u.getId (), u);
@@ -174,6 +176,68 @@ public class UserManager
 			e.printStackTrace();
 			note.addError ("sql err updating password of user: " + e.getMessage ());
 			LOGGER.error ("db problem while updating password of user", e);
+      return false;
+		}
+		finally
+		{
+			db.closeRes (st);
+			db.closeRes (rs);
+		}
+		return true;
+	}
+	
+	public boolean updateInstitution (User user, String institution) throws SQLException
+	{
+		PreparedStatement st = db.prepareStatement ("UPDATE `user` SET `institution`=? WHERE `id`=?");
+    ResultSet rs = null;
+		
+		try
+		{
+			st.setString (1, institution);
+			st.setInt (2, user.getId ());
+			
+			int affectedRows = st.executeUpdate();
+      if (affectedRows == 0)
+      {
+          return false;//throw new SQLException("Update failed. No such user/password combination.");
+      }
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+			note.addError ("sql err updating institution of user: " + e.getMessage ());
+			LOGGER.error ("db problem while updating institution of user", e);
+      return false;
+		}
+		finally
+		{
+			db.closeRes (st);
+			db.closeRes (rs);
+		}
+		return true;
+	}
+	
+	public boolean updateSendMails (User user, boolean sendMails) throws SQLException
+	{
+		PreparedStatement st = db.prepareStatement ("UPDATE `user` SET `sendMails`=? WHERE `id`=?");
+    ResultSet rs = null;
+		
+		try
+		{
+			st.setBoolean (1, sendMails);
+			st.setInt (2, user.getId ());
+			
+			int affectedRows = st.executeUpdate();
+      if (affectedRows == 0)
+      {
+          return false;//throw new SQLException("Update failed. No such user/password combination.");
+      }
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+			note.addError ("sql err updating sendMails of user: " + e.getMessage ());
+			LOGGER.error ("db problem while updating sendMails of user", e);
       return false;
 		}
 		finally

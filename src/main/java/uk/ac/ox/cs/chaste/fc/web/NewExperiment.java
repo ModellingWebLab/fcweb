@@ -98,9 +98,9 @@ public class NewExperiment
 				ChasteEntityVersion model = getSchedEntity (request, session, db, notifications, userMgmt, modelMgmt, NEWEXP_MODEL);
 				ChasteEntityVersion protocol = getSchedEntity (request, session, db, notifications, userMgmt, protocolMgmt, NEWEXP_PROTOCOL);
 				if (model != null)
-				answer.put ("scheduledModel", model.getEntity ().getName () + " @ " + model.getVersion ());
+					answer.put ("scheduledModel", model.getEntity ().getName () + " @ " + model.getVersion ());
 				if (protocol != null)
-				answer.put ("scheduledProtocol", protocol.getEntity ().getName () + " @ " + protocol.getVersion ());
+					answer.put ("scheduledProtocol", protocol.getEntity ().getName () + " @ " + protocol.getVersion ());
 				
 				return answer;
 			}

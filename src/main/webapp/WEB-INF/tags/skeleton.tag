@@ -154,7 +154,7 @@
 		
 		<%-- finish the site --%>
 		<footer>
-			some footer &copy; 2013 Team Jonathan
+			some footer &copy; 2013 Team Jonathan &amp; Gary
 		</footer>
 		
 		

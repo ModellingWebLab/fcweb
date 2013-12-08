@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}MyAccount - " contextPath="${contextPath}">
     <h1>Your Account</h1>
@@ -14,7 +15,7 @@
     	</tr>
     	<tr>
     		<th>Institution</th>
-    		<td>${User.institution}</td>
+    		<td><input type="text" id="instituteChanger" value="${User.institution}" /> <span id="instituteChangeaction"></span></td>
     	</tr>
     	<tr>
     		<th>Role</th>
@@ -23,6 +24,10 @@
     	<tr>
     		<th>Registered</th>
     		<td><time>${User.created}</time></td>
+    	</tr>
+    	<tr>
+    		<th>Send me Mails</th>
+    		<td><input type="checkbox" id="sendMailsCheckbox" <c:if test="${User.sendMails}">checked="checked"</c:if> > Inform me about finished experiments. <span id="sendMailsChangeaction"></span></td>
     	</tr>
     </table>
     

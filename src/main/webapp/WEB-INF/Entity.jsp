@@ -2,7 +2,7 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}ModelView - " contextPath="${contextPath}" newExpModelName="${newExpModelName}" newExpProtocolName="${newExpProtocolName}">
+<t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}${entity.type} - " contextPath="${contextPath}" newExpModelName="${newExpModelName}" newExpProtocolName="${newExpProtocolName}">
     <h1 id="entityname">${entity.name}</h1>
 	<div class="suppl"><small>${entity.type} created</small> <time>${entity.created}</time> <small>by</small> <em>${entity.author}</em>
 	    <c:if test="${entity.author == User.nick || User.admin}">
@@ -88,7 +88,12 @@
 		</div>
 		
 		<div id="entityexperimentlist">
-			
+			<div id="entityexperimentlistpartners"></div>
+			<div id="entityexperimentlistpartnersact">
+				<a id="entityexperimentlistpartnersactall">select all</a>
+				<a id="entityexperimentlistpartnersactnone">select none</a><br/>
+				<button id="entityexperimentlistpartnersactcompare">compare selected experiments</button>
+			</div>
 		</div>
 		
 	</div>

@@ -32,6 +32,13 @@ function displayNotifications (json)
 	}
 }
 
+function removeListeners (element)
+{
+	var new_element = element.cloneNode(true);
+	element.parentNode.replaceChild (new_element, element);
+	return new_element;
+}
+
 function batchProcessing (jsonObject, actionIndicator)
 {
 	actionIndicator.innerHTML = "<img src='"+contextPath+"/res/img/loading2-new.gif' alt='loading' />";
