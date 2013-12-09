@@ -14,21 +14,21 @@ function parseUrl (href)
 	var t = href.split ("/");
 	for (var i = 0; i < t.length; i++)
 	{
-		if ("/" + t[i] == contextPath && i + 4 < t.length && t[i+1] == "model")
+		if ("/" + t[i] == contextPath && i + 3 < t.length && t[i+1] == "model")
 		{
 			basicurl = t.slice (0, i + 4).join ("/") + "/";
 			entityType = "model";
 			entityId = t[i+3];
 			return t.slice (i + 4);
 		}
-		if ("/" + t[i] == contextPath && i + 4 < t.length && t[i+1] == "protocol")
+		if ("/" + t[i] == contextPath && i + 3 < t.length && t[i+1] == "protocol")
 		{
 			basicurl = t.slice (0, i + 4).join ("/") + "/";
 			entityType = "protocol";
 			entityId = t[i+3];
 			return t.slice (i + 4);
 		}
-		if ("/" + t[i] == contextPath && i + 4 < t.length && t[i+1] == "experiment")
+		if ("/" + t[i] == contextPath && i + 3 < t.length && t[i+1] == "experiment")
 		{
 			basicurl = t.slice (0, i + 4).join ("/") + "/";
 			entityType = "experiment";
@@ -887,6 +887,11 @@ function render ()
 	}
 	else
 	{
+		if (url.length > 0 && url[0] == "latest")
+		{
+			//document.getElementById("entityversionlist")
+			$(".entityversionlink").each(function (){nextPage ($(this).attr('href'));});
+		}
 		doc.entity.version.style.display = "none";
 		doc.entity.details.style.display = "block";
 	}

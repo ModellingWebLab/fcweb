@@ -23,7 +23,7 @@
 				<td class="experiment-RUNNING center">running</td>
 				<td class="experiment-SUCCESS center">successful</td>
 				<td class="experiment-FAILED center">failed</td>
-				<td class="experiment-INAPPRORIATE center">inappropriate (model/protocol incompatible)</td>
+				<td class="experiment-INAPPRORIATE center">inappropriate</td>
 			</tr>
 		</table>
     </section>

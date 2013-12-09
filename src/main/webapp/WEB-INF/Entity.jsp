@@ -53,7 +53,7 @@
     </div>
     
     <div id="entityversion">
-    	<div class="closebtn"><small><a id="entityversionclose">&otimes; close / version table</a></small></div>
+    	<div class="closebtn"><small><a id="entityversionclose">&otimes; close / see  version table</a></small></div>
     	<h2 id="entityversionname"></h2>
 	    <div class="suppl"><small>Version created</small> <time id="entityversiontime"></time> <small>by</small> <em id="entityversionauthor"></em>.
 		    <c:if test="${entity.author == User.nick}">

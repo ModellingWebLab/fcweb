@@ -171,10 +171,14 @@ function drawMatrix (matrix)
 			{
 				var d1 = document.createElement("div");
 				var d2 = document.createElement("div");
+				var a = document.createElement("a");
+				a.href = contextPath + "/protocol/" + convertForURL (mat[row][col].protocol.name) + "/" + mat[row][col].protocol.entityId
+				+ "/" + convertForURL (mat[row][col].protocol.version) + "/" + mat[row][col].protocol.id;
 				d2.setAttribute("class", "vertical-text");
 				d1.setAttribute("class", "vertical-text__inner");
 				d2.appendChild (d1);
-				d1.appendChild (document.createTextNode (mat[row][col].protocol.name));
+				a.appendChild (document.createTextNode (mat[row][col].protocol.name));
+				d1.appendChild(a);
 				td.appendChild (d2);//document.createTextNode ("<div class='vertical-text'><div class='vertical-text__inner'>" + mat[row][col].protocol.name + "</div></div>"));
 				td.setAttribute("class", "matrixTableCol");
 				continue;
@@ -182,7 +186,11 @@ function drawMatrix (matrix)
 			
 			if (col == 0)
 			{
-				td.appendChild (document.createTextNode (mat[row][col].model.name));
+				var a = document.createElement("a");
+				a.href = contextPath + "/model/" + convertForURL (mat[row][col].model.name) + "/" + mat[row][col].model.entityId
+				+ "/" + convertForURL (mat[row][col].model.version) + "/" + mat[row][col].model.id;
+				a.appendChild (document.createTextNode (mat[row][col].model.name));
+				td.appendChild (a);
 				td.setAttribute("class", "matrixTableRow");
 				continue;
 			}
@@ -201,51 +209,50 @@ function drawMatrix (matrix)
 
 			var titleText = "";
 
-			var r = row, c = col;
+			//var r = row, c = col;
 			
-			if (mat[r][c].model)
+			if (mat[row][col].model)
 			{
 				titleText += 
-					"M: <a href='" + contextPath + "/model/" + convertForURL (mat[r][c].model.name) + "/" + mat[r][c].model.entityId
-					+ "/" + convertForURL (mat[r][c].model.version) + "/" + mat[r][c].model.id + "/'>" + mat[r][c].model.name + " @ " + mat[r][c].model.version + "</a>|";
+					"M: <a href='" + contextPath + "/model/" + convertForURL (mat[row][col].model.name) + "/" + mat[row][col].model.entityId
+					+ "/" + convertForURL (mat[row][col].model.version) + "/" + mat[row][col].model.id + "/'>" + mat[row][col].model.name + " @ " + mat[row][col].model.version + "</a>|";
 			}
 			
-			if (mat[r][c].protocol)
-				//protocolLink.innerHTML = mat[r][c].protocol.name + " @ " + mat[r][c].protocol.version;
+			if (mat[row][col].protocol)
+				//protocolLink.innerHTML = mat[row][col].protocol.name + " @ " + mat[row][col].protocol.version;
 				titleText += 
-					"P: <a href='" + contextPath + "/protocol/" + convertForURL (mat[r][c].protocol.name) + "/" + mat[r][c].protocol.entityId
-					+ "/" + convertForURL (mat[r][c].protocol.version) + "/" + mat[r][c].protocol.id + "/'>" + mat[r][c].protocol.name + " @ " + mat[r][c].protocol.version + "</a>|";
+					"P: <a href='" + contextPath + "/protocol/" + convertForURL (mat[row][col].protocol.name) + "/" + mat[row][col].protocol.entityId
+					+ "/" + convertForURL (mat[row][col].protocol.version) + "/" + mat[row][col].protocol.id + "/'>" + mat[row][col].protocol.name + " @ " + mat[row][col].protocol.version + "</a>|";
 						
-			if (mat[r][c].experiment)
-				//expLink.innerHTML = mat[r][c].experiment.name;
+			if (mat[row][col].experiment)
+			{
+				//expLink.innerHTML = mat[row][col].experiment.name;
 				titleText +=  
-					"E: <a href='" + contextPath + "/experiment/" + convertForURL (mat[r][c].experiment.name) + "/"
-					+  mat[r][c].experiment.id + "/'>" + mat[r][c].experiment.name + "</a>";
+					"E: <a href='" + contextPath + "/experiment/" + convertForURL (mat[row][col].experiment.name) + "/"
+					+  mat[row][col].experiment.id + "/latest/'>" + mat[row][col].experiment.name + "</a>";
+				//if (mat[row][col].experiment.latestResult == "")
+				addMatrixClickListener (td, contextPath + "/experiment/" + convertForURL (mat[row][col].experiment.name) + "/"
+				+  mat[row][col].experiment.id + "/latest");
+			}
 			else
 			{
 				titleText +=  
 					"E: <a id='create-"+row+"-"+col+"'>create experiment</a>";
 				
-				/*var a = document.createElement ("a");
-				a.appendChild(document.createTextNode("create experiment"));*/
-				//removeChildren (expLink);
-				//expLink.appendChild (a);
-				//titleText += a;
-				
-				/*a.addEventListener("click", function () {
-					submitNewExperiment ({
-						task: "newExperiment",
-						model: mat[r][c].model.id,
-						protocol: mat[r][c].protocol.id
-					}, expLink);
-				}, false);*/
 			}
 			
 			td.setAttribute("title", titleText);
-			createClueTip (td, mat, r, c);
+			createClueTip (td, mat, row, col);
 		}
 	}
 	
+}
+
+function addMatrixClickListener (td, link)
+{
+				td.addEventListener("click", function () {
+					document.location.href = link;
+				}, false);
 }
 
 function createClueTip (td, mat, r, c)
