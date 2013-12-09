@@ -11,7 +11,7 @@ var lock = true;
 		"INAPPRORIATE": "#f1c886"
 };*/
 
-function submitNewExperiment (jsonObject, notificationElement)
+function submitNewExperiment (jsonObject, notificationElement, td)
 {
 	if (notificationElement)
 		notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/loading2-new.gif' alt='loading' />";
@@ -40,6 +40,12 @@ function submitNewExperiment (jsonObject, notificationElement)
     	var json = JSON.parse(xmlhttp.responseText);
     	console.log (json);
     	displayNotifications (json);
+
+    	console.log ("td prev");
+    	console.log (td);
+    	
+    	if (td)
+    		td.removeClass ("experiment-RUNNING").removeClass ("experiment-INAPPRORIATE").removeClass ("experiment-FAILED").removeClass ("experiment-SUCCESS");
     	
         if(xmlhttp.status == 200)
         {
@@ -49,18 +55,31 @@ function submitNewExperiment (jsonObject, notificationElement)
         		if (json.newExperiment.response)
 	        	{
         			if (notificationElement)
-        			notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/check.png' alt='valid' /> " + msg;
+        				notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/check.png' alt='valid' /> " + msg;
+        			if (td)
+	    				td.addClass ("experiment-RUNNING");
+        				//td.attr ("class", td.attr ("class").replace (/experiment-[A-Z]+/, "") + "experiment-RUNNING");
 	        	}
 	        	else
+	        	{
 	        		if (notificationElement)
-	        		notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + msg;
+	        			notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + msg;
+	    			if (td)
+	    				td.addClass ("experiment-INAPPRORIATE");
+	    				//td.attr ("class", td.attr ("class").replace (/experiment-[A-Z]+/, "") + "experiment-INAPPRORIATE");
+	        	}
         	}
         }
         else
         {
         	if (notificationElement)
-        	notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='error' /> sorry, serverside error occurred.";
+        		notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='error' /> sorry, serverside error occurred.";
+			if (td)
+				td.addClass ("experiment-INAPPRORIATE");
+				//td.attr ("class", td.attr ("class").replace (/experiment-[A-Z]+/, "") + "experiment-INAPPRORIATE");
         }
+    	console.log ("td post");
+    	console.log (td);
     };
     xmlhttp.send(JSON.stringify(jsonObject));
 }
@@ -279,7 +298,7 @@ function createClueTip (td, mat, r, c)
 						task: "newExperiment",
 						model: mat[r][c].model.id,
 						protocol: mat[r][c].protocol.id
-					}, document.getElementById ("actionIndicator"));
+					}, document.getElementById ("actionIndicator"), $(td));
 					  console.log ("clicked2");
 				});
 			  console.log ("shown2");

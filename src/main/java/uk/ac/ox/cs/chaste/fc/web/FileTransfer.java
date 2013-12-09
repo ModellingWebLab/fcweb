@@ -240,7 +240,7 @@ public class FileTransfer extends WebModule
 	{
 		return "Hi " + nick + ",\n\nthe experiment you submitted is finished.\nReturn message: "
 	+result
-	+"\nHave a look at your files: "+Tools.getThisUrl ()+"/myfiles.html"
+	+"\nHave a look at your files: "+Tools.getThisUrl ()+"myfiles.html"
 	+ "\n\nSincerely,\nChaste dev-team";
 	}
 	
@@ -310,7 +310,8 @@ public class FileTransfer extends WebModule
 				User u = exp.getAuthor ();
 				try
 				{
-					Tools.sendMail (u.getMail (), u.getNick (), "Chaste Experiment finished", buildMailBody (u.getNick (), returnmsg));
+					if (u.isSendMails ())
+						Tools.sendMail (u.getMail (), u.getNick (), "Chaste Experiment finished", buildMailBody (u.getNick (), returnmsg));
 				}
 				catch (MessagingException e)
 				{
