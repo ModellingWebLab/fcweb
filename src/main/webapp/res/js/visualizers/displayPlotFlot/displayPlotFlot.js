@@ -21,7 +21,7 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
 	{
 		var csvData = getCSVColumnsDownsampled (this.file);
 
-		plotPoints = true;
+		var plotPoints = true;
 
         var div = document.createElement("div");
         div.id = "choices";

@@ -31,13 +31,19 @@
 					<c:choose>
 						<c:when test="${entity.type == 'experiment' && version.value.status != 'SUCCESS'}">
 							<strong>
-							${version.value.version}</strong> by <em>${version.value.author}</em> - ${version.value.returnText}<br/>
+							${version.value.version}</strong> by <em>${version.value.author}</em> - ${version.value.returnText}
+							<c:if test="${entity.author == User.nick || User.admin}">
+						    	<a id='deleteVersion'><img src="${contextPath}/res/img/failed.png" alt="delete version" title="delete version" /></a>
+						    </c:if><br/>
 	    					<span class="suppl"><small>created </small> <time>${version.value.created}</time> <small>containing</small> ${version.value.numFiles} File<c:if test="${version.value.numFiles!=1}">s</c:if>.</span>
 						</c:when>
 						<c:otherwise>
 							<strong>
 							<a class="entityversionlink" href="${contextPath}/${entity.type}/${entity.url}/${entity.id}/${version.value.url}/${version.value.id}/">
-							${version.value.version}</a></strong> by <em>${version.value.author}</em><br/>
+							${version.value.version}</a></strong> by <em>${version.value.author}
+							<c:if test="${entity.author == User.nick || User.admin}">
+						    	<a id='deleteVersion-${version.value.id}' class="deleteVersionLink"><img src="${contextPath}/res/img/failed.png" alt="delete version" title="delete version" /></a>
+						    </c:if></em><br/>
 	    					<span class="suppl"><small>created </small> <time>${version.value.created}</time> <small>containing</small> ${version.value.numFiles} File<c:if test="${version.value.numFiles!=1}">s</c:if>.</span>
 						</c:otherwise>
 					</c:choose>

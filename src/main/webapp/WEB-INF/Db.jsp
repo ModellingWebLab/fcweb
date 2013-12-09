@@ -19,7 +19,7 @@
 	    <br/>
 		<table class="matrixTable small">
 			<tr>
-				<td>unrun</td>
+				<td class="center">unrun</td>
 				<td class="experiment-RUNNING center">running</td>
 				<td class="experiment-SUCCESS center">successful</td>
 				<td class="experiment-FAILED center">failed</td>

@@ -18,6 +18,7 @@ HCPlotter.prototype.getContentsCallback = function (succ)
 		this.div.appendChild (document.createTextNode ("failed to load the contents"));
 	else
 	{
+		var plotPoints = true;
 		var csvData = getCSVColumnsDownsampled (this.file);
 		
 		var div = document.createElement("div");
@@ -34,6 +35,8 @@ HCPlotter.prototype.getContentsCallback = function (succ)
                 var curData = [];
                 for (var j = 0; j < csvData[i].length; j++)
                         curData.push ([csvData[i][j].x, csvData[i][j].y]);
+                if (curData.length > 100)
+                	plotPoints = false;
                 //plot.polyline("line " + i, { x: csvData[0], y: csvData[i], stroke:  colorPalette.getRgba (col), thickness: 1 });
                 datasets.push ({name : "line " + i, data: curData});
         }
@@ -42,13 +45,18 @@ HCPlotter.prototype.getContentsCallback = function (succ)
 		
 		
 		//$(id).plot (data, {});
-		$("#"+id).highcharts({
+		var options = {
 	        title: {
-	            text: 'some title'
+	            text: ''
 	        },
 	        plotOptions: {
 	            series: {
 	                allowPointSelect: true
+	            },
+	            line: {
+	            	marker: {
+	            		enabled: plotPoints
+	            	}
 	            }
 	        },
 	/*,plotOptions: {
@@ -89,7 +97,17 @@ HCPlotter.prototype.getContentsCallback = function (succ)
 		            name: 'New visitors'
 		        }
 		    ]*/
-		});
+		};
+		
+		if (this.file.xAxes)
+			options.xAxis = {title : { text : this.file.xAxes}};
+		if (this.file.yAxes)
+			options.yAxis = {title : { text : this.file.yAxes}};
+		if (this.file.title)
+			options.title = {text : this.file.title};
+		
+		
+		$("#"+id).highcharts(options);
 	}
 		
 };

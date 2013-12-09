@@ -167,9 +167,10 @@ function deleteEntity (jsonObject)
     };
     xmlhttp.send (JSON.stringify (jsonObject));
 }
-function highlightPlots (plotDescription, showDefault)
+function highlightPlots (version, showDefault)
 {
 	//console.log (plotDescription);
+	var plotDescription = version.plotDescription;
 	for (var i = 1; i < plotDescription.length; i++)
 	{
 		if (plotDescription[i].length < 2)
@@ -185,6 +186,20 @@ function highlightPlots (plotDescription, showDefault)
 				if (viz)
 					viz.click();
 			}
+		}
+
+		//console.log ("files: ")
+		//console.log (version.files);
+		for (var f = 0; f < version.files.length; f++)
+		{
+			if (files[version.files[f]].name == plotDescription[i][2])
+			{
+				files[version.files[f]].xAxes = plotDescription[i][4];
+				files[version.files[f]].yAxes = plotDescription[i][5];
+				files[version.files[f]].title = plotDescription[i][0];
+			}
+			//console.log ("file: ")
+			//console.log (files[version.files[f]]);
 		}
 	}
 }
@@ -229,8 +244,7 @@ function parsePlotDescription (file, version, showDefault)
 					}
 					
 					version.plotDescription = csv;
-					highlightPlots (version.plotDescription, showDefault);
-					
+					highlightPlots (version, showDefault);
 				}
 			}
 	};
@@ -502,7 +516,7 @@ function displayVersion (id, showDefault)
 	if (v.readme)
 		dv.readme.innerHTML = v.readme;
 	if (v.plotDescription)
-		highlightPlots (v.plotDescription, showDefault);
+		highlightPlots (v, showDefault);
 	
 	
 	doc.entity.details.style.display = "none";
@@ -1019,6 +1033,17 @@ function initModel ()
 				console.log ("not deleting " + v.id);*/
 		});
 	}
+	
+
+	$(".deleteVersionLink").click (function () {
+		if (confirm("Are you sure to delete this version? (including all files and experiments associated to it)"))
+		{
+			deleteEntity ({
+				task: "deleteVersion",
+		    	version: $(this).attr("id").replace("deleteVersion-", "")
+			});
+		}
+	});
     
 }
 
