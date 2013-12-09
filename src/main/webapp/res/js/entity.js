@@ -286,7 +286,7 @@ function displayVersion (id, showDefault)
 	
 	if (entityType != "experiment" && ROLE.isAllowedToCreateNewExperiment)
 	{
-		var createExpLink = document.createElement("a");
+		/*var createExpLink = document.createElement("a");
 		var createExpImg = document.createElement("img");
 		createExpImg.src = contextPath + "/res/img/create-experiment-small.png";
 		createExpImg.alt = "create experiment from this " + entityType;
@@ -300,7 +300,7 @@ function displayVersion (id, showDefault)
 		createExpLink.setAttribute ("class", "pointer");
 		dv.name.appendChild (createExpLink);
 		
-		dv.name.appendChild (document.createTextNode (" "));
+		dv.name.appendChild (document.createTextNode (" "));*/
 		
 		var createBatchLink = document.createElement("a");
 		var createBatchImg = document.createElement("img");

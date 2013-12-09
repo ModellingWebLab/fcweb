@@ -333,25 +333,6 @@ function initPage ()
 		}
 	}
 	
-
-	var submitExperiment = document.getElementById("newexpsubmit");
-	if (submitExperiment)
-	submitExperiment.addEventListener("click", 
-	        function (event)
-	        {
-		runExperiment (false);
-	        }, 
-	        false);
-	
-
-	submitExperiment = document.getElementById("newexpsubmitforce");
-	if (submitExperiment)
-	submitExperiment.addEventListener("click", 
-	        function (event)
-	        {
-		runExperiment (true);
-	        }, 
-	        false);
 	
 	/*var as = document.getElementsByTagName("a");
 	for (var i = 0; i < times.length; i++)
