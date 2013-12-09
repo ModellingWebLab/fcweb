@@ -6,7 +6,7 @@
     <h1 id="entityname">${entity.name}</h1>
 	<div class="suppl"><small>${entity.type} created</small> <time>${entity.created}</time> <small>by</small> <em>${entity.author}</em>
 	    <c:if test="${entity.author == User.nick || User.admin}">
-	    	- delete entity: <a id='deleteEntity'><img src="${contextPath}/res/img/failed.png" alt="delete entity" title="delete entity" /></a>
+	    	- delete entity: <a id='deleteEntity'><img src="${contextPath}/res/img/delete.png" alt="delete entity" title="delete entity" /></a>
 	    </c:if>
 		<c:if test="${User.allowedToForceNewExperiment && entity.type == 'experiment'}">
 			<a id="rerunExperiment"><img src="${contextPath}/res/img/refresh.png" alt="rerun experiment" title="rerun experiment"/></a> <span id="rerunExperimentAction"></span>
@@ -42,7 +42,7 @@
 							<a class="entityversionlink" href="${contextPath}/${entity.type}/${entity.url}/${entity.id}/${version.value.url}/${version.value.id}/">
 							${version.value.version}</a></strong> by <em>${version.value.author}
 							<c:if test="${entity.author == User.nick || User.admin}">
-						    	<a id='deleteVersion-${version.value.id}' class="deleteVersionLink"><img src="${contextPath}/res/img/failed.png" alt="delete version" title="delete version" /></a>
+						    	<a id='deleteVersion-${version.value.id}' class="deleteVersionLink"><img src="${contextPath}/res/img/delete.png" alt="delete version" title="delete version" /></a>
 						    </c:if></em><br/>
 	    					<span class="suppl"><small>created </small> <time>${version.value.created}</time> <small>containing</small> ${version.value.numFiles} File<c:if test="${version.value.numFiles!=1}">s</c:if>.</span>
 						</c:otherwise>
@@ -66,7 +66,7 @@
 		    	<span id="versionVisibilityAction"></span>
 		    </c:if>
 		    <c:if test="${entity.author == User.nick || User.admin}">
-		    	delete version: <a id='deleteVersion'><img src="${contextPath}/res/img/failed.png" alt="delete version" title="delete version" /></a>
+		    	delete version: <a id='deleteVersion'><img src="${contextPath}/res/img/delete.png" alt="delete version" title="delete version" /></a>
 		    </c:if>
 	    </div>
 	    
