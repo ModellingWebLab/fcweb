@@ -14,9 +14,7 @@
     
     <section id="matrixTab">
 	    <h2>Matrix Overview</h2>
-	    <span id="modelLink"></span><br/>
-	    <span id="protocolLink"></span><br/>
-	    <span id="experimentLink"></span><br/>
+	    <span id="actionIndicator"></span><br/>
 	    <div id="matrixdiv"></div>
     </section>
 </t:skeleton>

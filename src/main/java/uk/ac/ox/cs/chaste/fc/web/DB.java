@@ -14,6 +14,7 @@ import org.json.simple.JSONObject;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntity;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeader;
+import uk.ac.ox.cs.chaste.fc.beans.PageHeaderLink;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeaderScript;
 import uk.ac.ox.cs.chaste.fc.beans.User;
 import uk.ac.ox.cs.chaste.fc.mgmt.ChasteEntityManager;
@@ -35,6 +36,9 @@ public class DB extends WebModule
 		Notifications notifications, User user, HttpSession session)
 	{
 		header.addScript (new PageHeaderScript ("res/js/db.js", "text/javascript", "UTF-8", null));
+		header.addScript (new PageHeaderScript ("res/js/3rd/jquery-cluetip-master/jquery.cluetip.js", "text/javascript", "UTF-8", null));
+		header.addScript (new PageHeaderScript ("res/js/3rd/jquery.hoverIntent.js", "text/javascript", "UTF-8", null));
+		header.addLink (new PageHeaderLink ("res/js/3rd/jquery-cluetip-master/jquery.cluetip.css", "text/css", "stylesheet"));
 		return "Db.jsp";
 	}
 
