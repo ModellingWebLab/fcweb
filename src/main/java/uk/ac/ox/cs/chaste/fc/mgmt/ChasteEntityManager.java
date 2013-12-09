@@ -409,9 +409,13 @@ public abstract class ChasteEntityManager
 			st.setInt (1, versionId);
 			
 			int affectedRows = st.executeUpdate ();
+			
+			deleteEmptyEntities ();
+			
 			if (affectedRows == 0)
 				throw new SQLException (
 					"Deleting entity version failed, no rows affected.");
+			
 			ok = true;
 		}
 		catch (SQLException e)
@@ -429,6 +433,31 @@ public abstract class ChasteEntityManager
 		}
 		
 		return ok;
+	}
+	
+	private void deleteEmptyEntities ()
+	{
+		
+		PreparedStatement st = db.prepareStatement ("DELETE FROM `" + entityTable + "` WHERE id NOT IN (SELECT DISTINCT `"+entityColumn+"` FROM `" + entityVersionsTable + "`)");
+		ResultSet rs = null;
+		try
+		{
+			st.execute ();
+			rs = st.getResultSet ();
+			db.closeRes (st);
+			db.closeRes (rs);
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+			note.addError ("sql err retrieving entities: " + e.getMessage ());
+			LOGGER.error ("db problem while retrieving entities (" + entityColumn + ")", e);
+		}
+		finally
+		{
+			db.closeRes (st);
+			db.closeRes (rs);
+		}
 	}
 	
 	public boolean removeEntity (int versionId) throws ChastePermissionException
