@@ -430,7 +430,7 @@ public class ExperimentView extends WebModule
 		if (protocolDir != null && protocolDir.exists ())
 			try
 			{
-				Tools.delete (protocolDir, false);
+				Tools.deleteRecursively (protocolDir, false);
 			}
 			catch (IOException e)
 			{

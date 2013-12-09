@@ -727,7 +727,7 @@ public class EntityView extends WebModule
 		if (entityDir != null && entityDir.exists ())
 			try
 			{
-				Tools.delete (entityDir, false);
+				Tools.deleteRecursively (entityDir, false);
 			}
 			catch (IOException e)
 			{

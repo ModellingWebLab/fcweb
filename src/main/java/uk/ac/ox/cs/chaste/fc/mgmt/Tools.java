@@ -88,11 +88,11 @@ public class Tools
 		return pw.substring (0, new Random ().nextInt(max - min) + min);
 	}
 	
-	public static void delete (File f, boolean breakable) throws IOException
+	public static void deleteRecursively (File f, boolean breakable) throws IOException
 	{
 		if (f.isDirectory()) {
 	    for (File c : f.listFiles())
-	      delete(c, breakable);
+	      deleteRecursively(c, breakable);
 	  }
 		if (!f.delete ())
 		{

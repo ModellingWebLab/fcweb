@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -94,7 +97,7 @@ public class FileTransfer extends WebModule
 		{
 			
 			cleanUp (db, notifications, userMgmt, user);
-			return errorPage (request, response, null);
+			return "Index.jsp";
 		}
 		
 		if (req.length != 7)
@@ -609,89 +612,8 @@ public class FileTransfer extends WebModule
 	    builder.addTextBody("signature", signature);
 	    builder.addTextBody("callBack", Tools.getThisUrl () + "submitExperiment.html");
 	    builder.addTextBody("password", Tools.getChastePassword ());
-	    final HttpEntity yourEntity = builder.build();
-
-	    class ProgressiveEntity implements HttpEntity {
-	        @Override
-	        public void consumeContent() throws IOException {
-	            //yourEntity.consumeContent();   
-	            EntityUtils.consume(yourEntity);
-	        }
-	        @Override
-	        public InputStream getContent() throws IOException,
-	                IllegalStateException {
-	            return yourEntity.getContent();
-	        }
-	        @Override
-	        public Header getContentEncoding() {             
-	            return yourEntity.getContentEncoding();
-	        }
-	        @Override
-	        public long getContentLength() {
-	            return yourEntity.getContentLength();
-	        }
-	        @Override
-	        public Header getContentType() {
-	            return yourEntity.getContentType();
-	        }
-	        @Override
-	        public boolean isChunked() {             
-	            return yourEntity.isChunked();
-	        }
-	        @Override
-	        public boolean isRepeatable() {
-	            return yourEntity.isRepeatable();
-	        }
-	        @Override
-	        public boolean isStreaming() {             
-	            return yourEntity.isStreaming();
-	        } // CONSIDER put a _real_ delegator into here!
-
-	        @Override
-	        public void writeTo(OutputStream outstream) throws IOException {
-
-	            class ProxyOutputStream extends FilterOutputStream {
-	                /**
-	                 * @author Stephen Colebourne
-	                 */
-
-	                public ProxyOutputStream(OutputStream proxy) {
-	                    super(proxy);    
-	                }
-	                public void write(int idx) throws IOException {
-	                    out.write(idx);
-	                }
-	                public void write(byte[] bts) throws IOException {
-	                    out.write(bts);
-	                }
-	                public void write(byte[] bts, int st, int end) throws IOException {
-	                    out.write(bts, st, end);
-	                }
-	                public void flush() throws IOException {
-	                    out.flush();
-	                }
-	                public void close() throws IOException {
-	                    out.close();
-	                }
-	            } // CONSIDER import this class (and risk more Jar File Hell)
-
-	            class ProgressiveOutputStream extends ProxyOutputStream {
-	                public ProgressiveOutputStream(OutputStream proxy) {
-	                    super(proxy);
-	                }
-	                public void write(byte[] bts, int st, int end) throws IOException {
-
-	                    // FIXME  Put your progress bar stuff here!
-
-	                    out.write(bts, st, end);
-	                }
-	            }
-
-	            yourEntity.writeTo(new ProgressiveOutputStream(outstream));
-	        }
-
-	    };
-	    ProgressiveEntity myEntity = new ProgressiveEntity();
+	    HttpEntity entity = builder.build();
+	    ProgressiveEntity myEntity = new ProgressiveEntity(entity);
 
 	    post.setEntity(myEntity);
 	    HttpResponse response = client.execute(post);
@@ -720,9 +642,30 @@ public class FileTransfer extends WebModule
 	    return content.trim();
 	}
 	
+	public static void scheduleCleanUp ()
+	{
+		new Thread () {
+			public void run ()
+			{
+				try
+				{
+					URL url = new URL(Tools.getThisUrl () + "download/cleanUP");
+					InputStream is = url.openStream();
+					is.close ();
+				}
+				catch (IOException e)
+				{
+					LOGGER.warn ("couldn't schedule cleanup script", e);
+				}
+			}
+		}.start ();
+	}
+	
 	
 	private void cleanUp (DatabaseConnector db, Notifications notifications, UserManager userMgmt, User user)
 	{
+		LOGGER.info ("cleaning");
+		
 		ModelManager modelMgmt = new ModelManager (db, notifications, userMgmt, user);
 		ProtocolManager protocolMgmt = new ProtocolManager (db, notifications, userMgmt, user);
 		ExperimentManager expMgmt = new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt);
@@ -731,5 +674,172 @@ public class FileTransfer extends WebModule
 		protocolMgmt.deleteEmptyEntities ();
 		expMgmt.deleteEmptyEntities ();
 		
+		int removedFiles = 0;
+		
+		// check if files are unused
+		int maxAgeTmpFiles = 1000 * 60 * 60 * 24; //1d
+		
+		// -> tmp dir
+		File dir = new File (Tools.getTempDir ());
+		if (dir.exists ())
+		{
+			File [] files = dir.listFiles ();
+			
+			long curTime = System.currentTimeMillis ();
+			
+			for (File f : files)
+				if (curTime - f.lastModified () > maxAgeTmpFiles) // more than 1d
+				{
+					LOGGER.info ("remove tmp file " + f.getAbsolutePath () + " because it's older than " + maxAgeTmpFiles + "ms");
+					f.delete ();
+					removedFiles++;
+				}
+		}
+		
+		// -> models/protocols/experiments
+		dir = new File (modelMgmt.getEntityStorageDir ());
+		File [] files = dir.listFiles ();
+		for (File f : files)
+		{
+			// is there a model in that dir?
+			if (modelMgmt.getVersionByPath (f.getName ()) == null)
+				try
+				{
+					LOGGER.info ("remove file " + f.getAbsolutePath () + " because it's not in db");
+					Tools.deleteRecursively (f, false);
+					removedFiles++;
+				}
+				catch (IOException e)
+				{
+					LOGGER.error ("couldn't remove file " + f.getAbsolutePath () + " during clean up!");
+				}
+		}
+		
+		
+		dir = new File (protocolMgmt.getEntityStorageDir ());
+		files = dir.listFiles ();
+		for (File f : files)
+		{
+			// is there a protocol in that dir?
+			if (protocolMgmt.getVersionByPath (f.getName ()) == null)
+				try
+				{
+					LOGGER.info ("remove file " + f.getAbsolutePath () + " because it's not in db");
+					Tools.deleteRecursively (f, false);
+					removedFiles++;
+				}
+				catch (IOException e)
+				{
+					LOGGER.error ("couldn't remove file " + f.getAbsolutePath () + " during clean up!");
+				}
+		}
+		
+		
+		dir = new File (expMgmt.getEntityStorageDir ());
+		files = dir.listFiles ();
+		for (File f : files)
+		{
+			// is there a exp in that dir?
+			if (expMgmt.getVersionByPath (f.getName ()) == null)
+				try
+				{
+					LOGGER.info ("remove file " + f.getAbsolutePath () + " because it's not in db");
+					Tools.deleteRecursively (f, false);
+					removedFiles++;
+				}
+				catch (IOException e)
+				{
+					LOGGER.error ("couldn't remove file " + f.getAbsolutePath () + " during clean up!");
+				}
+		}
+
+		LOGGER.info ("cleaning finished, removed " + removedFiles + " files");
 	}
+	
+	static class ProgressiveEntity implements HttpEntity {
+		HttpEntity entity;
+		public ProgressiveEntity (HttpEntity entity)
+		{
+			this.entity = entity;
+		}
+		
+    @Override
+    public void consumeContent() throws IOException {
+        //yourEntity.consumeContent();   
+        EntityUtils.consume(entity);
+    }
+    @Override
+    public InputStream getContent() throws IOException,
+            IllegalStateException {
+        return entity.getContent();
+    }
+    @Override
+    public Header getContentEncoding() {             
+        return entity.getContentEncoding();
+    }
+    @Override
+    public long getContentLength() {
+        return entity.getContentLength();
+    }
+    @Override
+    public Header getContentType() {
+        return entity.getContentType();
+    }
+    @Override
+    public boolean isChunked() {             
+        return entity.isChunked();
+    }
+    @Override
+    public boolean isRepeatable() {
+        return entity.isRepeatable();
+    }
+    @Override
+    public boolean isStreaming() {             
+        return entity.isStreaming();
+    } // CONSIDER put a _real_ delegator into here!
+
+    @Override
+    public void writeTo(OutputStream outstream) throws IOException {
+
+        class ProxyOutputStream extends FilterOutputStream {
+            /**
+             * @author Stephen Colebourne
+             */
+
+            public ProxyOutputStream(OutputStream proxy) {
+                super(proxy);    
+            }
+            public void write(int idx) throws IOException {
+                out.write(idx);
+            }
+            public void write(byte[] bts) throws IOException {
+                out.write(bts);
+            }
+            public void write(byte[] bts, int st, int end) throws IOException {
+                out.write(bts, st, end);
+            }
+            public void flush() throws IOException {
+                out.flush();
+            }
+            public void close() throws IOException {
+                out.close();
+            }
+        } // CONSIDER import this class (and risk more Jar File Hell)
+
+        class ProgressiveOutputStream extends ProxyOutputStream {
+            public ProgressiveOutputStream(OutputStream proxy) {
+                super(proxy);
+            }
+            public void write(byte[] bts, int st, int end) throws IOException {
+
+                // FIXME  Put your progress bar stuff here!
+
+                out.write(bts, st, end);
+            }
+        }
+
+        entity.writeTo(new ProgressiveOutputStream(outstream));
+    }
+
+};
 }

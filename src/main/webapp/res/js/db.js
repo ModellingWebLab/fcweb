@@ -170,11 +170,11 @@ function drawMatrix (matrix)
 	tableDiv.appendChild (table);
 
 
-	for (var row = 0; row < mat.length; row++)
+	for (var row = -1; row < mat.length; row++)
 	{
 		var tr = document.createElement("tr");
 		table.appendChild (tr);
-		for (var col = 0; col < mat[row].length; col++)
+		for (var col = -1; col < mat[0].length; col++)
 		{
 			var td = document.createElement("td");
 			tr.appendChild (td);
@@ -183,32 +183,34 @@ function drawMatrix (matrix)
 			else
 				ctx.fillStyle="#fff";*/
 			
-			if (row == 0 && col == 0)
+			//console.log ("row " + row + " col " + col);
+			
+			if (row == -1 && col == -1)
 				continue;
 			
-			if (row == 0)
+			if (row == -1)
 			{
 				var d1 = document.createElement("div");
 				var d2 = document.createElement("div");
 				var a = document.createElement("a");
-				a.href = contextPath + "/protocol/" + convertForURL (mat[row][col].protocol.name) + "/" + mat[row][col].protocol.entityId
-				+ "/" + convertForURL (mat[row][col].protocol.version) + "/" + mat[row][col].protocol.id;
+				a.href = contextPath + "/protocol/" + convertForURL (mat[0][col].protocol.name) + "/" + mat[0][col].protocol.entityId
+				+ "/" + convertForURL (mat[0][col].protocol.version) + "/" + mat[0][col].protocol.id;
 				d2.setAttribute("class", "vertical-text");
 				d1.setAttribute("class", "vertical-text__inner");
 				d2.appendChild (d1);
-				a.appendChild (document.createTextNode (mat[row][col].protocol.name));
+				a.appendChild (document.createTextNode (mat[0][col].protocol.name));
 				d1.appendChild(a);
 				td.appendChild (d2);//document.createTextNode ("<div class='vertical-text'><div class='vertical-text__inner'>" + mat[row][col].protocol.name + "</div></div>"));
 				td.setAttribute("class", "matrixTableCol");
 				continue;
 			}
 			
-			if (col == 0)
+			if (col == -1)
 			{
 				var a = document.createElement("a");
-				a.href = contextPath + "/model/" + convertForURL (mat[row][col].model.name) + "/" + mat[row][col].model.entityId
-				+ "/" + convertForURL (mat[row][col].model.version) + "/" + mat[row][col].model.id;
-				a.appendChild (document.createTextNode (mat[row][col].model.name));
+				a.href = contextPath + "/model/" + convertForURL (mat[row][0].model.name) + "/" + mat[row][0].model.entityId
+				+ "/" + convertForURL (mat[row][0].model.version) + "/" + mat[row][0].model.id;
+				a.appendChild (document.createTextNode (mat[row][0].model.name));
 				td.appendChild (a);
 				td.setAttribute("class", "matrixTableRow");
 				continue;

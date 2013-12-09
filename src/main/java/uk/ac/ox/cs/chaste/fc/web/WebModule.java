@@ -209,6 +209,10 @@ extends HttpServlet
 		
 		configure ();
 		
+		if (!fileTransfer)
+			if (Math.random () < .05) // on avg every 20th click
+				FileTransfer.scheduleCleanUp ();
+		
 	  HttpSession session = request.getSession (true);
 	  CookieManager cookieMgmt = new CookieManager (request, response);
 		Notifications notifications = new Notifications ();
