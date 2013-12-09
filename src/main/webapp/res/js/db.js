@@ -101,9 +101,9 @@ function drawMatrix (matrix)
 				}
 	
 	/*console.log ("models");
-	console.log (modelMapper);
+	console.log (modelMapper);*/
 	console.log ("protocols");
-	console.log (protocolMapper);*/
+	console.log (protocolMapper);
 	
 	var mat = [];
 	for (var i = 0; i < models.length; i++)
@@ -145,7 +145,7 @@ function drawMatrix (matrix)
 	tableDiv.id = "matrixContainer";
 
 	var table = document.createElement("table");
-	table.id = "matrixTable";
+	table.setAttribute("class", "matrixTable");
 	
 	div.appendChild (tableDiv);
 	tableDiv.appendChild (table);
@@ -245,142 +245,6 @@ function drawMatrix (matrix)
 			createClueTip (td, mat, r, c);
 		}
 	}
-	
-	/*$('.experiment').cluetip({
-		  cluetipClass: 'jtip',
-		  arrows: true,
-		  dropShadow: false,
-		  hoverIntent: false,
-		  sticky: true,
-		  mouseOutClose: true,
-		  closePosition: 'title',
-		  closeText: '<img src="cross.png" alt="close" />'
-		});*/
-	//$('.experiment').each(function () {console.log ("test");});
-	/*div.appendChild(canvas);
-	
-	
-	
-	var canvas = document.createElement("canvas");
-	var ctx = canvas.getContext("2d");
-	canvas.id = "matrixcanvas";
-	div.appendChild(canvas);
-	canvas.style.width = "800px";
-	canvas.style.height = "600px";
-	canvas.width = 800;
-	canvas.height = 600;
-
-	var rows = mat.length;
-	var cols = mat[0].length;
-	
-	var width = canvas.width;
-	var height = canvas.height;
-	var boxWidth = width / cols;
-	var boxHeight = height / rows;
-	
-	
-	
-
-	for (var row = 0; row < mat.length; row++)
-		for (var col = 0; col < mat[row].length; col++)
-		{
-			if (mat[row][col].experiment)
-				ctx.fillStyle = colorMapper[mat[row][col].experiment.latestResult];
-			else
-				ctx.fillStyle="#fff";
-			ctx.fillRect((col) * boxWidth, (row) * boxHeight, boxWidth, boxHeight);
-			
-			ctx.beginPath ();
-			ctx.moveTo ((col) * boxWidth, (row) * boxHeight + boxHeight);
-			ctx.lineTo ((col) * boxWidth + boxWidth, (row) * boxHeight + boxHeight);
-			ctx.lineTo ((col) * boxWidth + boxWidth, (row) * boxHeight);
-			ctx.stroke ();
-		}
-
-	var modelLink = document.getElementById("modelLink");
-	var protocolLink = document.getElementById("protocolLink");
-	var expLink = document.getElementById("experimentLink");
-	
-	function getMousePos(canvas, evt) {
-        var rect = canvas.getBoundingClientRect();
-        return {
-          x: evt.clientX - rect.left,
-          y: evt.clientY - rect.top
-        };
-      }
-
-	
-	canvas.addEventListener("mouseover", function (event) {
-		lock = false;
-	}, false);
-	
-//	var rect = canvas.getBoundingClientRect();
-	canvas.addEventListener("mousemove", function (event) {
-		if (lock)
-			return;
-		
-		var mouse = getMousePos(canvas, event);
-
-		var x = mouse.x;//event.pageX - rect.left;
-		var y = mouse.y;//event.pageY - rect.top;
-		//console.log ("x: " + x + " y: " + y);
-		
-		// translate into matrix
-		var r = parseInt(y / boxHeight);
-		var c = parseInt(x / boxWidth);
-		
-		//console.log ("r: " + r + " c: " + c);
-		if (r >= mat.length || c >= mat[0].length)
-			return;
-		
-		if (mat[r][c].model)
-		{
-			modelLink.innerHTML = 
-				"<a href='" + contextPath + "/model/" + convertForURL (mat[r][c].model.name) + "/" + mat[r][c].model.entityId
-				+ "/" + convertForURL (mat[r][c].model.version) + "/" + mat[r][c].model.id + "/'>" + mat[r][c].model.name + " @ " + mat[r][c].model.version + "</a>";
-		}
-		else
-			modelLink.innerHTML = "";
-		
-		if (mat[r][c].protocol)
-			//protocolLink.innerHTML = mat[r][c].protocol.name + " @ " + mat[r][c].protocol.version;
-			protocolLink.innerHTML = 
-				"<a href='" + contextPath + "/protocol/" + convertForURL (mat[r][c].protocol.name) + "/" + mat[r][c].protocol.entityId
-				+ "/" + convertForURL (mat[r][c].protocol.version) + "/" + mat[r][c].protocol.id + "/'>" + mat[r][c].protocol.name + " @ " + mat[r][c].protocol.version + "</a>";
-		else
-			protocolLink.innerHTML = "";
-		
-		if (mat[r][c].experiment)
-			//expLink.innerHTML = mat[r][c].experiment.name;
-			expLink.innerHTML = 
-				"<a href='" + contextPath + "/experiment/" + convertForURL (mat[r][c].experiment.name) + "/"
-				+  mat[r][c].experiment.id + "/'>" + mat[r][c].experiment.name + "</a>";
-		else
-		{
-			var a = document.createElement ("a");
-			a.appendChild(document.createTextNode("create experiment"));
-			removeChildren (expLink);
-			expLink.appendChild (a);
-			
-			a.addEventListener("click", function () {
-				submitNewExperiment ({
-					task: "newExperiment",
-					model: mat[r][c].model.id,
-					protocol: mat[r][c].protocol.id
-				}, expLink);
-			}, false);
-		}
-	}, false);
-	
-	canvas.addEventListener("click", function (event) {
-		lock = true;
-		
-		
-	}, false);
-	*/
-	
-	
-	
 	
 }
 

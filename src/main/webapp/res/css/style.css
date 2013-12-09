@@ -491,24 +491,33 @@ background-image: url(../img/red-dot.png);
 	display: block;
 	margin: -1.5em 0 100%;
 }
-#matrixTable .experiment-RUNNING
+.matrixTable .experiment-RUNNING
 {
 	background-color:#86b6f1;
 }
-#matrixTable .experiment-INAPPRORIATE
+.matrixTable .experiment-INAPPRORIATE
 {
 	background-color:#f1c886;
 }
-#matrixTable .experiment-FAILED
+.matrixTable .experiment-FAILED
 {
 	background-color:#db0000;
 }
-#matrixTable .experiment-SUCCESS
+.matrixTable .experiment-SUCCESS
 {
 	background-color:#05db00;
 }
-#matrixTable td
+.matrixTable td
 {
 	border-bottom:1px dashed #ccc;
 	border-right:1px dashed #ccc;
+}
+
+.center
+{
+	text-align:center;
+}
+.small
+{
+	font-size:.8em;
 }

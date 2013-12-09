@@ -16,6 +16,16 @@
 	    <h2>Matrix Overview</h2>
 	    <span id="actionIndicator"></span><br/>
 	    <div id="matrixdiv"></div>
+	    <br/>
+		<table class="matrixTable small">
+			<tr>
+				<td>unrun</td>
+				<td class="experiment-RUNNING center">running</td>
+				<td class="experiment-SUCCESS center">successful</td>
+				<td class="experiment-FAILED center">failed</td>
+				<td class="experiment-INAPPRORIATE center">inappropriate (model/protocol incompatible)</td>
+			</tr>
+		</table>
     </section>
 </t:skeleton>
 
