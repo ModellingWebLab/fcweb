@@ -56,6 +56,7 @@ import uk.ac.ox.cs.chaste.fc.mgmt.ExperimentManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.ModelManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.ProtocolManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.Tools;
+import uk.ac.ox.cs.chaste.fc.mgmt.UserManager;
 import de.binfalse.bflog.LOGGER;
 import de.unirostock.sems.cbarchive.ArchiveEntry;
 import de.unirostock.sems.cbarchive.CombineArchive;
@@ -88,6 +89,13 @@ public class FileTransfer extends WebModule
 			// req[5] = file id
 			// req[6] = file name
 		String[] req =  request.getRequestURI().substring(request.getContextPath().length()).split ("/");
+		
+		if (req.length == 3 && req[2].equals ("cleanUP"))
+		{
+			
+			cleanUp (db, notifications, userMgmt, user);
+			return errorPage (request, response, null);
+		}
 		
 		if (req.length != 7)
 			return errorPage (request, response, null);
@@ -712,4 +720,16 @@ public class FileTransfer extends WebModule
 	    return content.trim();
 	}
 	
+	
+	private void cleanUp (DatabaseConnector db, Notifications notifications, UserManager userMgmt, User user)
+	{
+		ModelManager modelMgmt = new ModelManager (db, notifications, userMgmt, user);
+		ProtocolManager protocolMgmt = new ProtocolManager (db, notifications, userMgmt, user);
+		ExperimentManager expMgmt = new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt);
+
+		modelMgmt.deleteEmptyEntities ();
+		protocolMgmt.deleteEmptyEntities ();
+		expMgmt.deleteEmptyEntities ();
+		
+	}
 }

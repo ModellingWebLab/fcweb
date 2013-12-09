@@ -435,7 +435,7 @@ public abstract class ChasteEntityManager
 		return ok;
 	}
 	
-	private void deleteEmptyEntities ()
+	public void deleteEmptyEntities ()
 	{
 		
 		PreparedStatement st = db.prepareStatement ("DELETE FROM `" + entityTable + "` WHERE id NOT IN (SELECT DISTINCT `"+entityColumn+"` FROM `" + entityVersionsTable + "`)");
