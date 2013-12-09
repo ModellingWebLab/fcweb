@@ -197,6 +197,7 @@ function highlightPlots (version, showDefault)
 				files[version.files[f]].xAxes = plotDescription[i][4];
 				files[version.files[f]].yAxes = plotDescription[i][5];
 				files[version.files[f]].title = plotDescription[i][0];
+				files[version.files[f]].linestyle = plotDescription[i][3];
 			}
 			//console.log ("file: ")
 			//console.log (files[version.files[f]]);
@@ -591,14 +592,18 @@ function parseCSVContent (file)
 			}
 	}
 	var dropDist = (max-min) / 5000.;//100.;
+	file.nonDownsampled = [];
 	file.downsampled = [];
 	for (var i = 1; i < file.columns.length; i++)
 	{
 		file.downsampled[i] = [];
+		file.nonDownsampled[i] = [];
 		//file.downsampled[i][0] = file.columns[i][0];
 		file.downsampled[i][0] = {x : file.columns[0][0], y : file.columns[i][0]};
+		file.nonDownsampled[i][0] = {x : file.columns[0][0], y : file.columns[i][0]};
 		for (var j = 1; j < file.columns[i].length - 1; j++)
 		{
+			file.nonDownsampled[i].push ({x : file.columns[0][j], y : file.columns[i][j]});
 			var last = file.downsampled[i][file.downsampled.length - 1];
 			var cur = file.columns[i][j];
 			var next = file.columns[i][j + 1];
@@ -612,6 +617,15 @@ function parseCSVContent (file)
 	}
 	
 	file.csv = csv;
+}
+
+function getCSVColumnsNonDownsampled (file)
+{
+	if (!file.nonDownsampled)
+	{
+		parseCSVContent (file);
+	}
+	return file.nonDownsampled;
 }
 
 function getCSVColumnsDownsampled (file)

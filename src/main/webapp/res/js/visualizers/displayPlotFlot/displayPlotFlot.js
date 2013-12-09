@@ -14,14 +14,19 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
 {
 	//console.log ("insert content");
 	//console.log (this.div);
+	var THISfile = this.file;
 	removeChildren (this.div);
 	if (!succ)
 		this.div.appendChild (document.createTextNode ("failed to load the contents"));
 	else
 	{
-		var csvData = getCSVColumnsDownsampled (this.file);
+		//console.log ("nondown -vs- down");
+		//console.log (getCSVColumns (this.file));
+		//console.log (getCSVColumnsDownsampled (this.file));
+		
+		var csvData = (THISfile.linestyle == "linespoints") ? getCSVColumnsNonDownsampled (this.file) : getCSVColumnsDownsampled (this.file);
 
-		var plotPoints = true;
+		//var plotPoints = true;
 
         var div = document.createElement("div");
         div.id = "choices";
@@ -40,8 +45,8 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
                 var curData = [];
                 for (var j = 0; j < csvData[i].length; j++)
                         curData.push ([csvData[i][j].x, csvData[i][j].y]);
-                if (curData.length > 100)
-                	plotPoints = false;
+                //if (curData.length > 100)
+                	//plotPoints = false;
                 //plot.polyline("line " + i, { x: csvData[0], y: csvData[i], stroke:  colorPalette.getRgba (col), thickness: 1 });
                 datasets["line" + i] = {label : "line " + i, data: curData};
         }
@@ -109,7 +114,7 @@ zoom: {
 legend: {backgroundOpacity: 0,container: $("#legend")}
                         };
                         
-                        if (plotPoints)
+                        if (THISfile.linestyle == "linespoints")
                         	settings.points = { show: true, radius:2};
                         
                         $.plot("#" + id, data, settings);

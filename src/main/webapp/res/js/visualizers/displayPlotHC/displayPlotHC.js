@@ -18,8 +18,9 @@ HCPlotter.prototype.getContentsCallback = function (succ)
 		this.div.appendChild (document.createTextNode ("failed to load the contents"));
 	else
 	{
-		var plotPoints = true;
-		var csvData = getCSVColumnsDownsampled (this.file);
+		//var plotPoints = true;
+		//var csvData = getCSVColumnsDownsampled (this.file);
+		var csvData = (this.file.linestyle == "linespoints") ? getCSVColumnsNonDownsampled (this.file) : getCSVColumnsDownsampled (this.file);
 		
 		var div = document.createElement("div");
 		var id = "hcplot-" + this.file.id;
@@ -35,8 +36,8 @@ HCPlotter.prototype.getContentsCallback = function (succ)
                 var curData = [];
                 for (var j = 0; j < csvData[i].length; j++)
                         curData.push ([csvData[i][j].x, csvData[i][j].y]);
-                if (curData.length > 100)
-                	plotPoints = false;
+                //if (curData.length > 100)
+                //	plotPoints = false;
                 //plot.polyline("line " + i, { x: csvData[0], y: csvData[i], stroke:  colorPalette.getRgba (col), thickness: 1 });
                 datasets.push ({name : "line " + i, data: curData});
         }
@@ -55,7 +56,7 @@ HCPlotter.prototype.getContentsCallback = function (succ)
 	            },
 	            line: {
 	            	marker: {
-	            		enabled: plotPoints
+	            		enabled: this.file.linestyle == "linespoints"
 	            	}
 	            }
 	        },
