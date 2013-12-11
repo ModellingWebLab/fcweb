@@ -103,6 +103,8 @@ public class FileTransfer extends WebModule
 		if (req.length != 7)
 			return errorPage (request, response, null);
 		
+		System.out.println ("a");
+		
 		int entityId = -1;
 		int fileId = -1;
 		boolean archive = false;
@@ -119,9 +121,12 @@ public class FileTransfer extends WebModule
 			LOGGER.warn ("user provided unparsebale ids. download impossible: " + req[4] + " / " + req[5]);
 			return errorPage (request, response, null);
 		}
+		System.out.println ("b " + entityId + " " + fileId);
 		
 		if (entityId < 0 || (fileId < 0 && !archive))
 			return errorPage (request, response, null);
+		
+		System.out.println ("b2");
 
 		if (req[2].equals ("m"))
 			return passEntity (request, response, db, notifications, entityId, archive, fileId, new ModelManager (db, notifications, userMgmt, user));
@@ -129,7 +134,8 @@ public class FileTransfer extends WebModule
 			return passEntity (request, response, db, notifications, entityId, archive, fileId, new ProtocolManager (db, notifications, userMgmt, user));
 		else if (req[2].equals ("e"))
 			return passEntity (request, response, db, notifications, entityId, archive, fileId, new ExperimentManager (db, notifications, userMgmt, user, new ModelManager (db, notifications, userMgmt, user), new ProtocolManager (db, notifications, userMgmt, user)));
-		
+
+		System.out.println ("c");
 		// nothing of the above?
 		return errorPage (request, response, null);
 		
@@ -143,10 +149,12 @@ public class FileTransfer extends WebModule
 		
 		// get file from entity
 		ChasteEntityVersion version = entityMgmt.getVersionById (entityId);
+		System.out.println ("version: " + version);
 		if (version == null)
 			return errorPage (request, response, null);
 		ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt);
 		fileMgmt.getFiles (version, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ());
+		System.out.println ("archive: " + archive);
 		if (archive)
 		{
 			try
@@ -164,6 +172,7 @@ public class FileTransfer extends WebModule
 		else
 		{
 			ChasteFile f = version.getFileById (fileId);
+			System.out.println ("f: " + f);
 			if (f == null)
 				return errorPage (request, response, null);
 			
@@ -665,6 +674,11 @@ public class FileTransfer extends WebModule
 	private void cleanUp (DatabaseConnector db, Notifications notifications, UserManager userMgmt, User user)
 	{
 		LOGGER.info ("cleaning");
+
+		String preRole = user.getRole ();
+		String preMail = user.getRole ();
+		user.setRole (User.ROLE_ADMIN);
+		user.setMail ("somemail");
 		
 		ModelManager modelMgmt = new ModelManager (db, notifications, userMgmt, user);
 		ProtocolManager protocolMgmt = new ProtocolManager (db, notifications, userMgmt, user);
@@ -754,6 +768,9 @@ public class FileTransfer extends WebModule
 		}
 
 		LOGGER.info ("cleaning finished, removed " + removedFiles + " files");
+
+		user.setRole (preRole);
+		user.setMail (preMail);
 	}
 	
 	static class ProgressiveEntity implements HttpEntity {

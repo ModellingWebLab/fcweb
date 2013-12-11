@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.Vector;
 
@@ -132,6 +133,12 @@ public class EntityView extends WebModule
 				notifications.addError ("no entity found");
 				return errorPage (request, response, "no entity found");
 			}
+			
+			Map<Integer, ChasteEntityVersion> versions = entity.getVersions ();
+			ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt); 
+			for (ChasteEntityVersion version : versions.values ())
+				fileMgmt.getFiles (version, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ());
+			
 			request.setAttribute ("entity", entity);
 			header.addScript (new PageHeaderScript ("res/js/3rd/showdown.js", "text/javascript", "UTF-8", null));
 			header.addScript (new PageHeaderScript ("res/js/entity.js", "text/javascript", "UTF-8", null));
@@ -146,7 +153,6 @@ public class EntityView extends WebModule
 		
 		// version/file view/action will be done on client side
 
-		// TODO: plugins
 		Vector<String> plugins = new Vector<String> ();
 		plugins.add ("displayContent");
 		plugins.add ("displayTable");
@@ -169,13 +175,7 @@ public class EntityView extends WebModule
 		HttpServletResponse response, DatabaseConnector db,
 		Notifications notifications, JSONObject querry, User user, HttpSession session) throws IOException, ChastePermissionException
 	{
-		// TODO: regularly clean up:
-		// uploaded files that were not used
-		// created entity dirs that don't exist in entities in db
 		
-		
-		
-
 		String[] req =  request.getRequestURI().substring(request.getContextPath().length()).split ("/");
 		
 		ChasteEntityManager entityMgmt = null;
@@ -712,7 +712,6 @@ public class EntityView extends WebModule
 			res.put ("versionType", entityMgmt.getEntityColumn ());
 			answer.put ("createNewEntity", res);
 			
-			// TODO: remove temp files
 		}
 		
 		if (!createOk)

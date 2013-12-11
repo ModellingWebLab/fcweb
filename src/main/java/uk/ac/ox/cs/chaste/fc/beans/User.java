@@ -356,6 +356,10 @@ public class User
 	{
 		String vis = version.getVisibility ();
 
+		System.out.println (version.getId () + " -- " + version.getEntity ().getName () + " ->> " + version.getVersion ());
+		System.out.println ("-"+vis+"-");
+		System.out.println ("-"+ChasteEntityVersion.VISIBILITY_PUBLIC+"-");
+
 		if (vis.equals (ChasteEntityVersion.VISIBILITY_PUBLIC))
 			return true;
 		if (vis.equals (ChasteEntityVersion.VISIBILITY_RESTRICTED))

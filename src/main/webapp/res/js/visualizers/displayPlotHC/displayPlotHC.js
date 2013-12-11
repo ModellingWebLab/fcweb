@@ -20,7 +20,7 @@ HCPlotter.prototype.getContentsCallback = function (succ)
 	{
 		//var plotPoints = true;
 		//var csvData = getCSVColumnsDownsampled (this.file);
-		var csvData = (this.file.linestyle == "linespoints") ? getCSVColumnsNonDownsampled (this.file) : getCSVColumnsDownsampled (this.file);
+		var csvData = (this.file.linestyle == "linespoints" || THISfile.linestyle == "points") ? getCSVColumnsNonDownsampled (this.file) : getCSVColumnsDownsampled (this.file);
 		
 		var div = document.createElement("div");
 		var id = "hcplot-" + this.file.id;

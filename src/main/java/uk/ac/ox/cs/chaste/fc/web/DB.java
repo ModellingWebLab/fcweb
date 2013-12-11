@@ -76,7 +76,7 @@ public class DB extends WebModule
 	{
 		JSONObject obj = new JSONObject ();
 		
-		TreeSet<ChasteEntity> entity = entityMgmt.getAll ();
+		TreeSet<ChasteEntity> entity = entityMgmt.getAll (true);
 		for (ChasteEntity e : entity)
 		{
 			if (e.getVersions ().size () > 0)

@@ -29,7 +29,7 @@
 	   		<c:forEach items="${entity.versions}" var="version" >
 	    		<p title="${version.value.created} -- Visibility: ${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> -- ${version.value.status}</c:if>" class="entityviz-${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> experiment-${version.value.status}</c:if>">
 					<c:choose>
-						<c:when test="${entity.type == 'experiment' && version.value.status != 'SUCCESS'}">
+						<c:when test="${entity.type == 'experiment' && version.value.numFiles eq 0}">
 							<strong>
 							${version.value.version}</strong> by <em>${version.value.author}</em> - ${version.value.returnText}
 							<c:if test="${entity.author == User.nick || User.admin}">
@@ -96,8 +96,8 @@
 		<div id="entityexperimentlist">
 			<div id="entityexperimentlistpartners"></div>
 			<div id="entityexperimentlistpartnersact">
-				<a id="entityexperimentlistpartnersactall">select all</a>
-				<a id="entityexperimentlistpartnersactnone">select none</a><br/>
+				[<a id="entityexperimentlistpartnersactall">select all</a>]
+				[<a id="entityexperimentlistpartnersactnone">select none</a>]<br/>
 				<button id="entityexperimentlistpartnersactcompare">compare selected experiments</button>
 			</div>
 		</div>

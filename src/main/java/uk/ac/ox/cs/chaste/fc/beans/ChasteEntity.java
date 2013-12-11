@@ -156,4 +156,20 @@ public class ChasteEntity
 		
 		return json;
 	}
+
+/*
+	@SuppressWarnings("unchecked")
+	public JSONObject toJsonOnlyLatestVersion ()
+	{
+		JSONObject json = new JSONObject ();
+
+		json.put ("name", name);
+		json.put ("created", getCreated ());
+		json.put ("author", getAuthor ().getNick ());
+		json.put ("id", id);
+
+		json.put ("latestversion", getLatestVersion ().toJson ());
+		
+		return json;
+	}*/
 }
