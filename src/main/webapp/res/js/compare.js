@@ -319,6 +319,9 @@ function displayFile (id, pluginName)
 	
 	// doc.version.files.style.display = "none";
 	doc.fileDetails.style.display = "block";
+	
+	var pos = getPos (doc.fileDetails);
+	window.scrollTo(pos.xPos, pos.yPos);
 }
 
 function handleReq ()

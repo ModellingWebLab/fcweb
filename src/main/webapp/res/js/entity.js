@@ -810,6 +810,9 @@ function displayFile (id, pluginName)
 	
 	// doc.version.files.style.display = "none";
 	doc.version.filedetails.style.display = "block";
+	
+	var pos = getPos (doc.version.filedetails);
+	window.scrollTo(pos.xPos, pos.yPos);
 }
 
 function requestInformation (jsonObject, onSuccess)

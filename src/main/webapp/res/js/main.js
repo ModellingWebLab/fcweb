@@ -39,6 +39,23 @@ function removeListeners (element)
 	return new_element;
 }
 
+function getPos (ele)
+{
+    var x = 0;
+    var y = 0;
+    while (true)
+    {
+    	if (!ele)
+    		break;
+        x += ele.offsetLeft;
+        y += ele.offsetTop;
+        if (ele.offsetParent === null)
+            break;
+        ele = ele.offsetParent;
+    }
+    return {xPos:x, yPos:y};
+}
+
 function batchProcessing (jsonObject, actionIndicator)
 {
 	actionIndicator.innerHTML = "<img src='"+contextPath+"/res/img/loading2-new.gif' alt='loading' />";
