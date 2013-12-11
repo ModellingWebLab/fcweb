@@ -869,11 +869,14 @@ function render ()
 	var url = parseUrl (document.location.href);
 	var curVersionId = getCurVersionId (url);
 	
+	console.log ("curVersionId " + curVersionId);
 	if (curVersionId)
 	{
 		var curFileId = getCurFileId (url);
 		var pluginName = getCurPluginName (url);
-		
+
+		console.log ("curFileId  " + curFileId);
+		console.log ("pluginName " + pluginName);
 		
 		var v = versions[curVersionId];
 		if (!v)
@@ -898,6 +901,9 @@ function render ()
 			displayFile (curFileId, pluginName);
 			doc.file.close.href = basicurl + convertForURL (v.name) + "/" + v.id + "/";
 		}
+		else
+			doc.version.filedetails.style.display = "none";
+			
 	}
 	else
 	{
@@ -908,6 +914,7 @@ function render ()
 		}
 		doc.entity.version.style.display = "none";
 		doc.entity.details.style.display = "block";
+		curVersion = null;
 	}
 }
 
@@ -950,8 +957,8 @@ function initModel ()
 			}
 	};
 	
-	render ();
 	window.onpopstate = render;
+	render ();
 	
 	document.getElementById("experiment-files-switcher-exp").addEventListener("click", function (ev) {
 		doc.version.details.style.display = "none";

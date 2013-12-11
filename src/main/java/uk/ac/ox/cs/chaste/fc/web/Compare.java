@@ -48,11 +48,8 @@ public class Compare extends WebModule
 		header.addScript (new PageHeaderScript ("res/js/compare.js", "text/javascript", "UTF-8", null));
 
 		Vector<String> plugins = new Vector<String> ();
-		//plugins.add ("displayContent");
-		//plugins.add ("displayTable");
 		plugins.add ("displayPlotFlot");
-		//plugins.add ("displayPlotHC");
-		//plugins.add ("displayPlotD3");
+		plugins.add ("displayPlotHC");
 
 		for (String s : plugins)
 		{
