@@ -200,10 +200,10 @@ function parseEntities (entityObj)
 					files[sig].hasContents = false;
 					setupDownloadFileContents (files[sig]);
 					
-					if (!plotDescription && entityObj[i].files[j].name.toLowerCase () == "outputs-default-plots.csv")
-						parsePlotDescription (entityObj[i].files[j], null);
 					/*files[sig]*/
 				}
+				if (entityObj[i].files[j].name.toLowerCase () == "outputs-default-plots.csv")
+					parsePlotDescription (entityObj[i].files[j], null);
 				files[sig].entities.push ({entityLink: entityObj[i], entityFileLink: entityObj[i].files[j]});
 			}
 	}

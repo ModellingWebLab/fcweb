@@ -316,6 +316,7 @@ tr:nth-child(5n+1)
 #experimentlist ul,*/
 #batchlist ul,
 #entityversionfilestable,
+#filestable,
 #accounttable
 {
 	font-size:.8em;

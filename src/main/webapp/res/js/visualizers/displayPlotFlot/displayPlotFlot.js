@@ -345,6 +345,11 @@ flotContent.prototype.canRead = function (file)
 {
 	var ext = file.name.split('.').pop();
 	
+	if (file.name && file.name == "outputs-default-plots.csv")
+		return false;
+	if (file.name && file.name == "outputs-contents.csv")
+		return false;
+	
 	return ext == "csv";
 };
 
