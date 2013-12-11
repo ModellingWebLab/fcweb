@@ -95,7 +95,11 @@ public class EntityView extends WebModule
 		
 		if (req[2].equals ("createnew") && type != TYPE_EXPERIMENT)
 		{
-			if (user.isAuthorized ())
+			if (type == TYPE_PROTOCOL && !user.isAllowedCreateProtocol ())
+				return errorPage (request, response, null);
+			if (type == TYPE_MODEL && !user.isAllowedCreateModel ())
+				return errorPage (request, response, null);
+			if (user.isAllowedCreateEntityVersion ())
 			{
 				header.addScript (new PageHeaderScript ("res/js/upload.js", "text/javascript", "UTF-8", null));
 				header.addScript (new PageHeaderScript ("res/js/entitynew.js", "text/javascript", "UTF-8", null));
@@ -217,7 +221,16 @@ public class EntityView extends WebModule
 		ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt); 
 		
 		if ((task.equals ("createNewEntity") || task.equals ("verifyNewEntity")) && type != TYPE_EXPERIMENT)
+		{
+			if (type == TYPE_PROTOCOL && !user.isAllowedCreateProtocol ())
+				throw new ChastePermissionException ("you are not allowed to create a new entity");
+			if (type == TYPE_MODEL && !user.isAllowedCreateModel ())
+				throw new ChastePermissionException ("you are not allowed to create a new entity");
+			if (!user.isAllowedCreateEntityVersion ())
+				throw new ChastePermissionException ("you are not allowed to create a new entity");
+				
 			createNewEntity (task, notifications, querry, user, answer, entityMgmt, fileMgmt);
+		}
 		else if (task.equals ("getInfo"))
 		{
 

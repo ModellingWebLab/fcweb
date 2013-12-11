@@ -337,6 +337,16 @@ public class User
 		return isAuthorized () && ((role.equals (ROLE_MODELER) && entity.getAuthor ().getId () == id) || role.equals (ROLE_ADMIN));
 	}
 	
+	public boolean isAllowedCreateModel ()
+	{
+		return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_ADMIN));
+	}
+	
+	public boolean isAllowedCreateProtocol ()
+	{
+		return isAuthorized () && role.equals (ROLE_ADMIN);
+	}
+	
 	public boolean isAllowedCreateEntity ()
 	{
 		return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_ADMIN));
