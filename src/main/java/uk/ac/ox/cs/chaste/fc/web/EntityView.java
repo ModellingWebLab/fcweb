@@ -23,6 +23,7 @@ import org.json.simple.JSONObject;
 
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntity;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntityVersion;
+import uk.ac.ox.cs.chaste.fc.beans.ChasteExperiment;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeader;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeaderLink;
@@ -140,6 +141,12 @@ public class EntityView extends WebModule
 				fileMgmt.getFiles (version, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ());
 			
 			request.setAttribute ("entity", entity);
+			if (type == TYPE_EXPERIMENT)
+			{
+				ChasteExperiment exp = (ChasteExperiment) entity;
+				request.setAttribute ("correspondingModel", exp.getModel ());
+				request.setAttribute ("correspondingProtocol", exp.getProtocol ());
+			}
 			header.addScript (new PageHeaderScript ("res/js/3rd/showdown.js", "text/javascript", "UTF-8", null));
 			header.addScript (new PageHeaderScript ("res/js/entity.js", "text/javascript", "UTF-8", null));
 		}

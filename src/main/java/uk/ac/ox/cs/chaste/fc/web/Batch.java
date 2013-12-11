@@ -421,8 +421,8 @@ public class Batch extends WebModule
 			return false;
 		}
 		
-		ChasteEntityVersion modelVersion = exp.getModel (modelMgmt);
-		ChasteEntityVersion protocolVersion = exp.getProtocol (protocolMgmt);
+		ChasteEntityVersion modelVersion = exp.getModel ();
+		ChasteEntityVersion protocolVersion = exp.getProtocol ();
 
 		try
 		{

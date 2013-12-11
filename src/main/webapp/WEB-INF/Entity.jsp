@@ -11,6 +11,12 @@
 		<c:if test="${User.allowedToForceNewExperiment && entity.type == 'experiment'}">
 			<a id="rerunExperiment"><img src="${contextPath}/res/img/refresh.png" alt="rerun experiment" title="rerun experiment"/></a> <span id="rerunExperimentAction"></span>
 		</c:if>
+		<c:if test="${entity.type == 'experiment'}">
+			<br/>corresponding model: 
+			<a href="${contextPath}/${correspondingModel.entity.type}/${correspondingModel.entity.url}/${correspondingModel.entity.id}/${correspondingModel.url}/${correspondingModel.id}">${correspondingModel.name}</a>
+			&mdash; corresponding protocol: 
+			<a href="${contextPath}/${correspondingProtocol.entity.type}/${correspondingProtocol.entity.url}/${correspondingProtocol.entity.id}/${correspondingProtocol.url}/${correspondingProtocol.id}">${correspondingProtocol.name}</a>
+		</c:if>
 	</div>
 	
     
