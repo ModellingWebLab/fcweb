@@ -58,7 +58,34 @@ login as new user and remove admin permissions of the root-user, or remove root-
 
 start uploading models/protocols
 
+### integrate tomcat into apache2
+follow for example http://www.dreamchain.com/apache-server-tomcat-mod_jk-on-debian-6-0-squeeze/
 
+a sample vhost configuration might look like:
+
+	<VirtualHost *:443>
+				ServerAdmin youradmin@your.company
+				ServerName your.company
+				
+				DocumentRoot /var/www
+				
+				# backend:
+				# setup python handler using mod_python
+				ScriptAlias /cgi-bin/ /var/www/cgi-bin/
+				<Directory "/var/www/cgi-bin">
+								AllowOverride None
+								Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
+								Order allow,deny
+								Allow from all
+				</Directory>
+				
+				# frontend:
+				# send requests to /FunctionalCuration* to tomcat
+				JkMount /FunctionalCuration* ajp13_worker
+	</VirtualHost>
+
+
+try to access http://your.company/FunctionalCuration
 
 
 
