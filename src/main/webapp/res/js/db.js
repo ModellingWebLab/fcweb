@@ -96,7 +96,16 @@ function drawMatrix (matrix)
 	//console.log (matrix);
 	for (var key in matrix.models)
 		if (matrix.models.hasOwnProperty (key))
-			for (var version in matrix.models[key].versions)
+		{
+			var version = matrix.models[key].id;
+			modelMapper[version] = matrix.models[key];
+			modelMapper[version].row = models.length;
+			modelMapper[version].name = matrix.models[key].name;
+			//modelMapper[version].entityId = matrix.models[key].id;
+			models.push(version);
+			
+		}
+			/*for (var version in matrix.models[key].versions)
 				if (matrix.models[key].versions.hasOwnProperty (version))
 				{
 					modelMapper[version] = matrix.models[key].versions[version];
@@ -104,12 +113,20 @@ function drawMatrix (matrix)
 					modelMapper[version].name = matrix.models[key].name;
 					modelMapper[version].entityId = matrix.models[key].id;
 					models.push(version);
-				}
+				}*/
 
 	var protocols = [];
 	for (var key in matrix.protocols)
 		if (matrix.protocols.hasOwnProperty (key))
-			for (var version in matrix.protocols[key].versions)
+		{
+			var version = matrix.protocols[key].id;
+			protocolMapper[version] = matrix.protocols[key];//.versions[version];
+			protocolMapper[version].col = protocols.length;
+			protocolMapper[version].name = matrix.protocols[key].name;
+			//protocolMapper[version].entityId = matrix.protocols[key].id;
+			protocols.push(version);
+		}
+			/*for (var version in matrix.protocols[key].versions)
 				if (matrix.protocols[key].versions.hasOwnProperty (version))
 				{
 					protocolMapper[version] = matrix.protocols[key].versions[version];
@@ -117,7 +134,7 @@ function drawMatrix (matrix)
 					protocolMapper[version].name = matrix.protocols[key].name;
 					protocolMapper[version].entityId = matrix.protocols[key].id;
 					protocols.push(version);
-				}
+				}*/
 	
 	/*console.log ("models");
 	console.log (modelMapper);*/
@@ -134,15 +151,16 @@ function drawMatrix (matrix)
 					model: modelMapper[models[i]],
 					protocol: protocolMapper[protocols[j]]
 			};
+			console.log (mat[i][j]);
 		}
 	}
 	//console.log ("matrix");
-	//console.log (mat);
+	console.log (mat);
 	
 	var div = document.getElementById("matrixdiv");
 	removeChildren (div);
 	
-	
+	console.log(protocolMapper);
 
 	
 	for (var key in matrix.experiments)
@@ -151,8 +169,15 @@ function drawMatrix (matrix)
 			var exp = matrix.experiments[key];
 			
 			exp.name = exp.model.name + " @ " + exp.model.version + " & " + exp.protocol.name + " @ " + exp.protocol.version;
-
+			
+			//if (!modelMapper[exp.model.id] || !protocolMapper[exp.protocol.id])
+			//	continue;
+			
 			var row = modelMapper[exp.model.id].row;
+
+			console.log(exp);
+			console.log(exp.protocol.id);
+			console.log(exp.protocol);
 			var col = protocolMapper[exp.protocol.id].col;
 			mat[row][col].experiment = exp;
 		}

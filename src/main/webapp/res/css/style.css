@@ -292,6 +292,7 @@ h3#entityversionfilename
 	overflow:auto;
 }
 
+#uploadedfiles td,
 td.right {
 	text-align: right;
 }

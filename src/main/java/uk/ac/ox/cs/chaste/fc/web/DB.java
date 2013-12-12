@@ -3,6 +3,7 @@ package uk.ac.ox.cs.chaste.fc.web;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.TreeSet;
+import java.util.Vector;
 
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpSession;
 import org.json.simple.JSONObject;
 
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntity;
+import uk.ac.ox.cs.chaste.fc.beans.ChasteEntityVersion;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeader;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeaderLink;
@@ -62,17 +64,67 @@ public class DB extends WebModule
 			ModelManager modelMgmt = new ModelManager (db, notifications, userMgmt, user);
 			ProtocolManager protocolMgmt = new ProtocolManager (db, notifications, userMgmt, user);
 			JSONObject obj = new JSONObject ();
-			obj.put ("models", prepareEntities (modelMgmt));
-			obj.put ("protocols", prepareEntities (protocolMgmt));
-			obj.put ("experiments", prepareEntities (new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt)));
+
+			Vector<ChasteEntityVersion> modelVersions = getEntityVersions (modelMgmt);
+			Vector<ChasteEntityVersion> protocolVersions = getEntityVersions (protocolMgmt);
+			
+			Vector<ChasteEntity> experiments = getExperimentVersions (modelVersions, protocolVersions, new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt));
+			
+			obj.put ("models", versionsToJson (modelVersions));//prepareEntities (modelMgmt, false));
+			obj.put ("protocols", versionsToJson (protocolVersions));//prepareEntities (protocolMgmt, false));
+			obj.put ("experiments", entitiesToJson (experiments));//prepareEntities (new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt), true));
 			
 			answer.put ("getMatrix", obj);
 		}
 		
 		return answer;
 	}
+	
+	private Vector<ChasteEntityVersion> getEntityVersions (ChasteEntityManager entityMgmt)
+	{
+		Vector<ChasteEntityVersion> entities = new Vector<ChasteEntityVersion> ();
+
+		TreeSet<ChasteEntity> entity = entityMgmt.getAll (true);
+		for (ChasteEntity e : entity)
+			if (e.getVersions ().size () > 0)
+				entities.add (e.getLatestVersion ());
+		
+		return entities;
+	}
+	
+	private Vector<ChasteEntity> getExperimentVersions (Vector<ChasteEntityVersion> modelVersions, Vector<ChasteEntityVersion> protocolVersions, ExperimentManager entityMgmt)
+	{
+		Vector<ChasteEntity> exps = new Vector<ChasteEntity> ();
+
+		for (ChasteEntityVersion model : modelVersions)
+			for (ChasteEntityVersion protocol : protocolVersions)
+			{
+				ChasteEntity ent = entityMgmt.getExperiment (model.getId (), protocol.getId ());
+				if (ent != null)
+					exps.add (ent);
+			}
+		return exps;
+	}
+	
 	@SuppressWarnings("unchecked")
-	private JSONObject prepareEntities (ChasteEntityManager entityMgmt)
+	private JSONObject entitiesToJson (Vector<ChasteEntity> vec)
+	{
+		JSONObject obj = new JSONObject ();
+		for (ChasteEntity v : vec)
+			obj.put (v.getId (), v.toJson ());
+		return obj;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private JSONObject versionsToJson (Vector<ChasteEntityVersion> vec)
+	{
+		JSONObject obj = new JSONObject ();
+		for (ChasteEntityVersion e : vec)
+			obj.put (e.getId (), e.toJson ());
+		return obj;
+	}
+	
+	/*prepareEntities (ChasteEntityManager entityMgmt, boolean exp)
 	{
 		JSONObject obj = new JSONObject ();
 		
@@ -80,10 +132,15 @@ public class DB extends WebModule
 		for (ChasteEntity e : entity)
 		{
 			if (e.getVersions ().size () > 0)
-				obj.put (e.getId (), e.toJson ());
+			{
+				if (exp)
+					obj.put (e.getId (), e.toJson ());
+				else
+					obj.put (e.getId (), e.getLatestVersion ().toJson ());
+			}
 		}
 		
 		return obj;
-	}
+	}*/
 
 }

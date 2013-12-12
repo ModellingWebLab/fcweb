@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Dec 09, 2013 at 06:25 PM
+-- Generation Time: Dec 12, 2013 at 03:25 PM
 -- Server version: 5.5.34
 -- PHP Version: 5.3.10-1ubuntu3.8
 
@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS `files` (
   `type` text COLLATE utf8_unicode_ci NOT NULL,
   `author` int(11) NOT NULL,
   `size` bigint(20) NOT NULL,
+  `masterFile` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `author` (`author`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -287,7 +288,7 @@ ALTER TABLE `protocol_files`
 
 
 
--- create root user:
+-- create root:
 INSERT INTO `chaste`.`user` (`mail` ,`password` ,`acronym` ,`institution` ,`created` ,`role` ,`cookie` ,`givenName` ,`familyName` ,`sendMails`) VALUES ('root@localhost', MD5( 'admin' ) , 'root', '', CURRENT_TIMESTAMP , 'ADMIN', UUID(), '', '', '0');
 
 

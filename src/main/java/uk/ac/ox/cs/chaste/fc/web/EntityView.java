@@ -596,6 +596,10 @@ public class EntityView extends WebModule
 				throw new IOException ("wasn't able to create/insert "+entityMgmt.getEntityColumn ()+" version to db.");
 			}
 			
+			String mainEntry = "";
+			if (querry.get ("mainFile") != null)
+				mainEntry = querry.get ("mainFile").toString ().trim ();
+			
 			boolean extractReadme = entityMgmt.getEntityColumn () == "protocol";
 			
 			for (NewFile f : files.values ())
@@ -614,7 +618,7 @@ public class EntityView extends WebModule
 				}
 				
 				// insert to db
-				int fileId = fileMgmt.addFile (f.name, f.type, user, f.tmpFile.length ());
+				int fileId = fileMgmt.addFile (f.name, f.type, user, f.tmpFile.length (), f.name.equals (mainEntry));
 				if (fileId < 0)
 				{
 					cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
@@ -673,7 +677,7 @@ public class EntityView extends WebModule
 								bw = null;
 								
 								// insert to db
-								int fileId = fileMgmt.addFile (readMeFile.getName (), "readme", user, readMeFile.length ());
+								int fileId = fileMgmt.addFile (readMeFile.getName (), "readme", user, readMeFile.length (), false);
 								if (fileId < 0)
 								{
 									readMeFile.delete ();

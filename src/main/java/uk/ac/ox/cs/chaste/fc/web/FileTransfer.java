@@ -385,7 +385,7 @@ public class FileTransfer extends WebModule
 								continue;
 							
 							// add the remaining to db
-							int fileId = fileMgmt.addFile (entry.getRelativeName (), CombineFormats.getFormatFromIdentifier (format), exp.getAuthor (), entry.getFile ().length ());
+							int fileId = fileMgmt.addFile (entry.getRelativeName (), CombineFormats.getFormatFromIdentifier (format), exp.getAuthor (), entry.getFile ().length (), false);
 							if (fileId < 0)
 							{
 								// TODO: cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
@@ -409,7 +409,7 @@ public class FileTransfer extends WebModule
 						File output = new File (destination.getAbsolutePath () + File.separator + "stdout.txt");
 						if (output.exists () && output.canRead ())
 						{
-							int fileId = fileMgmt.addFile ("stdout.txt", "text/plain", exp.getAuthor (), output.length ());
+							int fileId = fileMgmt.addFile ("stdout.txt", "text/plain", exp.getAuthor (), output.length (), false);
 							if (fileId < 0)
 							{
 								// TODO: cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
