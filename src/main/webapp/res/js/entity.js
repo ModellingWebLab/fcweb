@@ -386,6 +386,8 @@ function displayVersion (id, showDefault)
 		var file = files[v.files[i]];
 		tr = document.createElement("tr");
 		tr.setAttribute("id", "filerow-" + file.name);
+		if (file.masterFile)
+			tr.setAttribute("class", "masterFile");
 		td = document.createElement("td");
 		td.appendChild(document.createTextNode (file.name));
 		tr.appendChild(td);
@@ -764,6 +766,7 @@ function updateFile (rf, v)
 	f.type = rf.filetype;
 	f.author = rf.author;
 	f.name = rf.name;
+	f.masterFile = rf.masterFile;
 	f.size = rf.size;
 	f.url = contextPath + "/download/" + entityType.charAt(0) + "/" + convertForURL (v.name) + "/" + v.id + "/" + f.id + "/" + convertForURL (f.name);
 	f.div = {};

@@ -63,7 +63,7 @@ follow for example http://www.dreamchain.com/apache-server-tomcat-mod_jk-on-debi
 
 a sample vhost configuration might look like:
 
-	<VirtualHost *:443>
+	<VirtualHost *:80>
 				ServerAdmin youradmin@your.company
 				ServerName your.company
 				
