@@ -55,7 +55,7 @@
 </dependency>
     </dependencies>
     <build>
-        <finalName>ChasteFunctionCuration</finalName>
+        <finalName>FunctionalCuration</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

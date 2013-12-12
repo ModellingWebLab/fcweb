@@ -5,9 +5,9 @@
     <h1>Authentication</h1>
       <section id="loginform">
     	<p>
-	    	<input type="email" name="mail" id="mail" placeholder="your email address" /> <code>martin@binfalse.de</code>
+	    	<input type="email" name="mail" id="mail" placeholder="your email address" />
 	    	<br/>
-	    	<input type="password" name="password" id="password" placeholder="your password" /> <code>2t5944ja8f</code>
+	    	<input type="password" name="password" id="password" placeholder="your password" />
     	</p>
     	
     	<p>
