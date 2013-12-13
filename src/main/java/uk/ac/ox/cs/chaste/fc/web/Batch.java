@@ -412,7 +412,7 @@ public class Batch extends WebModule
 		return answer;
 	}
 	
-	private boolean reRunExperiment (ChasteExperiment exp, DatabaseConnector db, Notifications notifications, ExperimentManager expMgmt, UserManager userMgmt, User user, ModelManager modelMgmt, ProtocolManager protocolMgmt, boolean force)
+	public static boolean reRunExperiment (ChasteExperiment exp, DatabaseConnector db, Notifications notifications, ExperimentManager expMgmt, UserManager userMgmt, User user, ModelManager modelMgmt, ProtocolManager protocolMgmt, boolean force)
 	{
 		if (exp == null)
 		{

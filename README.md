@@ -21,6 +21,10 @@ create user having all permissions on that database.
 setup webserver/vhost that is able to execute python scripts. copy `resources/cgi-bin/*py` to the webserver, so that it is executable from the frontend.
 
 ### Tomcat configuration
+make sure tomcat is using at least java in version 7. it can be configured in /etc/default/tomcat7
+
+add jdbc mysql driver to /var/lib/tomcat7/lib.
+
 Server configuration is in `/etc/tomcat7/server.xml`. modify file, so that it includes a line like:
 
     <Host name="localhost"  appBase="webapps"  deployXML="false" xmlBase="/var/lib/tomcat7/context"
@@ -31,6 +35,8 @@ then, context files are stored in `/var/lib/tomcat7/context` and your apps are e
 copy `resources/FunctionalCuration.xml` to `/var/lib/tomcat7/context` and configure the file properly, including database credentials and link to the backend.
 
 ### build project
+add the sems maven repository to your list of repositories: http://sems.uni-rostock.de/2013/10/maven-repository/
+
 just move into project source directory and call
 
     mvn package

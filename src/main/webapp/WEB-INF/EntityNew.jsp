@@ -28,6 +28,9 @@
 	    </p>
 	    <t:upload/>
 	    <p>
+	    	<input type="checkbox" name="reRunExperiments" id="reRunExperiments"/> <label for="reRunExperiments">rerun previous experiments</label> <small>(This might take some seconds.)</small>
+	    </p>
+	    <p>
 	    	<button id="savebutton">Create ${newentitytype}</button>
 	    	<span id="saveaction"></span>
 	    </p>
