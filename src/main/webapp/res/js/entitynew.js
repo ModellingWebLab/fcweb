@@ -146,7 +146,8 @@ function initNewEntity ()
 	    	task: "createNewEntity",
 	    	entityName: entityName.value,
 	    	versionName: versionName.value,
-	    	files: uploadedFiles
+	    	files: uploadedFiles,
+	    	mainFile: $('input[name="mainEntry"]:checked').val ()
 	    }, storeAction, entityNameAction, versionNameAction, storeAction);
 	}, true);
 	

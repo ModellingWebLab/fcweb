@@ -14,14 +14,18 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
 {
 	//console.log ("insert content");
 	//console.log (this.div);
+	var THISfile = this.file;
 	removeChildren (this.div);
 	if (!succ)
 		this.div.appendChild (document.createTextNode ("failed to load the contents"));
 	else
 	{
-		var csvData = getCSVColumnsDownsampled (this.file);
+		//console.log (getCSVColumns (this.file));
+		//console.log (getCSVColumnsDownsampled (this.file));
+		
+		var csvData = (THISfile.linestyle == "linespoints" || THISfile.linestyle == "points") ? getCSVColumnsNonDownsampled (this.file) : getCSVColumnsDownsampled (this.file);
 
-		plotPoints = true;
+		//var plotPoints = true;
 
         var div = document.createElement("div");
         div.id = "choices";
@@ -40,8 +44,8 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
                 var curData = [];
                 for (var j = 0; j < csvData[i].length; j++)
                         curData.push ([csvData[i][j].x, csvData[i][j].y]);
-                if (curData.length > 100)
-                	plotPoints = false;
+                //if (curData.length > 100)
+                	//plotPoints = false;
                 //plot.polyline("line " + i, { x: csvData[0], y: csvData[i], stroke:  colorPalette.getRgba (col), thickness: 1 });
                 datasets["line" + i] = {label : "line " + i, data: curData};
         }
@@ -72,7 +76,8 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
                 });
 
 var legendContainer =  document.createElement("div");
-legendContainer.id = "legend";this.div.appendChild (legendContainer);
+legendContainer.id = "legend";
+this.div.appendChild (legendContainer);
 
 
                 function plotAccordingToChoices() {
@@ -86,7 +91,7 @@ legendContainer.id = "legend";this.div.appendChild (legendContainer);
                         }
                     });
 
-                    if (data.length > 0) {
+                    //if (data.length > 0) {
                         //$.plot("#flotplot-262", data, {
                         var settings = {
                             /*yaxis: {
@@ -109,11 +114,11 @@ zoom: {
 legend: {backgroundOpacity: 0,container: $("#legend")}
                         };
                         
-                        if (plotPoints)
+                        if (THISfile.linestyle == "linespoints" || THISfile.linestyle == "points")
                         	settings.points = { show: true, radius:2};
                         
                         $.plot("#" + id, data, settings);
-                    }
+                    //}
                 };
                 
                 
@@ -127,11 +132,198 @@ legend: {backgroundOpacity: 0,container: $("#legend")}
 
 contentFlotPlot.prototype.show = function ()
 {
-	console.log ("show");
-	console.log (this.div);
+	//console.log ("show");
+	//console.log (this.div);
 	if (!this.setUp)
 		this.file.getContents (this);
 };
+
+
+
+
+
+
+
+
+
+
+
+function contentFlotPlotComparer (file, div)
+{
+	this.file = file;
+	this.div = div;
+	this.setUp = false;
+	div.appendChild (document.createTextNode ("loading"));
+	div.setAttribute ("class", "flotDiv");
+	this.gotFileContents = 0;
+	this.ok = true;
+};
+contentFlotPlotComparer.prototype.getContentsCallback = function (succ)
+{
+	//console.log ("getContentsCallback : " + succ + " -> so far: " + this.gotFileContents + " of " + this.file.entities.length);
+	if (!succ)
+		this.ok = false;
+	
+	this.gotFileContents++;
+	
+	if (this.gotFileContents >= this.file.entities.length)
+		this.showContents ();
+};
+
+contentFlotPlotComparer.prototype.showContents = function ()
+{
+	//console.log ("insert content");
+	//console.log (this.div);
+	//var THISfile = this.file;
+	removeChildren (this.div);
+	if (!this.ok)
+		this.div.appendChild (document.createTextNode ("failed to load the contents"));
+	else
+	{
+		this.setUp = true;
+		//this.div.appendChild (document.createTextNode ("loaded"));
+		//console.log ("nondown -vs- down");
+		//console.log (getCSVColumns (this.file));
+		//console.log (getCSVColumnsDownsampled (this.file));
+		console.log (this.file);
+		
+		var lineStyle = this.file.linestyle;
+		
+		var csvDatas = new Array ();
+		
+		for (var i = 0; i < this.file.entities.length; i++)
+		{
+			csvDatas.push ({
+					data: (lineStyle == "linespoints" || lineStyle == "points") ?
+							getCSVColumnsNonDownsampled (this.file.entities[i].entityFileLink) : getCSVColumnsDownsampled (this.file.entities[i].entityFileLink),
+					entity: this.file.entities[i].entityLink,
+					file: this.file.entities[i].entityFileLink
+			});
+		}
+		
+		
+
+		//var plotPoints = true;
+
+        var div = document.createElement("div");
+        div.id = "choices";
+        this.div.appendChild (div);
+
+        div = document.createElement("div");
+        var id = "flotplot-" + this.file.sig;
+        div.id = id;
+        div.style.width = "780px";
+        div.style.height = "450px";
+
+
+                // insert checkboxes 
+                var choiceContainer = $("#choices");
+                
+        var datasets = {};
+        var curColor = 0;
+
+        for (var j = 0; j < csvDatas.length; j++)
+        {
+        	//console.log (csvDatas[j]);
+        	var tmp = "<p><strong>" + csvDatas[j].entity.name + ":</strong> ";
+        	var csvData = csvDatas[j].data;
+        	for (var i = 1; i < csvData.length; i++)
+        	{
+        		var curData = [];
+	            for (var k = 0; k < csvData[i].length; k++)
+	                curData.push ([csvData[i][k].x, csvData[i][k].y]);
+	            
+	            var key = csvDatas[j].entity.id + "-" + csvDatas[j].file.sig + "-" + i;
+	            var label = csvDatas[j].entity.name + " line " + i;
+	            datasets[key] = {label : label, data: curData, color: curColor};
+	            curColor++;
+	            
+	            tmp += "<input type='checkbox' name='" + key +
+                //"' id='id" + key + "'></input>" +
+                "' checked='checked' id='id" + key + "'></input>" +
+                "<label for='id" + key + "'>"
+                + " line " + i + "</label>";
+        	}
+        	choiceContainer.append(tmp + "</p>");
+        	
+        }
+    	//console.log (datasets);
+
+
+        this.div.appendChild (div);
+
+                
+                
+                
+var legendContainer =  document.createElement("div");
+legendContainer.id = "legend";
+this.div.appendChild (legendContainer);
+
+
+                function plotAccordingToChoices() {
+
+                    var data = [];
+
+                    choiceContainer.find("input:checked").each(function () {
+                        var key = $(this).attr("name");
+                        if (key && datasets[key]) {
+                            data.push(datasets[key]);
+                        }
+                    });
+
+                    //if (data.length > 0) {
+                        var settings = {
+                            xaxis: {
+                                tickDecimals: 0
+                            }
+,
+lines: { show: true},
+
+
+
+zoom: {
+	interactive: true
+	},
+	pan: {
+	interactive: true
+	},
+legend: {backgroundOpacity: 0,container: $("#legend")}
+                        };
+                        
+                        if (lineStyle == "linespoints" || lineStyle == "points")
+                        	settings.points = { show: true, radius:2};
+                        
+                        $.plot("#" + id, data, settings);
+                    //}
+                };
+                
+                
+                choiceContainer.find("input").click(plotAccordingToChoices);
+
+                plotAccordingToChoices ();
+        }
+
+		
+};
+
+contentFlotPlotComparer.prototype.show = function ()
+{
+	//console.log ("show");
+	//console.log (this.div);
+	if (!this.setUp)
+	{
+		this.file.getContents (this);
+	}
+	else
+		this.showContents ();
+};
+
+
+
+
+
+
+
 
 
 
@@ -152,6 +344,11 @@ function flotContent ()
 flotContent.prototype.canRead = function (file)
 {
 	var ext = file.name.split('.').pop();
+	
+	if (file.name && file.name == "outputs-default-plots.csv")
+		return false;
+	if (file.name && file.name == "outputs-contents.csv")
+		return false;
 	
 	return ext == "csv";
 };
@@ -174,6 +371,11 @@ flotContent.prototype.getDescription = function ()
 flotContent.prototype.setUp = function (file, div)
 {
 	return new contentFlotPlot (file, div);
+};
+
+flotContent.prototype.setUpComparision = function (files, div)
+{
+	return new contentFlotPlotComparer (files, div);
 };
 
 

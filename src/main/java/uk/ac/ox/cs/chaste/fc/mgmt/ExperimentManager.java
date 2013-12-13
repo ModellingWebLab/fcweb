@@ -76,28 +76,17 @@ extends ChasteEntityManager
 	@Override
 	protected ChasteEntity createEntity (ResultSet rs) throws SQLException
 	{
-		/*System.out.println ("create chaste experiment:");
-		System.out.println (rs);
-		System.out.println (rs.getInt ("entityid"));
-		System.out.println (rs.getInt ("entityauthor"));
-		System.out.println (rs.getTimestamp ("entitycreated"));
-		System.out.println (rs.getInt ("entitymodel"));
-		System.out.println (rs.getInt ("entityprotocol"));*/
-
-		ChasteEntityVersion model = modelMgmt.getVersionById (rs.getInt ("entitymodel"));
-		ChasteEntityVersion protocol = protocolMgmt.getVersionById (rs.getInt ("entityprotocol"));
+		ChasteEntityVersion model = modelMgmt.getVersionById (rs.getInt ("entitymodel"), true);
+		ChasteEntityVersion protocol = protocolMgmt.getVersionById (rs.getInt ("entityprotocol"), true);
 		
 		if (model == null || protocol == null)
 		{
-			//System.out.println ("createEntity - Exp: model or protocol is null: " + model + " -- " + protocol);
-			//System.out.println ("ids: " + rs.getInt ("entitymodel") + " -- " + rs.getInt ("entityprotocol"));
 			if (model != null)
-				System.out.println ("model is: " + model.toJson ());
+				LOGGER.info ("model is: " + model.toJson () + " but protocol missing");
 			if (protocol != null)
-				System.out.println ("protocol is: " + protocol.toJson ());
+				LOGGER.info ("protocol is: " + protocol.toJson () + " but model missing");
 			return null;
 		}
-		//System.out.println ("createEntity - Exp: found experiment");
 		
 		return new ChasteExperiment (
 			rs.getInt ("entityid"),
@@ -111,15 +100,6 @@ extends ChasteEntityManager
 	@Override
 	protected ChasteEntityVersion createEntityVersion (ResultSet rs, ChasteEntity cur) throws SQLException
 	{
-		/*System.out.println ("create chaste entity version:");
-		System.out.println (rs);
-		System.out.println (rs.getString ("versioncreated"));
-		System.out.println (rs.getTimestamp ("versioncreated"));
-		System.out.println (rs.getString ("versionfinished"));
-		System.out.println (rs.getTimestamp ("versionfinished"));*/
-
-		//System.out.println ("createEntityVersion - Exp: found experiment version");
-		
 		return new ChasteExperimentVersion (
 			cur,
 			rs.getInt ("versionid"),
@@ -291,7 +271,7 @@ extends ChasteEntityManager
 			st.setInt (2, protocolId);
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> res = evaluateResult (rs);
+			TreeSet<ChasteEntity> res = evaluateResult (rs, false);
 			if (res.size () > 0)
 				return res.first ();
 		}
@@ -355,7 +335,7 @@ extends ChasteEntityManager
 			System.out.println (st.toString ());
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> entity = evaluateResult (rs);
+			TreeSet<ChasteEntity> entity = evaluateResult (rs, false);
 			if (entity != null && entity.size () > 0)
 				return (ChasteExperimentVersion) entity.first ().getVersionByFilePath (signature);
 		}
@@ -422,7 +402,7 @@ extends ChasteEntityManager
 			st.setInt (1, protocolId);
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> res = evaluateResult (rs);
+			TreeSet<ChasteEntity> res = evaluateResult (rs, false);
 			if (res.size () > 0)
 				return res;
 		}
@@ -451,7 +431,7 @@ extends ChasteEntityManager
 			st.setInt (1, modelId);
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> res = evaluateResult (rs);
+			TreeSet<ChasteEntity> res = evaluateResult (rs, false);
 			if (res.size () > 0)
 				return res;
 		}

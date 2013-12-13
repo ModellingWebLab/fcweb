@@ -1,9 +1,14 @@
 package uk.ac.ox.cs.chaste.fc.web;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.Vector;
 
@@ -12,11 +17,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntity;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntityVersion;
+import uk.ac.ox.cs.chaste.fc.beans.ChasteExperiment;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeader;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeaderLink;
@@ -88,7 +95,11 @@ public class EntityView extends WebModule
 		
 		if (req[2].equals ("createnew") && type != TYPE_EXPERIMENT)
 		{
-			if (user.isAuthorized ())
+			if (type == TYPE_PROTOCOL && !user.isAllowedCreateProtocol ())
+				return errorPage (request, response, null);
+			if (type == TYPE_MODEL && !user.isAllowedCreateModel ())
+				return errorPage (request, response, null);
+			if (user.isAllowedCreateEntityVersion ())
 			{
 				header.addScript (new PageHeaderScript ("res/js/upload.js", "text/javascript", "UTF-8", null));
 				header.addScript (new PageHeaderScript ("res/js/entitynew.js", "text/javascript", "UTF-8", null));
@@ -127,7 +138,20 @@ public class EntityView extends WebModule
 				notifications.addError ("no entity found");
 				return errorPage (request, response, "no entity found");
 			}
+			
+			Map<Integer, ChasteEntityVersion> versions = entity.getVersions ();
+			ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt); 
+			for (ChasteEntityVersion version : versions.values ())
+				fileMgmt.getFiles (version, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ());
+			
 			request.setAttribute ("entity", entity);
+			if (type == TYPE_EXPERIMENT)
+			{
+				ChasteExperiment exp = (ChasteExperiment) entity;
+				request.setAttribute ("correspondingModel", exp.getModel ());
+				request.setAttribute ("correspondingProtocol", exp.getProtocol ());
+			}
+			header.addScript (new PageHeaderScript ("res/js/3rd/showdown.js", "text/javascript", "UTF-8", null));
 			header.addScript (new PageHeaderScript ("res/js/entity.js", "text/javascript", "UTF-8", null));
 		}
 		catch (NumberFormatException e)
@@ -140,7 +164,6 @@ public class EntityView extends WebModule
 		
 		// version/file view/action will be done on client side
 
-		// TODO: plugins
 		Vector<String> plugins = new Vector<String> ();
 		plugins.add ("displayContent");
 		plugins.add ("displayTable");
@@ -163,13 +186,7 @@ public class EntityView extends WebModule
 		HttpServletResponse response, DatabaseConnector db,
 		Notifications notifications, JSONObject querry, User user, HttpSession session) throws IOException, ChastePermissionException
 	{
-		// TODO: regularly clean up:
-		// uploaded files that were not used
-		// created entity dirs that don't exist in entities in db
 		
-		
-		
-
 		String[] req =  request.getRequestURI().substring(request.getContextPath().length()).split ("/");
 		
 		ChasteEntityManager entityMgmt = null;
@@ -204,7 +221,16 @@ public class EntityView extends WebModule
 		ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt); 
 		
 		if ((task.equals ("createNewEntity") || task.equals ("verifyNewEntity")) && type != TYPE_EXPERIMENT)
+		{
+			if (type == TYPE_PROTOCOL && !user.isAllowedCreateProtocol ())
+				throw new ChastePermissionException ("you are not allowed to create a new entity");
+			if (type == TYPE_MODEL && !user.isAllowedCreateModel ())
+				throw new ChastePermissionException ("you are not allowed to create a new entity");
+			if (!user.isAllowedCreateEntityVersion ())
+				throw new ChastePermissionException ("you are not allowed to create a new entity");
+				
 			createNewEntity (task, notifications, querry, user, answer, entityMgmt, fileMgmt);
+		}
 		else if (task.equals ("getInfo"))
 		{
 
@@ -403,7 +429,7 @@ public class EntityView extends WebModule
 				if (entityName.length () < 2)
 				{
 					obj.put ("response", false);
-					obj.put ("responseText", "needs to be at least 5 characters in length");
+					obj.put ("responseText", "needs to be at least 2 characters in length");
 					createOk = false;
 				}
 				// else name ok
@@ -570,6 +596,12 @@ public class EntityView extends WebModule
 				throw new IOException ("wasn't able to create/insert "+entityMgmt.getEntityColumn ()+" version to db.");
 			}
 			
+			String mainEntry = "";
+			if (querry.get ("mainFile") != null)
+				mainEntry = querry.get ("mainFile").toString ().trim ();
+			
+			boolean extractReadme = entityMgmt.getEntityColumn () == "protocol";
+			
 			for (NewFile f : files.values ())
 			{
 				//copy file
@@ -586,7 +618,7 @@ public class EntityView extends WebModule
 				}
 				
 				// insert to db
-				int fileId = fileMgmt.addFile (f.name, f.type, user, f.tmpFile.length ());
+				int fileId = fileMgmt.addFile (f.name, f.type, user, f.tmpFile.length (), f.name.equals (mainEntry));
 				if (fileId < 0)
 				{
 					cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
@@ -602,6 +634,98 @@ public class EntityView extends WebModule
 					LOGGER.error ("error inserting file to db: " + f.name + " -> " + f.tmpFile);
 					throw new IOException ("wasn't able to insert file " + f.name + " to db.");
 				}
+				
+				extractReadme = extractReadme && !f.name.toLowerCase ().equals ("readme.md");
+			}
+			
+			if (extractReadme)
+			{
+				for (NewFile f : files.values ())
+				{
+					//parse protocol
+					BufferedReader br = null; 
+					try
+					{
+						br = new BufferedReader (new FileReader (f.tmpFile));
+						String line = "", doc = "";
+						boolean read = false;
+						while (br.ready ())
+						{
+							line = br.readLine ();
+							
+							if (read && line.startsWith ("}"))
+								break;
+							
+							if (read)
+								doc += line + Tools.NEWLINE;
+							
+							if (line.startsWith ("documentation"))
+								read = true;
+						}
+						br.close ();
+						
+						if (doc.length () > 0)
+						{
+							// write a readme.md
+							BufferedWriter bw = null;
+							try
+							{
+								File readMeFile = new File (entityDir + File.separator + "README.md");
+								bw = new BufferedWriter (new FileWriter (readMeFile));
+								bw.write (doc);
+								bw.close ();
+								bw = null;
+								
+								// insert to db
+								int fileId = fileMgmt.addFile (readMeFile.getName (), "readme", user, readMeFile.length (), false);
+								if (fileId < 0)
+								{
+									readMeFile.delete ();
+									LOGGER.error ("error inserting file to db: README.md");
+									throw new IOException ("wasn't able to insert file README.md to db.");
+								}
+								
+								// associate files+version
+								if (!fileMgmt.associateFile (fileId, versionId, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ()))
+								{
+									readMeFile.delete ();
+									LOGGER.error ("error inserting file to db: README.md");
+									throw new IOException ("wasn't able to insert file README.md to db.");
+								}
+								
+								break;
+							}
+							catch (Exception e)
+							{
+								LOGGER.warn ("tried writing extracted readme from protocol", e);
+							}
+							finally
+							{
+								if (bw != null)
+									try
+									{
+										bw.close ();
+									}
+									catch (Exception e)
+									{}
+							}
+						}
+					}
+					catch (Exception e)
+					{
+						LOGGER.warn ("tried extracting readme from protocol", e);
+					}
+					finally
+					{
+						if (br != null)
+							try
+						{
+							br.close ();
+							}
+						catch (Exception e)
+						{}
+					}
+				}
 			}
 			
 
@@ -612,7 +736,6 @@ public class EntityView extends WebModule
 			res.put ("versionType", entityMgmt.getEntityColumn ());
 			answer.put ("createNewEntity", res);
 			
-			// TODO: remove temp files
 		}
 		
 		if (!createOk)
@@ -627,7 +750,7 @@ public class EntityView extends WebModule
 		if (entityDir != null && entityDir.exists ())
 			try
 			{
-				Tools.delete (entityDir, false);
+				Tools.deleteRecursively (entityDir, false);
 			}
 			catch (IOException e)
 			{

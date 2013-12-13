@@ -20,8 +20,6 @@ import de.binfalse.bflog.LOGGER;
  * @author martin
  *
  * TODO: optimize (hashtables etc)
- * 
- * TODO: is current user allowed to see the stuff?
  */
 public abstract class ChasteEntityManager
 {
@@ -80,7 +78,7 @@ public abstract class ChasteEntityManager
 		);
 	}
 	
-	protected TreeSet<ChasteEntity> evaluateResult (ResultSet rs) throws SQLException
+	protected TreeSet<ChasteEntity> evaluateResult (ResultSet rs, boolean neglectPermissions) throws SQLException
 	{
 		TreeSet<ChasteEntity> res = new TreeSet<ChasteEntity> (new ChasteEntity.SortByName ());
 		while (rs != null && rs.next ())
@@ -107,23 +105,22 @@ public abstract class ChasteEntityManager
 				knownEntities.put (mid, cur);
 			}
 			
-			//System.out.println ("cur: " + cur);
-			//System.out.println ("creating version");
+			LOGGER.debug ("cur: " + cur);
+			LOGGER.debug ("creating version");
 			
 			if (knownVersions.get (vid) != null)
 				cur.addVersion (knownVersions.get (vid));
 			else
 			{
-				//System.out.println ("wasn't there");
 				ChasteEntityVersion neu = createEntityVersion (rs, cur);
-				if (user.isAllowedToSeeEntityVersion (neu))
+				if (neglectPermissions || user.isAllowedToSeeEntityVersion (neu))
 				{
-					//System.out.println ("user allowed");
+					LOGGER.debug ("user allowed");
 					cur.addVersion (neu);
 					knownVersions.put (vid, neu);
 				}
-				//else
-					//System.out.println ("user not allowed");
+				else
+					LOGGER.debug ("user not allowed: " + neu.toJson ());
 			}
 			
 			//System.out.println ("cur w/ version: " + cur.toJson ());
@@ -222,7 +219,7 @@ public abstract class ChasteEntityManager
 			st.setInt (1, id);
 			st.execute ();
 			rs = st.getResultSet ();
-			evaluateResult (rs);
+			evaluateResult (rs, false);
 		}
 		catch (SQLException e)
 		{
@@ -250,7 +247,7 @@ public abstract class ChasteEntityManager
 			st.setString (1, name);
 			st.execute ();
 			rs = st.getResultSet ();
-			evaluateResult (rs);
+			evaluateResult (rs, false);
 		}
 		catch (SQLException e)
 		{
@@ -272,6 +269,10 @@ public abstract class ChasteEntityManager
 	
 	public ChasteEntityVersion getVersionById (int id)
 	{
+		return getVersionById (id, false);
+	}
+	public ChasteEntityVersion getVersionById (int id, boolean neglectPermissions)
+	{
 		if (knownVersions.get (id) != null)
 			return knownVersions.get (id);
 		
@@ -284,7 +285,7 @@ public abstract class ChasteEntityManager
 			st.setInt (1, id);
 			st.execute ();
 			rs = st.getResultSet ();
-			evaluateResult (rs);
+			evaluateResult (rs, neglectPermissions);
 		}
 		catch (SQLException e)
 		{
@@ -310,7 +311,7 @@ public abstract class ChasteEntityManager
 			st.setString (1, filePath);
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> entity = evaluateResult (rs);
+			TreeSet<ChasteEntity> entity = evaluateResult (rs, false);
 			if (entity != null && entity.size () > 0)
 				return entity.first ().getVersionByFilePath (filePath);
 		}
@@ -338,7 +339,7 @@ public abstract class ChasteEntityManager
 			st.setString (1, nick);
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> res = evaluateResult (rs);
+			TreeSet<ChasteEntity> res = evaluateResult (rs, false);
 			db.closeRes (st);
 			db.closeRes (rs);
 			return res;
@@ -357,7 +358,7 @@ public abstract class ChasteEntityManager
 		return null;
 	}
 	
-	public TreeSet<ChasteEntity> getAll ()
+	public TreeSet<ChasteEntity> getAll (boolean neglectPermissions)
 	{
 		PreparedStatement st = db.prepareStatement (buildSelectQuery (""));
 		ResultSet rs = null;
@@ -365,7 +366,7 @@ public abstract class ChasteEntityManager
 		{
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> res = evaluateResult (rs);
+			TreeSet<ChasteEntity> res = evaluateResult (rs, neglectPermissions);
 			db.closeRes (st);
 			db.closeRes (rs);
 			return res;
@@ -409,9 +410,13 @@ public abstract class ChasteEntityManager
 			st.setInt (1, versionId);
 			
 			int affectedRows = st.executeUpdate ();
+			
+			deleteEmptyEntities ();
+			
 			if (affectedRows == 0)
 				throw new SQLException (
 					"Deleting entity version failed, no rows affected.");
+			
 			ok = true;
 		}
 		catch (SQLException e)
@@ -429,6 +434,31 @@ public abstract class ChasteEntityManager
 		}
 		
 		return ok;
+	}
+	
+	public void deleteEmptyEntities ()
+	{
+		
+		PreparedStatement st = db.prepareStatement ("DELETE FROM `" + entityTable + "` WHERE id NOT IN (SELECT DISTINCT `"+entityColumn+"` FROM `" + entityVersionsTable + "`)");
+		ResultSet rs = null;
+		try
+		{
+			st.execute ();
+			rs = st.getResultSet ();
+			db.closeRes (st);
+			db.closeRes (rs);
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+			note.addError ("sql err retrieving entities: " + e.getMessage ());
+			LOGGER.error ("db problem while retrieving entities (" + entityColumn + ")", e);
+		}
+		finally
+		{
+			db.closeRes (st);
+			db.closeRes (rs);
+		}
 	}
 	
 	public boolean removeEntity (int versionId) throws ChastePermissionException

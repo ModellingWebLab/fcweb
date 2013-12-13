@@ -31,12 +31,12 @@ extends ChasteEntity
 		this.protocol = protocol;
 	}
 
-	public ChasteEntityVersion getModel (ModelManager modelMgmt)
+	public ChasteEntityVersion getModel ()
 	{
 		return model;
 	}
 
-	public ChasteEntityVersion getProtocol (ProtocolManager protocolMgmt)
+	public ChasteEntityVersion getProtocol ()
 	{
 		return protocol;
 	}

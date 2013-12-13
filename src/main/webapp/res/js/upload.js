@@ -25,25 +25,45 @@ function sendFile (uploaded, file, name, types)
 		return;
 	}
 	
-	var list = document.getElementById("uploadedfiles");
-	var neu = document.createElement("li");
+	var table = document.getElementById("uploadedfiles");
+	var neu = document.createElement("tr");
+	table.appendChild(neu);
+	
+	var td = document.createElement("td");
+	neu.appendChild(td);
+	var mainEntry = document.createElement("input");
+	mainEntry.type = "radio";
+	mainEntry.name = "mainEntry";
+	mainEntry.value = name;
+	td.appendChild(mainEntry);
+	
+
+	td = document.createElement("td");
+	neu.appendChild(td);
 	var neuName = document.createElement("code");
 	var neuRm = document.createElement("a");
 	var neuRmPic = document.createElement("img");
-	var neuSize = document.createElement("small");
-	var neuSizeCode = document.createElement("code");
-	var neuAction = document.createElement("small");
 	neuName.appendChild(document.createTextNode(name));
 	neuRmPic.src = contextPath+"/res/img/failed.png";
 	neuRmPic.alt = "remove from list";
-	neuRm.appendChild(neuRmPic);
-	neu.appendChild(neuName);
-	neu.appendChild (neuRm);
+	neuRm.appendChild (neuRmPic);
+	td.appendChild (neuName);
+	td.appendChild (neuRm);
+	
+	
+
+	td = document.createElement("td");
+	neu.appendChild(td);
+	var neuSize = document.createElement("small");
+	var neuSizeCode = document.createElement("code");
 	neuSizeCode.appendChild (document.createTextNode(" "+humanReadableBytes(file.size)+" "));
 	neuSize.appendChild (neuSizeCode);
-	neu.appendChild(neuSize);
-	neu.appendChild(neuAction);
-	list.appendChild(neu);
+	td.appendChild(neuSize);
+	
+	td = document.createElement("td");
+	neu.appendChild(td);
+	var neuAction = document.createElement("small");
+	td.appendChild(neuAction);
 	
 	var xmlhttp = null;
     // !IE
@@ -87,6 +107,7 @@ function sendFile (uploaded, file, name, types)
         		tmpName: json.upload.tmpName,
         		fileType: "unknown"
         	};
+        	
         	var type = document.createElement("select");
         	for (var i = 0; i < types.length; i++)
         	{
@@ -101,7 +122,7 @@ function sendFile (uploaded, file, name, types)
 
         	neuName.setAttribute("class", "success");
         	removeChildren (neuAction);
-        	neuAction.appendChild (document.createTextNode("file type: "));
+        	//neuAction.appendChild (document.createTextNode("file type: "));
         	neuAction.appendChild (type);
         	uploaded.push (array);
         }
@@ -128,7 +149,7 @@ function sendFile (uploaded, file, name, types)
 			xmlhttp.onreadystatechange = function () {/* need this cause some browsers will throw a 'done' which we cannot interpret otherwise */};
 			xmlhttp.abort();
 		}
-		list.removeChild(neu);
+		table.removeChild(neu);
 		for (var i = 0; i < uploaded.length; i++)
 			if (uploaded[i].fileName == name)
 				uploaded.splice(i, 1);

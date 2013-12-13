@@ -3,11 +3,10 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Dec 02, 2013 at 05:09 PM
+-- Generation Time: Dec 12, 2013 at 03:25 PM
 -- Server version: 5.5.34
 -- PHP Version: 5.3.10-1ubuntu3.8
 
-SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
@@ -40,16 +39,6 @@ CREATE TABLE IF NOT EXISTS `experiments` (
   KEY `author` (`author`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
---
--- RELATIONS FOR TABLE `experiments`:
---   `author`
---       `user` -> `id`
---   `model`
---       `modelversions` -> `id`
---   `protocol`
---       `protocolversions` -> `id`
---
-
 -- --------------------------------------------------------
 
 --
@@ -71,14 +60,6 @@ CREATE TABLE IF NOT EXISTS `experimentversions` (
   KEY `experiment` (`experiment`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
---
--- RELATIONS FOR TABLE `experimentversions`:
---   `author`
---       `user` -> `id`
---   `experiment`
---       `experiments` -> `id`
---
-
 -- --------------------------------------------------------
 
 --
@@ -91,14 +72,6 @@ CREATE TABLE IF NOT EXISTS `experiment_files` (
   UNIQUE KEY `result` (`experiment`,`file`),
   KEY `file` (`file`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- RELATIONS FOR TABLE `experiment_files`:
---   `file`
---       `files` -> `id`
---   `experiment`
---       `experimentversions` -> `id`
---
 
 -- --------------------------------------------------------
 
@@ -113,15 +86,10 @@ CREATE TABLE IF NOT EXISTS `files` (
   `type` text COLLATE utf8_unicode_ci NOT NULL,
   `author` int(11) NOT NULL,
   `size` bigint(20) NOT NULL,
+  `masterFile` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `author` (`author`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- RELATIONS FOR TABLE `files`:
---   `author`
---       `user` -> `id`
---
 
 -- --------------------------------------------------------
 
@@ -138,12 +106,6 @@ CREATE TABLE IF NOT EXISTS `models` (
   UNIQUE KEY `name` (`name`),
   KEY `author` (`author`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- RELATIONS FOR TABLE `models`:
---   `author`
---       `user` -> `id`
---
 
 -- --------------------------------------------------------
 
@@ -166,14 +128,6 @@ CREATE TABLE IF NOT EXISTS `modelversions` (
   KEY `model` (`model`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
---
--- RELATIONS FOR TABLE `modelversions`:
---   `model`
---       `models` -> `id`
---   `author`
---       `user` -> `id`
---
-
 -- --------------------------------------------------------
 
 --
@@ -186,14 +140,6 @@ CREATE TABLE IF NOT EXISTS `model_files` (
   UNIQUE KEY `model` (`model`,`file`),
   KEY `file` (`file`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- RELATIONS FOR TABLE `model_files`:
---   `model`
---       `modelversions` -> `id`
---   `file`
---       `files` -> `id`
---
 
 -- --------------------------------------------------------
 
@@ -210,12 +156,6 @@ CREATE TABLE IF NOT EXISTS `protocols` (
   UNIQUE KEY `name` (`name`),
   KEY `author` (`author`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- RELATIONS FOR TABLE `protocols`:
---   `author`
---       `user` -> `id`
---
 
 -- --------------------------------------------------------
 
@@ -237,14 +177,6 @@ CREATE TABLE IF NOT EXISTS `protocolversions` (
   KEY `author` (`author`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
---
--- RELATIONS FOR TABLE `protocolversions`:
---   `protocol`
---       `protocols` -> `id`
---   `author`
---       `user` -> `id`
---
-
 -- --------------------------------------------------------
 
 --
@@ -257,14 +189,6 @@ CREATE TABLE IF NOT EXISTS `protocol_files` (
   UNIQUE KEY `protocol` (`protocol`,`file`),
   KEY `file` (`file`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- RELATIONS FOR TABLE `protocol_files`:
---   `protocol`
---       `protocolversions` -> `id`
---   `file`
---       `files` -> `id`
---
 
 -- --------------------------------------------------------
 
@@ -283,6 +207,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `cookie` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
   `givenName` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `familyName` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
+  `sendMails` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `mail` (`mail`),
   UNIQUE KEY `acronym` (`acronym`),
@@ -360,7 +285,12 @@ ALTER TABLE `protocolversions`
 ALTER TABLE `protocol_files`
   ADD CONSTRAINT `protocol_files_ibfk_1` FOREIGN KEY (`protocol`) REFERENCES `protocolversions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `protocol_files_ibfk_2` FOREIGN KEY (`file`) REFERENCES `files` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-SET FOREIGN_KEY_CHECKS=1;
+
+
+
+-- create root:
+INSERT INTO `chaste`.`user` (`mail` ,`password` ,`acronym` ,`institution` ,`created` ,`role` ,`cookie` ,`givenName` ,`familyName` ,`sendMails`) VALUES ('root@localhost', MD5( 'admin' ) , 'root', '', CURRENT_TIMESTAMP , 'ADMIN', UUID(), '', '', '0');
+
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

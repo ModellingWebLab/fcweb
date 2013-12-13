@@ -4,6 +4,8 @@ var doc;
 var basicurl;
 var entityType;
 var entityId;
+var curVersion = null;
+var converter = new Showdown.converter();
 
 var visualizers = {};
 
@@ -12,21 +14,21 @@ function parseUrl (href)
 	var t = href.split ("/");
 	for (var i = 0; i < t.length; i++)
 	{
-		if ("/" + t[i] == contextPath && i + 4 < t.length && t[i+1] == "model")
+		if ("/" + t[i] == contextPath && i + 3 < t.length && t[i+1] == "model")
 		{
 			basicurl = t.slice (0, i + 4).join ("/") + "/";
 			entityType = "model";
 			entityId = t[i+3];
 			return t.slice (i + 4);
 		}
-		if ("/" + t[i] == contextPath && i + 4 < t.length && t[i+1] == "protocol")
+		if ("/" + t[i] == contextPath && i + 3 < t.length && t[i+1] == "protocol")
 		{
 			basicurl = t.slice (0, i + 4).join ("/") + "/";
 			entityType = "protocol";
 			entityId = t[i+3];
 			return t.slice (i + 4);
 		}
-		if ("/" + t[i] == contextPath && i + 4 < t.length && t[i+1] == "experiment")
+		if ("/" + t[i] == contextPath && i + 3 < t.length && t[i+1] == "experiment")
 		{
 			basicurl = t.slice (0, i + 4).join ("/") + "/";
 			entityType = "experiment";
@@ -74,8 +76,8 @@ function updateVisibility (jsonObject, actionIndicator)
         xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
     }
     
-    xmlhttp.open("POST", '', true);
-    xmlhttp.setRequestHeader("Content-type", "application/json");
+    xmlhttp.open ("POST", '', true);
+    xmlhttp.setRequestHeader ("Content-type", "application/json");
 
     xmlhttp.onreadystatechange = function()
     {
@@ -121,8 +123,8 @@ function deleteEntity (jsonObject)
         xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
     }
     
-    xmlhttp.open("POST", '', true);
-    xmlhttp.setRequestHeader("Content-type", "application/json");
+    xmlhttp.open ("POST", '', true);
+    xmlhttp.setRequestHeader ("Content-type", "application/json");
 
     xmlhttp.onreadystatechange = function()
     {
@@ -165,8 +167,114 @@ function deleteEntity (jsonObject)
     };
     xmlhttp.send (JSON.stringify (jsonObject));
 }
+function highlightPlots (version, showDefault)
+{
+	//console.log (plotDescription);
+	var plotDescription = version.plotDescription;
+	for (var i = 1; i < plotDescription.length; i++)
+	{
+		if (plotDescription[i].length < 2)
+			continue;
+		//console.log (plotDescription[i][2]);
+		var row = document.getElementById ("filerow-" + plotDescription[i][2]);
+		if (row)
+		{
+			row.setAttribute("class", "highlight-plot");
+			if (i == 1 && showDefault)
+			{
+				var viz = document.getElementById ("filerow-" + plotDescription[i][2] + "-viz-displayPlotFlot");
+				if (viz)
+					viz.click();
+			}
+		}
 
-function displayVersion (id)
+		//console.log ("files: ")
+		//console.log (version.files);
+		for (var f = 0; f < version.files.length; f++)
+		{
+			if (files[version.files[f]].name == plotDescription[i][2])
+			{
+				files[version.files[f]].xAxes = plotDescription[i][4];
+				files[version.files[f]].yAxes = plotDescription[i][5];
+				files[version.files[f]].title = plotDescription[i][0];
+				files[version.files[f]].linestyle = plotDescription[i][3];
+			}
+			//console.log ("file: ")
+			//console.log (files[version.files[f]]);
+		}
+	}
+}
+
+function parsePlotDescription (file, version, showDefault)
+{
+	if (file.plotDescription)
+		return converter.makeHtml (file.contents);
+	
+	var goForIt = {
+			getContentsCallback : function (succ)
+			{
+				if (succ)
+				{
+					var str = file.contents.replace(/\s*#.*\n/gm,"");
+					var delimiter = ",";
+					var patterns = new RegExp(
+				    		(
+				    			// Delimiters.
+				    			"(\\" + delimiter + "|\\r?\\n|\\r|^)" +
+				    			// Quoted fields.
+				    			"(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
+				    			// Standard fields.
+				    			"([^\"\\" + delimiter + "\\r\\n]*))"
+				    		),
+				    		"gi"
+				    		);
+					var csv = [[]];
+					var matches = null;
+					while (matches = patterns.exec (str))
+					{
+						var value;
+						var matchDel = matches[1];
+						if (matchDel.length && matchDel != delimiter)
+				    			csv.push([]);
+						if (matches[2])
+							value = matches[2].replace (new RegExp ("\"\"", "g"), "\"");
+						else
+							value = matches[3];
+						
+						csv[csv.length - 1].push (value);
+					}
+					
+					version.plotDescription = csv;
+					highlightPlots (version, showDefault);
+				}
+			}
+	};
+	getFileContent (file, goForIt);
+	
+	return null;
+}
+
+function parseReadme (file, version)
+{
+	if (file.contents)
+		return converter.makeHtml (file.contents);
+	
+	var goForIt = {
+			getContentsCallback : function (succ)
+			{
+				if (succ)
+				{
+					version.readme = converter.makeHtml (file.contents);
+					doc.version.readme.innerHTML = version.readme;
+				}
+			}
+	};
+	getFileContent (file, goForIt);
+	
+	return null;
+}
+
+function displayVersion (id, showDefault)
 {
 	var v = versions[id];
 	if (!v)
@@ -179,7 +287,7 @@ function displayVersion (id)
 	
 	if (entityType != "experiment" && ROLE.isAllowedToCreateNewExperiment)
 	{
-		var createExpLink = document.createElement("a");
+		/*var createExpLink = document.createElement("a");
 		var createExpImg = document.createElement("img");
 		createExpImg.src = contextPath + "/res/img/create-experiment-small.png";
 		createExpImg.alt = "create experiment from this " + entityType;
@@ -193,7 +301,7 @@ function displayVersion (id)
 		createExpLink.setAttribute ("class", "pointer");
 		dv.name.appendChild (createExpLink);
 		
-		dv.name.appendChild (document.createTextNode (" "));
+		dv.name.appendChild (document.createTextNode (" "));*/
 		
 		var createBatchLink = document.createElement("a");
 		var createBatchImg = document.createElement("img");
@@ -206,9 +314,9 @@ function displayVersion (id)
 	
 	if (dv.visibility)
 	{
-		var new_element = dv.visibility.cloneNode(true);
-		dv.visibility.parentNode.replaceChild (new_element, dv.visibility);
-		dv.visibility = new_element;
+		//var new_element = dv.visibility.cloneNode(true);
+		//dv.visibility.parentNode.replaceChild (new_element, dv.visibility);
+		dv.visibility = removeListeners (dv.visibility);//new_element;
 		
 		document.getElementById("visibility-" + v.visibility).selected=true;
 		
@@ -233,9 +341,9 @@ function displayVersion (id)
 	
 	if (dv.deleteBtn)
 	{
-		var new_element = dv.deleteBtn.cloneNode(true);
-		dv.deleteBtn.parentNode.replaceChild (new_element, dv.deleteBtn);
-		dv.deleteBtn = new_element;
+		//var new_element = dv.deleteBtn.cloneNode(true);
+		//dv.deleteBtn.parentNode.replaceChild (new_element, dv.deleteBtn);
+		dv.deleteBtn = removeListeners (dv.deleteBtn); //new_element;
 		
 		dv.deleteBtn.addEventListener("click", function () {
 			if (confirm("Are you sure to delete this version? (including all files and experiments associated to it)"))
@@ -273,11 +381,13 @@ function displayVersion (id)
 	tr.appendChild(td);
 	dv.filestable.appendChild(tr);
 	
-	
 	for (var i = 0; i < v.files.length; i++)
 	{
 		var file = files[v.files[i]];
 		tr = document.createElement("tr");
+		tr.setAttribute("id", "filerow-" + file.name);
+		if (file.masterFile)
+			tr.setAttribute("class", "masterFile");
 		td = document.createElement("td");
 		td.appendChild(document.createTextNode (file.name));
 		tr.appendChild(td);
@@ -295,6 +405,14 @@ function displayVersion (id)
 		tr.appendChild(td);
 		td = document.createElement("td");
 		
+		if (!v.readme && file.name.toLowerCase () == "readme.md")
+			v.readme = parseReadme (file, v);
+		
+		if (!v.plotDescription && file.name.toLowerCase () == "outputs-default-plots.csv")
+			parsePlotDescription (file, v, showDefault);
+		
+		
+		
 		
 		for (var vi in visualizers)
 		{
@@ -302,6 +420,7 @@ function displayVersion (id)
 			if (!viz.canRead (file))
 				continue;
 			var a = document.createElement("a");
+			a.setAttribute("id", "filerow-" + file.name + "-viz-" + viz.getName ());
 			a.href = basicurl + convertForURL (v.name) + "/" + v.id + "/" + convertForURL (file.name) + "/" + file.id + "/" + vi;
 			var img = document.createElement("img");
 			img.src = contextPath + "/res/js/visualizers/" + vi + "/" + viz.getIcon ();
@@ -334,17 +453,24 @@ function displayVersion (id)
 
 	if (v.experiments.length > 0)
 	{
-		removeChildren (dv.experimentlist);
+		removeChildren (dv.experimentpartners);
+		
+		var compares = new Array();
+		
 		var ul = document.createElement ("ul");
 		for (var i = 0; i < v.experiments.length; i++)
 		{
 			
 			var li = document.createElement ("li");
+			var chk = document.createElement ("input");
+			chk.type = "checkbox";
+			chk.value = v.experiments[i].id;
+			compares.push (chk);
 			var a = document.createElement ("a");
 			if (entityType == "protocol")
 			{
 				//console.log ("protoc");
-				console.log (v.experiments[i].model);
+				//console.log (v.experiments[i].model);
 				a.appendChild(document.createTextNode(v.experiments[i].model.name + " @ " + v.experiments[i].model.version));
 			}
 			else
@@ -352,10 +478,32 @@ function displayVersion (id)
 				a.appendChild(document.createTextNode(v.experiments[i].protocol.name + " @ " + v.experiments[i].protocol.version));
 			}
 			a.href = contextPath + "/experiment/" + v.experiments[i].model.id + v.experiments[i].protocol.id + "/" + v.experiments[i].id;
+			li.appendChild (chk);
 			li.appendChild (a);
 			ul.appendChild (li);
 		}
-		dv.experimentlist.appendChild (ul);
+
+		dv.experimentSelAll = removeListeners (dv.experimentSelAll);
+		dv.experimentSelNone = removeListeners (dv.experimentSelNone);
+		dv.experimentcompare = removeListeners (dv.experimentcompare);
+		
+		dv.experimentSelAll.addEventListener("click", function () {
+			for (var i = 0; i < compares.length; i++)
+				compares[i].checked = true;
+		});
+		dv.experimentSelNone.addEventListener("click", function () {
+			for (var i = 0; i < compares.length; i++)
+				compares[i].checked = false;
+		});
+		dv.experimentcompare.addEventListener("click", function () {
+			var url = "";
+			for (var i = 0; i < compares.length; i++)
+				if (compares[i].checked)
+					url += compares[i].value + "/";
+			document.location = contextPath + "/compare/e/" + url;
+		});
+		
+		dv.experimentpartners.appendChild (ul);
 		//dv.experimentlist.style.display = "block";
 		dv.switcher.style.display = "block";
 		//dv.details.style.display = "none";
@@ -363,16 +511,22 @@ function displayVersion (id)
 	else
 	{
 		dv.switcher.style.display = "none";
-		dv.experimentlist.style.display = "none";
+		dv.experimentpartners.style.display = "none";
 		dv.details.style.display = "block";
 	}
+	
+	removeChildren (dv.readme);
+	if (v.readme)
+		dv.readme.innerHTML = v.readme;
+	if (v.plotDescription)
+		highlightPlots (v, showDefault);
 	
 	
 	doc.entity.details.style.display = "none";
 	doc.entity.version.style.display = "block";
 
 	doc.version.files.style.display = "block";
-	doc.version.filedetails.style.display = "none";
+	//doc.version.filedetails.style.display = "none";
 	// update address bar
 	
 }
@@ -387,6 +541,7 @@ function maxDist (val1, val2, val3)
 			(val2 < val3 ? val2 : val3);
 	return a - b;
 }
+
 
 function parseCSVContent (file)
 {
@@ -439,14 +594,18 @@ function parseCSVContent (file)
 			}
 	}
 	var dropDist = (max-min) / 5000.;//100.;
+	file.nonDownsampled = [];
 	file.downsampled = [];
 	for (var i = 1; i < file.columns.length; i++)
 	{
 		file.downsampled[i] = [];
+		file.nonDownsampled[i] = [];
 		//file.downsampled[i][0] = file.columns[i][0];
 		file.downsampled[i][0] = {x : file.columns[0][0], y : file.columns[i][0]};
+		file.nonDownsampled[i][0] = {x : file.columns[0][0], y : file.columns[i][0]};
 		for (var j = 1; j < file.columns[i].length - 1; j++)
 		{
+			file.nonDownsampled[i].push ({x : file.columns[0][j], y : file.columns[i][j]});
 			var last = file.downsampled[i][file.downsampled.length - 1];
 			var cur = file.columns[i][j];
 			var next = file.columns[i][j + 1];
@@ -460,6 +619,15 @@ function parseCSVContent (file)
 	}
 	
 	file.csv = csv;
+}
+
+function getCSVColumnsNonDownsampled (file)
+{
+	if (!file.nonDownsampled)
+	{
+		parseCSVContent (file);
+	}
+	return file.nonDownsampled;
 }
 
 function getCSVColumnsDownsampled (file)
@@ -530,6 +698,7 @@ function updateVersion (rv)
 	v.created = rv.created;
 	v.visibility = rv.visibility;
 	v.id = rv.id;
+	v.readme = null;
 	v.files = new Array ();
 	for (var i = 0; i < rv.files.length; i++)
 	{
@@ -597,6 +766,7 @@ function updateFile (rf, v)
 	f.type = rf.filetype;
 	f.author = rf.author;
 	f.name = rf.name;
+	f.masterFile = rf.masterFile;
 	f.size = rf.size;
 	f.url = contextPath + "/download/" + entityType.charAt(0) + "/" + convertForURL (v.name) + "/" + v.id + "/" + f.id + "/" + convertForURL (f.name);
 	f.div = {};
@@ -641,8 +811,11 @@ function displayFile (id, pluginName)
 	removeChildren (df.display);
 	df.display.appendChild (f.div[pluginName]);
 	
-	doc.version.files.style.display = "none";
+	// doc.version.files.style.display = "none";
 	doc.version.filedetails.style.display = "block";
+	
+	var pos = getPos (doc.version.filedetails);
+	window.scrollTo(pos.xPos, pos.yPos);
 }
 
 function requestInformation (jsonObject, onSuccess)
@@ -700,13 +873,17 @@ function nextPage (url)
 function render ()
 {
 	var url = parseUrl (document.location.href);
-	//console.log (basicurl);
-	//console.log (url);
-	//console.log ("entityId: " + entityId);
 	var curVersionId = getCurVersionId (url);
 	
+	console.log ("curVersionId " + curVersionId);
 	if (curVersionId)
 	{
+		var curFileId = getCurFileId (url);
+		var pluginName = getCurPluginName (url);
+
+		console.log ("curFileId  " + curFileId);
+		console.log ("pluginName " + pluginName);
+		
 		var v = versions[curVersionId];
 		if (!v)
 		{
@@ -718,23 +895,32 @@ function render ()
 			}, render);
 			return;
 		}
-		else
-			displayVersion (curVersionId);
+		else if (v != curVersion)
+		{
+			displayVersion (curVersionId, !(curFileId && pluginName));
+			curVersion = v;
+		}
 		
-		
-		var curFileId = getCurFileId (url);
-		var pluginName = getCurPluginName (url);
 		
 		if (curFileId && pluginName)
 		{
 			displayFile (curFileId, pluginName);
 			doc.file.close.href = basicurl + convertForURL (v.name) + "/" + v.id + "/";
 		}
+		else
+			doc.version.filedetails.style.display = "none";
+			
 	}
 	else
 	{
+		if (url.length > 0 && url[0] == "latest")
+		{
+			//document.getElementById("entityversionlist")
+			$(".entityversionlink").each(function (){nextPage ($(this).attr('href'));});
+		}
 		doc.entity.version.style.display = "none";
 		doc.entity.details.style.display = "block";
+		curVersion = null;
 	}
 }
 
@@ -755,9 +941,14 @@ function initModel ()
 				details : document.getElementById("entityversiondetails"),
 				files : document.getElementById("entityversionfiles"),
 				filestable : document.getElementById("entityversionfilestable"),
+				readme : document.getElementById("entityversionfilesreadme"),
 				archivelink : document.getElementById("downloadArchive"),
 				filedetails : document.getElementById("entityversionfiledetails"),
 				experimentlist: document.getElementById("entityexperimentlist"),
+				experimentpartners: document.getElementById("entityexperimentlistpartners"),
+				experimentSelAll: document.getElementById("entityexperimentlistpartnersactall"),
+				experimentSelNone: document.getElementById("entityexperimentlistpartnersactnone"),
+				experimentcompare: document.getElementById("entityexperimentlistpartnersactcompare"),
 				switcher: document.getElementById("experiment-files-switcher"),
 				visibility: document.getElementById("versionVisibility"),
 				visibilityAction : document.getElementById("versionVisibilityAction"),
@@ -772,8 +963,8 @@ function initModel ()
 			}
 	};
 	
-	render ();
 	window.onpopstate = render;
+	render ();
 	
 	document.getElementById("experiment-files-switcher-exp").addEventListener("click", function (ev) {
 		doc.version.details.style.display = "none";
@@ -791,6 +982,7 @@ function initModel ()
 		if (ev.which == 1)
 		{
 			ev.preventDefault();
+			curVersion = null;
 			doc.entity.version.style.display = "none";
 			doc.entity.details.style.display = "block";
 			nextPage (doc.version.close.href);
@@ -873,6 +1065,17 @@ function initModel ()
 				console.log ("not deleting " + v.id);*/
 		});
 	}
+	
+
+	$(".deleteVersionLink").click (function () {
+		if (confirm("Are you sure to delete this version? (including all files and experiments associated to it)"))
+		{
+			deleteEntity ({
+				task: "deleteVersion",
+		    	version: $(this).attr("id").replace("deleteVersion-", "")
+			});
+		}
+	});
     
 }
 

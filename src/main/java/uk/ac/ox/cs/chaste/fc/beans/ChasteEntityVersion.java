@@ -159,6 +159,8 @@ public class ChasteEntityVersion
 		json.put ("numFiles", numFiles);
 		json.put ("visibility", visibility);
 		json.put ("id", id);
+		json.put ("entityId", entity.getId ());
+		json.put ("name", entity.getName ());
 
 		if (files != null && files.size () > 0)
 		{

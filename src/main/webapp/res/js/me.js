@@ -41,6 +41,23 @@ function updateUser (jsonObject, elem)
         		else
         			elem.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + json.updatePassword.responseText;
         	}
+        	
+        	if (json.updateInstitute)
+        	{
+        		if (json.updateInstitute.response)
+        			elem.innerHTML = "<img src='"+contextPath+"/res/img/check.png' alt='valid' /> " + json.updateInstitute.responseText;
+        		else
+        			elem.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + json.updateInstitute.responseText;
+        	}
+        	
+        	if (json.updateSendMails)
+        	{
+        		if (json.updateSendMails.response)
+        			elem.innerHTML = "<img src='"+contextPath+"/res/img/check.png' alt='valid' /> " + json.updateSendMails.responseText;
+        		else
+        			elem.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + json.updateSendMails.responseText;
+        	}
+        	
         }
         else
         	elem.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='error' /> sorry, serverside error occurred.";
@@ -80,6 +97,24 @@ function initMe ()
 				}, document.getElementById("changeaction"));
 			}
 	    	}, true);
+		
+		var instituteChanger = document.getElementById("instituteChanger");
+		if (instituteChanger)
+			instituteChanger.addEventListener("blur", function (ev) {
+				updateUser ({
+					task: "updateInstitute",
+					institute: instituteChanger.value
+				}, document.getElementById("instituteChangeaction"));
+			}, true);
+		
+		var sendMailsChanger = document.getElementById("sendMailsCheckbox");
+		if (sendMailsChanger)
+			sendMailsChanger.addEventListener("click", function (ev) {
+				updateUser ({
+					task: "updateSendMails",
+					sendMail: sendMailsChanger.checked
+				}, document.getElementById("sendMailsChangeaction"));
+			}, true);
 	}
 	else
 	{

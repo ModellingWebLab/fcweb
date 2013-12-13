@@ -37,6 +37,8 @@ public class User
 	private String cookie;
 	private Timestamp created;
 	private String role;
+	private boolean sendMails;
+
 	private int id;
 	
 	private DatabaseConnector db;
@@ -55,7 +57,7 @@ public class User
 	 * Instantiates a new read-only user. No auth etc. Just to display.
 	 */
 	public User (int id, String givenName, String familyName, String mail, String nick, String institution,
-		Timestamp created, String role)
+		Timestamp created, String role, boolean sendMails)
 	{
 		this.id = id;
 		this.givenName = givenName;
@@ -65,6 +67,7 @@ public class User
 		this.institution = institution;
 		this.created = created;
 		this.role =role;
+		this.sendMails = sendMails;
 	}
 
 
@@ -83,6 +86,7 @@ public class User
 			cookie = rs.getString ("cookie");
 			role = rs.getString ("role");
 			created = rs.getTimestamp ("created");
+			sendMails = rs.getBoolean ("sendMails");
 			id = rs.getInt ("id");
 		}
 	}
@@ -194,6 +198,11 @@ public class User
 	public Notifications getNote ()
 	{
 		return note;
+	}
+	
+	public boolean isSendMails ()
+	{
+		return sendMails;
 	}
 	
 	public void logout (HttpSession session)
@@ -326,6 +335,16 @@ public class User
 	public boolean isAllowedToDeleteEntity (ChasteEntity entity)
 	{
 		return isAuthorized () && ((role.equals (ROLE_MODELER) && entity.getAuthor ().getId () == id) || role.equals (ROLE_ADMIN));
+	}
+	
+	public boolean isAllowedCreateModel ()
+	{
+		return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_ADMIN));
+	}
+	
+	public boolean isAllowedCreateProtocol ()
+	{
+		return isAuthorized () && role.equals (ROLE_ADMIN);
 	}
 	
 	public boolean isAllowedCreateEntity ()

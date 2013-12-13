@@ -19,6 +19,7 @@ import uk.ac.ox.cs.chaste.fc.mgmt.DatabaseConnector;
 import uk.ac.ox.cs.chaste.fc.mgmt.ExperimentManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.ModelManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.ProtocolManager;
+import uk.ac.ox.cs.chaste.fc.mgmt.Tools;
 
 public class Me
 extends WebModule
@@ -87,6 +88,36 @@ extends WebModule
 				user.logout (session);
 			}
 			
+		}
+		else if (task.equals ("updateInstitute"))
+		{
+			String newInst = Tools.validataUserInput (querry.get ("institute").toString ());
+
+			JSONObject obj = new JSONObject ();
+				obj.put ("response", false);
+				obj.put ("responseText", "updating institute failed");
+			answer.put ("updateInstitute", obj);
+			
+			if (userMgmt.updateInstitution (user, newInst))
+			{
+				obj.put ("response", true);
+				obj.put ("responseText", "institute updated");
+			}
+		}
+		else if (task.equals ("updateSendMails"))
+		{
+			boolean sendMails = Boolean.parseBoolean (querry.get ("sendMail").toString ());
+
+			JSONObject obj = new JSONObject ();
+				obj.put ("response", false);
+				obj.put ("responseText", "updating mail settings failed");
+			answer.put ("updateSendMails", obj);
+			
+			if (userMgmt.updateSendMails (user, sendMails))
+			{
+				obj.put ("response", true);
+				obj.put ("responseText", "mail settings updated");
+			}
 		}
 		
 		return answer;

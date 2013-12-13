@@ -81,6 +81,10 @@ function D3Plot ()
 
 D3Plot.prototype.canRead = function (file)
 {
+	if (file.name && file.name == "outputs-default-plots.csv")
+		return false;
+	if (file.name && file.name == "outputs-contents.csv")
+		return false;
 	return file.type.match (/csv/gi) || file.name.split('.').pop() == "csv";
 };
 

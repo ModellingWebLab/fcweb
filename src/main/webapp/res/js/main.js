@@ -32,6 +32,30 @@ function displayNotifications (json)
 	}
 }
 
+function removeListeners (element)
+{
+	var new_element = element.cloneNode(true);
+	element.parentNode.replaceChild (new_element, element);
+	return new_element;
+}
+
+function getPos (ele)
+{
+    var x = 0;
+    var y = 0;
+    while (true)
+    {
+    	if (!ele)
+    		break;
+        x += ele.offsetLeft;
+        y += ele.offsetTop;
+        if (ele.offsetParent === null)
+            break;
+        ele = ele.offsetParent;
+    }
+    return {xPos:x, yPos:y};
+}
+
 function batchProcessing (jsonObject, actionIndicator)
 {
 	actionIndicator.innerHTML = "<img src='"+contextPath+"/res/img/loading2-new.gif' alt='loading' />";
@@ -293,6 +317,21 @@ function addLink (link)
 
 function initPage ()
 {
+	// java's implementation of string's hashcode
+	String.prototype.hashCode = function()
+	{
+	    var hash = 0, i, char, l;
+	    if (this.length == 0)
+	    	return hash;
+	    for (i = 0, l = this.length; i < l; i++)
+	    {
+	        char  = this.charCodeAt(i);
+	        hash  = ((hash<<5)-hash)+char;
+	        hash |= 0; // Convert to 32bit integer
+	    }
+	    return hash;
+	};
+
 	var dismissErrs = document.getElementById("dismisserrors");
 	dismissErrs.addEventListener("click", 
 	        function (event)
@@ -326,25 +365,6 @@ function initPage ()
 		}
 	}
 	
-
-	var submitExperiment = document.getElementById("newexpsubmit");
-	if (submitExperiment)
-	submitExperiment.addEventListener("click", 
-	        function (event)
-	        {
-		runExperiment (false);
-	        }, 
-	        false);
-	
-
-	submitExperiment = document.getElementById("newexpsubmitforce");
-	if (submitExperiment)
-	submitExperiment.addEventListener("click", 
-	        function (event)
-	        {
-		runExperiment (true);
-	        }, 
-	        false);
 	
 	/*var as = document.getElementsByTagName("a");
 	for (var i = 0; i < times.length; i++)

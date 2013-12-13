@@ -64,7 +64,8 @@ public class ChasteFileManager
 					//rs.getString ("filevis"),
 					rs.getString ("filetype"),
 					rs.getLong ("filesize"),
-					userMgmt.getUser (rs.getInt ("author"))
+					userMgmt.getUser (rs.getInt ("author")),
+					rs.getBoolean ("masterFile")
 					);
 				knownFiles.put (id, file);
 				res.add (file);
@@ -106,14 +107,14 @@ public class ChasteFileManager
 		return ok;
 	}
 	
-	public int addFile (String name, String type, User u, long size)
+	public int addFile (String name, String type, User u, long size, boolean mainFile)
 	{
-		return addFile (name, type, u.getId (), size);
+		return addFile (name, type, u.getId (), size, mainFile);
 	}
 	
-	public int addFile (String name, String type, int user, long size)
+	public int addFile (String name, String type, int user, long size, boolean mainFile)
 	{
-		PreparedStatement st = db.prepareStatement ("INSERT INTO `files`(`relpath`, `type`, `author`, `size`) VALUES (?,?,?,?)");
+		PreparedStatement st = db.prepareStatement ("INSERT INTO `files`(`relpath`, `type`, `author`, `size`, `masterFile`) VALUES (?,?,?,?,?)");
     ResultSet rs = null;
     int id = -1;
 		
@@ -123,6 +124,7 @@ public class ChasteFileManager
 			st.setString (2, type);
 			st.setInt (3, user);
 			st.setLong (4, size);
+			st.setBoolean (5, mainFile);
 			
 			int affectedRows = st.executeUpdate();
       if (affectedRows == 0)
@@ -320,7 +322,7 @@ public class ChasteFileManager
 		ResultSet rs = null;
 
 		PreparedStatement st = db.prepareStatement (
-			"SELECT f.id AS fileid, f.relpath AS filepath, f.created AS filecreated, f.type AS filetype, u.id AS author, f.size AS filesize FROM "
+			"SELECT f.id AS fileid, f.relpath AS filepath, f.created AS filecreated, f.type AS filetype, u.id AS author, f.size AS filesize, f.masterFile AS masterFile FROM "
 			+ "`files` f"
 			+ " INNER JOIN `" + filesTable + "` mf on mf.file = f.id"
 			+ " INNER JOIN `user` u on f.author = u.id"
@@ -376,7 +378,7 @@ public class ChasteFileManager
 
 			System.out.println ("add: " + file.getName ());
 			
-			ca.addEntry (basePath, new File (entityPath + file.getName ()), CombineFormats.getFormatIdentifier (file.getFiletype ().toLowerCase ()), od);
+			ca.addEntry (basePath, new File (entityPath + file.getName ()), CombineFormats.getFormatIdentifier (file.getFiletype ().toLowerCase ()), od, file.isMasterFile ());
 		}
 		
 		File tmpDir = new File (Tools.getTempDir ());

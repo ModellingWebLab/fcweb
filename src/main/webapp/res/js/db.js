@@ -4,16 +4,17 @@ var modelMapper = {};
 var protocolMapper = {};
 var lock = true;
 
-var colorMapper = {
+/*var colorMapper = {
 		"RUNNING": "#86b6f1",
 		"SUCCESS": "#05db00",
 		"FAILED": "#db0000",
 		"INAPPRORIATE": "#f1c886"
-};
+};*/
 
-function submitNewExperiment (jsonObject, notificationElement)
+function submitNewExperiment (jsonObject, notificationElement, td)
 {
-	notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/loading2-new.gif' alt='loading' />";
+	if (notificationElement)
+		notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/loading2-new.gif' alt='loading' />";
 	
 	var xmlhttp = null;
     // !IE
@@ -39,6 +40,12 @@ function submitNewExperiment (jsonObject, notificationElement)
     	var json = JSON.parse(xmlhttp.responseText);
     	console.log (json);
     	displayNotifications (json);
+
+    	console.log ("td prev");
+    	console.log (td);
+    	
+    	if (td)
+    		td.removeClass ("experiment-RUNNING").removeClass ("experiment-INAPPRORIATE").removeClass ("experiment-FAILED").removeClass ("experiment-SUCCESS");
     	
         if(xmlhttp.status == 200)
         {
@@ -47,17 +54,32 @@ function submitNewExperiment (jsonObject, notificationElement)
 	        	var msg = json.newExperiment.responseText;
         		if (json.newExperiment.response)
 	        	{
-        			notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/check.png' alt='valid' /> " + msg;
+        			if (notificationElement)
+        				notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/check.png' alt='valid' /> " + msg;
+        			if (td)
+	    				td.addClass ("experiment-RUNNING");
+        				//td.attr ("class", td.attr ("class").replace (/experiment-[A-Z]+/, "") + "experiment-RUNNING");
 	        	}
 	        	else
-	        		notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + msg;
+	        	{
+	        		if (notificationElement)
+	        			notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + msg;
+	    			if (td)
+	    				td.addClass ("experiment-INAPPRORIATE");
+	    				//td.attr ("class", td.attr ("class").replace (/experiment-[A-Z]+/, "") + "experiment-INAPPRORIATE");
+	        	}
         	}
-        	
         }
         else
         {
-        	notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='error' /> sorry, serverside error occurred.";
+        	if (notificationElement)
+        		notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='error' /> sorry, serverside error occurred.";
+			if (td)
+				td.addClass ("experiment-INAPPRORIATE");
+				//td.attr ("class", td.attr ("class").replace (/experiment-[A-Z]+/, "") + "experiment-INAPPRORIATE");
         }
+    	console.log ("td post");
+    	console.log (td);
     };
     xmlhttp.send(JSON.stringify(jsonObject));
 }
@@ -65,11 +87,25 @@ function submitNewExperiment (jsonObject, notificationElement)
 
 function drawMatrix (matrix)
 {
+	/*var minBoxWidth = 10px;
+	var minBoxHeight = 10px;*/
+	
+	
+	
 	var models = [];
 	//console.log (matrix);
 	for (var key in matrix.models)
 		if (matrix.models.hasOwnProperty (key))
-			for (var version in matrix.models[key].versions)
+		{
+			var version = matrix.models[key].id;
+			modelMapper[version] = matrix.models[key];
+			modelMapper[version].row = models.length;
+			modelMapper[version].name = matrix.models[key].name;
+			//modelMapper[version].entityId = matrix.models[key].id;
+			models.push(version);
+			
+		}
+			/*for (var version in matrix.models[key].versions)
 				if (matrix.models[key].versions.hasOwnProperty (version))
 				{
 					modelMapper[version] = matrix.models[key].versions[version];
@@ -77,12 +113,20 @@ function drawMatrix (matrix)
 					modelMapper[version].name = matrix.models[key].name;
 					modelMapper[version].entityId = matrix.models[key].id;
 					models.push(version);
-				}
+				}*/
 
 	var protocols = [];
 	for (var key in matrix.protocols)
 		if (matrix.protocols.hasOwnProperty (key))
-			for (var version in matrix.protocols[key].versions)
+		{
+			var version = matrix.protocols[key].id;
+			protocolMapper[version] = matrix.protocols[key];//.versions[version];
+			protocolMapper[version].col = protocols.length;
+			protocolMapper[version].name = matrix.protocols[key].name;
+			//protocolMapper[version].entityId = matrix.protocols[key].id;
+			protocols.push(version);
+		}
+			/*for (var version in matrix.protocols[key].versions)
 				if (matrix.protocols[key].versions.hasOwnProperty (version))
 				{
 					protocolMapper[version] = matrix.protocols[key].versions[version];
@@ -90,12 +134,12 @@ function drawMatrix (matrix)
 					protocolMapper[version].name = matrix.protocols[key].name;
 					protocolMapper[version].entityId = matrix.protocols[key].id;
 					protocols.push(version);
-				}
+				}*/
 	
 	/*console.log ("models");
-	console.log (modelMapper);
+	console.log (modelMapper);*/
 	console.log ("protocols");
-	console.log (protocolMapper);*/
+	console.log (protocolMapper);
 	
 	var mat = [];
 	for (var i = 0; i < models.length; i++)
@@ -107,35 +151,17 @@ function drawMatrix (matrix)
 					model: modelMapper[models[i]],
 					protocol: protocolMapper[protocols[j]]
 			};
+			console.log (mat[i][j]);
 		}
 	}
 	//console.log ("matrix");
-	//console.log (mat);
+	console.log (mat);
 	
 	var div = document.getElementById("matrixdiv");
 	removeChildren (div);
 	
-	var canvas = document.createElement("canvas");
-	var ctx = canvas.getContext("2d");
-	canvas.id = "matrixcanvas";
-	div.appendChild(canvas);
-	canvas.style.width = "800px";
-	canvas.style.height = "600px";
-	canvas.width = 800;
-	canvas.height = 600;
+	console.log(protocolMapper);
 
-	var rows = mat.length;
-	var cols = mat[0].length;
-	
-	var width = canvas.width;
-	var height = canvas.height;
-	var boxWidth = width / cols;
-	var boxHeight = height / rows;
-	
-	/*console.log ("rc: ", rows, cols);
-	console.log ("wh: ", width, height);
-	console.log ("bwh: ", boxWidth, boxHeight);*/
-	
 	
 	for (var key in matrix.experiments)
 		if (matrix.experiments.hasOwnProperty (key))
@@ -143,111 +169,170 @@ function drawMatrix (matrix)
 			var exp = matrix.experiments[key];
 			
 			exp.name = exp.model.name + " @ " + exp.model.version + " & " + exp.protocol.name + " @ " + exp.protocol.version;
-
+			
+			//if (!modelMapper[exp.model.id] || !protocolMapper[exp.protocol.id])
+			//	continue;
+			
 			var row = modelMapper[exp.model.id].row;
+
+			console.log(exp);
+			console.log(exp.protocol.id);
+			console.log(exp.protocol);
 			var col = protocolMapper[exp.protocol.id].col;
 			mat[row][col].experiment = exp;
 		}
 	
+	
+	
+	
+	var tableDiv = document.createElement("div");
+	tableDiv.id = "matrixContainer";
 
-	for (var row = 0; row < mat.length; row++)
-		for (var col = 0; col < mat[row].length; col++)
+	var table = document.createElement("table");
+	table.setAttribute("class", "matrixTable");
+	
+	div.appendChild (tableDiv);
+	tableDiv.appendChild (table);
+
+
+	for (var row = -1; row < mat.length; row++)
+	{
+		var tr = document.createElement("tr");
+		table.appendChild (tr);
+		for (var col = -1; col < mat[0].length; col++)
 		{
-			if (mat[row][col].experiment)
+			var td = document.createElement("td");
+			tr.appendChild (td);
+			/*if (mat[row][col].experiment)
 				ctx.fillStyle = colorMapper[mat[row][col].experiment.latestResult];
 			else
-				ctx.fillStyle="#fff";
-			ctx.fillRect((col) * boxWidth, (row) * boxHeight, boxWidth, boxHeight);
+				ctx.fillStyle="#fff";*/
 			
-			ctx.beginPath ();
-			ctx.moveTo ((col) * boxWidth, (row) * boxHeight + boxHeight);
-			ctx.lineTo ((col) * boxWidth + boxWidth, (row) * boxHeight + boxHeight);
-			ctx.lineTo ((col) * boxWidth + boxWidth, (row) * boxHeight);
-			ctx.stroke ();
-		}
-
-	var modelLink = document.getElementById("modelLink");
-	var protocolLink = document.getElementById("protocolLink");
-	var expLink = document.getElementById("experimentLink");
-	
-	function getMousePos(canvas, evt) {
-        var rect = canvas.getBoundingClientRect();
-        return {
-          x: evt.clientX - rect.left,
-          y: evt.clientY - rect.top
-        };
-      }
-
-	
-	canvas.addEventListener("mouseover", function (event) {
-		lock = false;
-	}, false);
-	
-//	var rect = canvas.getBoundingClientRect();
-	canvas.addEventListener("mousemove", function (event) {
-		if (lock)
-			return;
-		
-		var mouse = getMousePos(canvas, event);
-
-		var x = mouse.x;//event.pageX - rect.left;
-		var y = mouse.y;//event.pageY - rect.top;
-		//console.log ("x: " + x + " y: " + y);
-		
-		// translate into matrix
-		var r = parseInt(y / boxHeight);
-		var c = parseInt(x / boxWidth);
-		
-		//console.log ("r: " + r + " c: " + c);
-		if (r >= mat.length || c >= mat[0].length)
-			return;
-		
-		if (mat[r][c].model)
-		{
-			modelLink.innerHTML = 
-				"<a href='" + contextPath + "/model/" + convertForURL (mat[r][c].model.name) + "/" + mat[r][c].model.entityId
-				+ "/" + convertForURL (mat[r][c].model.version) + "/" + mat[r][c].model.id + "/'>" + mat[r][c].model.name + " @ " + mat[r][c].model.version + "</a>";
-		}
-		else
-			modelLink.innerHTML = "";
-		
-		if (mat[r][c].protocol)
-			//protocolLink.innerHTML = mat[r][c].protocol.name + " @ " + mat[r][c].protocol.version;
-			protocolLink.innerHTML = 
-				"<a href='" + contextPath + "/protocol/" + convertForURL (mat[r][c].protocol.name) + "/" + mat[r][c].protocol.entityId
-				+ "/" + convertForURL (mat[r][c].protocol.version) + "/" + mat[r][c].protocol.id + "/'>" + mat[r][c].protocol.name + " @ " + mat[r][c].protocol.version + "</a>";
-		else
-			protocolLink.innerHTML = "";
-		
-		if (mat[r][c].experiment)
-			//expLink.innerHTML = mat[r][c].experiment.name;
-			expLink.innerHTML = 
-				"<a href='" + contextPath + "/experiment/" + convertForURL (mat[r][c].experiment.name) + "/"
-				+  mat[r][c].experiment.id + "/'>" + mat[r][c].experiment.name + "</a>";
-		else
-		{
-			var a = document.createElement ("a");
-			a.appendChild(document.createTextNode("create experiment"));
-			removeChildren (expLink);
-			expLink.appendChild (a);
+			//console.log ("row " + row + " col " + col);
 			
-			a.addEventListener("click", function () {
-				submitNewExperiment ({
-					task: "newExperiment",
-					model: mat[r][c].model.id,
-					protocol: mat[r][c].protocol.id
-				}, expLink);
-			}, false);
+			if (row == -1 && col == -1)
+				continue;
+			
+			if (row == -1)
+			{
+				var d1 = document.createElement("div");
+				var d2 = document.createElement("div");
+				var a = document.createElement("a");
+				a.href = contextPath + "/protocol/" + convertForURL (mat[0][col].protocol.name) + "/" + mat[0][col].protocol.entityId
+				+ "/" + convertForURL (mat[0][col].protocol.version) + "/" + mat[0][col].protocol.id;
+				d2.setAttribute("class", "vertical-text");
+				d1.setAttribute("class", "vertical-text__inner");
+				d2.appendChild (d1);
+				a.appendChild (document.createTextNode (mat[0][col].protocol.name));
+				d1.appendChild(a);
+				td.appendChild (d2);//document.createTextNode ("<div class='vertical-text'><div class='vertical-text__inner'>" + mat[row][col].protocol.name + "</div></div>"));
+				td.setAttribute("class", "matrixTableCol");
+				continue;
+			}
+			
+			if (col == -1)
+			{
+				var a = document.createElement("a");
+				a.href = contextPath + "/model/" + convertForURL (mat[row][0].model.name) + "/" + mat[row][0].model.entityId
+				+ "/" + convertForURL (mat[row][0].model.version) + "/" + mat[row][0].model.id;
+				a.appendChild (document.createTextNode (mat[row][0].model.name));
+				td.appendChild (a);
+				td.setAttribute("class", "matrixTableRow");
+				continue;
+			}
+			
+			
+			if (mat[row][col].experiment)
+				td.setAttribute("class", "experiment experiment-"+mat[row][col].experiment.latestResult);
+			else
+				td.setAttribute("class", "experiment experiment-NONE");
+			
+
+			//td.setAttribute("rel", "test123|test");
+			//td.setAttribute("rel", "test123");
+			//td.setAttribute("title", "test123");
+			
+
+			var titleText = "";
+
+			//var r = row, c = col;
+			
+			if (mat[row][col].model)
+			{
+				titleText += 
+					"M: <a href='" + contextPath + "/model/" + convertForURL (mat[row][col].model.name) + "/" + mat[row][col].model.entityId
+					+ "/" + convertForURL (mat[row][col].model.version) + "/" + mat[row][col].model.id + "/'>" + mat[row][col].model.name + " @ " + mat[row][col].model.version + "</a>|";
+			}
+			
+			if (mat[row][col].protocol)
+				//protocolLink.innerHTML = mat[row][col].protocol.name + " @ " + mat[row][col].protocol.version;
+				titleText += 
+					"P: <a href='" + contextPath + "/protocol/" + convertForURL (mat[row][col].protocol.name) + "/" + mat[row][col].protocol.entityId
+					+ "/" + convertForURL (mat[row][col].protocol.version) + "/" + mat[row][col].protocol.id + "/'>" + mat[row][col].protocol.name + " @ " + mat[row][col].protocol.version + "</a>|";
+						
+			if (mat[row][col].experiment)
+			{
+				//expLink.innerHTML = mat[row][col].experiment.name;
+				titleText +=  
+					"E: <a href='" + contextPath + "/experiment/" + convertForURL (mat[row][col].experiment.name) + "/"
+					+  mat[row][col].experiment.id + "/latest/'>" + mat[row][col].experiment.name + "</a>";
+				//if (mat[row][col].experiment.latestResult == "")
+				addMatrixClickListener (td, contextPath + "/experiment/" + convertForURL (mat[row][col].experiment.name) + "/"
+				+  mat[row][col].experiment.id + "/latest");
+			}
+			else
+			{
+				titleText +=  
+					"E: <a id='create-"+row+"-"+col+"'>create experiment</a>";
+				
+			}
+			
+			td.setAttribute("title", titleText);
+			createClueTip (td, mat, row, col);
 		}
-	}, false);
-	
-	canvas.addEventListener("click", function (event) {
-		lock = true;
-		
-		
-	}, false);
+	}
 	
 }
+
+function addMatrixClickListener (td, link)
+{
+				td.addEventListener("click", function () {
+					document.location.href = link;
+				}, false);
+}
+
+function createClueTip (td, mat, r, c)
+{
+
+	$(td).cluetip({
+		  hoverIntent: {
+			    sensitivity:  1,
+			    interval:     350,
+			    timeout:      350
+			  },
+		cluetipClass: 'jtip',
+		  dropShadow: false,
+		  mouseOutClose: true,
+		  sticky: true,
+		  positionBy: 'bottomTop', topOffset: 0,
+		  showTitle: false,
+		  splitTitle: '|',
+		  onShow:           function(ct, ci){
+			  console.log ("shown: " + '#create-'+r+'-'+c);
+			  $('#create-'+r+'-'+c).click (function () {
+				  console.log ("clicked");
+					submitNewExperiment ({
+						task: "newExperiment",
+						model: mat[r][c].model.id,
+						protocol: mat[r][c].protocol.id
+					}, document.getElementById ("actionIndicator"), $(td));
+					  console.log ("clicked2");
+				});
+			  console.log ("shown2");
+		  },
+		});
+}
+
 
 function getMatrix (jsonObject, actionIndicator)
 {
@@ -273,7 +358,7 @@ function getMatrix (jsonObject, actionIndicator)
         	return;
         
     	var json = JSON.parse(xmlhttp.responseText);
-    	console.log (json);
+    	//console.log (json);
     	displayNotifications (json);
     	
         if(xmlhttp.status == 200)
@@ -305,7 +390,7 @@ function prepareMatrix ()
 
 function switchPage (page)
 {
-	console.log ("switching to " + page);
+	//console.log ("switching to " + page);
 	for (var i = 0; i < pages.length; i++)
 	{
 		if (pages[i] == page)
@@ -316,7 +401,7 @@ function switchPage (page)
 }
 function registerSwitchPagesListener (btn, page)
 {
-	console.log ("register switch listener: " + page);
+	//console.log ("register switch listener: " + page);
 	btn.addEventListener("click", function () {
 		console.log ("switch listener triggered " + page);
 		switchPage (page);

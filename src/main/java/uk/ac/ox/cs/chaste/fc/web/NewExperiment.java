@@ -98,9 +98,9 @@ public class NewExperiment
 				ChasteEntityVersion model = getSchedEntity (request, session, db, notifications, userMgmt, modelMgmt, NEWEXP_MODEL);
 				ChasteEntityVersion protocol = getSchedEntity (request, session, db, notifications, userMgmt, protocolMgmt, NEWEXP_PROTOCOL);
 				if (model != null)
-				answer.put ("scheduledModel", model.getEntity ().getName () + " @ " + model.getVersion ());
+					answer.put ("scheduledModel", model.getEntity ().getName () + " @ " + model.getVersion ());
 				if (protocol != null)
-				answer.put ("scheduledProtocol", protocol.getEntity ().getName () + " @ " + protocol.getVersion ());
+					answer.put ("scheduledProtocol", protocol.getEntity ().getName () + " @ " + protocol.getVersion ());
 				
 				return answer;
 			}
@@ -344,7 +344,19 @@ public class NewExperiment
 		
 		
 		// send file for processing
-		FileTransfer.SubmitResult res = FileTransfer.submitExperiment (modelFile, protocolFile, signature);
+		FileTransfer.SubmitResult res = null;
+		try
+		{
+			res = FileTransfer.submitExperiment (modelFile, protocolFile, signature);
+		}
+		catch (Exception e)
+		{
+			ChasteExperimentVersion exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);
+			expMgmt.updateVersion (exp, e.getMessage (), ChasteExperimentVersion.STATUS_FAILED);
+			
+			throw e;
+		}
+		
 		if (!res.result)
 		{
 			ChasteExperimentVersion exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);

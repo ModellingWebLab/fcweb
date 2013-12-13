@@ -185,11 +185,13 @@ h1 a,h2 a,h3 a,h4 a,h5 a
 #error {
 	background-color: #e5cece;
 	border: 2px solid #7d3e3e;
+	padding: 0px 10px;
 }
 
 #info {
 	background-color: #ced5e5;
 	border: 2px solid #263e6a;
+	padding: 0px 10px;
 }
 
 .pointer {
@@ -274,7 +276,8 @@ h3#entityversionfilename
 
 
 #entityversion,
-#entityversionfiledetails
+#entityversionfiledetails,
+#filedetails
 {
 	/* hidden by default */
 	display: none;
@@ -289,6 +292,7 @@ h3#entityversionfilename
 	overflow:auto;
 }
 
+#uploadedfiles td,
 td.right {
 	text-align: right;
 }
@@ -313,6 +317,7 @@ tr:nth-child(5n+1)
 #experimentlist ul,*/
 #batchlist ul,
 #entityversionfilestable,
+#filestable,
 #accounttable
 {
 	font-size:.8em;
@@ -336,6 +341,10 @@ tr:nth-child(5n+1)
 .experiment-FAILED
 {
 	background-color:#ffe0e0;
+}
+#matrixTable .experiment-SUCCESS
+{
+	background-color:#05db00;
 }
 
 #experiment-files-switcher,
@@ -427,4 +436,98 @@ background-image: url(../img/red-dot.png);
 #expversioncolorlegend
 {
 	font-size:.8em;
+}
+#entityversionfilesreadme
+{
+	font-size:.8em;
+    background-color: #dddddd;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	padding:15px;
+	margin:10px;
+}
+.highlight-plot
+{
+	background-color: #eee;
+}
+#cluetip
+{
+	font-size:.8em;
+}
+#entityexperimentlistpartnersact a
+{
+	font-size:.8em;
+}
+.matrixTableCol,
+.matrixTableRow
+{
+	font-size:.8em;
+}
+/*.matrixTableCol
+{
+	transform:rotate(-90deg);
+	-webkit-transform: rotate(-90deg); 
+	-moz-transform: rotate(-90deg);	
+	-ms-transform:rotate(-90deg);
+	-o-transform: rotate(-90deg);
+	width: 1.2em;
+}*/
+.vertical-text {
+	display: inline-block;
+	overflow: hidden;
+	width: 1.5em;
+}
+.vertical-text__inner {
+	display: inline-block;
+	white-space: nowrap;
+	line-height: 1.5;
+	/*transform: translate(0,100%) rotate(-90deg);
+	transform-origin: 0 0;*/
+	transform:rotate(-90deg);
+	-webkit-transform: rotate(-90deg); 
+	-moz-transform: rotate(-90deg);	
+	-ms-transform:rotate(-90deg);
+	-o-transform: rotate(-90deg);
+}
+/* This element stretches the parent to be square
+   by using the mechanics of vertical margins  */
+.vertical-text__inner:after {
+	content: "";
+	display: block;
+	margin: -1.5em 0 100%;
+}
+.matrixTable .experiment-RUNNING
+{
+	background-color:#86b6f1;
+}
+.matrixTable .experiment-INAPPRORIATE
+{
+	background-color:#f1c886;
+}
+.matrixTable .experiment-FAILED
+{
+	background-color:#db0000;
+}
+.matrixTable .experiment-SUCCESS
+{
+	background-color:#05db00;
+}
+.matrixTable td
+{
+	border-bottom:1px dashed #ccc;
+	border-right:1px dashed #ccc;
+}
+
+.center
+{
+	text-align:center;
+}
+.small
+{
+	font-size:.8em;
+}
+
+.masterFile
+{
+	background-color: #bbd3ff;
 }

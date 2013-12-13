@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -20,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import javax.mail.MessagingException;
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -55,6 +59,7 @@ import uk.ac.ox.cs.chaste.fc.mgmt.ExperimentManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.ModelManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.ProtocolManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.Tools;
+import uk.ac.ox.cs.chaste.fc.mgmt.UserManager;
 import de.binfalse.bflog.LOGGER;
 import de.unirostock.sems.cbarchive.ArchiveEntry;
 import de.unirostock.sems.cbarchive.CombineArchive;
@@ -88,8 +93,17 @@ public class FileTransfer extends WebModule
 			// req[6] = file name
 		String[] req =  request.getRequestURI().substring(request.getContextPath().length()).split ("/");
 		
+		if (req.length == 3 && req[2].equals ("cleanUP"))
+		{
+			
+			cleanUp (db, notifications, userMgmt, user);
+			return "Index.jsp";
+		}
+		
 		if (req.length != 7)
 			return errorPage (request, response, null);
+		
+		System.out.println ("a");
 		
 		int entityId = -1;
 		int fileId = -1;
@@ -107,9 +121,12 @@ public class FileTransfer extends WebModule
 			LOGGER.warn ("user provided unparsebale ids. download impossible: " + req[4] + " / " + req[5]);
 			return errorPage (request, response, null);
 		}
+		System.out.println ("b " + entityId + " " + fileId);
 		
 		if (entityId < 0 || (fileId < 0 && !archive))
 			return errorPage (request, response, null);
+		
+		System.out.println ("b2");
 
 		if (req[2].equals ("m"))
 			return passEntity (request, response, db, notifications, entityId, archive, fileId, new ModelManager (db, notifications, userMgmt, user));
@@ -117,7 +134,8 @@ public class FileTransfer extends WebModule
 			return passEntity (request, response, db, notifications, entityId, archive, fileId, new ProtocolManager (db, notifications, userMgmt, user));
 		else if (req[2].equals ("e"))
 			return passEntity (request, response, db, notifications, entityId, archive, fileId, new ExperimentManager (db, notifications, userMgmt, user, new ModelManager (db, notifications, userMgmt, user), new ProtocolManager (db, notifications, userMgmt, user)));
-		
+
+		System.out.println ("c");
 		// nothing of the above?
 		return errorPage (request, response, null);
 		
@@ -131,10 +149,12 @@ public class FileTransfer extends WebModule
 		
 		// get file from entity
 		ChasteEntityVersion version = entityMgmt.getVersionById (entityId);
+		System.out.println ("version: " + version);
 		if (version == null)
 			return errorPage (request, response, null);
 		ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt);
 		fileMgmt.getFiles (version, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ());
+		System.out.println ("archive: " + archive);
 		if (archive)
 		{
 			try
@@ -152,6 +172,7 @@ public class FileTransfer extends WebModule
 		else
 		{
 			ChasteFile f = version.getFileById (fileId);
+			System.out.println ("f: " + f);
 			if (f == null)
 				return errorPage (request, response, null);
 			
@@ -234,7 +255,14 @@ public class FileTransfer extends WebModule
 	
 	
 	
-	
+
+	private final static String buildMailBody (String nick, String result)
+	{
+		return "Hi " + nick + ",\n\nthe experiment you submitted is finished.\nReturn message: "
+	+result
+	+"\nHave a look at your files: "+Tools.getThisUrl ()+"myfiles.html"
+	+ "\n\nSincerely,\nChaste dev-team";
+	}
 	
 	
 	
@@ -283,11 +311,7 @@ public class FileTransfer extends WebModule
 					return answer;
 				}
 				
-				user.setRole (preRole);
-				user.setMail (preMail);
 				
-				
-
 				System.out.println ("exp: " + exp);
 				
 				String returnmsg = request.getParameter ("returnmsg");
@@ -300,6 +324,19 @@ public class FileTransfer extends WebModule
 				
 				System.out.println ("supp: " + returnmsg + " -- " + returntype + " --> " + returnType);
 				
+				
+				user.setRole (preRole);
+				user.setMail (preMail);
+				User u = exp.getAuthor ();
+				try
+				{
+					if (u.isSendMails ())
+						Tools.sendMail (u.getMail (), u.getNick (), "Chaste Experiment finished", buildMailBody (u.getNick (), returnmsg));
+				}
+				catch (MessagingException e)
+				{
+					LOGGER.error ("couldn't send mail to user (exp finished)", e);
+				}
 				
 				File destination = new File (expMgmt.getEntityStorageDir () + File.separator + signature);
 				destination.mkdirs ();
@@ -348,7 +385,7 @@ public class FileTransfer extends WebModule
 								continue;
 							
 							// add the remaining to db
-							int fileId = fileMgmt.addFile (entry.getRelativeName (), CombineFormats.getFormatFromIdentifier (format), exp.getAuthor (), entry.getFile ().length ());
+							int fileId = fileMgmt.addFile (entry.getRelativeName (), CombineFormats.getFormatFromIdentifier (format), exp.getAuthor (), entry.getFile ().length (), false);
 							if (fileId < 0)
 							{
 								// TODO: cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
@@ -372,7 +409,7 @@ public class FileTransfer extends WebModule
 						File output = new File (destination.getAbsolutePath () + File.separator + "stdout.txt");
 						if (output.exists () && output.canRead ())
 						{
-							int fileId = fileMgmt.addFile ("stdout.txt", "text/plain", exp.getAuthor (), output.length ());
+							int fileId = fileMgmt.addFile ("stdout.txt", "text/plain", exp.getAuthor (), output.length (), false);
 							if (fileId < 0)
 							{
 								// TODO: cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
@@ -584,89 +621,8 @@ public class FileTransfer extends WebModule
 	    builder.addTextBody("signature", signature);
 	    builder.addTextBody("callBack", Tools.getThisUrl () + "submitExperiment.html");
 	    builder.addTextBody("password", Tools.getChastePassword ());
-	    final HttpEntity yourEntity = builder.build();
-
-	    class ProgressiveEntity implements HttpEntity {
-	        @Override
-	        public void consumeContent() throws IOException {
-	            //yourEntity.consumeContent();   
-	            EntityUtils.consume(yourEntity);
-	        }
-	        @Override
-	        public InputStream getContent() throws IOException,
-	                IllegalStateException {
-	            return yourEntity.getContent();
-	        }
-	        @Override
-	        public Header getContentEncoding() {             
-	            return yourEntity.getContentEncoding();
-	        }
-	        @Override
-	        public long getContentLength() {
-	            return yourEntity.getContentLength();
-	        }
-	        @Override
-	        public Header getContentType() {
-	            return yourEntity.getContentType();
-	        }
-	        @Override
-	        public boolean isChunked() {             
-	            return yourEntity.isChunked();
-	        }
-	        @Override
-	        public boolean isRepeatable() {
-	            return yourEntity.isRepeatable();
-	        }
-	        @Override
-	        public boolean isStreaming() {             
-	            return yourEntity.isStreaming();
-	        } // CONSIDER put a _real_ delegator into here!
-
-	        @Override
-	        public void writeTo(OutputStream outstream) throws IOException {
-
-	            class ProxyOutputStream extends FilterOutputStream {
-	                /**
-	                 * @author Stephen Colebourne
-	                 */
-
-	                public ProxyOutputStream(OutputStream proxy) {
-	                    super(proxy);    
-	                }
-	                public void write(int idx) throws IOException {
-	                    out.write(idx);
-	                }
-	                public void write(byte[] bts) throws IOException {
-	                    out.write(bts);
-	                }
-	                public void write(byte[] bts, int st, int end) throws IOException {
-	                    out.write(bts, st, end);
-	                }
-	                public void flush() throws IOException {
-	                    out.flush();
-	                }
-	                public void close() throws IOException {
-	                    out.close();
-	                }
-	            } // CONSIDER import this class (and risk more Jar File Hell)
-
-	            class ProgressiveOutputStream extends ProxyOutputStream {
-	                public ProgressiveOutputStream(OutputStream proxy) {
-	                    super(proxy);
-	                }
-	                public void write(byte[] bts, int st, int end) throws IOException {
-
-	                    // FIXME  Put your progress bar stuff here!
-
-	                    out.write(bts, st, end);
-	                }
-	            }
-
-	            yourEntity.writeTo(new ProgressiveOutputStream(outstream));
-	        }
-
-	    };
-	    ProgressiveEntity myEntity = new ProgressiveEntity();
+	    HttpEntity entity = builder.build();
+	    ProgressiveEntity myEntity = new ProgressiveEntity(entity);
 
 	    post.setEntity(myEntity);
 	    HttpResponse response = client.execute(post);
@@ -676,7 +632,7 @@ public class FileTransfer extends WebModule
 				return new SubmitResult (true, res.substring (signature.length ()).trim ());
 			if (res.trim ().startsWith (signature))
 			{
-				LOGGER.error ("chaste backend answered with !succ: " + res);
+				LOGGER.error ("Chaste backend answered with !succ: " + res);
 				return new SubmitResult (false, res.substring (signature.length ()).trim ());
 			}
 			LOGGER.error ("chaste backend answered w/ smth unexpected: " + res);
@@ -695,4 +651,212 @@ public class FileTransfer extends WebModule
 	    return content.trim();
 	}
 	
+	public static void scheduleCleanUp ()
+	{
+		new Thread () {
+			public void run ()
+			{
+				try
+				{
+					URL url = new URL(Tools.getThisUrl () + "download/cleanUP");
+					InputStream is = url.openStream();
+					is.close ();
+				}
+				catch (IOException e)
+				{
+					LOGGER.warn ("couldn't schedule cleanup script", e);
+				}
+			}
+		}.start ();
+	}
+	
+	
+	private void cleanUp (DatabaseConnector db, Notifications notifications, UserManager userMgmt, User user)
+	{
+		LOGGER.info ("cleaning");
+
+		String preRole = user.getRole ();
+		String preMail = user.getRole ();
+		user.setRole (User.ROLE_ADMIN);
+		user.setMail ("somemail");
+		
+		ModelManager modelMgmt = new ModelManager (db, notifications, userMgmt, user);
+		ProtocolManager protocolMgmt = new ProtocolManager (db, notifications, userMgmt, user);
+		ExperimentManager expMgmt = new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt);
+
+		modelMgmt.deleteEmptyEntities ();
+		protocolMgmt.deleteEmptyEntities ();
+		expMgmt.deleteEmptyEntities ();
+		
+		int removedFiles = 0;
+		
+		// check if files are unused
+		int maxAgeTmpFiles = 1000 * 60 * 60 * 24; //1d
+		
+		// -> tmp dir
+		File dir = new File (Tools.getTempDir ());
+		if (dir.exists ())
+		{
+			File [] files = dir.listFiles ();
+			
+			long curTime = System.currentTimeMillis ();
+			
+			for (File f : files)
+				if (curTime - f.lastModified () > maxAgeTmpFiles) // more than 1d
+				{
+					LOGGER.info ("remove tmp file " + f.getAbsolutePath () + " because it's older than " + maxAgeTmpFiles + "ms");
+					f.delete ();
+					removedFiles++;
+				}
+		}
+		
+		// -> models/protocols/experiments
+		dir = new File (modelMgmt.getEntityStorageDir ());
+		File [] files = dir.listFiles ();
+		for (File f : files)
+		{
+			// is there a model in that dir?
+			if (modelMgmt.getVersionByPath (f.getName ()) == null)
+				try
+				{
+					LOGGER.info ("remove file " + f.getAbsolutePath () + " because it's not in db");
+					Tools.deleteRecursively (f, false);
+					removedFiles++;
+				}
+				catch (IOException e)
+				{
+					LOGGER.error ("couldn't remove file " + f.getAbsolutePath () + " during clean up!");
+				}
+		}
+		
+		
+		dir = new File (protocolMgmt.getEntityStorageDir ());
+		files = dir.listFiles ();
+		for (File f : files)
+		{
+			// is there a protocol in that dir?
+			if (protocolMgmt.getVersionByPath (f.getName ()) == null)
+				try
+				{
+					LOGGER.info ("remove file " + f.getAbsolutePath () + " because it's not in db");
+					Tools.deleteRecursively (f, false);
+					removedFiles++;
+				}
+				catch (IOException e)
+				{
+					LOGGER.error ("couldn't remove file " + f.getAbsolutePath () + " during clean up!");
+				}
+		}
+		
+		
+		dir = new File (expMgmt.getEntityStorageDir ());
+		files = dir.listFiles ();
+		for (File f : files)
+		{
+			// is there a exp in that dir?
+			if (expMgmt.getVersionByPath (f.getName ()) == null)
+				try
+				{
+					LOGGER.info ("remove file " + f.getAbsolutePath () + " because it's not in db");
+					Tools.deleteRecursively (f, false);
+					removedFiles++;
+				}
+				catch (IOException e)
+				{
+					LOGGER.error ("couldn't remove file " + f.getAbsolutePath () + " during clean up!");
+				}
+		}
+
+		LOGGER.info ("cleaning finished, removed " + removedFiles + " files");
+
+		user.setRole (preRole);
+		user.setMail (preMail);
+	}
+	
+	static class ProgressiveEntity implements HttpEntity {
+		HttpEntity entity;
+		public ProgressiveEntity (HttpEntity entity)
+		{
+			this.entity = entity;
+		}
+		
+    @Override
+    public void consumeContent() throws IOException {
+        //yourEntity.consumeContent();   
+        EntityUtils.consume(entity);
+    }
+    @Override
+    public InputStream getContent() throws IOException,
+            IllegalStateException {
+        return entity.getContent();
+    }
+    @Override
+    public Header getContentEncoding() {             
+        return entity.getContentEncoding();
+    }
+    @Override
+    public long getContentLength() {
+        return entity.getContentLength();
+    }
+    @Override
+    public Header getContentType() {
+        return entity.getContentType();
+    }
+    @Override
+    public boolean isChunked() {             
+        return entity.isChunked();
+    }
+    @Override
+    public boolean isRepeatable() {
+        return entity.isRepeatable();
+    }
+    @Override
+    public boolean isStreaming() {             
+        return entity.isStreaming();
+    } // CONSIDER put a _real_ delegator into here!
+
+    @Override
+    public void writeTo(OutputStream outstream) throws IOException {
+
+        class ProxyOutputStream extends FilterOutputStream {
+            /**
+             * @author Stephen Colebourne
+             */
+
+            public ProxyOutputStream(OutputStream proxy) {
+                super(proxy);    
+            }
+            public void write(int idx) throws IOException {
+                out.write(idx);
+            }
+            public void write(byte[] bts) throws IOException {
+                out.write(bts);
+            }
+            public void write(byte[] bts, int st, int end) throws IOException {
+                out.write(bts, st, end);
+            }
+            public void flush() throws IOException {
+                out.flush();
+            }
+            public void close() throws IOException {
+                out.close();
+            }
+        } // CONSIDER import this class (and risk more Jar File Hell)
+
+        class ProgressiveOutputStream extends ProxyOutputStream {
+            public ProgressiveOutputStream(OutputStream proxy) {
+                super(proxy);
+            }
+            public void write(byte[] bts, int st, int end) throws IOException {
+
+                // FIXME  Put your progress bar stuff here!
+
+                out.write(bts, st, end);
+            }
+        }
+
+        entity.writeTo(new ProgressiveOutputStream(outstream));
+    }
+
+};
 }

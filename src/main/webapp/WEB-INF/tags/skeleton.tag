@@ -127,22 +127,6 @@
 		</div><%-- #notifications --%>
 		<%-- notification stuff done --%>
 		
-		<c:if test="${user.allowedToCreateNewExperiment}">
-			<div id='newexpcontainer' <c:if test="${(newExpModelName == null || empty newExpModelName) && (newExpProtocolName == null || empty newExpProtocolName)}">class='invisible'</c:if>  >
-				<div id='newexpicon'>
-					<img alt="new experiment icon" src="${contextPath}/res/img/create-experiment.png" />
-				</div>
-				<div id='newexp'>
-					<span id='newexpheadline'>Create new experiment</span><br />
-					Model: <span id='newexpmodel'>${newExpModelName}</span><br />
-					Protocol: <span id='newexpprotocol'>${newExpProtocolName}</span><br />
-					<a id='newexpsubmit'>submit experiment</a>
-					<c:if test="${user.allowedToForceNewExperiment}">
-						<small>(<a id='newexpsubmitforce'>force new version</a>)</small>
-					</c:if>
-				</div>
-			</div>
-		</c:if>
 		
 		<%-- here comes the action --%>
 		<div id="body">
@@ -154,7 +138,7 @@
 		
 		<%-- finish the site --%>
 		<footer>
-			some footer &copy; 2013 Team Jonathan
+			some footer &copy; 2013 Team Jonathan &amp; Gary
 		</footer>
 		
 		

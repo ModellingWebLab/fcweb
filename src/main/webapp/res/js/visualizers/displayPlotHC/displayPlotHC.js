@@ -18,7 +18,9 @@ HCPlotter.prototype.getContentsCallback = function (succ)
 		this.div.appendChild (document.createTextNode ("failed to load the contents"));
 	else
 	{
-		var csvData = getCSVColumnsDownsampled (this.file);
+		//var plotPoints = true;
+		//var csvData = getCSVColumnsDownsampled (this.file);
+		var csvData = (this.file.linestyle == "linespoints" || THISfile.linestyle == "points") ? getCSVColumnsNonDownsampled (this.file) : getCSVColumnsDownsampled (this.file);
 		
 		var div = document.createElement("div");
 		var id = "hcplot-" + this.file.id;
@@ -34,62 +36,39 @@ HCPlotter.prototype.getContentsCallback = function (succ)
                 var curData = [];
                 for (var j = 0; j < csvData[i].length; j++)
                         curData.push ([csvData[i][j].x, csvData[i][j].y]);
+                //if (curData.length > 100)
+                //	plotPoints = false;
                 //plot.polyline("line " + i, { x: csvData[0], y: csvData[i], stroke:  colorPalette.getRgba (col), thickness: 1 });
                 datasets.push ({name : "line " + i, data: curData});
         }
         
-        
-		
-		
-		//$(id).plot (data, {});
-		$("#"+id).highcharts({
+		var options = {
 	        title: {
-	            text: 'some title'
+	            text: ''
 	        },
 	        plotOptions: {
 	            series: {
 	                allowPointSelect: true
+	            },
+	            line: {
+	            	marker: {
+	            		enabled: this.file.linestyle == "linespoints"
+	            	}
 	            }
 	        },
-	/*,plotOptions: {
-	            series: {
-	                cursor: 'pointer',
-	                point: {
-	                    events: {
-	                        click: function() {
-	                            hs.htmlExpand(null, {
-	                                pageOrigin: {
-	                                    x: this.pageX,
-	                                    y: this.pageY
-	                                },
-	                                headingText: this.series.name,
-	                                maincontentText: Highcharts.dateFormat('%A, %b %e, %Y', this.x) +':<br/> '+
-	                                    this.y +' visits',
-	                                width: 200
-	                            });
-	                        }
-	                    }
-	                },
-	                marker: {
-	                    lineWidth: 1
-	                }
-	            }
-	        },*/
 	
-	        series: datasets/*[
-		        {
-		        	name: 'All visits',
-		            lineWidth: 4,
-		            marker:
-		            {
-		                radius: 4
-		            }
-		        },
-		        {
-		            name: 'New visitors'
-		        }
-		    ]*/
-		});
+	        series: datasets
+		};
+		
+		if (this.file.xAxes)
+			options.xAxis = {title : { text : this.file.xAxes}};
+		if (this.file.yAxes)
+			options.yAxis = {title : { text : this.file.yAxes}};
+		if (this.file.title)
+			options.title = {text : this.file.title};
+		
+		
+		$("#"+id).highcharts(options);
 	}
 		
 };
@@ -101,6 +80,183 @@ HCPlotter.prototype.show = function ()
 	if (!this.setUp)
 		this.file.getContents (this);
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+function HCPlotterComparer (file, div)
+{
+	this.file = file;
+	this.div = div;
+	this.setUp = false;
+	div.appendChild (document.createTextNode ("loading"));
+	div.setAttribute ("class", "HighChartDiv");
+	this.gotFileContents = 0;
+	this.ok = true;
+};
+HCPlotterComparer.prototype.getContentsCallback = function (succ)
+{
+	//console.log ("getContentsCallback : " + succ + " -> so far: " + this.gotFileContents + " of " + this.file.entities.length);
+	if (!succ)
+		this.ok = false;
+	
+	this.gotFileContents++;
+	
+	if (this.gotFileContents >= this.file.entities.length)
+		this.showContents ();
+};
+
+HCPlotterComparer.prototype.showContents = function ()
+{
+	//console.log ("insert content");
+	//console.log (this.div);
+	removeChildren (this.div);
+	if (!this.ok)
+		this.div.appendChild (document.createTextNode ("failed to load the contents"));
+	else
+	{
+		this.setUp = true;
+		//var plotPoints = true;
+		//var csvData = getCSVColumnsDownsampled (this.file);
+		
+		var lineStyle = this.file.linestyle;
+		
+		var csvDatas = new Array ();
+		
+		for (var i = 0; i < this.file.entities.length; i++)
+		{
+			csvDatas.push ({
+					data: (lineStyle == "linespoints" || lineStyle == "points") ?
+							getCSVColumnsNonDownsampled (this.file.entities[i].entityFileLink) : getCSVColumnsDownsampled (this.file.entities[i].entityFileLink),
+					entity: this.file.entities[i].entityLink,
+					file: this.file.entities[i].entityFileLink
+			});
+		}
+		
+		
+		
+		
+		
+		
+		
+		//var csvData = (this.file.linestyle == "linespoints" || THISfile.linestyle == "points") ? getCSVColumnsNonDownsampled (this.file) : getCSVColumnsDownsampled (this.file);
+		
+		var div = document.createElement("div");
+		var id = "hcplot-" + this.file.id;
+		div.id = id;
+		div.style.width = "780px";
+		div.style.height = "450px";
+		this.div.appendChild (div);
+		
+		
+        var datasets = [];
+
+        for (var j = 0; j < csvDatas.length; j++)
+        {
+        	//console.log (csvDatas[j]);
+        	//var tmp = "<p><strong>" + csvDatas[j].entity.name + ":</strong> ";
+        	var csvData = csvDatas[j].data;
+        	for (var i = 1; i < csvData.length; i++)
+        	{
+        		var curData = [];
+	            for (var k = 0; k < csvData[i].length; k++)
+	                curData.push ([csvData[i][k].x, csvData[i][k].y]);
+	            
+	            var key = csvDatas[j].entity.id + "-" + csvDatas[j].file.sig + "-" + i;
+	            var label = csvDatas[j].entity.name + " line " + i;
+	            //datasets[key] = {label : label, data: curData, color: curColor};
+	            //curColor++;
+                datasets.push ({name : label, data: curData});
+	            
+	            /*tmp += "<input type='checkbox' name='" + key +
+                //"' id='id" + key + "'></input>" +
+                "' checked='checked' id='id" + key + "'></input>" +
+                "<label for='id" + key + "'>"
+                + " line " + i + "</label>";*/
+        	}
+        	//choiceContainer.append(tmp + "</p>");
+        	
+        }
+        
+        
+        
+/*
+        for (var i = 1; i < csvData.length; i++)
+        {
+                var curData = [];
+                for (var j = 0; j < csvData[i].length; j++)
+                        curData.push ([csvData[i][j].x, csvData[i][j].y]);
+                //if (curData.length > 100)
+                //	plotPoints = false;
+                //plot.polyline("line " + i, { x: csvData[0], y: csvData[i], stroke:  colorPalette.getRgba (col), thickness: 1 });
+        }*/
+        
+		var options = {
+	        title: {
+	            text: ''
+	        },
+	        plotOptions: {
+	            series: {
+	                allowPointSelect: true
+	            },
+	            line: {
+	            	marker: {
+	            		enabled: this.file.linestyle == "linespoints"
+	            	}
+	            }
+	        },
+	
+	        series: datasets
+		};
+		
+		if (this.file.xAxes)
+			options.xAxis = {title : { text : this.file.xAxes}};
+		if (this.file.yAxes)
+			options.yAxis = {title : { text : this.file.yAxes}};
+		if (this.file.title)
+			options.title = {text : this.file.title};
+		
+		
+		$("#"+id).highcharts(options);
+	}
+		
+};
+
+HCPlotterComparer.prototype.show = function ()
+{
+	if (!this.setUp)
+	{
+		this.file.getContents (this);
+	}
+	else
+		this.showContents ();
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -123,7 +279,12 @@ function HCPlot ()
 
 HCPlot.prototype.canRead = function (file)
 {
-	return file.type.match (/csv/gi) || file.name.split('.').pop() == "csv";
+	if (file.name && file.name == "outputs-default-plots.csv")
+		return false;
+	if (file.name && file.name == "outputs-contents.csv")
+		return false;
+	
+	return (file.type && file.type.match (/csv/gi)) || file.name.split('.').pop() == "csv";
 };
 
 HCPlot.prototype.getName = function ()
@@ -144,6 +305,10 @@ HCPlot.prototype.getDescription = function ()
 HCPlot.prototype.setUp = function (file, div)
 {
 	return new HCPlotter (file, div);
+};
+HCPlot.prototype.setUpComparision = function (files, div)
+{
+	return new HCPlotterComparer (files, div);
 };
 
 

@@ -43,6 +43,10 @@
         <servlet-class>uk.ac.ox.cs.chaste.fc.web.NewExperiment</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>Compare</servlet-name>
+        <servlet-class>uk.ac.ox.cs.chaste.fc.web.Compare</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>Admin</servlet-name>
         <servlet-class>uk.ac.ox.cs.chaste.fc.web.Admin</servlet-class>
     </servlet>
@@ -95,6 +99,10 @@
         <url-pattern>/model/*</url-pattern>
         <url-pattern>/protocol/*</url-pattern>
         <url-pattern>/experiment/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Compare</servlet-name>
+        <url-pattern>/compare/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Admin</servlet-name>

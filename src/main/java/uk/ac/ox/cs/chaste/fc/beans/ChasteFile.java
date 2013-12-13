@@ -25,10 +25,11 @@ public class ChasteFile
 	private String name;
 	private long size;
 	private String url;
+	private boolean masterFile;
 	
 	public ChasteFile (int id, String name, Timestamp filecreated,
 		//String filevis,
-		String filetype, long size, User author)
+		String filetype, long size, User author, boolean masterFile)
 	{
 		super ();
 		this.id = id;
@@ -39,6 +40,7 @@ public class ChasteFile
 		this.author = author;
 		this.url = Tools.convertForURL (name);
 		this.size = size;
+		this.masterFile = masterFile;
 	}
 	
 	public User getAuthor ()
@@ -77,6 +79,11 @@ public class ChasteFile
 		return size;
 	}
 	
+	public boolean isMasterFile ()
+	{
+		return masterFile;
+	}
+	
 
 
 	
@@ -104,6 +111,7 @@ public class ChasteFile
 		json.put ("author", author.getNick ());
 		json.put ("size", size);
 		json.put ("name", name);
+		json.put ("masterFile", masterFile);
 		
 		return json;
 	}

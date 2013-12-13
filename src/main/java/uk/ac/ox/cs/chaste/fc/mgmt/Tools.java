@@ -32,6 +32,15 @@ public class Tools
 	private static String chasteUrl = "chaste.cs.ox.ac.uk";
 	private static String thisUrl = "chaste.cs.ox.ac.uk";
 	
+	private static String chastePassword = "chaste.cs.ox.ac.uk";
+	private static String tempDir = "/tmp/chasteTempDir";
+	private static String storageDir = "/tmp/chasteStorageDir";
+	
+	public static final String NEWLINE = System.getProperty("line.separator");
+	public static final String FILESEP = System.getProperty("file.separator");
+	public static final SimpleDateFormat dateFormater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	//public static final SimpleDateFormat dateFormater = new SimpleDateFormat("MMM d, yyyy 'at' h:mm a");
+	
 	
 	public static String getThisUrl ()
 	{
@@ -69,14 +78,6 @@ public class Tools
 		Tools.chastePassword = chastePassword;
 	}
 
-	private static String chastePassword = "chaste.cs.ox.ac.uk";
-	private static String tempDir = "/tmp/chasteTempDir";
-	private static String storageDir = "/tmp/chasteStorageDir";
-	
-	public static final String FILESEP = System.getProperty("file.separator");
-	public static final SimpleDateFormat dateFormater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	//public static final SimpleDateFormat dateFormater = new SimpleDateFormat("MMM d, yyyy 'at' h:mm a");
-	
 	public static final String getPassword (int min, int max)
 	{
 		String pw = "";
@@ -87,11 +88,11 @@ public class Tools
 		return pw.substring (0, new Random ().nextInt(max - min) + min);
 	}
 	
-	public static void delete (File f, boolean breakable) throws IOException
+	public static void deleteRecursively (File f, boolean breakable) throws IOException
 	{
 		if (f.isDirectory()) {
 	    for (File c : f.listFiles())
-	      delete(c, breakable);
+	      deleteRecursively(c, breakable);
 	  }
 		if (!f.delete ())
 		{

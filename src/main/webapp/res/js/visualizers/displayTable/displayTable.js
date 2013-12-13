@@ -21,6 +21,7 @@ contentTabularizer.prototype.getContentsCallback = function (succ)
 		var data = getCSV (this.file);
 		
 		var table = document.createElement("table");
+		table.setAttribute("class", "displayContentsTable");
 		
 		for (var i = 0; i < data.length; i++)
 		{

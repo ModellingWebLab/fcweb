@@ -209,6 +209,10 @@ extends HttpServlet
 		
 		configure ();
 		
+		if (!fileTransfer)
+			if (Math.random () < .05) // on avg every 20th click
+				FileTransfer.scheduleCleanUp ();
+		
 	  HttpSession session = request.getSession (true);
 	  CookieManager cookieMgmt = new CookieManager (request, response);
 		Notifications notifications = new Notifications ();
@@ -224,7 +228,7 @@ extends HttpServlet
 		}
 		else
 		{
-			String dispatch = JSP_PATH + JSP_ERR;
+			String dispatch = JSP_ERR;
 			try
 			{
 				dispatch = runWebRequest (request, response, db, notifications, user, session);
