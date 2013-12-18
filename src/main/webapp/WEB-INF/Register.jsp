@@ -5,13 +5,13 @@
     <h1>Register for Chaste</h1>
       <section id="registerform">
     	<p>
-	    	<label for="mail">Mail Address* <small>(we'll send you a password and use it for meta data of your files)</small></label>
+	    	<label for="mail">E-mail Address* <small>(we'll send you a password and use it for meta data of your files)</small></label>
 	    	<br/>
 	    	<input type="email" name="mail" id="mail" placeholder="your email address" /> <span id="mailaction"></span>
     	</p>
     	
     	<p>
-	    	<label for="nick">Nick* <small>(will be associated to your content)</small></label>
+	    	<label for="nick">Nickname* <small>(will be associated to your content)</small></label>
 	    	<br/>
 	    	<input type="text" name="nick" id="nick" placeholder="your alias goes here" /> <span id="nickaction"></span>
     	</p>
