@@ -66,9 +66,9 @@ output_zip.write(child_stdout_name, 'stdout.txt')
 for ofile in output_files:
     if os.path.isfile(ofile):
         output_zip.write(ofile, os.path.basename(ofile))
-outcome = 'success' if 'success' in output_zip.filelist else 'failed'
+outcome = 'success' if 'success' in output_zip.namelist() else 'failed'
 # Add a manifest if Chaste didn't create one
-if 'manifest.xml' not in output_zip.filelist:
+if 'manifest.xml' not in output_zip.namelist():
     manifest = open(os.path.join(temp_dir, 'manifest.xml'), 'w')
     manifest.write("""<?xml version='1.0' encoding='utf-8'?>
 <omexManifest xmlns='http://identifiers.org/combine.specifications/omex-manifest'>
