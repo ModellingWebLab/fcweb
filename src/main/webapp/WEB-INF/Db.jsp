@@ -5,10 +5,10 @@
     <h1>Available experiments</h1>
     
     <button id="matrixchooser">matrix</button>
-    <!-- Not yet implemented:  <button id="searchchooser">search</button>  -->
+    <button id="searchchooser">search</button>
     
     <section id="searchTab">
-        <h2>Search</h2>
+        <h2>Search (not yet implemented)</h2>
         <input type="text" id="filter" placeholder="search the DB" /> <button>search</button>
     </section>
     
