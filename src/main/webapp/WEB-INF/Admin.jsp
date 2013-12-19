@@ -2,7 +2,7 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}MyAccount - " contextPath="${contextPath}">
+<t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}Administration - " contextPath="${contextPath}">
     <h1>Batch</h1>
     Changed Chaste Version? 
      <a id="rerunExperiments"><img src="${contextPath}/res/img/refresh.png" alt="rerun experiments" title="rerun experiments"/> ReRun all Experiments</a> 

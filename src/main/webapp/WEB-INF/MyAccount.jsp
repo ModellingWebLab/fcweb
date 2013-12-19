@@ -2,7 +2,7 @@
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}MyAccount - " contextPath="${contextPath}">
+<t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}My Account - " contextPath="${contextPath}">
     <h1>Your Account</h1>
     <table id="myaccounttable" class="leftright">
     	<tr>
