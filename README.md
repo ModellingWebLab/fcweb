@@ -14,16 +14,14 @@ following is about debian based systems using tomcat7
 ### Setup database
 create database from resources/chaste.sql
 
-create user having all permissions on that database.
+create db user having all permissions on that database.
 
 ### setup backend
 
 setup webserver/vhost that is able to execute python scripts. copy `resources/cgi-bin/*py` to the webserver, so that it is executable from the frontend.
 
 ### Tomcat configuration
-make sure tomcat is using at least java in version 7. it can be configured in /etc/default/tomcat7
-
-add jdbc mysql driver to /var/lib/tomcat7/lib.
+make sure tomcat is using at least java in version 7. tomcat's java home can be configured in /etc/default/tomcat7
 
 Server configuration is in `/etc/tomcat7/server.xml`. modify file, so that it includes a line like:
 
@@ -33,6 +31,8 @@ Server configuration is in `/etc/tomcat7/server.xml`. modify file, so that it in
 then, context files are stored in `/var/lib/tomcat7/context` and your apps are expected to be in `/var/lib/tomcat7/webapps`.
 
 copy `resources/FunctionalCuration.xml` to `/var/lib/tomcat7/context` and configure the file properly, including database credentials and link to the backend.
+
+add jdbc mysql driver to /var/lib/tomcat7/lib. (http://dev.mysql.com/downloads/connector/j/)
 
 ### build project
 add the sems maven repository to your list of repositories: http://sems.uni-rostock.de/2013/10/maven-repository/
