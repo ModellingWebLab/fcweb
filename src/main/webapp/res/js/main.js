@@ -283,23 +283,23 @@ function sortChildrenByAttribute (elem, reverse, attr)
 	
 	for (var i = 0; i < children.length; i++)
 	{
-		console.log (children[i]);
-		console.log (children[i].nodeType);
-		console.log (children[i].attr);
-		console.log (children[i][attr]);
+		//console.log (children[i]);
+		//console.log (children[i].nodeType);
+		//console.log (children[i].attr);
+		//console.log (children[i][attr]);
 		if (children[i].nodeType == 1 && children[i][attr])
 			items.push(children[i]);
 	}
-	console.log ("sorting");
-	console.log (items);
+	//console.log ("sorting");
+	//console.log (items);
 	
 	items.sort(function (a, b)
 			{
 				return a[attr] == b[attr] ? 0 : (a[attr] > b[attr] ? ret : -1 * ret);
 			});
 
-	console.log (items);
-	console.log ("sorted");
+	//console.log (items);
+	//console.log ("sorted");
 	
 	for (var i = 0; i < items.length; i++)
 		elem.appendChild (items[i]);

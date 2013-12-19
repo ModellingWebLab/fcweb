@@ -86,7 +86,7 @@ function updateVisibility (jsonObject, actionIndicator)
         	return;
         
     	var json = JSON.parse(xmlhttp.responseText);
-    	console.log (json);
+    	//console.log (json);
     	displayNotifications (json);
     	
         if(xmlhttp.status == 200)
@@ -133,7 +133,7 @@ function deleteEntity (jsonObject)
         	return;
         
     	var json = JSON.parse(xmlhttp.responseText);
-    	console.log (json);
+    	//console.log (json);
     	displayNotifications (json);
     	
         if(xmlhttp.status == 200)
@@ -169,14 +169,6 @@ function deleteEntity (jsonObject)
     xmlhttp.send (JSON.stringify (jsonObject));
 }
 
-/*filesTable = {};
-filesTable.table = dv.filestable;
-filesTable.plots = {};
-filesTable.pngeps = {};
-filesTable.otherCSV = {};
-filesTable.defaults = {};
-filesTable.other = {};
-filesTable.all = new Array ();*/
 function sortTable (plots)
 {
 	for (var i = 0; i < filesTable.all.length; i++)
@@ -187,6 +179,7 @@ function sortTable (plots)
 			if (f.name == plots[j])
 			{
 				filesTable.plots[f.name] = f;
+				found = true;
 				break;
 			}
 		if (found)
@@ -201,15 +194,31 @@ function sortTable (plots)
 			filesTable.other[f.name] = f;
 	}
 	
+
+	var resortPartially = function (arr, css)
+	{
+		var cur = keys(arr).sort();
+		for (var i = 0; i < cur.length; i++)
+		{
+			$(arr[cur[i]].row).addClass ("filesTable-" + css);
+			filesTable.table.removeChild (arr[cur[i]].row);
+			filesTable.table.appendChild (arr[cur[i]].row);
+		}
+	};
 	
-	
-	
-	
-	var arr = filesTable.plots;
-	var cur = keys(arr).sort();
-	for (var i = 0; i < cur.length; i++)
-		filesTable.table.appendChild (arr[cur[i]].row);
-	
+	/* 
+	according to keytask :    
+	Those CSV files corresponding to plots, in the order given in default-plots.csv
+    png & eps files
+    Other CSV files corresponding to outputs
+    The contents & default-plots files (although don't give buttons to plot these!)
+    Other files 
+    */
+	resortPartially (filesTable.plots, "plots");
+	resortPartially (filesTable.pngeps, "pngeps");
+	resortPartially (filesTable.otherCSV, "otherCSV");
+	resortPartially (filesTable.defaults, "defaults");
+	resortPartially (filesTable.other, "other");
 }
 
 
@@ -223,7 +232,7 @@ function highlightPlots (version, showDefault)
 		if (plotDescription[i].length < 2)
 			continue;
 		//console.log (plotDescription[i][2]);
-		var row = document.getElementById ("filerow-" + plotDescription[i][2]);
+		var row = document.getElementById ("filerow-" + plotDescription[i][2].hashCode ());
 		if (row)
 		{
 			row.setAttribute("class", "highlight-plot");
@@ -444,7 +453,7 @@ function displayVersion (id, showDefault)
 	{
 		var file = files[v.files[i]];
 		tr = document.createElement("tr");
-		tr.setAttribute("id", "filerow-" + file.name);
+		tr.setAttribute("id", "filerow-" + file.name.hashCode ());
 		if (file.masterFile)
 			tr.setAttribute("class", "masterFile");
 		td = document.createElement("td");
@@ -939,14 +948,14 @@ function render ()
 	var url = parseUrl (document.location.href);
 	var curVersionId = getCurVersionId (url);
 	
-	console.log ("curVersionId " + curVersionId);
+	//console.log ("curVersionId " + curVersionId);
 	if (curVersionId)
 	{
 		var curFileId = getCurFileId (url);
 		var pluginName = getCurPluginName (url);
 
-		console.log ("curFileId  " + curFileId);
-		console.log ("pluginName " + pluginName);
+		//console.log ("curFileId  " + curFileId);
+		//console.log ("pluginName " + pluginName);
 		
 		var v = versions[curVersionId];
 		if (!v)

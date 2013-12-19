@@ -1,10 +1,12 @@
 package uk.ac.ox.cs.chaste.fc.web;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -143,6 +145,7 @@ public class Register extends WebModule
 					try
 					{
 						Tools.sendMail (mail, nick, "Successful Registration at Chaste", buildMailBody (nick, password));
+						informAdmins (nick);
 						
 						JSONObject res = new JSONObject ();
 						res.put ("response", true);
@@ -169,6 +172,30 @@ public class Register extends WebModule
 		}
 		
 		return answer;
+	}
+	
+	private void informAdmins (String newUser)
+	{
+		String mailSubject = "New Registration at Chaste Functional Curation Web Interface";
+		String mailBody = "Hey Admin,\n\ngood news: "+newUser+" just registered for the Chaste Functional Curation Web Interface!"
+			+ "\nPlease go to the Admin interface and check it's role:\n\nhttps://userpc58.cs.ox.ac.uk/FunctionalCuration/admin.html"
+			+ "\n\nBest wishes,\nThe Chaste Dev-Team";
+		
+		Vector<User> users = userMgmt.getUsers ();
+		for (User u: users)
+		{
+			if (u.getRole ().equals (User.ROLE_ADMIN))
+			{
+				try
+				{
+					Tools.sendMail (u.getMail (), u.getNick (), mailSubject, mailBody);
+				}
+				catch (UnsupportedEncodingException | MessagingException e)
+				{
+					LOGGER.error ("could not notify admins about new user registration", e);
+				}
+			}
+		}
 	}
 	
 	private final static String buildMailBody (String nick, String password)
