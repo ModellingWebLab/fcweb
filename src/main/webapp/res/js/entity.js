@@ -6,6 +6,7 @@ var entityType;
 var entityId;
 var curVersion = null;
 var converter = new Showdown.converter();
+var filesTable = {};
 
 var visualizers = {};
 
@@ -167,10 +168,56 @@ function deleteEntity (jsonObject)
     };
     xmlhttp.send (JSON.stringify (jsonObject));
 }
+
+/*filesTable = {};
+filesTable.table = dv.filestable;
+filesTable.plots = {};
+filesTable.pngeps = {};
+filesTable.otherCSV = {};
+filesTable.defaults = {};
+filesTable.other = {};
+filesTable.all = new Array ();*/
+function sortTable (plots)
+{
+	for (var i = 0; i < filesTable.all.length; i++)
+	{
+		var f = filesTable.all[i];
+		var found = false;
+		for (var j = 0; j < plots.length; j++)
+			if (f.name == plots[j])
+			{
+				filesTable.plots[f.name] = f;
+				break;
+			}
+		if (found)
+			continue;
+		if (f.name.endsWith ("png") || f.name.endsWith ("eps"))
+			filesTable.pngeps[f.name] = f;
+		else if (f.name == "outputs-default-plots.csv" || f.name == "outputs-contents.csv")
+			filesTable.defaults[f.name] = f;
+		else if (f.name.endsWith ("csv"))
+			filesTable.otherCSV[f.name] = f;
+		else 
+			filesTable.other[f.name] = f;
+	}
+	
+	
+	
+	
+	
+	var arr = filesTable.plots;
+	var cur = keys(arr).sort();
+	for (var i = 0; i < cur.length; i++)
+		filesTable.table.appendChild (arr[cur[i]].row);
+	
+}
+
+
 function highlightPlots (version, showDefault)
 {
 	//console.log (plotDescription);
 	var plotDescription = version.plotDescription;
+	var plots = new Array ();
 	for (var i = 1; i < plotDescription.length; i++)
 	{
 		if (plotDescription[i].length < 2)
@@ -202,7 +249,10 @@ function highlightPlots (version, showDefault)
 			//console.log ("file: ")
 			//console.log (files[version.files[f]]);
 		}
+		
+		plots.push (plotDescription[i][2]);
 	}
+	sortTable (plots);
 }
 
 function parsePlotDescription (file, version, showDefault)
@@ -246,6 +296,7 @@ function parsePlotDescription (file, version, showDefault)
 					
 					version.plotDescription = csv;
 					highlightPlots (version, showDefault);
+					
 				}
 			}
 	};
@@ -364,6 +415,14 @@ function displayVersion (id, showDefault)
 	dv.time.innerHTML = beautifyTimeStamp (v.created);
 	
 	removeChildren (dv.filestable);
+	filesTable = {};
+	filesTable.table = dv.filestable;
+	filesTable.plots = {};
+	filesTable.pngeps = {};
+	filesTable.otherCSV = {};
+	filesTable.defaults = {};
+	filesTable.other = {};
+	filesTable.all = new Array ();
 
 	var tr = document.createElement("tr");
 	var td = document.createElement("th");
@@ -411,6 +470,11 @@ function displayVersion (id, showDefault)
 		if (!v.plotDescription && file.name.toLowerCase () == "outputs-default-plots.csv")
 			parsePlotDescription (file, v, showDefault);
 		
+
+		filesTable.all.push ({
+			name: file.name,
+			row: tr
+		});
 		
 		
 		

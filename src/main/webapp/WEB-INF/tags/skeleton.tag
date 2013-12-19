@@ -20,7 +20,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title><c:if test="${not empty title}">${title}</c:if>FunctionalCuration @ Chaste</title>
+		<title><c:if test="${not empty title}">${title}</c:if>Functional Curation @ Chaste - Prototype</title>
 		
 		<%-- static header fields -> used on every page --%>
 		<script type='text/javascript'>
@@ -57,25 +57,25 @@
 		<header>
 			<div id="logo">
 				<a href="${contextPath}/index.html">
-					<img alt="Chaste - FunctionalCuration" src="${contextPath}/res/img/chaste.jpg" />
+					<img alt="Chaste - Functional Curation" src="${contextPath}/res/img/chaste.jpg" />
 				</a>
 			</div>
 			
 			<nav>
 				<ul class="navbar">
 					<li><a href="${contextPath}/index.html">Home</a></li>
-					<li><a href="${contextPath}/db.html">Known Stuff</a></li>
+					<li><a href="${contextPath}/db.html">All experiments</a></li>
 					<li><a href="${contextPath}/contact.html">Contact/Team</a></li>
 					<c:choose>
 						<c:when test="${user != null && user.authorized}">
 							<li><a href="${contextPath}/myfiles.html">${user.nick}</a>
 								<ul>
-									<li><a href="${contextPath}/myfiles.html">Files</a></li>
+									<li><a href="${contextPath}/myfiles.html">My files</a></li>
 									<li><a href="${contextPath}/myaccount.html">Account</a></li>
 									<c:if test="${user.role == 'ADMIN'}">
 										<li><a href="${contextPath}/admin.html">Admin</a></li>
 									</c:if>
-									<li><a href="${contextPath}/logout.html">logout</a></li>
+									<li><a href="${contextPath}/logout.html">Logout</a></li>
 								</ul>
 							</li>
 						</c:when>
@@ -138,7 +138,7 @@
 		
 		<%-- finish the site --%>
 		<footer>
-			some footer &copy; 2013 Team Jonathan &amp; Gary
+			Functional Curation Cardiac Prototype &copy; 2013 University of Oxford
 		</footer>
 		
 		

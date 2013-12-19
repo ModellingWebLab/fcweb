@@ -38,7 +38,16 @@ function removeListeners (element)
 	element.parentNode.replaceChild (new_element, element);
 	return new_element;
 }
+function keys (obj)
+{
+    var keys = [];
 
+    for(var key in obj)
+        if(obj.hasOwnProperty(key))
+            keys.push(key);
+
+    return keys;
+}
 function getPos (ele)
 {
     var x = 0;
@@ -331,6 +340,12 @@ function initPage ()
 	    }
 	    return hash;
 	};
+	
+	
+	String.prototype.endsWith = function(suffix) {
+	    return this.indexOf(suffix, this.length - suffix.length) !== -1;
+	};
+	
 
 	var dismissErrs = document.getElementById("dismisserrors");
 	dismissErrs.addEventListener("click", 
