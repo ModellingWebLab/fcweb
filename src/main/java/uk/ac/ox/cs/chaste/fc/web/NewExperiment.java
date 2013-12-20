@@ -5,6 +5,7 @@ package uk.ac.ox.cs.chaste.fc.web;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.Throwable;
 import java.sql.SQLException;
 import java.util.UUID;
 
@@ -300,14 +301,14 @@ public class NewExperiment
 		File protocolFile = null;
 		try
 		{
-				ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt);	
-				fileMgmt.getFiles (model, modelMgmt.getEntityFilesTable (), modelMgmt.getEntityColumn ());
-				fileMgmt.getFiles (protocol, protocolMgmt.getEntityFilesTable (), protocolMgmt.getEntityColumn ());
-			 modelFile = ChasteFileManager.createArchive (model, modelMgmt.getEntityStorageDir ());
-			 protocolFile = ChasteFileManager.createArchive (protocol, protocolMgmt.getEntityStorageDir ());
+			ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt);	
+			fileMgmt.getFiles (model, modelMgmt.getEntityFilesTable (), modelMgmt.getEntityColumn ());
+			fileMgmt.getFiles (protocol, protocolMgmt.getEntityFilesTable (), protocolMgmt.getEntityColumn ());
+			modelFile = ChasteFileManager.createArchive (model, modelMgmt.getEntityStorageDir ());
+			protocolFile = ChasteFileManager.createArchive (protocol, protocolMgmt.getEntityStorageDir ());
 
-			 modelFile.deleteOnExit ();
-			 protocolFile.deleteOnExit ();
+			modelFile.deleteOnExit ();
+			protocolFile.deleteOnExit ();
 		}
 		catch (Exception e)
 		{
@@ -351,8 +352,15 @@ public class NewExperiment
 		}
 		catch (Exception e)
 		{
+			String msg = e.toString();
+			Throwable cause = e.getCause();
+			while (cause != null)
+			{
+				msg += "\n" + cause.toString();
+				cause = cause.getCause();
+			}
 			ChasteExperimentVersion exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);
-			expMgmt.updateVersion (exp, e.getMessage (), ChasteExperimentVersion.STATUS_FAILED);
+			expMgmt.updateVersion (exp, msg, ChasteExperimentVersion.STATUS_FAILED);
 			
 			throw e;
 		}

@@ -362,7 +362,7 @@ extends ChasteEntityManager
 		
 		PreparedStatement st = db.prepareStatement ("UPDATE `" + entityVersionsTable + 
 			"` SET `returnmsg`=?, `status`=?, `finished`=? WHERE id=?");
-    ResultSet rs = null;
+                ResultSet rs = null;
 		
 		try
 		{
@@ -372,11 +372,11 @@ extends ChasteEntityManager
 			st.setInt (4, exp.getId ());
 			
 			int affectedRows = st.executeUpdate();
-      if (affectedRows == 0)
-      {
-          throw new SQLException("Updating experiment version failed, no rows affected. (" + entityVersionsTable + ")");
-      }
-      return true;
+			if (affectedRows == 0)
+			{
+                                throw new SQLException("Updating experiment version failed, no rows affected. (" + entityVersionsTable + ")");
+                        }
+                        return true;
 		}
 		catch (SQLException e)
 		{
