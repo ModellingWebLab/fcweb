@@ -11,6 +11,10 @@ The following instructions assume a Debian-based system (we use Ubuntu) using to
 * java based webserver (e.g. tomcat)
 * mail server on localhost (e.g. postfix)
 
+For the backend:
+* All the Chaste dependencies
+* python-requests
+
 ### Setup database
 
 Create a database 'chaste' with associated user account, and populate from `resources/chaste.sql`.
@@ -24,10 +28,32 @@ flush privileges;
 
 ### Setup backend
 
-Setup a webserver/vhost that is able to execute Python CGI scripts.
-Copy `resources/cgi-bin/*.py` to the webserver, so that it is executable from the frontend.
+Setup a webserver/vhost that is able to execute Python CGI scripts.  Copy
+`resources/cgi-bin/*.py` to the webserver, so that it is executable from the
+frontend, and check that the paths etc. there match your system.
 
 There is a sample Apache site configuration file below.
+
+Currently the backend 'schedules' jobs using `batch`.  It is thus
+recommended to edit `/etc/init/atd.conf` so that multiple experiments can be
+run at once on a multi-processor system.  Use an `exec` line something like
+`exec atd -l 11.5` (for a 12 processor machine).
+
+If the backend is accessed via https and the certificate isn't signed by a
+standard authority, you'll need to add it to the Java key store, using a
+command like:
+
+```
+/usr/lib/jvm/java-7-openjdk-amd64/jre/bin/keytool 
+	-import -alias [SOME ALIAS]
+	-file [CERT]
+	-keystore [KEYSTORE]
+# keystore is usually $JAVAHOME/jre/lib/security/cacerts
+```
+
+You must also ensure that the user account running the webserver is
+permitted to launch jobs via `batch`, and that it can execute the
+FunctionalCuration program.
 
 ### Tomcat configuration
 
