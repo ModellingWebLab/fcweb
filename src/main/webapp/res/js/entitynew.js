@@ -63,6 +63,8 @@ function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction,
 	        		img.alt = "created entity successfully";
 	        		h1.appendChild(img);
 	        		h1.appendChild(document.createTextNode (" Congratulations"));
+
+	        		form.appendChild(h1);
 	        		
 	        		var p = document.createElement("p");
 	        		p.appendChild(document.createTextNode ("You've just created a new entity! Have a look at "));
@@ -73,6 +75,13 @@ function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction,
 	        		p.appendChild(document.createTextNode ("."));
 	        		form.appendChild(p);
 	        		
+	        		if (json.createNewEntity.expCreation)
+	        		{
+		        		p = document.createElement("p");
+		        		p.appendChild(document.createTextNode ("Also, " + json.createNewEntity.expCreation + "."));
+		        		form.appendChild(p);
+	        		}
+	        		
 	        		p = document.createElement("p");
 	        		p.appendChild(document.createTextNode ("Schedule  "));
 	        		a = document.createElement("a");
@@ -81,8 +90,6 @@ function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction,
 	        		p.appendChild(a);
 	        		p.appendChild(document.createTextNode (" using this entity."));
 	        		form.appendChild(p);
-
-	        		form.appendChild(h1);
 	        	}
 	        	else
 	        		storeAction.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + msg;
@@ -147,7 +154,8 @@ function initNewEntity ()
 	    	entityName: entityName.value,
 	    	versionName: versionName.value,
 	    	files: uploadedFiles,
-	    	mainFile: $('input[name="mainEntry"]:checked').val ()
+	    	mainFile: $('input[name="mainEntry"]:checked').val (),
+	    	rerunExperiments: document.getElementById('reRunExperiments').checked
 	    }, storeAction, entityNameAction, versionNameAction, storeAction);
 	}, true);
 	

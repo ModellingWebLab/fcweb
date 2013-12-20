@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.Vector;
 
@@ -229,7 +230,7 @@ public class EntityView extends WebModule
 			if (!user.isAllowedCreateEntityVersion ())
 				throw new ChastePermissionException ("you are not allowed to create a new entity");
 				
-			createNewEntity (task, notifications, querry, user, answer, entityMgmt, fileMgmt);
+			createNewEntity (task, notifications, db, querry, user, answer, entityMgmt, fileMgmt);
 		}
 		else if (task.equals ("getInfo"))
 		{
@@ -405,7 +406,7 @@ public class EntityView extends WebModule
 	
 	
 	@SuppressWarnings("unchecked")
-	private void createNewEntity (Object task, Notifications notifications, JSONObject querry, User user, JSONObject answer, ChasteEntityManager entityMgmt, ChasteFileManager fileMgmt) throws IOException, ChastePermissionException
+	private void createNewEntity (Object task, Notifications notifications, DatabaseConnector db, JSONObject querry, User user, JSONObject answer, ChasteEntityManager entityMgmt, ChasteFileManager fileMgmt) throws IOException, ChastePermissionException
 	{
 
 		String entityName = null;
@@ -586,6 +587,9 @@ public class EntityView extends WebModule
 				LOGGER.error ("error inserting/creating "+entityMgmt.getEntityColumn ()+" to db");
 				throw new IOException ("wasn't able to create/insert "+entityMgmt.getEntityColumn ()+" to db.");
 			}
+			ChasteEntityVersion latestVersion = null;
+			if (entityMgmt.getEntityById (entityId) != null)
+				latestVersion = entityMgmt.getEntityById (entityId).getLatestVersion ();
 			
 			// create version
 			int versionId = entityMgmt.createVersion (entityId, versionName, filePath, user);
@@ -728,9 +732,85 @@ public class EntityView extends WebModule
 				}
 			}
 			
-
 			JSONObject res = new JSONObject ();
 			res.put ("response", true);
+			
+			
+			if (latestVersion != null && querry.get ("rerunExperiments") != null)
+			{
+				try
+				{
+					boolean rerunExperiments = Boolean.parseBoolean (querry.get ("rerunExperiments").toString ());
+
+					
+					if (rerunExperiments)
+					{
+						ModelManager modelMgmt = new ModelManager (db, notifications, userMgmt, user);
+						ProtocolManager protocolMgmt = new ProtocolManager (db, notifications, userMgmt, user);
+						
+						ExperimentManager expMgmt = new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt);
+						
+						int ok = 0, failed = 0;
+						
+						ChasteEntityVersion newVersion = entityMgmt.getVersionById (versionId);
+								
+						TreeSet<ChasteEntity> exp = null;
+						if (entityMgmt.getEntityColumn ().equals ("model"))
+						{
+							 exp = expMgmt.getExperimentByModel (latestVersion.getId ());
+								if (exp != null)
+								{
+									for (ChasteEntity ex : exp)
+									{
+										ChasteExperiment e = (ChasteExperiment) ex;
+										try
+										{
+											if (0 < NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, newVersion, e.getProtocol (), modelMgmt, protocolMgmt, true))
+												//Batch.reRunExperiment ((ChasteExperiment) ex, db, notifications, expMgmt, userMgmt, user, modelMgmt, protocolMgmt, true))
+												ok++;
+											else
+												failed++;
+										}
+										catch (Exception e1)
+										{
+											failed++;
+										}
+									}
+								}
+						}
+						else if (entityMgmt.getEntityColumn ().equals ("protocol"))
+						{
+							 exp = expMgmt.getExperimentByProtocol (latestVersion.getId ());
+								if (exp != null)
+								{
+									for (ChasteEntity ex : exp)
+									{
+										ChasteExperiment e = (ChasteExperiment) ex;
+										try
+										{
+											if (0 < NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, e.getModel (), newVersion, modelMgmt, protocolMgmt, true))
+												//Batch.reRunExperiment ((ChasteExperiment) ex, db, notifications, expMgmt, userMgmt, user, modelMgmt, protocolMgmt, true))
+												ok++;
+											else
+												failed++;
+										}
+										catch (Exception e1)
+										{
+											failed++;
+										}
+									}
+								}
+						}
+							// exp = expMgmt.getExperimentByProtocol (latestVersion.getId ());
+						
+						res.put ("expCreation", "created " + ok + " experiments; " + failed + " failed");
+					}
+				}
+				catch (NumberFormatException e)
+				{}
+			}
+			
+
 			res.put ("responseText", "added version successfully");
 			res.put ("versionId", versionId);
 			res.put ("versionType", entityMgmt.getEntityColumn ());

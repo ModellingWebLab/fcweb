@@ -56,8 +56,11 @@ permitted to launch jobs via `batch`, and that it can execute the
 FunctionalCuration program.
 
 ### Tomcat configuration
+make sure tomcat is using at least java in version 7. tomcat's java home can be configured in /etc/default/tomcat7
+
 
 The server configuration is in `/etc/tomcat7/server.xml`. Modify this file, so that it includes a line like:
+
 
     <Host name="localhost"  appBase="webapps"  deployXML="false" xmlBase="/var/lib/tomcat7/context"
           unpackWARs="true" autoDeploy="true">
@@ -66,11 +69,17 @@ Then, context files are stored in `/var/lib/tomcat7/context` and your apps are e
 
 Copy `resources/FunctionalCuration.xml` to `/var/lib/tomcat7/context` and configure the file properly, including database credentials and link to the backend.
 
+add jdbc mysql driver to /var/lib/tomcat7/lib. (http://dev.mysql.com/downloads/connector/j/)
 ### Build project
 
-Just move into project source directory and call
+add the sems maven repository to your list of repositories: http://sems.uni-rostock.de/2013/10/maven-repository/
 
-    mvn package
+and move into project source directory and call
+
+
+
+
+        mvn package
 
 maven will find all dependencies and build a `war` file in `$PROJECTHOME/target/FunctionalCuration.war`
 
@@ -117,6 +126,7 @@ The following example is suitable:
         </profiles>
         <activeProfiles/>
     </settings>
+
 
 
 ### Install project

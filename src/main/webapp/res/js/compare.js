@@ -8,6 +8,8 @@ var pluginName = null;
 var doc;
 var gotInfos = false;
 var plotDescription;
+var plotFiles = new Array ();
+var filesTable = {};
 
 function getFileContent (file, succ)
 {
@@ -75,6 +77,57 @@ function setupDownloadFileContents (f)
 	};
 }
 
+function sortTable (plots)
+{
+	for (var i = 0; i < filesTable.all.length; i++)
+	{
+		var f = filesTable.all[i];
+		var found = false;
+		for (var j = 0; j < plots.length; j++)
+			if (f.name == plots[j])
+			{
+				filesTable.plots[f.name] = f;
+				found = true;
+				break;
+			}
+		if (found)
+			continue;
+		if (f.name.endsWith ("png") || f.name.endsWith ("eps"))
+			filesTable.pngeps[f.name] = f;
+		else if (f.name == "outputs-default-plots.csv" || f.name == "outputs-contents.csv")
+			filesTable.defaults[f.name] = f;
+		else if (f.name.endsWith ("csv"))
+			filesTable.otherCSV[f.name] = f;
+		else 
+			filesTable.other[f.name] = f;
+	}
+	
+	
+	var resortPartially = function (arr, css)
+	{
+		var cur = keys(arr).sort();
+		for (var i = 0; i < cur.length; i++)
+		{
+			$(arr[cur[i]].row).addClass ("filesTable-" + css);
+			filesTable.table.removeChild (arr[cur[i]].row);
+			filesTable.table.appendChild (arr[cur[i]].row);
+		}
+	};
+	
+	/* 
+	according to keytask :    
+	Those CSV files corresponding to plots, in the order given in default-plots.csv
+    png & eps files
+    Other CSV files corresponding to outputs
+    The contents & default-plots files (although don't give buttons to plot these!)
+    Other files 
+    */
+	resortPartially (filesTable.plots, "plots");
+	resortPartially (filesTable.pngeps, "pngeps");
+	resortPartially (filesTable.otherCSV, "otherCSV");
+	resortPartially (filesTable.defaults, "defaults");
+	resortPartially (filesTable.other, "other");
+}
 function highlightPlots (showDefault)
 {
 	//console.log (plotDescription);
@@ -95,6 +148,7 @@ function highlightPlots (showDefault)
 			}*/
 		}
 		
+		
 		if (files[plotDescription[i][2].hashCode ()])
 		{
 			//console.log (files[plotDescription[i][2].hashCode ()]);
@@ -104,6 +158,8 @@ function highlightPlots (showDefault)
 			f.yAxes = plotDescription[i][5];
 			f.title = plotDescription[i][0];
 			f.linestyle = plotDescription[i][3];
+			
+			plotFiles.push (plotDescription[i][2]);
 		}
 		/*else
 		{
@@ -126,6 +182,7 @@ function highlightPlots (showDefault)
 			//console.log (files[version.files[f]]);
 		}*/
 	}
+	sortTable (plotFiles);
 }
 function parsePlotDescription (file, showDefault)
 {
@@ -225,8 +282,16 @@ function parseEntities (entityObj)
 }
 function buildSite ()
 {
-	
 	var filestable = document.getElementById("filestable");
+	filesTable = {};
+	filesTable.table = filestable;
+	filesTable.plots = {};
+	filesTable.pngeps = {};
+	filesTable.otherCSV = {};
+	filesTable.defaults = {};
+	filesTable.other = {};
+	filesTable.all = new Array ();
+	
 	var tr = document.createElement("tr");
 	
 	var td = document.createElement("th");
@@ -253,6 +318,11 @@ function buildSite ()
 		td = document.createElement("td");
 		td.appendChild(document.createTextNode(curFileName + " ("+ents.entities.length+")"));
 		tr.appendChild(td);
+		
+		filesTable.all.push ({
+			name: curFileName,
+			row: tr
+		});
 		
 		td = document.createElement("td");
 		var size = 0;
