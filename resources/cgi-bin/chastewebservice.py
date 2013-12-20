@@ -5,6 +5,7 @@ import os
 import tempfile
 import time
 import random
+import subprocess
 
 import fcws_utils
 
@@ -64,12 +65,16 @@ else:
             print "   ", term
     else:
         # call the chaste handler via batch -> it will be executed if load average drops below 1.5
-        # seems to be the most convinient mech, to not blow the machine...
+        # seems to be the most convenient mech, to not blow the machine...
         # but may be replaced by a submit to sge or other scheduling workarounds
-        os.system("batch <<< '/var/www/cgi-bin/processthefiles.py "+callBack.value+" "+signature.value
-                  +" "+main_model_path+" "+main_proto_path+" "+temp_dir+"'")
-
-        # print success to calling script -> tell web interface that the call was successful
-        print signature.value, "succ"
-
-
+        exec_cmd = ' '.join(["/var/www/cgi-bin/processthefiles.py", callBack.value, signature.value,
+                              main_model_path, main_proto_path, temp_dir])
+        process = subprocess.Popen(['batch'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        (output, errors) = process.communicate(exec_cmd)
+        if process.returncode != 0:
+            print signature.value, "failed to launch job - system error"
+            print "Output:", output
+            print "Error output:", errors
+        else:
+            # print success to calling script -> tell web interface that the call was successful
+            print signature.value, "succ"

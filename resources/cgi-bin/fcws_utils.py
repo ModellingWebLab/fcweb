@@ -14,7 +14,7 @@ import sys
 import xml.etree.ElementTree as ET
 import zipfile
 
-CHASTE_ROOT = '/home/tom/eclipse/workspace/Chaste'
+CHASTE_ROOT = '/home/jonc/eclipse/workspace/Chaste'
 FC_ROOT = os.path.join(CHASTE_ROOT, 'projects', 'FunctionalCuration')
 
 EXPECTED_EXTENSIONS = {'model': ['.cellml'],

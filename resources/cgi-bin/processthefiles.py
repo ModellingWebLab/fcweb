@@ -1,19 +1,22 @@
 #!/usr/bin/env python
-import os
+
 import sys
-import glob
-import json
-import datetime
-import requests
-import shutil
-import subprocess
 import tempfile
-import time
-import zipfile
 
 my_output_file = tempfile.NamedTemporaryFile(prefix='python-webservice-output-', delete=False)
 sys.stderr = my_output_file
 sys.stdout = my_output_file
+
+import os
+import glob
+import json
+import datetime
+import shutil
+import subprocess
+import time
+import zipfile
+
+import requests
 
 # this file is called via batch -> it is executed if there is CPU time available
 # arguments:
@@ -43,12 +46,12 @@ fout.close()
 # Call FunctionalCuration exe, writing output to the temporary folder containing inputs
 # (or rather, a subfolder thereof).
 # Also redirect stdout and stderr so we can debug any issues.
-os.environ['LD_LIBRARY_PATH'] = '/home/bob/petsc-3.1-p8/linux-gnu-opt/lib:/home/tom/eclipse/workspace/Chaste/lib'
+os.environ['LD_LIBRARY_PATH'] = '/home/bob/petsc-3.1-p8/linux-gnu-opt/lib:/home/jonc/eclipse/workspace/Chaste/lib'
 os.environ['CHASTE_TEST_OUTPUT'] = '/tmp/python-webservice-testoutput'
-os.environ['USER'] = 'tom'
+os.environ['USER'] = 'jonc'
 os.environ['GROUP'] = 'www-data'
-os.environ['HOME'] = '/home/tom'
-args = ['/home/tom/eclipse/workspace/Chaste/projects/FunctionalCuration/apps/src/FunctionalCuration',
+os.environ['HOME'] = '/home/jonc'
+args = ['/home/jonc/eclipse/workspace/Chaste/projects/FunctionalCuration/apps/src/FunctionalCuration',
         model_path,
         proto_path,
         os.path.join(temp_dir, 'output')
