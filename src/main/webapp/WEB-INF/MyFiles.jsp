@@ -11,7 +11,7 @@
     
     <section id="modellist">
 	    <h2>Your Models</h2>
-	    <c:if test="${User.allowedCreateEntity}"> 
+	    <c:if test="${User.allowedCreateModel}"> 
 	    	<small><a href="${contextPath}/model/createnew" id="addmodellink" class="pointer">create a new model</a></small>
 		</c:if>
 	    <ul>
@@ -27,7 +27,7 @@
     
     <section id="protocollist">
 	    <h2>Your Protocols</h2>
-	    <c:if test="${User.allowedCreateEntity}"> 
+	    <c:if test="${User.allowedCreateProtocol}"> 
 	    	<small><a href="${contextPath}/protocol/createnew" id="addprotocol" class="pointer">create a new protocol</a></small>
 		</c:if>
 	    
