@@ -48,8 +48,8 @@ def UnpackArchive(archivePath, tempPath, contentType):
     manifest_path = os.path.join(output_path, MANIFEST)
     if os.path.exists(manifest_path):
         manifest = ET.parse(manifest_path)
-        for item in manifest.iter('content'):
-            if item.get('master', 'false'):
+        for item in manifest.iter('{http://identifiers.org/combine.specifications/omex-manifest}content'):
+            if item.get('master', 'false') == 'true':
                 primary_file = item.get('location')
                 break
     if not primary_file:
