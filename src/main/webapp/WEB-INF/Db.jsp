@@ -22,8 +22,8 @@
             <tr>
                 <td class="center">not run</td>
                 <td class="experiment-RUNNING center">running</td>
-                <td class="experiment-SUCCESS center">successful</td>
-                <td class="experiment-FAILED center">failed</td>
+                <td class="experiment-SUCCESS center">ran successfully</td>
+                <td class="experiment-FAILED center">failed to complete</td>
                 <td class="experiment-INAPPRORIATE center">inappropriate</td>
             </tr>
         </table>
