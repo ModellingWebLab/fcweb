@@ -125,6 +125,7 @@ def DetermineCompatibility(protoPath, modelPath):
     named_uris = cellml_metadata.get_targets(model_doc.model, None, cellml_metadata.create_rdf_node(('bqbiol:is', pycml.NSS['bqbiol'])))
     category_uris = cellml_metadata.get_targets(model_doc.model, None, cellml_metadata.create_rdf_node(('bqbiol:isVersionOf', pycml.NSS['bqbiol'])))
     model_terms = set(str(uri) for uri in named_uris + category_uris) # TODO: Check!
+    model_terms.add('https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#state_variable') # Present implicitly
     # Return the mismatch, if any, as a sorted list
     needed_terms = list(proto_terms - model_terms)
     needed_terms.sort()
