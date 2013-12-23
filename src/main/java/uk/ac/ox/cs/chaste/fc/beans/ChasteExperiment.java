@@ -26,7 +26,7 @@ extends ChasteEntity
 	
 	public ChasteExperiment (int id, User author, Timestamp created, ChasteEntityVersion model, ChasteEntityVersion protocol)
 	{
-		super (id, "Experiment of " + model.getEntity ().getName () + " @ " + model.getVersion () + " &amp; " + protocol.getEntity ().getName () + " @ " + protocol.getVersion (), author, created, "experiment");
+		super (id, "Experiment of " + model.getEntity ().getName () + " &amp; " + protocol.getEntity ().getName (), author, created, "experiment");
 		this.model = model;
 		this.protocol = protocol;
 	}
