@@ -90,10 +90,9 @@ function drawMatrix (matrix)
 	/*var minBoxWidth = 10px;
 	var minBoxHeight = 10px;*/
 	
-	
+	//console.log (matrix);
 	
 	var models = [];
-	//console.log (matrix);
 	for (var key in matrix.models)
 		if (matrix.models.hasOwnProperty (key))
 		{
@@ -135,11 +134,14 @@ function drawMatrix (matrix)
 					protocolMapper[version].entityId = matrix.protocols[key].id;
 					protocols.push(version);
 				}*/
+
+        models.sort(function(a,b) {return (modelMapper[a].name > modelMapper[b].name) ? 1 : ((modelMapper[b].name > modelMapper[a].name) ? -1 : 0);});
+        protocols.sort(function(a,b) {return (protocolMapper[a].name > protocolMapper[b].name) ? 1 : ((protocolMapper[b].name > protocolMapper[a].name) ? -1 : 0);});
 	
 	/*console.log ("models");
-	console.log (modelMapper);*/
+	console.log (modelMapper);
 	console.log ("protocols");
-	console.log (protocolMapper);
+	console.log (protocolMapper);*/
 	
 	var mat = [];
 	for (var i = 0; i < models.length; i++)
@@ -151,17 +153,14 @@ function drawMatrix (matrix)
 					model: modelMapper[models[i]],
 					protocol: protocolMapper[protocols[j]]
 			};
-			console.log (mat[i][j]);
+			//console.log (mat[i][j]);
 		}
 	}
 	//console.log ("matrix");
-	console.log (mat);
+	//console.log (mat);
 	
 	var div = document.getElementById("matrixdiv");
 	removeChildren (div);
-	
-	console.log(protocolMapper);
-
 	
 	for (var key in matrix.experiments)
 		if (matrix.experiments.hasOwnProperty (key))
@@ -175,9 +174,9 @@ function drawMatrix (matrix)
 			
 			var row = modelMapper[exp.model.id].row;
 
-			console.log(exp);
+			/*console.log(exp);
 			console.log(exp.protocol.id);
-			console.log(exp.protocol);
+			console.log(exp.protocol);*/
 			var col = protocolMapper[exp.protocol.id].col;
 			mat[row][col].experiment = exp;
 		}
