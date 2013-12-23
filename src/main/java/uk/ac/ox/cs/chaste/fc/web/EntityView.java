@@ -136,12 +136,12 @@ public class EntityView extends WebModule
 			ChasteEntity entity = entityMgmt.getEntityById (entityID);
 			if (entity == null || entity.getVersions ().size () < 1)
 			{
-				notifications.addError ("no entity found");
-				return errorPage (request, response, "no entity found");
+				notifications.addError ("no entity found, or you do not have permission to view this entity");
+				return errorPage (request, response, "no entity found, or you do not have permission to view this entity");
 			}
 			
 			Map<Integer, ChasteEntityVersion> versions = entity.getVersions ();
-			ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt); 
+			ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt);
 			for (ChasteEntityVersion version : versions.values ())
 				fileMgmt.getFiles (version, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ());
 			

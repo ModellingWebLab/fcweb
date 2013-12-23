@@ -610,7 +610,7 @@ public class FileTransfer extends WebModule
     
 	    HttpClient client = new DefaultHttpClient();
 	    HttpPost post = new HttpPost(Tools.getChasteUrl ());
-	    MultipartEntityBuilder builder = MultipartEntityBuilder.create();        
+	    MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 	    builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
 
 	    FileBody modelBody = new FileBody(model);

@@ -60,7 +60,7 @@ function verifyReg (jsonObject, elem, mailAction, nickAction, submitAction)
 	        		h1.appendChild(img);
 	        		h1.appendChild(document.createTextNode (" Congratulations"));
 	        		var p = document.createElement("p");
-	        		p.appendChild(document.createTextNode ("You've just registered for Chaste. Now, have a look at your mailbox. We've just sent you an email with a password."));
+	        		p.appendChild(document.createTextNode ("You've just registered for Functional Curation. Now, have a look at your mailbox. We've just sent you an email with a password."));
 
 	        		form.appendChild(h1);
 	        		form.appendChild(p);

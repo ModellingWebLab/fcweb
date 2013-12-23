@@ -144,7 +144,7 @@ public class Register extends WebModule
 					
 					try
 					{
-						Tools.sendMail (mail, nick, "Successful Registration at Chaste", buildMailBody (nick, password));
+						Tools.sendMail (mail, nick, "Successful Registration for Functional Curation", buildMailBody (nick, password));
 						informAdmins (nick);
 						
 						JSONObject res = new JSONObject ();
@@ -178,8 +178,8 @@ public class Register extends WebModule
 	{
 		String mailSubject = "New Registration at Chaste Functional Curation Web Interface";
 		String mailBody = "Hey Admin,\n\ngood news: "+newUser+" just registered for the Chaste Functional Curation Web Interface!"
-			+ "\nPlease go to the Admin interface and check it's role:\n\nhttps://userpc58.cs.ox.ac.uk/FunctionalCuration/admin.html"
-			+ "\n\nBest wishes,\nThe Chaste Dev-Team";
+			+ "\nPlease go to the Admin interface and check their role:\n\n" + Tools.getThisUrl () + "admin.html"
+			+ "\n\nBest wishes,\nThe Functional Curation Development Team";
 		
 		Vector<User> users = userMgmt.getUsers ();
 		for (User u: users)
@@ -200,7 +200,9 @@ public class Register extends WebModule
 	
 	private final static String buildMailBody (String nick, String password)
 	{
-		return "Hi " + nick + ",\n\nwe successfully registered an account for you at Chaste!\n\nYour password is: " + password + "\n\nNow go to " + Tools.getThisUrl () + " to see if everything's working.\n\nSincerely,\nChaste dev-team";
+		return "Hi " + nick + ",\n\nWe successfully registered an account for you in the Functional Curation system!\n\n"
+				+ "Your password is: " + password + "\n\nNow go to " + Tools.getThisUrl () + " to see if everything's working.\n\n"
+				+ "Sincerely,\nFunctional Curation Development Team";
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -215,7 +217,7 @@ public class Register extends WebModule
 		if (nick.length () > 99)
 		{
 			obj.put ("response", false);
-			obj.put ("responseText", "sry, we didn't expect such a long nick. please contact one of us.");
+			obj.put ("responseText", "sorry, we didn't expect such a long nick. please contact one of us.");
 			return false;
 		}
 
@@ -223,7 +225,7 @@ public class Register extends WebModule
     if(!regMatcher.matches())
 		{
 			obj.put ("response", false);
-			obj.put ("responseText", "nick has to start with [A-Za-z0-9] and only following charachters allowed: [_A-Za-z0-9-]");
+			obj.put ("responseText", "nick has to start with [A-Za-z0-9] and only the following characters are allowed: [_A-Za-z0-9-]");
 			return false;
 		}
 

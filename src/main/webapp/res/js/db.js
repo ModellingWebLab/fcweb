@@ -370,7 +370,7 @@ function getMatrix (jsonObject, actionIndicator)
         }
         else
         {
-        	actionIndicator.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='error' /> sorry, serverside error occurred.";
+        	actionIndicator.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='error' />Sorry, serverside error occurred.";
         }
     };
     xmlhttp.send(JSON.stringify(jsonObject));
@@ -380,7 +380,7 @@ function prepareMatrix ()
 {
 	var div = document.getElementById("matrixdiv");
 	
-	div.appendChild(document.createTextNode("preparing matrix. please be patient"));
+	div.appendChild(document.createTextNode("Preparing experiment matrix; please be patient."));
 
 	getMatrix ({
     	task: "getMatrix"

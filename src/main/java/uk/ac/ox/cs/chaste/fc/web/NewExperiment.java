@@ -312,7 +312,7 @@ public class NewExperiment
 		}
 		catch (Exception e)
 		{
-			LOGGER.error ("couldn't create combinde archives to run experiment", e);
+			LOGGER.error ("couldn't create combine archives to run experiment", e);
 			e.printStackTrace ();
 			throw new IOException ("error creating combine archives");
 		}

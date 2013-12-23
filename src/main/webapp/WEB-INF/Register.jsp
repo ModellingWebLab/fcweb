@@ -2,7 +2,7 @@
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}Register - " contextPath="${contextPath}">
-    <h1>Register for Chaste</h1>
+    <h1>Register for this Functional Curation system</h1>
       <section id="registerform">
     	<p>
 	    	<label for="mail">E-mail Address* <small>(we'll send you a password and use it for meta data of your files)</small></label>
@@ -35,7 +35,7 @@
     	</p>
     	
     	<p>
-    		<button id="registersubmit">Join Chaste</button> <span id="submitaction"></span>
+    		<button id="registersubmit">Register</button> <span id="submitaction"></span>
     	</p>
       </section>
 </t:skeleton>
