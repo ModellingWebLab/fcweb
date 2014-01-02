@@ -98,42 +98,20 @@ function drawMatrix (matrix)
 		{
 			var version = matrix.models[key].id;
 			modelMapper[version] = matrix.models[key];
-			modelMapper[version].row = models.length;
 			modelMapper[version].name = matrix.models[key].name;
-			//modelMapper[version].entityId = matrix.models[key].id;
 			models.push(version);
 			
 		}
-			/*for (var version in matrix.models[key].versions)
-				if (matrix.models[key].versions.hasOwnProperty (version))
-				{
-					modelMapper[version] = matrix.models[key].versions[version];
-					modelMapper[version].row = models.length;
-					modelMapper[version].name = matrix.models[key].name;
-					modelMapper[version].entityId = matrix.models[key].id;
-					models.push(version);
-				}*/
 
 	var protocols = [];
 	for (var key in matrix.protocols)
 		if (matrix.protocols.hasOwnProperty (key))
 		{
 			var version = matrix.protocols[key].id;
-			protocolMapper[version] = matrix.protocols[key];//.versions[version];
-			protocolMapper[version].col = protocols.length;
+			protocolMapper[version] = matrix.protocols[key];
 			protocolMapper[version].name = matrix.protocols[key].name;
-			//protocolMapper[version].entityId = matrix.protocols[key].id;
 			protocols.push(version);
 		}
-			/*for (var version in matrix.protocols[key].versions)
-				if (matrix.protocols[key].versions.hasOwnProperty (version))
-				{
-					protocolMapper[version] = matrix.protocols[key].versions[version];
-					protocolMapper[version].col = protocols.length;
-					protocolMapper[version].name = matrix.protocols[key].name;
-					protocolMapper[version].entityId = matrix.protocols[key].id;
-					protocols.push(version);
-				}*/
 
         models.sort(function(a,b) {return (modelMapper[a].name > modelMapper[b].name) ? 1 : ((modelMapper[b].name > modelMapper[a].name) ? -1 : 0);});
         protocols.sort(function(a,b) {return (protocolMapper[a].name > protocolMapper[b].name) ? 1 : ((protocolMapper[b].name > protocolMapper[a].name) ? -1 : 0);});
@@ -153,6 +131,8 @@ function drawMatrix (matrix)
 					model: modelMapper[models[i]],
 					protocol: protocolMapper[protocols[j]]
 			};
+			modelMapper[models[i]].row = i;
+			protocolMapper[protocols[j]].col = j;
 			//console.log (mat[i][j]);
 		}
 	}
