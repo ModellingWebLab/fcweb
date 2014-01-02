@@ -85,6 +85,7 @@ public abstract class ChasteEntityManager
 		{
 			int vid = rs.getInt ("versionid");
 			int mid = rs.getInt ("entityid");
+			//LOGGER.debug("row " + rs.getRow());
 
 			//System.out.println ("creating cur");
 			ChasteEntity cur = null;
@@ -105,7 +106,7 @@ public abstract class ChasteEntityManager
 				knownEntities.put (mid, cur);
 			}
 			
-			LOGGER.debug ("cur: " + cur);
+			LOGGER.debug ("cur " + res.size() + ": " + cur.getId() + " " + cur.getName() + " " + cur);
 			LOGGER.debug ("creating version");
 			
 			if (knownVersions.get (vid) != null)
@@ -115,7 +116,7 @@ public abstract class ChasteEntityManager
 				ChasteEntityVersion neu = createEntityVersion (rs, cur);
 				if (neglectPermissions || user.isAllowedToSeeEntityVersion (neu))
 				{
-					LOGGER.debug ("user allowed");
+					LOGGER.debug ("user allowed; version=" + neu.getVersion());
 					cur.addVersion (neu);
 					knownVersions.put (vid, neu);
 				}

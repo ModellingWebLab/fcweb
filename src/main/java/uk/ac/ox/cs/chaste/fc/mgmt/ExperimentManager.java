@@ -54,7 +54,7 @@ extends ChasteEntityManager
 		+ " LEFT JOIN `experiment_files` mf on mf.experiment = m.id";
 	private static final String SQL_SELECT_END = 
 		" GROUP BY m.id"
-		+ " ORDER BY mo.created, m.created";
+		+ " ORDER BY mo.created DESC, m.created DESC";
 
 	private ChasteEntityManager modelMgmt;
 	private ChasteEntityManager protocolMgmt;
@@ -433,6 +433,7 @@ extends ChasteEntityManager
 			st.execute ();
 			rs = st.getResultSet ();
 			TreeSet<ChasteEntity> res = evaluateResult (rs, false);
+			System.out.println("Num expts for " + modelId + " found: " + res.size());
 			if (res.size () > 0)
 				return res;
 		}

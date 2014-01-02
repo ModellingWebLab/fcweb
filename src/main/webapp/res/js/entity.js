@@ -342,7 +342,8 @@ function displayVersion (id, showDefault)
 		addNotification ("no such version", "error");
 		return;
 	}
-    var dv = doc.version;
+	//console.log(v);
+	var dv = doc.version;
 	dv.name.innerHTML = v.name + " ";
 	
 	if (entityType != "experiment" && ROLE.isAllowedToCreateNewExperiment)
