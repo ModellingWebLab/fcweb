@@ -47,7 +47,7 @@ extends ChasteEntity
 	{
 		JSONObject json = new JSONObject ();
 
-		System.out.println ("model: " + model);
+		System.out.println ("model: " + model.getEntity().getName() + " @ " + model.getVersion());
 		
 		JSONObject tmp = model.toJson ();
 		tmp.put ("name", model.getEntity ().getName ());
@@ -55,7 +55,7 @@ extends ChasteEntity
 		tmp.put ("id", model.getId ());
 		json.put ("model", tmp);
 
-		System.out.println ("protocol: " + protocol);
+		System.out.println ("protocol: " + protocol.getEntity().getName() + " @ " + protocol.getVersion());
 		
 		tmp = protocol.toJson ();
 		tmp.put ("name", protocol.getEntity ().getName ());
@@ -66,7 +66,8 @@ extends ChasteEntity
 		json.put ("id", getId ());
 		ChasteExperimentVersion version = (ChasteExperimentVersion) this.getLatestVersion ();
 		System.out.println ("latest version: " + version);
-		json.put ("latestResult", version.getStatus ());
+		if (version != null)
+			json.put ("latestResult", version.getStatus ());
 		
 		return json;
 	}

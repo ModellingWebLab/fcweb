@@ -118,6 +118,18 @@ public class ChasteEntityVersion
 		return visibility;
 	}
 	
+	public String getJointVisibility(ChasteEntityVersion other)
+	{
+		String result = this.visibility;
+		if ((other.visibility == ChasteEntityVersion.VISIBILITY_PRIVATE) ||
+				(other.visibility == ChasteEntityVersion.VISIBILITY_RESTRICTED
+				 && this.visibility == ChasteEntityVersion.VISIBILITY_PUBLIC))
+		{
+			result = other.visibility;
+		}
+		return result;
+	}
+	
 	public String getCreated ()
 	{
 		return Tools.formatTimeStamp (created);

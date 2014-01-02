@@ -212,11 +212,11 @@ extends ChasteEntityManager
 				return -1;
 		}
 		
-		return createVersion (expId, filePath, u);
+		return createVersion (expId, filePath, u, model.getJointVisibility(protocol));
 	}
 	
 	
-	private int createVersion (int entityid, String filePath, User u) throws ChastePermissionException
+	private int createVersion (int entityid, String filePath, User u, String visibility) throws ChastePermissionException
 	{
 		/*if (!user.isAllowedToCreateNewExperiment ())
 			throw new ChastePermissionException ("you are not allowed to create a new experiment");*/
@@ -225,7 +225,7 @@ extends ChasteEntityManager
 			return entityid;
 		
 		PreparedStatement st = db.prepareStatement ("INSERT INTO `" + entityVersionsTable + 
-			"`(`author`, `" + entityColumn + "`, `filepath`, `returnmsg`) VALUES (?,?,?,?)");
+			"`(`author`, `" + entityColumn + "`, `filepath`, `returnmsg`, `visibility`) VALUES (?,?,?,?,?)");
     ResultSet rs = null;
     int id = -1;
 		
@@ -235,6 +235,7 @@ extends ChasteEntityManager
 			st.setInt (2, entityid);
 			st.setString (3, filePath);
 			st.setString (4, "");
+			st.setString (5, visibility);
 			
 			int affectedRows = st.executeUpdate();
       if (affectedRows == 0)

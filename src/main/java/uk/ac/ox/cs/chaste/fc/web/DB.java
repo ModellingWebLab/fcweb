@@ -84,7 +84,7 @@ public class DB extends WebModule
 	{
 		Vector<ChasteEntityVersion> entities = new Vector<ChasteEntityVersion> ();
 
-		TreeSet<ChasteEntity> entity = entityMgmt.getAll (true);
+		TreeSet<ChasteEntity> entity = entityMgmt.getAll (false);
 		for (ChasteEntity e : entity)
 			if (e.getVersions ().size () > 0)
 				entities.add (e.getLatestVersion ());
