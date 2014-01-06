@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Context  reloadable="false"  allowLinking="true">
+<Context  reloadable="false"  allowLinking="true" sessionCookiePath="/">
     <Resource name="jdbc/CHASTE"
         auth="Container"
         type="javax.sql.DataSource"

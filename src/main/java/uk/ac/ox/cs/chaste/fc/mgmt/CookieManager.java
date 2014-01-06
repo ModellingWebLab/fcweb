@@ -36,6 +36,7 @@ public class CookieManager
 	
 	public void setCookie (Cookie c)
 	{
+		c.setPath("/");
 		cookies.put (c.getName (), c);
 		response.addCookie (c);
 	}
