@@ -19,7 +19,7 @@ function updateUser (jsonObject, elem)
         xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
     }
     
-    xmlhttp.open("POST", '', true);
+    xmlhttp.open("POST", document.location.href, true);
     xmlhttp.setRequestHeader("Content-type", "application/json");
 
     xmlhttp.onreadystatechange = function()

@@ -77,7 +77,7 @@ function updateVisibility (jsonObject, actionIndicator)
         xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
     }
     
-    xmlhttp.open ("POST", '', true);
+    xmlhttp.open ("POST", document.location.href, true);
     xmlhttp.setRequestHeader ("Content-type", "application/json");
 
     xmlhttp.onreadystatechange = function()
@@ -124,7 +124,7 @@ function deleteEntity (jsonObject)
         xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
     }
     
-    xmlhttp.open ("POST", '', true);
+    xmlhttp.open ("POST", document.location.href, true);
     xmlhttp.setRequestHeader ("Content-type", "application/json");
 
     xmlhttp.onreadystatechange = function()
@@ -908,7 +908,7 @@ function requestInformation (jsonObject, onSuccess)
         xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
     }
     
-    xmlhttp.open("POST", '', true);
+    xmlhttp.open("POST", document.location.href, true);
     xmlhttp.setRequestHeader("Content-type", "application/json");
 
     xmlhttp.onreadystatechange = function()
