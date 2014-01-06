@@ -551,7 +551,7 @@ function displayVersion (id, showDefault)
 			{
 				a.appendChild(document.createTextNode(v.experiments[i].protocol.name + " @ " + v.experiments[i].protocol.version));
 			}
-			a.href = contextPath + "/experiment/" + v.experiments[i].model.id + v.experiments[i].protocol.id + "/" + v.experiments[i].id;
+			a.href = contextPath + "/experiment/" + v.experiments[i].model.id + v.experiments[i].protocol.id + "/" + v.experiments[i].id + "/latest";
 			li.appendChild (chk);
 			li.appendChild (a);
 			ul.appendChild (li);
