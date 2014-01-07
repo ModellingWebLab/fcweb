@@ -66,6 +66,15 @@ extends ChasteEntityVersion
 	{
 		return expMgmt.updateVersion (this, returnMsg, status);
 	}
-	
+
+	/*
+	 * Override the base method to instead return the more restrictive of the visibilities of the model & protocol involved.
+	 * @see uk.ac.ox.cs.chaste.fc.beans.ChasteEntityVersion#getVisibility()
+	 */
+	public String getVisibility ()
+	{
+		ChasteExperiment exp = getExperiment ();
+		return exp.getModel ().getJointVisibility (exp.getProtocol());
+	}
 	
 }
