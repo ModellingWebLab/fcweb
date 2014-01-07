@@ -86,6 +86,7 @@ function initBatch ()
 	
 
 	var checker = document.getElementById("checkAll");
+	var checkerLatest = document.getElementById("checkLatest");
 	var unchecker = document.getElementById("uncheckAll");
 	checker.addEventListener("click", function ()
 	{
@@ -96,6 +97,10 @@ function initBatch ()
 				continue;
 			boxes[i].checked = true;
 		}
+	}, false);
+	checkerLatest.addEventListener("click", function ()
+	{
+		$( ".latestVersion" ).prop('checked', true);
 	}, false);
 	unchecker.addEventListener("click", function ()
 	{

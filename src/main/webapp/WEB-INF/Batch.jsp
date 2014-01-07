@@ -11,15 +11,20 @@
 	
 	
    	<button id="checkAll">check all</button>
+   	<button id="checkLatest">check latest</button>
    	<button id="uncheckAll">uncheck all</button>
 	
     <div id="batchlist">
 	   	<c:forEach items="${options}" var="opt" >
 	   		<h3>${opt.name}</h3>
 	   		<ul>
+	   			<c:set var="firstElement" value="true"/>
 	    		<c:forEach items="${opt.versions}" var="version" >
 		    		<li title="${version.value.version}">
-		    			<input type="checkbox" name="${version.value.id}" id="checkbox-${version.value.id}" class="batch-checkbox" value="${version.value.id}"/>
+		    			<input type="checkbox" name="${version.value.id}" id="checkbox-${version.value.id}" class="batch-checkbox<c:if test="${firstElement eq true}"> latestVersion
+		    					<c:set var="firstElement" value="false"/>
+		    				</c:if>" value="${version.value.id}"
+		    			/>
 		    			<label for="checkbox-${version.value.id}"><strong>${version.value.version}</strong> by <em>${version.value.author}</em></label><br/>
 		    			<span class="suppl"><small>created </small> <time>${version.value.created}</time> <small>containing</small> ${version.value.numFiles} File<c:if test="${version.value.numFiles!=1}">s</c:if>.</span>
 		    		</li>
