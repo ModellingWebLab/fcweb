@@ -5,12 +5,12 @@ package uk.ac.ox.cs.chaste.fc.beans;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.json.simple.JSONObject;
 
@@ -85,13 +85,19 @@ public class ChasteEntity
 		return versions;
 	}
 
+	public Map<Integer, ChasteEntityVersion> getOrderedVersions()
+	{
+		Map<Integer, ChasteEntityVersion> sorted = new TreeMap<Integer, ChasteEntityVersion>(Collections.reverseOrder());
+		sorted.putAll(versions);
+		return sorted;
+	}
 	
 	public ChasteEntityVersion getLatestVersion ()
 	{
 		if (versions.size () < 1)
 			return null;
 		List<Integer> list = new ArrayList<Integer> (versions.keySet ());
-	  Collections.sort (list);
+		Collections.sort (list);
 
 		return versions.get (list.get (list.size () - 1));
 	}

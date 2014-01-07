@@ -19,7 +19,7 @@
 	   		<h3>${opt.name}</h3>
 	   		<ul>
 	   			<c:set var="firstElement" value="true"/>
-	    		<c:forEach items="${opt.versions}" var="version" >
+	    		<c:forEach items="${opt.getOrderedVersions()}" var="version" >
 		    		<li title="${version.value.version}">
 		    			<input type="checkbox" name="${version.value.id}" id="checkbox-${version.value.id}" class="batch-checkbox<c:if test="${firstElement eq true}"> latestVersion
 		    					<c:set var="firstElement" value="false"/>
