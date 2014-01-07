@@ -25,10 +25,5 @@
         Currently only administrators may upload new protocols, but if you have one you'd like to add to the system, please do
         <a href="${contextPath}/contact.html">contact us</a>.
     </p>
-    <hr/>
-    <p>
-        <b>Note:</b> it appears that the interactive portions of this site <b>do not work</b> with at least some versions of Microsoft Internet Explorer.
-        The site has been tested successfully with both <a href="http://www.mozilla.org/en-US/firefox">Firefox</a> and <a href="https://www.google.com/intl/en/chrome/browser/">Chrome</a>.
-    </p>
 </t:skeleton>
 
