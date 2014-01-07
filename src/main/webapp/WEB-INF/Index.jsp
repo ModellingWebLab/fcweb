@@ -18,8 +18,8 @@
     <p>
         You are encouraged to browse around and view the results of protocols encoded so far run on a range of cell models.
         If you wish to evaluate your own models under these protocols, you will need to register for an account.
-        By default your own models and experiments are 'restricted' so that only logged-in users may view them.
-        You may alternatively make them private to yourself, or publish them so that all users of the system can see the results.
+        By default your own models, protocols and experiments are private so that only you may view them.
+        This can be altered to 'restricted', providing visibility to all logged-in users, or 'public' to publish them to the world.
     </p>
     <p>
         Currently only administrators may upload new protocols, but if you have one you'd like to add to the system, please do
