@@ -674,21 +674,18 @@ function parseCSVContent (file)
 	{
 		file.downsampled[i] = [];
 		file.nonDownsampled[i] = [];
-		//file.downsampled[i][0] = file.columns[i][0];
 		file.downsampled[i][0] = {x : file.columns[0][0], y : file.columns[i][0]};
 		file.nonDownsampled[i][0] = {x : file.columns[0][0], y : file.columns[i][0]};
-		for (var j = 1; j < file.columns[i].length - 1; j++)
+		var last_j = file.columns[i].length - 1;
+		for (var j = 1; j <= last_j; j++)
 		{
 			file.nonDownsampled[i].push ({x : file.columns[0][j], y : file.columns[i][j]});
 			var last = file.downsampled[i][file.downsampled.length - 1];
 			var cur = file.columns[i][j];
 			var next = file.columns[i][j + 1];
-			if (maxDist (last, cur, next) > dropDist || (cur < last && cur < next) || (cur > last && cur > next))
+			if (j == last_j || maxDist (last, cur, next) > dropDist || (cur < last && cur < next) || (cur > last && cur > next))
 				file.downsampled[i].push ({x : file.columns[0][j], y : file.columns[i][j]});
 		}
-		var last = file.columns[0].length - 1;
-		//file.downsampled[i].push (file.columns[i][j]);
-		file.downsampled[i].push ({x : file.columns[0][last], y : file.columns[i][last]});
 		//console.log ("column " + i + " prev: " + file.columns[i].length + " now: " + file.downsampled[i].length);
 	}
 	
