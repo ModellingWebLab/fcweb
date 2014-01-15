@@ -368,7 +368,7 @@ public class NewExperiment
 		if (!res.result)
 		{
 			ChasteExperimentVersion exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);
-			expMgmt.updateVersion (exp, res.response, ChasteExperimentVersion.STATUS_INAPPRORIATE);
+			expMgmt.updateVersion (exp, res.response, res.status);
 		}
 		else
 		{

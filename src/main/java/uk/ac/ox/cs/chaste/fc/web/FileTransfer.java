@@ -590,10 +590,12 @@ public class FileTransfer extends WebModule
 	{
 		boolean result;
 		String response;
-		public SubmitResult (boolean result, String response)
+		String status;
+		public SubmitResult (boolean result, String response, String status)
 		{
 			this.result = result;
 			this.response = response;
+			this.status = status;
 		}
 		
 	}
@@ -628,16 +630,20 @@ public class FileTransfer extends WebModule
 	    HttpResponse response = client.execute(post);
 	    String res = getContent (response);
 	    System.out.println ("response: " + res);
-            if (res.trim ().equals (signature + " succ"))
-		return new SubmitResult (true, res.substring (signature.length ()).trim ());
-            if (res.trim ().startsWith (signature))
-            {
-		LOGGER.error ("Chaste backend answered with !succ: " + res);
-		return new SubmitResult (false, res.substring (signature.length ()).trim ());
-            }
-            LOGGER.error ("chaste backend answered w/ smth unexpected: " + res);
-            throw new IOException ("Chaste backend response not expected.");
-	} 
+	    if (res.trim ().equals (signature + " succ"))
+	    	return new SubmitResult (true, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_RUNNING);
+	    if (res.trim ().startsWith (signature + " inappropriate"))
+	    {
+	    	return new SubmitResult (false, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_INAPPRORIATE);
+	    }
+	    if (res.trim ().startsWith (signature))
+	    {
+	    	LOGGER.error ("Chaste backend answered with error: " + res);
+	    	return new SubmitResult (false, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_FAILED);
+	    }
+	    LOGGER.error ("chaste backend answered w/ smth unexpected: " + res);
+	    throw new IOException ("Chaste backend response not expected.");
+	}
 
 	private static String getContent(HttpResponse response) throws IOException
 	{
