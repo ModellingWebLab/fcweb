@@ -646,8 +646,10 @@ public class EntityView extends WebModule
 			{
 				for (NewFile f : files.values ())
 				{
+					if (!mainEntry.isEmpty() && !f.name.equals(mainEntry))
+						continue;
 					//parse protocol
-					BufferedReader br = null; 
+					BufferedReader br = null;
 					try
 					{
 						br = new BufferedReader (new FileReader (f.tmpFile));
