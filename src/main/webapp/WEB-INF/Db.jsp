@@ -27,6 +27,9 @@
                 <td class="experiment-INAPPRORIATE center">inappropriate</td>
             </tr>
         </table>
+        <p>
+        Note that you can compare models' behaviours under a particular protocol by viewing the protocol (click on a column heading), selecting the 'Experiments' button, and comparing the experiments using models of interest.
+        </p>
     </section>
 </t:skeleton>
 
