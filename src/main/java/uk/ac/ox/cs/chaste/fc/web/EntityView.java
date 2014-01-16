@@ -503,12 +503,7 @@ public class EntityView extends WebModule
 					filePath = UUID.randomUUID ().toString ();
 					entityDir = new File (storageFir + Tools.FILESEP + filePath);
 				}
-				
-				if (!entityDir.mkdirs ())
-				{
-					LOGGER.error ("cannot create dir: " + entityDir);
-					throw new IOException ("cannot create directory");
-				}
+				LOGGER.debug ("will write files to " + entityDir);
 				
 				JSONArray array= (JSONArray) querry.get ("files");
 				for (int i = 0; i < array.size (); i++)
@@ -585,7 +580,7 @@ public class EntityView extends WebModule
 			
 			if (entityId < 0)
 			{
-				cleanUp (entityDir, -1, files, fileMgmt, entityMgmt);
+				cleanUp (null, -1, files, fileMgmt, entityMgmt);
 				LOGGER.error ("error inserting/creating "+entityMgmt.getEntityColumn ()+" to db");
 				throw new IOException ("wasn't able to create/insert "+entityMgmt.getEntityColumn ()+" to db.");
 			}
@@ -597,9 +592,16 @@ public class EntityView extends WebModule
 			int versionId = entityMgmt.createVersion (entityId, versionName, filePath, user);
 			if (versionId < 0)
 			{
-				cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
+				cleanUp (null, versionId, files, fileMgmt, entityMgmt);
 				LOGGER.error ("error inserting/creating "+entityMgmt.getEntityColumn ()+" version to db");
 				throw new IOException ("wasn't able to create/insert "+entityMgmt.getEntityColumn ()+" version to db.");
+			}
+			
+			if (!entityDir.mkdirs ()) // This should fail if entityDir already exists, so catching race conditions
+			{
+				cleanUp (null, versionId, files, fileMgmt, entityMgmt);
+				LOGGER.error ("cannot create dir: " + entityDir);
+				throw new IOException ("cannot create directory");
 			}
 			
 			String mainEntry = "";
@@ -610,19 +612,6 @@ public class EntityView extends WebModule
 			
 			for (NewFile f : files.values ())
 			{
-				//copy file
-				try
-				{
-					FileTransfer.copyFile (f, entityDir);
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace ();
-					cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
-					LOGGER.error ("error copying file from tmp to "+entityMgmt.getEntityColumn ()+" dir", e);
-					throw new IOException ("wasn't able to copy a file. sry, our fault.");
-				}
-				
 				// insert to db
 				int fileId = fileMgmt.addFile (f.name, f.type, user, f.tmpFile.length (), f.name.equals (mainEntry));
 				if (fileId < 0)
@@ -639,6 +628,19 @@ public class EntityView extends WebModule
 					cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
 					LOGGER.error ("error inserting file to db: " + f.name + " -> " + f.tmpFile);
 					throw new IOException ("wasn't able to insert file " + f.name + " to db.");
+				}
+				
+				//copy file
+				try
+				{
+					FileTransfer.copyFile (f, entityDir);
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace ();
+					cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
+					LOGGER.error ("error copying file from tmp to "+entityMgmt.getEntityColumn ()+" dir", e);
+					throw new IOException ("wasn't able to copy a file. sry, our fault.");
 				}
 				
 				extractReadme = extractReadme && !f.name.toLowerCase ().equals ("readme.md");

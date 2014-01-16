@@ -311,7 +311,7 @@ public abstract class ChasteEntityManager
 			st.setString (1, filePath);
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> entity = evaluateResult (rs, false);
+			TreeSet<ChasteEntity> entity = evaluateResult (rs, true);
 			if (entity != null && entity.size () > 0)
 				return entity.first ().getVersionByFilePath (filePath);
 		}

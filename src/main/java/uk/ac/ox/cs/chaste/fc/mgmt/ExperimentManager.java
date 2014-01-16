@@ -336,7 +336,7 @@ extends ChasteEntityManager
 			System.out.println (st.toString ());
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> entity = evaluateResult (rs, false);
+			TreeSet<ChasteEntity> entity = evaluateResult (rs, true);
 			if (entity != null && entity.size () > 0)
 				return (ChasteExperimentVersion) entity.first ().getVersionByFilePath (signature);
 		}
