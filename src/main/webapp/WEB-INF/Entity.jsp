@@ -65,7 +65,7 @@
     	<div class="closebtn"><small><a id="entityversionclose">&otimes; close / see  version table</a></small></div>
     	<h2 id="entityversionname"></h2>
 	    <div class="suppl"><small>Version created</small> <time id="entityversiontime"></time> <small>by</small> <em id="entityversionauthor"></em>.
-		    <c:if test="${entity.author == User.nick}">
+		    <c:if test="${entity.author == User.nick && entity.type != 'experiment'}">
 		    	Change visibility: 
 		    	<select id="versionVisibility">
 			    	<option value="PUBLIC" id="visibility-PUBLIC">PUBLIC</option>
