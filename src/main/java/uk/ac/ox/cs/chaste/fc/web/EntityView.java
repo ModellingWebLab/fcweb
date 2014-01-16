@@ -408,7 +408,7 @@ public class EntityView extends WebModule
 	@SuppressWarnings("unchecked")
 	private void createNewEntity (Object task, Notifications notifications, DatabaseConnector db, JSONObject querry, User user, JSONObject answer, ChasteEntityManager entityMgmt, ChasteFileManager fileMgmt) throws IOException, ChastePermissionException
 	{
-
+		LOGGER.debug ("creating new entity");
 		String entityName = null;
 		String versionName = null;
 		String filePath = null;
@@ -482,10 +482,12 @@ public class EntityView extends WebModule
 					createOk = false;
 				}
 			}
-			// else: new entity -> dont care about version names
+			// else: new entity -> don't care about version names
 		}
 		else
 			createOk = false;
+		
+		LOGGER.debug ("creating entity " + entityName + " version " + versionName);
 		
 		if (createOk)
 		{
@@ -529,7 +531,7 @@ public class EntityView extends WebModule
 					if (name == null || name.length () < 1)
 					{
 						LOGGER.warn ("user provided file name is empty or null.");
-						throw new IOException ("detected empty file name. thats not allowed.");
+						throw new IOException ("detected empty file name. that's not allowed.");
 					}
 					if (name.contains ("/") || name.contains ("\\"))
 					{

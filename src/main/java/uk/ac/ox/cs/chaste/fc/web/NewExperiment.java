@@ -165,19 +165,15 @@ public class NewExperiment
 			try
 			{
 				Object o = querry.get ("forceNewVersion");
-				System.out.println ("o: " + o);
 				if (o != null)
 					force = Boolean.parseBoolean (o.toString ());
-				System.out.println ("force: " + force);
 			}
 			catch (Exception e)
 			{
 				e.printStackTrace ();
 				notifications.addError ("force not valid");
 			}
-			System.out.println ("force after parse: " + force);
 			force &= user.isAllowedToForceNewExperiment ();
-			System.out.println ("force after perm check: " + force);
 			
 			// everything's ready to run the experiment?
 			if (model == null)
@@ -261,19 +257,15 @@ public class NewExperiment
 			try
 			{
 				Object o = querry.get ("forceNewVersion");
-				System.out.println ("o: " + o);
 				if (o != null)
 					force = Boolean.parseBoolean (o.toString ());
-				System.out.println ("force: " + force);
 			}
 			catch (Exception e)
 			{
 				e.printStackTrace ();
 				notifications.addError ("force not valid");
 			}
-			System.out.println ("force after parse: " + force);
 			force &= user.isAllowedToForceNewExperiment ();
-			System.out.println ("force after perm check: " + force);
 
 			//int expID = 
 				createExperiment (db, notifications, new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt), userMgmt, user, model, protocol, modelMgmt, protocolMgmt, force);

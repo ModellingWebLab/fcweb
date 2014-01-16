@@ -147,18 +147,14 @@ public class Batch extends WebModule
 		try
 		{
 			Object o = querry.get ("force");
-			System.out.println ("o: " + o);
 			if (o != null)
 				force = Boolean.parseBoolean (o.toString ());
-			System.out.println ("force: " + force);
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace ();
 		}
-		System.out.println ("force after parse: " + force);
 		force &= user.isAllowedToForceNewExperiment ();
-		System.out.println ("force after perm check: " + force);
 		
 		
 		ChasteEntityVersion model = null;
@@ -260,18 +256,14 @@ public class Batch extends WebModule
 		try
 		{
 			Object o = querry.get ("force");
-			System.out.println ("o: " + o);
 			if (o != null)
 				force = Boolean.parseBoolean (o.toString ());
-			System.out.println ("force: " + force);
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace ();
 		}
-		System.out.println ("force after parse: " + force);
 		force &= user.isAllowedToForceNewExperiment ();
-		System.out.println ("force after perm check: " + force);
 		
 		JSONArray array = (JSONArray) querry.get ("batchTasks");
 		for (Object task : array)

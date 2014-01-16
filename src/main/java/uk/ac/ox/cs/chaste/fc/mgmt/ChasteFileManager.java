@@ -367,8 +367,8 @@ public class ChasteFileManager
 		File basePath = new File (storageDir + Tools.FILESEP + version.getFilePath ());
 		String entityPath = storageDir + Tools.FILESEP + version.getFilePath () + Tools.FILESEP;
 
-		System.out.println ("base path will be: " + basePath);
-		System.out.println ("entityPath will be: " + entityPath);
+		LOGGER.debug ("base path will be: " + basePath);
+		LOGGER.debug ("entityPath will be: " + entityPath);
 		
 		for (ChasteFile file : files)
 		{
@@ -376,7 +376,7 @@ public class ChasteFileManager
 			VCard vcard = new VCard (u.getFamilyName (), u.getGivenName (), u.getMail (), u.getInstitution ());
 			OmexDescription od = new OmexDescription (vcard, file.getFilecreated ());
 
-			System.out.println ("add: " + file.getName ());
+			LOGGER.debug ("add: " + file.getName ());
 			
 			ca.addEntry (basePath, new File (entityPath + file.getName ()), CombineFormats.getFormatIdentifier (file.getFiletype ().toLowerCase ()), od, file.isMasterFile ());
 		}

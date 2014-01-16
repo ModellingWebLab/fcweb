@@ -226,8 +226,8 @@ extends ChasteEntityManager
 		
 		PreparedStatement st = db.prepareStatement ("INSERT INTO `" + entityVersionsTable + 
 			"`(`author`, `" + entityColumn + "`, `filepath`, `returnmsg`, `visibility`) VALUES (?,?,?,?,?)");
-    ResultSet rs = null;
-    int id = -1;
+		ResultSet rs = null;
+		int id = -1;
 		
 		try
 		{
@@ -238,14 +238,14 @@ extends ChasteEntityManager
 			st.setString (5, visibility);
 			
 			int affectedRows = st.executeUpdate();
-      if (affectedRows == 0)
-      {
-          throw new SQLException("Creating entity version failed, no rows affected. (" + entityVersionsTable + ")");
-      }
+			if (affectedRows == 0)
+			{
+				throw new SQLException("Creating entity version failed, no rows affected. (" + entityVersionsTable + ")");
+			}
 
-      rs = st.getGeneratedKeys();
-      if (rs.next())
-      	id = rs.getInt (1);
+			rs = st.getGeneratedKeys();
+			if (rs.next())
+				id = rs.getInt (1);
 		}
 		catch (SQLException e)
 		{
@@ -361,9 +361,9 @@ extends ChasteEntityManager
 		if (exp == null)
 			return false;
 		
-		PreparedStatement st = db.prepareStatement ("UPDATE `" + entityVersionsTable + 
+		PreparedStatement st = db.prepareStatement ("UPDATE `" + entityVersionsTable +
 			"` SET `returnmsg`=?, `status`=?, `finished`=? WHERE id=?");
-                ResultSet rs = null;
+		ResultSet rs = null;
 		
 		try
 		{
@@ -375,9 +375,9 @@ extends ChasteEntityManager
 			int affectedRows = st.executeUpdate();
 			if (affectedRows == 0)
 			{
-                                throw new SQLException("Updating experiment version failed, no rows affected. (" + entityVersionsTable + ")");
-                        }
-                        return true;
+				throw new SQLException("Updating experiment version failed, no rows affected. (" + entityVersionsTable + ")");
+			}
+			return true;
 		}
 		catch (SQLException e)
 		{

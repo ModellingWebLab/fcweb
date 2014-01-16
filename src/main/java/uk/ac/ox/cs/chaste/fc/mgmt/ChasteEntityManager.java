@@ -106,8 +106,7 @@ public abstract class ChasteEntityManager
 				knownEntities.put (mid, cur);
 			}
 			
-			LOGGER.debug ("cur " + res.size() + ": " + cur.getId() + " " + cur.getName() + " " + cur);
-			LOGGER.debug ("creating version");
+			LOGGER.debug ("getting version of entity " + res.size() + ": " + cur.getId() + " " + cur.getName());
 			
 			if (knownVersions.get (vid) != null)
 				cur.addVersion (knownVersions.get (vid));
@@ -121,7 +120,7 @@ public abstract class ChasteEntityManager
 					knownVersions.put (vid, neu);
 				}
 				else
-					LOGGER.debug ("user not allowed: " + neu.toJson ());
+					LOGGER.debug ("user " + user.getNick() + " not allowed: " + neu.toJson ());
 			}
 			
 			//System.out.println ("cur w/ version: " + cur.toJson ());

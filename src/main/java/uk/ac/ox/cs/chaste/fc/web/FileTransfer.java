@@ -103,8 +103,6 @@ public class FileTransfer extends WebModule
 		if (req.length != 7)
 			return errorPage (request, response, null);
 		
-		System.out.println ("a");
-		
 		int entityId = -1;
 		int fileId = -1;
 		boolean archive = false;
@@ -121,12 +119,10 @@ public class FileTransfer extends WebModule
 			LOGGER.warn ("user provided unparsebale ids. download impossible: " + req[4] + " / " + req[5]);
 			return errorPage (request, response, null);
 		}
-		System.out.println ("b " + entityId + " " + fileId);
+		LOGGER.debug ("transfer " + entityId + " " + fileId);
 		
 		if (entityId < 0 || (fileId < 0 && !archive))
 			return errorPage (request, response, null);
-		
-		System.out.println ("b2");
 
 		if (req[2].equals ("m"))
 			return passEntity (request, response, db, notifications, entityId, archive, fileId, new ModelManager (db, notifications, userMgmt, user));
@@ -135,7 +131,7 @@ public class FileTransfer extends WebModule
 		else if (req[2].equals ("e"))
 			return passEntity (request, response, db, notifications, entityId, archive, fileId, new ExperimentManager (db, notifications, userMgmt, user, new ModelManager (db, notifications, userMgmt, user), new ProtocolManager (db, notifications, userMgmt, user)));
 
-		System.out.println ("c");
+		LOGGER.debug ("failed to transfer file");
 		// nothing of the above?
 		return errorPage (request, response, null);
 		
@@ -149,12 +145,12 @@ public class FileTransfer extends WebModule
 		
 		// get file from entity
 		ChasteEntityVersion version = entityMgmt.getVersionById (entityId);
-		System.out.println ("version: " + version);
+		LOGGER.debug ("version: " + version);
 		if (version == null)
 			return errorPage (request, response, null);
 		ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt);
 		fileMgmt.getFiles (version, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ());
-		System.out.println ("archive: " + archive);
+		LOGGER.debug ("archive: " + archive);
 		if (archive)
 		{
 			try
@@ -172,7 +168,7 @@ public class FileTransfer extends WebModule
 		else
 		{
 			ChasteFile f = version.getFileById (fileId);
-			System.out.println ("f: " + f);
+			LOGGER.debug ("file: " + f);
 			if (f == null)
 				return errorPage (request, response, null);
 			
@@ -198,7 +194,7 @@ public class FileTransfer extends WebModule
 	    ServletContext context  = getServletConfig().getServletContext();
 	    String mimetype = context.getMimeType(file.getName ());
 	    
-	    System.out.println ("mime: " + mimetype);
+	    LOGGER.debug ("mime: " + mimetype);
 	    
 	    if (mimetype == null)
 	        mimetype = "application/octet-stream";
@@ -277,9 +273,9 @@ public class FileTransfer extends WebModule
 		
 		String[] req =  request.getRequestURI().substring(request.getContextPath().length()).split ("/");
 		
-		System.out.println (req.length);
+		LOGGER.debug ("len " + req.length);
 		for (String s : req)
-			System.out.println (s);
+			LOGGER.debug (s);
 
 		if (req != null && req.length == 2 && req[1].equals ("submitExperiment.html"))
 		{
@@ -292,7 +288,7 @@ public class FileTransfer extends WebModule
 					return answer;
 				}
 				
-				System.out.println ("signature: " + signature);
+				LOGGER.debug ("signature: " + signature);
 
 				String preRole = user.getRole ();
 				String preMail = user.getRole ();
@@ -302,17 +298,17 @@ public class FileTransfer extends WebModule
 				ExperimentManager expMgmt = new ExperimentManager (db, notifications, userMgmt, user, new ModelManager (db, notifications, userMgmt, user), new ProtocolManager (db, notifications, userMgmt, user));
 				
 
-				System.out.println ("searching for experiment");
+				LOGGER.debug ("searching for experiment");
 				ChasteExperimentVersion exp = expMgmt.getRunningExperiment (signature.trim ());
 				if (exp == null || !exp.getStatus ().equals (ChasteExperimentVersion.STATUS_RUNNING))
 				{
-					System.out.println ("no experiment found");
+					LOGGER.debug ("no experiment found");
 					answer.put ("error", "invalid signature");
 					return answer;
 				}
 				
 				
-				System.out.println ("exp: " + exp);
+				LOGGER.debug ("exp: " + exp);
 				
 				String returnmsg = request.getParameter ("returnmsg");
 				if (returnmsg == null)
@@ -322,7 +318,7 @@ public class FileTransfer extends WebModule
 					returntype = "success";
 				boolean returnType = returntype.trim ().equals ("success");
 				
-				System.out.println ("supp: " + returnmsg + " -- " + returntype + " --> " + returnType);
+				LOGGER.debug ("supp: " + returnmsg + " -- " + returntype + " --> " + returnType);
 				
 				
 				user.setRole (preRole);
@@ -348,7 +344,7 @@ public class FileTransfer extends WebModule
 					return answer;
 				}
 
-				System.out.println ("dest: " + destination);
+				LOGGER.debug ("dest: " + destination);
 				
 				Part expPart = null;
 				try
@@ -366,7 +362,7 @@ public class FileTransfer extends WebModule
 					File tmp = File.createTempFile ("chasteIncommingExperiment", ".combineArchive");
 					expPart.write (tmp.getAbsolutePath ());
 					
-					System.out.println ("tmp: " + tmp);
+					LOGGER.debug ("tmp: " + tmp);
 					
 					try
 					{
@@ -527,9 +523,9 @@ public class FileTransfer extends WebModule
 
 	public static File getTempFile (String tmpName)
 	{
-		File tmpDir = new File (Tools.getTempDir () + Tools.FILESEP + tmpName);
-		if (tmpDir.exists () && tmpDir.isFile () && tmpDir.canRead ())
-			return tmpDir;
+		File tmpFile = new File (Tools.getTempDir () + Tools.FILESEP + tmpName);
+		if (tmpFile.exists () && tmpFile.isFile () && tmpFile.canRead ())
+			return tmpFile;
 		return null;
 	}
 	
@@ -629,7 +625,7 @@ public class FileTransfer extends WebModule
 	    post.setEntity(myEntity);
 	    HttpResponse response = client.execute(post);
 	    String res = getContent (response);
-	    System.out.println ("response: " + res);
+	    LOGGER.debug ("response: " + res);
 	    if (res.trim ().equals (signature + " succ"))
 	    	return new SubmitResult (true, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_RUNNING);
 	    if (res.trim ().startsWith (signature + " inappropriate"))
