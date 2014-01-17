@@ -68,12 +68,14 @@ def UnpackArchive(archivePath, tempPath, contentType):
 def GetProtoInterface(protoPath):
     """Get the set of ontology terms used by the given protocol, recursively processing imports."""
     nested_proto = CSP.MakeKw('nests') + CSP.MakeKw('protocol') - CSP.CompactSyntaxParser.quotedUri
+    var_ref = CSP.CompactSyntaxParser.cIdent.re
     ns_maps = {}
     terms = set()
-    def AddTerm(qname):
+    optional_terms = set()
+    def AddTerm(qname, termSet=terms):
         prefix, name = qname.split(':')
         nsuri = ns_maps[prefix]
-        terms.add(nsuri + name)
+        termSet.add(nsuri + name)
     def ProcessInput(res):
         qname = res[0].tokens['name']
         if not 'units' in res[0].tokens or not 'initial_value' in res[0].tokens:
@@ -81,6 +83,8 @@ def GetProtoInterface(protoPath):
             AddTerm(qname)
     def ProcessOutput(res):
         AddTerm(res[0].tokens['name'])
+    def ProcessOptional(res):
+        AddTerm(res[0].tokens['name'], optional_terms)
     def ProcessNsDecl(res):
         ns_maps[res[0]['prefix']] = res[0]['uri']
     def ProcessImport(source_uri):
@@ -93,11 +97,14 @@ def GetProtoInterface(protoPath):
             # Try resolving relative to the library folder
             library = os.path.join(FC_ROOT, 'src', 'proto', 'library')
             source = os.path.join(library, source_uri)
-        terms.update(GetProtoInterface(source))
+        import_terms, import_optional_terms = GetProtoInterface(source)
+        terms.update(import_terms)
+        optional_terms.update(import_optional_terms)
     grammars = {CSP.CompactSyntaxParser.nsDecl: ProcessNsDecl,
                 CSP.CompactSyntaxParser.importStmt: (lambda res: ProcessImport(res[0][1])),
                 CSP.CompactSyntaxParser.inputVariable: ProcessInput,
                 CSP.CompactSyntaxParser.outputVariable: ProcessOutput,
+                CSP.CompactSyntaxParser.optionalVariable: ProcessOptional,
                 nested_proto: (lambda res: ProcessImport(res[0]))}
     for line in open(protoPath, 'rU'):
         for grammar, processor in grammars.items():
@@ -107,7 +114,14 @@ def GetProtoInterface(protoPath):
                 continue
             processor(match)
             break
-    return terms
+        else:
+            # Default check: Scan for any variable references, and see if they're in a known namespace
+            for match in var_ref.finditer(line):
+                prefix, name = match.group(0).split(':')
+                nsuri = ns_maps.get(prefix, None)
+                if nsuri:
+                    terms.add(nsuri + name)
+    return terms - optional_terms, optional_terms
 
 def DetermineCompatibility(protoPath, modelPath):
     """Determine whether the given protocol and model are compatible.
@@ -118,15 +132,17 @@ def DetermineCompatibility(protoPath, modelPath):
     NB: Only works with textual syntax protocols at present; assumes OK otherwise.
     """
     if not protoPath.endswith('.txt'):
-        return []
-    proto_terms = GetProtoInterface(protoPath)
+        return [], []
+    proto_terms, optional_terms = GetProtoInterface(protoPath)
     # Get the terms defined by the model
     model_doc = pycml.amara_parse_cellml(modelPath)
     named_uris = cellml_metadata.get_targets(model_doc.model, None, cellml_metadata.create_rdf_node(('bqbiol:is', pycml.NSS['bqbiol'])))
     category_uris = cellml_metadata.get_targets(model_doc.model, None, cellml_metadata.create_rdf_node(('bqbiol:isVersionOf', pycml.NSS['bqbiol'])))
-    model_terms = set(str(uri) for uri in named_uris + category_uris) # TODO: Check!
+    model_terms = set(str(uri) for uri in named_uris + category_uris)
     model_terms.add('https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#state_variable') # Present implicitly
     # Return the mismatch, if any, as a sorted list
     needed_terms = list(proto_terms - model_terms)
     needed_terms.sort()
-    return needed_terms
+    missing_optional_terms = list(optional_terms - model_terms)
+    missing_optional_terms.sort()
+    return needed_terms, missing_optional_terms

@@ -59,11 +59,14 @@ else:
         main_proto_path = fcws_utils.UnpackArchive(proto_path, temp_dir, 'proto')
         
         # Check whether their interfaces are compatible
-        missing_terms = fcws_utils.DetermineCompatibility(main_proto_path, main_model_path)
+        missing_terms, missing_optional_terms = fcws_utils.DetermineCompatibility(main_proto_path, main_model_path)
         if missing_terms:
             print signature.value, "inappropriate - required ontology terms are not present in the model."
             print "Missing terms are:<br/>"
             for term in missing_terms:
+                print "&nbsp;" * 4, term, "<br/>"
+            print "Missing optional terms are:<br/>"
+            for term in missing_optional_terms:
                 print "&nbsp;" * 4, term, "<br/>"
         else:
             # call the chaste handler via batch -> it will be executed if load average drops below 1.5
