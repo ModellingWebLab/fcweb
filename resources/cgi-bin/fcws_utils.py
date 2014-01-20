@@ -106,21 +106,30 @@ def GetProtoInterface(protoPath):
                 CSP.CompactSyntaxParser.outputVariable: ProcessOutput,
                 CSP.CompactSyntaxParser.optionalVariable: ProcessOptional,
                 nested_proto: (lambda res: ProcessImport(res[0]))}
+    in_conversion_rule = False
     for line in open(protoPath, 'rU'):
+        stripped = line.strip()
+        if stripped.startswith('convert'):
+            in_conversion_rule = True
+            continue
         for grammar, processor in grammars.items():
             try:
                 match = grammar.parseString(line)
+                in_conversion_rule = False
             except CSP.p.ParseException:
                 continue
             processor(match)
             break
         else:
-            # Default check: Scan for any variable references, and see if they're in a known namespace
-            for match in var_ref.finditer(line):
-                prefix, name = match.group(0).split(':')
-                nsuri = ns_maps.get(prefix, None)
-                if nsuri:
-                    terms.add(nsuri + name)
+            if stripped.startswith('define ') or stripped.startswith('clamp ') or stripped.startswith('var ') or stripped == '}':
+                in_conversion_rule = False
+            if not in_conversion_rule:
+                # Default check: Scan for any variable references, and see if they're in a known namespace
+                for match in var_ref.finditer(line):
+                    prefix, name = match.group(0).split(':')
+                    nsuri = ns_maps.get(prefix, None)
+                    if nsuri:
+                        terms.add(nsuri + name)
     return terms - optional_terms, optional_terms
 
 def DetermineCompatibility(protoPath, modelPath):
