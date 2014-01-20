@@ -81,6 +81,8 @@ def GetProtoInterface(protoPath):
         if not 'units' in res[0].tokens or not 'initial_value' in res[0].tokens:
             # Input is not optional, so record as part of the interface
             AddTerm(qname)
+        else:
+            AddTerm(qname, optional_terms)
     def ProcessOutput(res):
         AddTerm(res[0].tokens['name'])
     def ProcessOptional(res):
