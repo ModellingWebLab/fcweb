@@ -210,7 +210,7 @@ extends HttpServlet
 		configure ();
 		
 		if (!fileTransfer)
-			if (Math.random () < .05) // on avg every 20th click
+			if (Math.random () < .02) // on avg every 50th click
 				FileTransfer.scheduleCleanUp ();
 		
 	  HttpSession session = request.getSession (true);
