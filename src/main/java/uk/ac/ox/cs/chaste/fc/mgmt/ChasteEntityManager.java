@@ -115,7 +115,7 @@ public abstract class ChasteEntityManager
 				ChasteEntityVersion neu = createEntityVersion (rs, cur);
 				if (neglectPermissions || user.isAllowedToSeeEntityVersion (neu))
 				{
-					LOGGER.debug ("user allowed; version=" + neu.getVersion());
+					LOGGER.debug ("user " + user.getNick() + " allowed; version=" + neu.getVersion());
 					cur.addVersion (neu);
 					knownVersions.put (vid, neu);
 				}

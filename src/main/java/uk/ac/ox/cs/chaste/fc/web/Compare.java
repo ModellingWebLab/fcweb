@@ -115,7 +115,7 @@ public class Compare extends WebModule
 				int curId;
 				try
 				{
-					System.out.println ("parsing id string " + id);
+//					System.out.println ("parsing id string " + id);
 					curId = Integer.parseInt (id.toString ());
 				}
 				catch (NumberFormatException e)
@@ -123,10 +123,10 @@ public class Compare extends WebModule
 					LOGGER.warn ("user provided number which isn't an int: " + id, e);
 					continue;
 				}
-				System.out.println ("id string " + curId);
+//				System.out.println ("id string " + curId);
 				
 				ChasteEntity entity = entityMgmt.getEntityById (curId);
-				System.out.println ("entity " + entity);
+//				System.out.println ("entity " + entity);
 				if (entity != null)
 				{
 					ChasteEntityVersion version = entity.getLatestVersion ();
@@ -135,7 +135,7 @@ public class Compare extends WebModule
 					v.put ("name", entity.getName ());
 					v.put ("entityId", entity.getId ());
 					entities.add (v);
-					System.out.println ("appended");
+//					System.out.println ("appended");
 				}
 			}
 			
