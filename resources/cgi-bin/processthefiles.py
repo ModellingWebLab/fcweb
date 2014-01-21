@@ -75,11 +75,22 @@ if 'manifest.xml' not in output_zip.namelist():
     manifest = open(os.path.join(temp_dir, 'manifest.xml'), 'w')
     manifest.write("""<?xml version='1.0' encoding='utf-8'?>
 <omexManifest xmlns='http://identifiers.org/combine.specifications/omex-manifest'>
-  <content location='%s' format='%s'/>
-  <content location='%s' format='%s'/>
-</omexManifest>
-""" % ('manifest.xml', 'http://identifiers.org/combine.specifications/omex-manifest',
-       'stdout.txt', 'text/plain'))
+  <content location='manifest.xml' format='http://identifiers.org/combine.specifications/omex-manifest'/>
+""")
+    for filename in output_zip.namelist():
+        try:
+            ext = os.path.splitext(filename)[1]
+            format = {'.txt': 'text/plain',
+                      '.csv': 'text/csv',
+                      '.png': 'image/png',
+                      '.eps': 'application/postscript',
+                      '.xml': 'text/xml',
+                      '.cellml': 'http://identifiers.org/combine.specifications/cellml.1.0'
+                     }[ext]
+        except:
+            format = 'application/octet-stream'
+        manifest.write("  <content location='%s' format='%s'/>\n" % (filename, format))
+    manifest.write("</omexManifest>")
     manifest.close()
     output_zip.write(os.path.join(temp_dir, 'manifest.xml'), 'manifest.xml')
 output_zip.close()
