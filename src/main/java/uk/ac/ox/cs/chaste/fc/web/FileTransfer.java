@@ -368,6 +368,7 @@ public class FileTransfer extends WebModule
 						Collection<ArchiveEntry> entries = ca.getEntries ();
 						
 						ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt);
+						boolean found_stdout = false;
 						
 						for (ArchiveEntry entry : entries)
 						{
@@ -377,6 +378,9 @@ public class FileTransfer extends WebModule
 							// TODO: formats werden noch nicht aufgeloest....
 							if (format.equals (CombineFormats.getFormatIdentifier ("omex")) || format.equals (CombineFormats.getFormatIdentifier ("manifest")))
 								continue;
+							
+							if (entry.getRelativeName().equals("stdout.txt"))
+								found_stdout = true;
 							
 							// add the remaining to db
 							int fileId = fileMgmt.addFile (entry.getRelativeName (), CombineFormats.getFormatFromIdentifier (format), exp.getAuthor (), entry.getFile ().length (), false);
@@ -401,7 +405,7 @@ public class FileTransfer extends WebModule
 						}
 						
 						File output = new File (destination.getAbsolutePath () + File.separator + "stdout.txt");
-						if (output.exists () && output.canRead ())
+						if (!found_stdout && output.exists () && output.canRead ())
 						{
 							int fileId = fileMgmt.addFile ("stdout.txt", "text/plain", exp.getAuthor (), output.length (), false);
 							if (fileId < 0)
