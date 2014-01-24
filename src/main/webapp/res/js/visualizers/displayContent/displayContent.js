@@ -14,13 +14,13 @@ highlightTypes =
 			[
 			 new RegExp("cpp", 'gi'),
 			 new RegExp("hpp", 'gi')
-			],
+			]/*,
 		"plain":
 			[
 			 new RegExp("plain", 'gi'),
 			 new RegExp("txt", 'gi'),
 			 new RegExp("csv", 'gi')
-			]
+			]*/
 	};
 
 function getHighlightingType (file)
@@ -45,7 +45,7 @@ function getHighlightingType (file)
 				if (ext.match (highlightTypes[i][j]))
 					return i;
 	// we don't know...
-	return null;
+	return "unknown";
 }
 
 
@@ -73,14 +73,12 @@ contentDumper.prototype.getContentsCallback = function (succ)
 		pre.appendChild(document.createTextNode(this.file.contents));
 		this.div.appendChild (pre);
 		var type = getHighlightingType (this.file);
-		if (type != "plain")
+		if (type != "unknown")
 		{
 			console.log ("setting class: " + type);
 			pre.setAttribute ("class", type);
+			hljs.highlightBlock(pre);
 		}
-		else
-			console.log ("plain layout: "+type+". detected by highlightjs");
-		hljs.highlightBlock(pre);
 	}
 		
 };
