@@ -16,6 +16,21 @@ For the backend:
 * All the Chaste dependencies
 * python-requests
 
+### FunctionalCuration executable
+
+Check out Chaste, and check out the FunctionalCuration project within its projects folder.
+You should then be able to build the project executable.
+For instance, to build using 4 cores:
+
+```
+svn co https://chaste.cs.ox.ac.uk/svn/chaste/trunk Chaste
+cd projects
+svn co https://chaste.cs.ox.ac.uk/svn/chaste/projects/FunctionalCuration
+cd ..
+scons -j4 b=GccOptNative cl=1 exe=1 projects/FunctionalCuration/apps
+```
+
+
 ### Setup database
 
 Create a database 'chaste' with associated user account, and populate from `resources/chaste.sql`.
