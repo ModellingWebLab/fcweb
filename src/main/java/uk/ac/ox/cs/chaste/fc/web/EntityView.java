@@ -58,9 +58,10 @@ public class EntityView extends WebModule
 	protected String answerWebRequest (HttpServletRequest request, HttpServletResponse response, PageHeader header, DatabaseConnector db,
 		Notifications notifications, User user, HttpSession session)
 	{
-		// req[2] = entity name
+		// req[1] = entity type
+		// req[2] = entity name, or 'createnew' (in which case we don't have parts 3-7)
 		// req[3] = entity id
-		// req[4] = version
+		// req[4] = version, or 'latest' (in which case we don't have parts 5-7)
 		// req[5] = version id
 		// req[6] = file
 		// req[7] = action
@@ -140,7 +141,7 @@ public class EntityView extends WebModule
 				return errorPage (request, response, "no entity found, or you do not have permission to view this entity");
 			}
 			
-			Map<Integer, ChasteEntityVersion> versions = entity.getVersions ();
+			Map<Integer, ChasteEntityVersion> versions = entity.getOrderedVersions ();
 			ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt);
 			for (ChasteEntityVersion version : versions.values ())
 				fileMgmt.getFiles (version, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ());

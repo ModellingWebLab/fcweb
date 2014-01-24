@@ -987,7 +987,7 @@ function render ()
 		if (url.length > 0 && url[0] == "latest")
 		{
 			//document.getElementById("entityversionlist")
-			$(".entityversionlink").each(function (){nextPage ($(this).attr('href'));});
+			$(".entityversionlink").each(function (){nextPage ($(this).attr('href')); return false;});
 		}
 		doc.entity.version.style.display = "none";
 		doc.entity.details.style.display = "block";
