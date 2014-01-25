@@ -18,5 +18,17 @@
         Currently only administrators may upload new protocols, but if you have one you'd like to add to the system, please do
         <a href="${contextPath}/contact.html">contact us</a>.
     </p>
+    <h2>Future Plans</h2>
+    <p>
+        The "To Do" list looks like this:
+        <ul>
+            <li>Utilise an ontology for the standardised names, to allow more sophisticated interfacing between models and protocols.</li>
+            <li>With community agreement, annotate models directly in the CellML repository.</li>
+            <li>Develop a protocol markup language editor.</li>
+            <li>Suggest some of the protocol language features for the next versions of SED-ML.</li>
+            <li>Link directly to databases of wet-lab experimental data from the same protocols, to allow comparison of simulated and real experiments. 
+                This will allow us to start to automatically validate models, and begin to think about auto-fitting, and in the end auto-developing models!</li>
+        </ul>
+    </p>
 </t:skeleton>
 
