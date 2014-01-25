@@ -1,6 +1,5 @@
 
 
-
 function contentFlotPlot (file, div)
 {
 	this.file = file;
@@ -37,97 +36,76 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
         div.style.width = "780px";
         div.style.height = "450px";
 
-
         var datasets = {};
         for (var i = 1; i < csvData.length; i++)
         {
-                var curData = [];
-                for (var j = 0; j < csvData[i].length; j++)
-                        curData.push ([csvData[i][j].x, csvData[i][j].y]);
-                //if (curData.length > 100)
-                	//plotPoints = false;
-                //plot.polyline("line " + i, { x: csvData[0], y: csvData[i], stroke:  colorPalette.getRgba (col), thickness: 1 });
-                datasets["line" + i] = {label : "line " + i, data: curData};
+            var curData = [];
+            for (var j = 0; j < csvData[i].length; j++)
+                    curData.push ([csvData[i][j].x, csvData[i][j].y]);
+            //if (curData.length > 100)
+            	//plotPoints = false;
+            //plot.polyline("line " + i, { x: csvData[0], y: csvData[i], stroke:  colorPalette.getRgba (col), thickness: 1 });
+            datasets["line" + i] = {label : "line " + i, data: curData};
         }
     	
-
-
-
         this.div.appendChild (div);
 
-                // hard-code color indices to prevent them from shifting as
-                // countries are turned on/off
+        // hard-code color indices to prevent them from shifting as
+        // lines are turned on/off
 
-                var i = 0;
-                $.each(datasets, function(key, val) {
-                    val.color = i;
-                    ++i;
-                });
+        var i = 0;
+        $.each(datasets, function(key, val) {
+            val.color = i;
+            ++i;
+        });
 
+        // insert checkboxes 
+        var choiceContainer = $("#choices");
+        $.each(datasets, function(key, val) {
+            choiceContainer.append("<input type='checkbox' name='" + key +
+                //"' id='id" + key + "'></input>" +
+                "' checked='checked' id='id" + key + "'></input>" +
+                "<label for='id" + key + "'>"
+                + val.label + "</label>");
+        });
 
-                // insert checkboxes 
-                var choiceContainer = $("#choices");
-                $.each(datasets, function(key, val) {
-                    choiceContainer.append("<input type='checkbox' name='" + key +
-                        //"' id='id" + key + "'></input>" +
-                        "' checked='checked' id='id" + key + "'></input>" +
-                        "<label for='id" + key + "'>"
-                        + val.label + "</label>");
-                });
+        var legendContainer =  document.createElement("div");
+        legendContainer.id = "legend";
+        this.div.appendChild (legendContainer);
 
-var legendContainer =  document.createElement("div");
-legendContainer.id = "legend";
-this.div.appendChild (legendContainer);
+        function plotAccordingToChoices() {
 
+            var data = [];
 
-                function plotAccordingToChoices() {
+            choiceContainer.find("input:checked").each(function () {
+                var key = $(this).attr("name");
+                if (key && datasets[key]) {
+                    data.push(datasets[key]);
+                }
+            });
 
-                    var data = [];
-
-                    choiceContainer.find("input:checked").each(function () {
-                        var key = $(this).attr("name");
-                        if (key && datasets[key]) {
-                            data.push(datasets[key]);
-                        }
-                    });
-
-                    //if (data.length > 0) {
-                        //$.plot("#flotplot-262", data, {
-                        var settings = {
-                            /*yaxis: {
-                                min: 0
-                            },*/
-                            xaxis: {
-                                tickDecimals: 0
-                            }
-,
-lines: { show: true},
-
-
-
-zoom: {
-	interactive: true
-	},
-	pan: {
-	interactive: true
-	},
-legend: {backgroundOpacity: 0,container: $("#legend")}
-                        };
-                        
-                        if (THISfile.linestyle == "linespoints" || THISfile.linestyle == "points")
-                        	settings.points = { show: true, radius:2};
-                        
-                        $.plot("#" + id, data, settings);
-                    //}
-                };
+            var settings = {
+                /*yaxis: {
+                    min: 0
+                },*/
+                xaxis: {
+                    tickDecimals: 0
+                },
+                lines: { show: true},
+                zoom: {	interactive: true },
+                pan: {interactive: true	},
+                legend: {backgroundOpacity: 0, container: $("#legend")}
+            };
                 
+            if (THISfile.linestyle == "linespoints" || THISfile.linestyle == "points")
+            	settings.points = { show: true, radius:2};
+            
+            $.plot("#" + id, data, settings);
+        };                
                 
-                choiceContainer.find("input").click(plotAccordingToChoices);
-
-                plotAccordingToChoices();
-        }
-
-		
+        choiceContainer.find("input").click(plotAccordingToChoices);
+        plotAccordingToChoices();
+    }		
 };
 
 contentFlotPlot.prototype.show = function ()
@@ -137,16 +115,6 @@ contentFlotPlot.prototype.show = function ()
 	if (!this.setUp)
 		this.file.getContents (this);
 };
-
-
-
-
-
-
-
-
-
-
 
 function contentFlotPlotComparer (file, div)
 {
@@ -158,6 +126,7 @@ function contentFlotPlotComparer (file, div)
 	this.gotFileContents = 0;
 	this.ok = true;
 };
+
 contentFlotPlotComparer.prototype.getContentsCallback = function (succ)
 {
 	//console.log ("getContentsCallback : " + succ + " -> so far: " + this.gotFileContents + " of " + this.file.entities.length);
@@ -201,8 +170,6 @@ contentFlotPlotComparer.prototype.showContents = function ()
 			});
 		}
 		
-		
-
 		//var plotPoints = true;
 
         var div = document.createElement("div");
@@ -215,9 +182,8 @@ contentFlotPlotComparer.prototype.showContents = function ()
         div.style.width = "780px";
         div.style.height = "450px";
 
-
-                // insert checkboxes 
-                var choiceContainer = $("#choices");
+        // insert checkboxes 
+        var choiceContainer = $("#choices");
                 
         var datasets = {};
         var curColor = 0;
@@ -249,61 +215,46 @@ contentFlotPlotComparer.prototype.showContents = function ()
         }
     	//console.log (datasets);
 
-
-        this.div.appendChild (div);
-
+        this.div.appendChild (div);               
                 
                 
-                
-var legendContainer =  document.createElement("div");
-legendContainer.id = "legend";
-this.div.appendChild (legendContainer);
+        var legendContainer =  document.createElement("div");
+        legendContainer.id = "legend";
+        this.div.appendChild (legendContainer);
 
 
-                function plotAccordingToChoices() {
+        function plotAccordingToChoices() {
 
-                    var data = [];
+            var data = [];
 
-                    choiceContainer.find("input:checked").each(function () {
-                        var key = $(this).attr("name");
-                        if (key && datasets[key]) {
-                            data.push(datasets[key]);
-                        }
-                    });
+            choiceContainer.find("input:checked").each(function () {
+                var key = $(this).attr("name");
+                if (key && datasets[key]) {
+                    data.push(datasets[key]);
+                }
+            });
 
-                    //if (data.length > 0) {
-                        var settings = {
-                            xaxis: {
-                                tickDecimals: 0
-                            }
-,
-lines: { show: true},
+            var settings = {
+                xaxis: {
+                    tickDecimals: 0
+                },
+                lines: { show: true},
+                zoom: {	interactive: true },
+                pan: {	interactive: true},
+                legend: {backgroundOpacity: 0,container: $("#legend")}
+            };
+            
+            if (lineStyle == "linespoints" || lineStyle == "points")
+            	settings.points = { show: true, radius:2};
+            
+            $.plot("#" + id, data, settings);
 
+        };        
+        
+        choiceContainer.find("input").click(plotAccordingToChoices);
 
-
-zoom: {
-	interactive: true
-	},
-	pan: {
-	interactive: true
-	},
-legend: {backgroundOpacity: 0,container: $("#legend")}
-                        };
-                        
-                        if (lineStyle == "linespoints" || lineStyle == "points")
-                        	settings.points = { show: true, radius:2};
-                        
-                        $.plot("#" + id, data, settings);
-                    //}
-                };
-                
-                
-                choiceContainer.find("input").click(plotAccordingToChoices);
-
-                plotAccordingToChoices ();
-        }
-
-		
+        plotAccordingToChoices ();
+    }		
 };
 
 contentFlotPlotComparer.prototype.show = function ()
@@ -315,19 +266,10 @@ contentFlotPlotComparer.prototype.show = function ()
 		this.file.getContents (this);
 	}
 	else
+	{
 		this.showContents ();
+	}
 };
-
-
-
-
-
-
-
-
-
-
-
 
 
 function flotContent ()
@@ -379,13 +321,10 @@ flotContent.prototype.setUpComparision = function (files, div)
 };
 
 
-
-
 function initFlotContent ()
 {
 	visualizers["displayPlotFlot"] = new flotContent ();
 }
 
-
-
 document.addEventListener("DOMContentLoaded", initFlotContent, false);
+

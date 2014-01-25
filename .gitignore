@@ -1,6 +1,7 @@
 *~
 *zip
 .cproject
+.pydevproject
 .project
 .Rhistory
 target

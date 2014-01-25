@@ -10,20 +10,11 @@
         This system brings together models encoded using <a href="http://www.cellml.org/">CellML</a> and virtual experiment protocols encoded in our own language, using <a href="https://chaste.cs.ox.ac.uk/trac/wiki/ChasteGuides/CodeGenerationFromCellML#Standardisednames">standardised names</a> to interface between them.
         You can explore the results of running any protocol on any model, and compare how different models respond to the same protocol.
     </p>
+    <div id="schematic">
+        <img alt="Chaste - Functional Curation Schematic" src="/FunctionalCuration/res/img/fc_schematic.jpg" />    
+    </div>
     <p>
-        For more background on Functional Curation, see our <a href="http://www.2020science.net/research/functional-curation">section of the 2020 Science project website</a>,
-        and our <a href="http://dx.doi.org/10.1016/j.pbiomolbio.2011.06.003">2011 reference publication</a>.
-        You can also get the <a href="https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration">open source software implementing the backend for this system</a> from the Chaste website.
-    </p>
-    <p>
-        You are encouraged to browse around and view the results of protocols encoded so far run on a range of cell models.
-        If you wish to evaluate your own models under these protocols, you will need to register for an account.
-        By default your own models, protocols and experiments are private so that only you may view them.
-        This can be altered to 'restricted', providing visibility to all logged-in users, or 'public' to publish them to the world.
-    </p>
-    <p>
-        Currently only administrators may upload new protocols, but if you have one you'd like to add to the system, please do
-        <a href="${contextPath}/contact.html">contact us</a>.
+    <a href="${contextPath}/about.html">Read more ...</a>
     </p>
 </t:skeleton>
 
