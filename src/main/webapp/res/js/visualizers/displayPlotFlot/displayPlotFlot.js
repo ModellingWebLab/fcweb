@@ -44,6 +44,7 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
             var curData = [];
             for (var j = 0; j < csvData[i].length; j++)
                     curData.push ([csvData[i][j].x, csvData[i][j].y]);
+
             //if (curData.length > 100)
             	//plotPoints = false;
             //plot.polyline("line " + i, { x: csvData[0], y: csvData[i], stroke:  colorPalette.getRgba (col), thickness: 1 });
@@ -91,11 +92,15 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
             //if (data.length > 0) {
                 //$.plot("#flotplot-262", data, {
                 var settings = {
-                    /*yaxis: { min: 0 },*/
-                    xaxes: [ { position: 'bottom', axisLabel: 'X-axis (units)', axisLabelPadding: 10, axisLabelUseCanvas: true } ],
-                    yaxes: [ { position: 'left', axisLabel: 'Y-axis (units)', axisLabelPadding: 10, axisLabelUseCanvas: true  } ],
-                    xaxis: { 1, tickDecimals: 0 },
-                    yaxis: { 1 },
+                    xaxis: { tickDecimals: 0, 
+                             position: 'bottom', 
+                             axisLabel: 'X-axis (units)', 
+                             axisLabelPadding: 5, 
+                             axisLabelUseCanvas: true  },
+                    yaxis: { position: 'left', 
+                             axisLabel: 'Y-axis (units)', 
+                             axisLabelPadding: 10, 
+                             axisLabelUseCanvas: true},
                     lines: { show: true},
                     zoom: {	interactive: true },
                     pan: { interactive: true },
@@ -241,10 +246,15 @@ contentFlotPlotComparer.prototype.showContents = function ()
 
             //if (data.length > 0) {
                 var settings = {
-                    xaxes: [ { position: 'bottom', axisLabel: 'X-axis (units)', axisLabelPadding: 10, axisLabelUseCanvas: true } ],
-                    yaxes: [ { position: 'left', axisLabel: 'Y-axis (units)', axisLabelPadding: 10, axisLabelUseCanvas: true } ],
-                    xaxis: { 1, tickDecimals: 0 },
-                    yaxis: { 1 },
+                    xaxis: { tickDecimals: 0,
+                             position: 'bottom', 
+                             axisLabel: 'X-axis (units)', 
+                             axisLabelPadding: 10, 
+                             axisLabelUseCanvas: true },
+                    yaxis: { position: 'left', 
+                             axisLabel: 'Y-axis (units)', 
+                             axisLabelPadding: 10, 
+                             axisLabelUseCanvas: true },
                     lines: { show: true},
                     zoom: {	interactive: true },
                     pan: { interactive: true },
