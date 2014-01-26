@@ -92,9 +92,10 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
                 //$.plot("#flotplot-262", data, {
                 var settings = {
                     /*yaxis: { min: 0 },*/
-                    xaxes: [ { position: 'bottom', axisLabel: 'X-axis (units)' } ],
-                    yaxes: [ { position: 'left', axisLabel: 'Y-axis (units)' } ],
-                    xaxis: { tickDecimals: 0 },
+                    xaxes: [ { position: 'bottom', axisLabel: 'X-axis (units)', axisLabelPadding: 10, axisLabelUseCanvas: true } ],
+                    yaxes: [ { position: 'left', axisLabel: 'Y-axis (units)', axisLabelPadding: 10, axisLabelUseCanvas: true  } ],
+                    xaxis: { 1, tickDecimals: 0 },
+                    yaxis: { 1 },
                     lines: { show: true},
                     zoom: {	interactive: true },
                     pan: { interactive: true },
@@ -240,9 +241,10 @@ contentFlotPlotComparer.prototype.showContents = function ()
 
             //if (data.length > 0) {
                 var settings = {
-                    xaxes: [ { position: 'bottom', axisLabel: 'X-axis (units)' } ],
-                    yaxes: [ { position: 'left', axisLabel: 'Y-axis (units)' } ],
-                    xaxis: { tickDecimals: 0 },
+                    xaxes: [ { position: 'bottom', axisLabel: 'X-axis (units)', axisLabelPadding: 10, axisLabelUseCanvas: true } ],
+                    yaxes: [ { position: 'left', axisLabel: 'Y-axis (units)', axisLabelPadding: 10, axisLabelUseCanvas: true } ],
+                    xaxis: { 1, tickDecimals: 0 },
+                    yaxis: { 1 },
                     lines: { show: true},
                     zoom: {	interactive: true },
                     pan: { interactive: true },
