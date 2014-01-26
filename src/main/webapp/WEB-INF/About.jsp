@@ -2,7 +2,13 @@
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}About - " contextPath="${contextPath}" newExpModelName="${newExpModelName}" newExpProtocolName="${newExpProtocolName}">
-    <h1>About</h1>
+    <h1>About Functional Curation</h1>
+    <p>
+        The key idea underpinning functional curation is that when mathematical and computational models are being developed and curated the primary goal should be the continuous validation of those models against experimental data.
+        To achieve this goal, it must be possible to simulate in the computational models precisely the same protocols used in generating the experimental data on which the models are based.
+        We are therefore developing a language for describing rich 'virtual experiment' protocols, and software for running these on compatible models.
+        This website provides a front-end to that software.
+    </p>
     <p>
         For more background on Functional Curation, see our <a href="http://www.2020science.net/research/functional-curation">section of the 2020 Science project website</a>,
         and our <a href="http://dx.doi.org/10.1016/j.pbiomolbio.2011.06.003">2011 reference publication</a>.
@@ -18,16 +24,17 @@
         Currently only administrators may upload new protocols, but if you have one you'd like to add to the system, please do
         <a href="${contextPath}/contact.html">contact us</a>.
     </p>
+
     <h2>Future Plans</h2>
     <p>
-        The "To Do" list looks like this:
+        The main features on our "to do" list include:
         <ul>
-            <li>Utilise an ontology for the standardised names, to allow more sophisticated interfacing between models and protocols.</li>
-            <li>With community agreement, annotate models directly in the CellML repository.</li>
-            <li>Develop a protocol markup language editor.</li>
-            <li>Suggest some of the protocol language features for the next versions of SED-ML.</li>
-            <li>Link directly to databases of wet-lab experimental data from the same protocols, to allow comparison of simulated and real experiments. 
-                This will allow us to start to automatically validate models, and begin to think about auto-fitting, and in the end auto-developing models!</li>
+            <li>Utilise an ontology for the standardised names used to identify model constructs accessible to protocols, to allow more sophisticated interfacing between models and protocols.</li>
+            <li>With community agreement, annotate models directly in the CellML repository using these standardised names.</li>
+            <li>Develop a protocol editor, facilitating the creation of new protocols.</li>
+            <li>Propose some of our protocol language features for the next versions of SED-ML.</li>
+            <li>Link directly to databases of wet-lab experimental data from the same protocols, to allow comparison of simulated and real experiments.
+                This will allow us to start to automatically validate models, and begin to think about auto-fitting, and in the end even auto-developing models!</li>
         </ul>
     </p>
 </t:skeleton>
