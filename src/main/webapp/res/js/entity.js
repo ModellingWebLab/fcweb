@@ -1150,6 +1150,4 @@ function initModel ()
     
 }
 
-
-
 document.addEventListener("DOMContentLoaded", initModel, false);
