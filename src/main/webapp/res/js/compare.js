@@ -570,11 +570,12 @@ function parseCSVContent (file)
 	}
 	file.csv = csv;
 
-	var min = Math.pow(2, 32);
-	var max = -min;
 	file.columns = [];
+	var dropDist = [];
 	for (var i = 0; i < csv[0].length; i++)
 	{
+	        var min = Math.pow(2, 32);
+        	var max = -min;
 		file.columns[i] = [];
 		for (var j = 0; j < csv.length; j++)
 			if (csv[j][i])
@@ -588,8 +589,9 @@ function parseCSVContent (file)
 						min = file.columns[i][j];
 				}
 			}
+                dropDist.push ( (max - min) / 500.0 );
+                //console.log( "scale for line " + i + ": " + min + ":" + dropDist[dropDist.length-1] + ":" + max);
 	}
-	var dropDist = (max-min) / 5000.;//100.;
 	file.nonDownsampled = [];
 	file.downsampled = [];
 	for (var i = 1; i < file.columns.length; i++)
@@ -602,10 +604,10 @@ function parseCSVContent (file)
         for (var j = 1; j <= last_j; j++)
         {
             file.nonDownsampled[i].push ({x : file.columns[0][j], y : file.columns[i][j]});
-            var last = file.downsampled[i][file.downsampled.length - 1];
+            var last = file.downsampled[i][file.downsampled[i].length - 1]['y'];
             var cur = file.columns[i][j];
             var next = file.columns[i][j + 1];
-            if (j == last_j || maxDist (last, cur, next) > dropDist || (cur < last && cur < next) || (cur > last && cur > next))
+            if (j == last_j || maxDist (last, cur, next) > dropDist[i] || (cur < last && cur < next) || (cur > last && cur > next))
                 file.downsampled[i].push ({x : file.columns[0][j], y : file.columns[i][j]});
         }
 		//console.log ("column " + i + " prev: " + file.columns[i].length + " now: " + file.downsampled[i].length);
