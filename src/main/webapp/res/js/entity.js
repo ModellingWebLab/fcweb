@@ -326,44 +326,44 @@ function parsePlotDescription (file, version, showDefault)
 		return converter.makeHtml (file.contents);
 	
 	var goForIt = {
-			getContentsCallback : function (succ)
+		getContentsCallback : function (succ)
+		{
+			if (succ)
 			{
-				if (succ)
+				var str = file.contents.replace(/\s*#.*\n/gm,"");
+				var delimiter = ",";
+				var patterns = new RegExp(
+			    		(
+			    			// Delimiters.
+			    			"(\\" + delimiter + "|\\r?\\n|\\r|^)" +
+			    			// Quoted fields.
+			    			"(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
+			    			// Standard fields.
+			    			"([^\"\\" + delimiter + "\\r\\n]*))"
+			    		),
+			    		"gi"
+			    		);
+				var csv = [[]];
+				var matches = null;
+				while (matches = patterns.exec (str))
 				{
-					var str = file.contents.replace(/\s*#.*\n/gm,"");
-					var delimiter = ",";
-					var patterns = new RegExp(
-				    		(
-				    			// Delimiters.
-				    			"(\\" + delimiter + "|\\r?\\n|\\r|^)" +
-				    			// Quoted fields.
-				    			"(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
-				    			// Standard fields.
-				    			"([^\"\\" + delimiter + "\\r\\n]*))"
-				    		),
-				    		"gi"
-				    		);
-					var csv = [[]];
-					var matches = null;
-					while (matches = patterns.exec (str))
-					{
-						var value;
-						var matchDel = matches[1];
-						if (matchDel.length && matchDel != delimiter)
-				    			csv.push([]);
-						if (matches[2])
-							value = matches[2].replace (new RegExp ("\"\"", "g"), "\"");
-						else
-							value = matches[3];
-						
-						csv[csv.length - 1].push (value);
-					}
+					var value;
+					var matchDel = matches[1];
+					if (matchDel.length && matchDel != delimiter)
+			    			csv.push([]);
+					if (matches[2])
+						value = matches[2].replace (new RegExp ("\"\"", "g"), "\"");
+					else
+						value = matches[3];
 					
-					version.plotDescription = csv;
-					highlightPlots (version, showDefault);
-					
+					csv[csv.length - 1].push (value);
 				}
+				
+				version.plotDescription = csv;
+				highlightPlots (version, showDefault);
+				
 			}
+		}
 	};
 	getFileContent (file, goForIt);
 	

@@ -36,6 +36,16 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
         div.id = id;
         div.style.width = "780px";
         div.style.height = "450px";
+        
+        // Some of the plots won't come from specified plots, so these are missing.
+    	var x_label = "";
+    	var y_label = "";    	
+    	if (THISfile.xAxes) {
+    		x_label = THISfile.xAxes;
+    	}
+    	if (THISfile.yAxes) {
+    		y_label = THISfile.yAxes;
+    	}
 
 
         var datasets = {};
@@ -91,16 +101,15 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
 
             //if (data.length > 0) {
                 //$plot("#flotplot-262", data, {
-          
-           
+                       
                 var settings = {
                     xaxis: { tickDecimals: 0, 
                              position: 'bottom', 
-                             axisLabel: "x axis", 
+                             axisLabel: x_label, 
                              axisLabelPadding: 10, 
                              axisLabelUseCanvas: true  },
                     yaxis: { position: 'left', 
-                             axisLabel: "y axis", 
+                             axisLabel: y_label, 
                              axisLabelPadding: 10, 
                              axisLabelUseCanvas: true},
                     lines: { show: true},
@@ -170,6 +179,16 @@ contentFlotPlotComparer.prototype.showContents = function ()
 		console.log (this.file);
 		
 		var lineStyle = this.file.linestyle;
+		
+		// Some of the plots won't come from specified plots, so these are missing.
+    	var x_label = "";
+    	var y_label = "";    	
+    	if (this.file.xAxes) {
+    		x_label = this.file.xAxes;
+    	}
+    	if (this.file.yAxes) {
+    		y_label = this.file.yAxes;
+    	}
 		
 		var csvDatas = new Array ();
 		
@@ -244,17 +263,17 @@ contentFlotPlotComparer.prototype.showContents = function ()
                 if (key && datasets[key]) {
                     data.push(datasets[key]);
                 }
-            });
+            });      
             
             //if (data.length > 0) {
                 var settings = {
                     xaxis: { tickDecimals: 0,
                              position: 'bottom', 
-                             axisLabel: 'X-axis (units)', 
+                             axisLabel: x_label, 
                              axisLabelPadding: 10, 
                              axisLabelUseCanvas: true },
                     yaxis: { position: 'left', 
-                             axisLabel: 'Y-axis (units)', 
+                             axisLabel: y_label, 
                              axisLabelPadding: 10, 
                              axisLabelUseCanvas: true },
                     lines: { show: true},
