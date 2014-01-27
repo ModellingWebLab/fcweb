@@ -1,6 +1,8 @@
 *~
 *zip
+.classpath
 .cproject
+.pydevproject
 .project
 .Rhistory
 target
