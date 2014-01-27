@@ -95,7 +95,7 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
                     xaxis: { tickDecimals: 0, 
                              position: 'bottom', 
                              axisLabel: 'X-axis (units)', 
-                             axisLabelPadding: 5, 
+                             axisLabelPadding: 10, 
                              axisLabelUseCanvas: true  },
                     yaxis: { position: 'left', 
                              axisLabel: 'Y-axis (units)', 
