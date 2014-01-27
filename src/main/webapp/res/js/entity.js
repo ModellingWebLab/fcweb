@@ -226,6 +226,7 @@ function highlightPlots (version, showDefault)
 {
 	//console.log (plotDescription);
 	var plotDescription = version.plotDescription;
+	var outputContents = version.outputContents;
 	var plots = new Array ();
 	for (var i = 1; i < plotDescription.length; i++)
 	{
@@ -250,8 +251,18 @@ function highlightPlots (version, showDefault)
 		{
 			if (files[version.files[f]].name == plotDescription[i][2])
 			{
-				files[version.files[f]].xAxes = plotDescription[i][4];
-				files[version.files[f]].yAxes = plotDescription[i][5];
+				// Find the plot x and y object names and units from the output contents file.
+				for (var output_idx = 0; output_idx < outputContents.length; output_idx++)
+				{
+					if (plotDescription[i][4] == outputContents[output_idx][0])
+					{
+						files[version.files[f]].xAxes = outputContents[output_idx][1] + ' (' + outputContents[output_idx][2] + ')';
+					}
+					if (plotDescription[i][5] == outputContents[output_idx][0])
+					{
+						files[version.files[f]].yAxes = outputContents[output_idx][1] + ' (' + outputContents[output_idx][2] + ')';
+					}
+				}				
 				files[version.files[f]].title = plotDescription[i][0];
 				files[version.files[f]].linestyle = plotDescription[i][3];
 			}
@@ -262,6 +273,51 @@ function highlightPlots (version, showDefault)
 		plots.push (plotDescription[i][2]);
 	}
 	sortTable (plots);
+}
+
+function parseOutputContents (file, version)
+{
+	var goForIt = {
+		getContentsCallback : function (succ)
+		{
+			if (succ)
+			{
+				var str = file.contents.replace(/\s*#.*\n/gm,"");
+				var delimiter = ",";
+				var patterns = new RegExp(
+			    		(
+			    			// Delimiters.
+			    			"(\\" + delimiter + "|\\r?\\n|\\r|^)" +
+			    			// Quoted fields.
+			    			"(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
+			    			// Standard fields.
+			    			"([^\"\\" + delimiter + "\\r\\n]*))"
+			    		),
+			    		"gi"
+			    		);
+				var csv = [[]];
+				var matches = null;
+				while (matches = patterns.exec (str))
+				{
+					var value;
+					var matchDel = matches[1];
+					if (matchDel.length && matchDel != delimiter)
+			    			csv.push([]);
+					if (matches[2])
+						value = matches[2].replace (new RegExp ("\"\"", "g"), "\"");
+					else
+						value = matches[3];
+					
+					csv[csv.length - 1].push (value);
+				}
+				
+				version.outputContents = csv;			
+			}
+		}
+	};
+	getFileContent (file, goForIt);
+	
+	return null;
 }
 
 function parsePlotDescription (file, version, showDefault)
@@ -479,6 +535,9 @@ function displayVersion (id, showDefault)
 		
 		if (!v.plotDescription && file.name.toLowerCase () == "outputs-default-plots.csv")
 			parsePlotDescription (file, v, showDefault);
+		
+		if (!v.outputContents && file.name.toLowerCase () == "outputs-contents.csv")
+			parseOutputContents (file, v);
 		
 
 		filesTable.all.push ({

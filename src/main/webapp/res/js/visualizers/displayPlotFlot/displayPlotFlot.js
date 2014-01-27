@@ -90,15 +90,17 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
             });
 
             //if (data.length > 0) {
-                //$.plot("#flotplot-262", data, {
+                //$plot("#flotplot-262", data, {
+          
+           
                 var settings = {
                     xaxis: { tickDecimals: 0, 
                              position: 'bottom', 
-                             axisLabel: 'X-axis (units)', 
+                             axisLabel: "x axis", 
                              axisLabelPadding: 10, 
                              axisLabelUseCanvas: true  },
                     yaxis: { position: 'left', 
-                             axisLabel: 'Y-axis (units)', 
+                             axisLabel: "y axis", 
                              axisLabelPadding: 10, 
                              axisLabelUseCanvas: true},
                     lines: { show: true},
@@ -243,7 +245,7 @@ contentFlotPlotComparer.prototype.showContents = function ()
                     data.push(datasets[key]);
                 }
             });
-
+            
             //if (data.length > 0) {
                 var settings = {
                     xaxis: { tickDecimals: 0,
