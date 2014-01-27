@@ -66,6 +66,7 @@
 					<li><a href="${contextPath}/index.html">Home</a></li>
 					<li><a href="${contextPath}/db.html">Experiments</a></li>
 					<li><a href="${contextPath}/contact.html">Contact/Team</a></li>
+					<li><a href="${contextPath}/about.html">About</a></li>
 					<c:choose>
 						<c:when test="${user != null && user.authorized}">
 							<li><a href="${contextPath}/myfiles.html">${user.nick}</a>

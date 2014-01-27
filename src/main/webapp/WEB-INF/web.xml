@@ -11,6 +11,10 @@
         <servlet-class>uk.ac.ox.cs.chaste.fc.web.Contact</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>About</servlet-name>
+        <servlet-class>uk.ac.ox.cs.chaste.fc.web.About</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>Db</servlet-name>
         <servlet-class>uk.ac.ox.cs.chaste.fc.web.DB</servlet-class>
     </servlet>
@@ -62,6 +66,10 @@
     <servlet-mapping>
         <servlet-name>Contact</servlet-name>
         <url-pattern>/contact.html</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>About</servlet-name>
+        <url-pattern>/about.html</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Db</servlet-name>

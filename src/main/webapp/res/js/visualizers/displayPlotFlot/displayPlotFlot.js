@@ -1,6 +1,5 @@
 
 
-
 function contentFlotPlot (file, div)
 {
 	this.file = file;
@@ -46,7 +45,6 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
     	if (THISfile.yAxes) {
     		y_label = THISfile.yAxes;
     	}
-
 
         var datasets = {};
         for (var i = 1; i < csvData.length; i++)
@@ -305,7 +303,9 @@ contentFlotPlotComparer.prototype.show = function ()
 		this.file.getContents (this);
 	}
 	else
+	{
 		this.showContents ();
+	}
 };
 
 
@@ -364,5 +364,6 @@ function initFlotContent ()
 	visualizers["displayPlotFlot"] = new flotContent ();
 }
 
+document.addEventListener("DOMContentLoaded", initFlotContent, false);
 
 document.addEventListener("DOMContentLoaded", initFlotContent, false);
