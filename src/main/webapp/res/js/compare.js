@@ -42,6 +42,7 @@ function getFileContent (file, succ)
     };
     xmlhttp.send(null);
 }
+
 function nextPage (url)
 {
 	//if (//url)
@@ -336,7 +337,30 @@ function parseEntities (entityObj)
 		a.innerHTML = entities[entity].name;
 		li.appendChild(a);
 		ul.appendChild(li);
-	}
+	}	
+	
+	/*
+	var form = document.createElement("form");
+	entitiesToCompare.appendChild(form);
+	var select_box = document.createElement("select");
+	select_box.name = "experiment_box";
+	var default_option = document.createElement("option");
+	default_option.selected = true;
+	default_option.value = document.location.href;
+	default_option.innerHTML = "click to view, select to switch to single experiment";
+	select_box.onChange = "document.location.href = document.form.experiment_box.options[document.form.experiment_box.selectedIndex].value;";
+	select_box.value = "GO";
+	select_box.appendChild(default_option);
+	for (var entity in entities)
+	{
+		var option = document.createElement("option");
+		option.value = contextPath + "/"+entityType+"/" + convertForURL (entities[entity].name) + "/" + entities[entity].entityId + "/" + convertForURL (entities[entity].created) + "/" + entities[entity].id;
+		option.innerHTML = entities[entity].name;
+		select_box.appendChild(option);
+	}	
+	form.innerHTML  = "Selected experiments: ";
+	form.appendChild(select_box);
+	*/
 	
 	buildSite ();
 }
