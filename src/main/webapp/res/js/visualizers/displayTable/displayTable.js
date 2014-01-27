@@ -1,6 +1,4 @@
 
-
-
 function contentTabularizer (file, div)
 {
 	this.file = file;
@@ -50,10 +48,6 @@ contentTabularizer.prototype.show = function ()
 };
 
 
-
-
-
-
 function tabularizeContent ()
 {
 	this.name = "displayTable";
@@ -88,14 +82,9 @@ tabularizeContent.prototype.setUp = function (file, div)
 	return new contentTabularizer (file, div);
 };
 
-
-
-
 function initTabularizeContent ()
 {
 	visualizers["displayTable"] = new tabularizeContent ();
 }
-
-
 
 document.addEventListener("DOMContentLoaded", initTabularizeContent, false);
