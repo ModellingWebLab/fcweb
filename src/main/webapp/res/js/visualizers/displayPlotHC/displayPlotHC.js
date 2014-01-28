@@ -1,6 +1,4 @@
 
-
-
 function HCPlotter (file, div)
 {
 	this.file = file;
@@ -81,18 +79,6 @@ HCPlotter.prototype.show = function ()
 		this.file.getContents (this);
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
 function HCPlotterComparer (file, div)
 {
 	this.file = file;
@@ -103,6 +89,7 @@ function HCPlotterComparer (file, div)
 	this.gotFileContents = 0;
 	this.ok = true;
 };
+
 HCPlotterComparer.prototype.getContentsCallback = function (succ)
 {
 	//console.log ("getContentsCallback : " + succ + " -> so far: " + this.gotFileContents + " of " + this.file.entities.length);
@@ -141,11 +128,6 @@ HCPlotterComparer.prototype.showContents = function ()
 					file: this.file.entities[i].entityFileLink
 			});
 		}
-		
-		
-		
-		
-		
 		
 		
 		//var csvData = (this.file.linestyle == "linespoints" || THISfile.linestyle == "points") ? getCSVColumnsNonDownsampled (this.file) : getCSVColumnsDownsampled (this.file);
@@ -241,28 +223,6 @@ HCPlotterComparer.prototype.show = function ()
 		this.showContents ();
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function HCPlot ()
 {
 	this.name = "displayPlotHC";
@@ -306,19 +266,15 @@ HCPlot.prototype.setUp = function (file, div)
 {
 	return new HCPlotter (file, div);
 };
+
 HCPlot.prototype.setUpComparision = function (files, div)
 {
 	return new HCPlotterComparer (files, div);
 };
 
-
-
-
 function initHCPlotContent ()
 {
 	visualizers["displayPlotHC"] = new HCPlot ();
 }
-
-
 
 document.addEventListener("DOMContentLoaded", initHCPlotContent, false);

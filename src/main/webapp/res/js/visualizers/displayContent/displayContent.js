@@ -49,9 +49,6 @@ function getHighlightingType (file)
 }
 
 
-
-
-
 function contentDumper (file, div)
 {
 	this.file = file;
@@ -92,10 +89,6 @@ contentDumper.prototype.show = function ()
 };
 
 
-
-
-
-
 function displayContent ()
 {
 	this.name = "displayContent";
@@ -131,14 +124,9 @@ displayContent.prototype.setUp = function (file, div)
 	return new contentDumper (file, div);
 };
 
-
-
-
 function initDisplayContent ()
 {
 	visualizers["displayContent"] = new displayContent ();
 }
-
-
 
 document.addEventListener("DOMContentLoaded", initDisplayContent, false);

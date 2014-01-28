@@ -217,7 +217,7 @@ public class Register extends WebModule
 		if (nick.length () > 99)
 		{
 			obj.put ("response", false);
-			obj.put ("responseText", "sorry, we didn't expect such a long nick. please contact one of us.");
+			obj.put ("responseText", "sorry, we didn't expect such a long nickname. Please contact one of us.");
 			return false;
 		}
 
@@ -225,7 +225,7 @@ public class Register extends WebModule
     if(!regMatcher.matches())
 		{
 			obj.put ("response", false);
-			obj.put ("responseText", "nick has to start with [A-Za-z0-9] and only the following characters are allowed: [_A-Za-z0-9-]");
+			obj.put ("responseText", "nickname has to start with [A-Za-z0-9] and only the following characters are allowed: [_A-Za-z0-9-]");
 			return false;
 		}
 
@@ -241,7 +241,7 @@ public class Register extends WebModule
 			if (rs.getInt(1) > 0)
 			{
 				obj.put ("response", false);
-				obj.put ("responseText", "nick already in use");
+				obj.put ("responseText", "nickname already in use");
 				return false;
 			}
 			else
@@ -279,7 +279,7 @@ public class Register extends WebModule
 		if (mail.length () > 99)
 		{
 			obj.put ("response", false);
-			obj.put ("responseText", "sry, we didn't expect such a long mail address. please contact one of us.");
+			obj.put ("responseText", "sorry, we didn't expect such a long mail address. please contact one of us.");
 			return false;
 		}
 		

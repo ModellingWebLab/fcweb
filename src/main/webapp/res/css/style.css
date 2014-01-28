@@ -85,18 +85,19 @@ padding: 10px;
 }
 
 .navbar li {
-	padding: 10px;
+	padding: 20px;
 	height: auto;
-	width: 100px; /* Each menu item is 150px wide */
+	/*width: 70px; Each menu item is 80px wide */
 	float: left; /* This lines up the menu items horizontally */
-	text-align: right; /* All text is placed in the center of the box */
+	text-align: center; /* All text is placed in the center of the box */
 	list-style: none;
 	/* Removes the default styling (bullets) for the list */
 	/*font: normal bold 12px/1.2em Arial, Verdana, Helvetica;  */
-	/*padding: 0;
+	padding: 5px;
+	/*
 			margin: 0;*/
 	/*background-color: #366b82;*/
-	margin-right: 30px;
+	margin-right: 20px;
 }
 
 .navbar a, .navbar a:hover, .navbar a:active {
@@ -121,6 +122,7 @@ padding: 10px;
 .navbar li ul {
 	display: none; /* Hides the drop-down menu */
 	height: auto;
+	width: 80px;
 	margin: 0; /* Aligns drop-down box underneath the menu item */
 	padding: 0; /* Aligns drop-down box underneath the menu item */
 }
