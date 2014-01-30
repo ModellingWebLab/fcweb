@@ -69,8 +69,36 @@ public class User
 		this.role =role;
 		this.sendMails = sendMails;
 	}
-
-
+	
+	/**
+	 * This method allows you to assume the identity of any user for which the id is known.
+	 * It allows an admin account to pretend to be someone else, temporarily.
+	 */
+	public boolean authById(int id)
+	{
+		PreparedStatement st = db.prepareStatement ("SELECT * FROM `user` WHERE `id`=?");
+		ResultSet rs = null;
+		try
+		{
+			st.setInt (1, id);
+			st.execute ();
+			rs = st.getResultSet ();
+			reqDB (rs);
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+			note.addError ("sql err: " + e.getMessage ());
+			LOGGER.error ("db problem during fake auth", e);
+		}
+		finally
+		{
+			db.closeRes (st);
+			db.closeRes (rs);
+		}
+		return this.mail != null;
+	}
+	
 	private void reqDB (ResultSet rs) throws SQLException
 	{
 		if (rs == null)
