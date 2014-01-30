@@ -36,7 +36,7 @@
         What's great about this is that for the first time you can:
         <ul>
             <li> compare how different models react to the same protocol,<br/>
-                 e.g. <a href="${contextPath}/compare/e/45/46/461/71/348/65/48/77/261/70/182/61/403/49/show/632647707/displayPlotFlot">action potentials under steady 1Hz pacing</a>,
+                 e.g. <a href="${contextPath}/compare/e/508/509/510/511/512/514/515/516/517/518/519/521/522/523/524/525/526/show/1848458697/displayPlotFlot">action potentials under steady 1Hz pacing</a>,
                  or <a href="${contextPath}/compare/e/326/327/458/330/345/331/333/334/335/337/338/339/400/341/show/-1621094149/displayPlotFlot">an IV curve of the fast sodium current</a>.</li>
             <li> compare how a model behaves under different protocols,<br/>
                  e.g. <a href="${contextPath}/compare/e/145/131/show/845419076/displayPlotFlot">S1-S2 and steady state restitution</a>.</li>
