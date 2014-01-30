@@ -825,8 +825,8 @@ public class EntityView extends WebModule
 				{}
 			}
 			
-
 			res.put ("responseText", "added version successfully");
+			res.put ("entityId", entityId);
 			res.put ("versionId", versionId);
 			res.put ("versionType", entityMgmt.getEntityColumn ());
 			answer.put ("createNewEntity", res);

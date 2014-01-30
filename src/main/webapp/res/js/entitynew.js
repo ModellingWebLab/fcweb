@@ -67,10 +67,15 @@ function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction,
 	        		form.appendChild(h1);
 	        		
 	        		var p = document.createElement("p");
-	        		p.appendChild(document.createTextNode ("You've just created a new entity! Have a look at "));
+	        		p.appendChild(document.createTextNode ("You've just created a "));
+                    var a = document.createElement("a");
+                    a.href = contextPath + "/" + json.createNewEntity.versionType + "/id/" + json.createNewEntity.entityId + "/version/" + json.createNewEntity.versionId;
+                    a.appendChild(document.createTextNode ("new " + json.createNewEntity.versionType));
+                    p.appendChild(a);
+	        		p.appendChild(document.createTextNode ("! Have a look at "));
 	        		var a = document.createElement("a");
 	        		a.href = contextPath + "/myfiles.html";
-	        		a.appendChild(document.createTextNode ("your files"));
+	        		a.appendChild(document.createTextNode ("all your files"));
 	        		p.appendChild(a);
 	        		p.appendChild(document.createTextNode ("."));
 	        		form.appendChild(p);
