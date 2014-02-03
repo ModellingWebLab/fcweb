@@ -418,6 +418,21 @@ public class EntityView extends WebModule
 		HashMap<String, NewFile> files = new HashMap<String, NewFile> ();
 		boolean createOk = task.equals ("createNewEntity");
 		ChasteEntity entity = null;
+		if (querry.get ("visibility") != null)
+		{
+			String userVisibility = querry.get ("visibility").toString();
+			if (!userVisibility.equals(ChasteEntityVersion.VISIBILITY_PRIVATE)
+				&& !userVisibility.equals(ChasteEntityVersion.VISIBILITY_RESTRICTED)
+				&& !userVisibility.equals(ChasteEntityVersion.VISIBILITY_PUBLIC))
+			{
+				LOGGER.warn("Invalid visibility '" + userVisibility + "' sent.");
+				createOk = false;
+			}
+			else
+			{
+				visibility = userVisibility;
+			}
+		}
 		if (querry.get ("entityName") != null)
 		{
 			JSONObject obj = new JSONObject ();

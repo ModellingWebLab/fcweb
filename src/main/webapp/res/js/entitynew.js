@@ -113,6 +113,7 @@ function initNewEntity ()
 {
 	var entityName = document.getElementById("entityname");
 	var versionName = document.getElementById("versionname");
+	var visibility = document.getElementById("visibility");
 	var entityNameAction = document.getElementById("entityaction");
 	var versionNameAction = document.getElementById("versionaction");
 	var storeAction = document.getElementById("saveaction");
@@ -158,6 +159,7 @@ function initNewEntity ()
 	    	task: "createNewEntity",
 	    	entityName: entityName.value,
 	    	versionName: versionName.value,
+	    	visibility: visibility.options[visibility.selectedIndex].value,
 	    	files: uploadedFiles,
 	    	mainFile: $('input[name="mainEntry"]:checked').val (),
 	    	rerunExperiments: document.getElementById('reRunExperiments').checked

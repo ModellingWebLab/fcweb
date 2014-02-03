@@ -26,6 +26,15 @@
 	    	<a class="pointer" id="dateinserter"><small>use current date</small></a>
 	    	<span id="versionaction"></span>
 	    </p>
+	    <p>
+            <label for="visibility">Visibility:</label>
+            <select id="visibility">
+                <option value="PUBLIC" id="visibility-PUBLIC">PUBLIC</option>
+                <option value="RESTRICTED" id="visibility-RESTRICTED">RESTRICTED</option>
+                <option value="PRIVATE" id="visibility-PRIVATE">PRIVATE</option>
+            </select>
+            <span id="visibilityaction"></span>
+	    </p>
 	    <t:upload/>
 	    <p>
 	    	<input type="checkbox" name="reRunExperiments" id="reRunExperiments"/> <label for="reRunExperiments">rerun previous experiments</label> <small>(This might take some seconds.)</small>
