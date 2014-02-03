@@ -412,6 +412,7 @@ public class EntityView extends WebModule
 		LOGGER.debug ("creating new entity");
 		String entityName = null;
 		String versionName = null;
+		String visibility = null;
 		String filePath = null;
 		File entityDir = null;
 		HashMap<String, NewFile> files = new HashMap<String, NewFile> ();
@@ -459,6 +460,12 @@ public class EntityView extends WebModule
 					obj.put ("response", true);
 					obj.put ("responseText", "name exists. You're going to upload a new version to an existing "+entityMgmt.getEntityColumn ()+".");
 				}
+				// Set visibility to match the latest version, if not already specified
+				if (visibility == null)
+				{
+					visibility = entity.getLatestVersion().getVisibility();
+					answer.put("visibility", visibility);
+				}
 			}
 		}
 		else
@@ -481,7 +488,6 @@ public class EntityView extends WebModule
 			}
 			// else ok
 			
-
 			if (entity != null)
 			{
 				if (entity.getVersion (versionName) != null)
@@ -580,6 +586,9 @@ public class EntityView extends WebModule
 		
 		if (createOk)
 		{
+			// default visibility if none specified
+			if (visibility == null)
+				visibility = ChasteEntityVersion.VISIBILITY_PRIVATE;
 			// create a entity if it not yet exists
 			int entityId = -1;
 			if (entity == null)
@@ -598,7 +607,7 @@ public class EntityView extends WebModule
 				latestVersion = entityMgmt.getEntityById (entityId).getLatestVersion ();
 			
 			// create version
-			int versionId = entityMgmt.createVersion (entityId, versionName, filePath, user);
+			int versionId = entityMgmt.createVersion (entityId, versionName, filePath, user, visibility);
 			if (versionId < 0)
 			{
 				cleanUp (null, versionId, files, fileMgmt, entityMgmt);

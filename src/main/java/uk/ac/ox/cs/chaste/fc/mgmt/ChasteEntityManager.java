@@ -167,12 +167,12 @@ public abstract class ChasteEntityManager
 		return id;
 	}
 	
-	public int createVersion (int entityid, String versionName, String filePath, User u) throws ChastePermissionException
+	public int createVersion (int entityid, String versionName, String filePath, User u, String visibility) throws ChastePermissionException
 	{
 		if (!user.isAllowedCreateEntityVersion ())
 			throw new ChastePermissionException ("you are not allowed to create a new entity version");
 		
-		PreparedStatement st = db.prepareStatement ("INSERT INTO `" + entityVersionsTable + "`(`author`, `" + entityColumn + "`, `version`, `filepath`) VALUES (?,?,?,?)");
+		PreparedStatement st = db.prepareStatement ("INSERT INTO `" + entityVersionsTable + "`(`author`, `" + entityColumn + "`, `version`, `filepath`, `visibility`) VALUES (?,?,?,?,?)");
     ResultSet rs = null;
     int id = -1;
 		
@@ -182,6 +182,7 @@ public abstract class ChasteEntityManager
 			st.setInt (2, entityid);
 			st.setString (3, versionName);
 			st.setString (4, filePath);
+			st.setString (5, visibility);
 			
 			int affectedRows = st.executeUpdate();
       if (affectedRows == 0)
@@ -261,6 +262,7 @@ public abstract class ChasteEntityManager
 			db.closeRes (rs);
 		}
 		
+		// TODO: Be more efficient here? Surely we can use the TreeSet<ChasteEntity> given by evaluateResult?
 		for (ChasteEntity m : knownEntities.values ())
 			if (m.getName ().equals (name))
 				return m;
