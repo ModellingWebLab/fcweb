@@ -31,7 +31,7 @@
             <select id="visibility">
                 <option value="PUBLIC" id="visibility-PUBLIC">PUBLIC</option>
                 <option value="RESTRICTED" id="visibility-RESTRICTED">RESTRICTED</option>
-                <option value="PRIVATE" id="visibility-PRIVATE">PRIVATE</option>
+                <option value="PRIVATE" id="visibility-PRIVATE" selected="true">PRIVATE</option>
             </select>
             <span id="visibilityaction"></span>
 	    </p>

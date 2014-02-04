@@ -409,7 +409,7 @@ public class EntityView extends WebModule
 	@SuppressWarnings("unchecked")
 	private void createNewEntity (Object task, Notifications notifications, DatabaseConnector db, JSONObject querry, User user, JSONObject answer, ChasteEntityManager entityMgmt, ChasteFileManager fileMgmt) throws IOException, ChastePermissionException
 	{
-		LOGGER.debug ("creating new entity");
+		LOGGER.debug ("creating new entity; task=" + task.toString() + ".");
 		String entityName = null;
 		String versionName = null;
 		String visibility = null;
@@ -426,6 +426,7 @@ public class EntityView extends WebModule
 				&& !userVisibility.equals(ChasteEntityVersion.VISIBILITY_PUBLIC))
 			{
 				LOGGER.warn("Invalid visibility '" + userVisibility + "' sent.");
+				notifications.addError("Invalid visibility '" + userVisibility + "' sent.");
 				createOk = false;
 			}
 			else

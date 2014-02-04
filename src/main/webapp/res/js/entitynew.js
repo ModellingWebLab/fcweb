@@ -1,9 +1,8 @@
 
 var uploadedFiles = new Array ();
-//var knownTypes = ["unknown", "CellML", "CSV", "HDF5", "EPS", "PNG", "XMLPROTOCOL", "TXTPROTOCOL"];
 var knownTypes = ["unknown", "CellML", "CSV", "HDF5", "EPS", "PNG", "XMLPROTOCOL", "TXTPROTOCOL"];
 
-function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction, storeAction)
+function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction, storeAction, visibilityAction)
 {
     elem.innerHTML = "<img src='"+contextPath+"/res/img/loading2-new.gif' alt='loading' />";
     
@@ -24,14 +23,14 @@ function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction,
 
     xmlhttp.onreadystatechange = function()
     {
-        if(xmlhttp.readyState != 4)
+        if (xmlhttp.readyState != 4)
         	return;
         
     	var json = JSON.parse(xmlhttp.responseText);
     	console.log (json);
     	displayNotifications (json);
     	
-        if(xmlhttp.status == 200)
+        if (xmlhttp.status == 200)
         {
         	
         	if (json.entityName && entityNameAction)
@@ -49,6 +48,11 @@ function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction,
 	        		versionNameAction.innerHTML = "<img src='"+contextPath+"/res/img/check.png' alt='valid' /> " + msg;
 	        	else
 	        		versionNameAction.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + msg;
+        	}
+        	if (json.visibility && visibilityAction)
+        	{
+        	    document.getElementById("visibility-" + json.visibility).selected = true;
+        	    visibilityAction.innerHTML = "";
         	}
         	if (json.createNewEntity)
         	{
@@ -113,7 +117,8 @@ function initNewEntity ()
 {
 	var entityName = document.getElementById("entityname");
 	var versionName = document.getElementById("versionname");
-	var visibility = document.getElementById("visibility");
+	var visibilityElt = document.getElementById("visibility");
+	var visibilityAction = document.getElementById("visibilityaction");
 	var entityNameAction = document.getElementById("entityaction");
 	var versionNameAction = document.getElementById("versionaction");
 	var storeAction = document.getElementById("saveaction");
@@ -124,7 +129,7 @@ function initNewEntity ()
 		verifyNewEntity ({
 	    	task: "verifyNewEntity",
 	    	entityName: entityName.value
-	    }, entityNameAction, entityNameAction, versionNameAction, storeAction);
+	    }, entityNameAction, entityNameAction, versionNameAction, storeAction, visibilityAction);
 	  }, true);
 	
 	versionName.addEventListener("blur", function( event ) {
@@ -132,7 +137,7 @@ function initNewEntity ()
 	    	task: "verifyNewEntity",
 	    	entityName: entityName.value,
 	    	versionName: versionName.value
-	    }, versionNameAction, entityNameAction, versionNameAction, storeAction);
+	    }, versionNameAction, entityNameAction, versionNameAction, storeAction, visibilityAction);
 	  }, true);
 	
 	
@@ -146,24 +151,28 @@ function initNewEntity ()
 		}
 	}, true);
 	
-
-	
-	
+	// Get initial visibility, if any
+	if (entityName.value)
+	{
+    	verifyNewEntity({
+    	        task: "verifyNewEntity",
+    	        entityName: entityName.value
+    	    }, visibilityAction, entityNameAction, versionNameAction, storeAction, visibilityAction);
+    }
 	
 	initUpload (uploadedFiles, knownTypes);
 	
-
 	svbtn.addEventListener("click", function (ev) {
 		verifyNewEntity(
 		{
 	    	task: "createNewEntity",
 	    	entityName: entityName.value,
 	    	versionName: versionName.value,
-	    	visibility: visibility.options[visibility.selectedIndex].value,
+	    	visibility: visibilityElt.options[visibilityElt.selectedIndex].value,
 	    	files: uploadedFiles,
 	    	mainFile: $('input[name="mainEntry"]:checked').val (),
 	    	rerunExperiments: document.getElementById('reRunExperiments').checked
-	    }, storeAction, entityNameAction, versionNameAction, storeAction);
+	    }, storeAction, entityNameAction, versionNameAction, storeAction, visibilityAction);
 	}, true);
 	
 }
