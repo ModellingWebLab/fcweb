@@ -589,6 +589,7 @@ function displayVersion (id, showDefault)
 		removeChildren (dv.experimentpartners);
 		
 		var compares = new Array();
+		var compareType = "";
 		
 		var ul = document.createElement ("ul");
 		for (var i = 0; i < v.experiments.length; i++)
@@ -602,12 +603,14 @@ function displayVersion (id, showDefault)
 			var a = document.createElement ("a");
 			if (entityType == "protocol")
 			{
+			    compareType = "model";
 				//console.log ("protoc");
 				//console.log (v.experiments[i].model);
 				a.appendChild(document.createTextNode(v.experiments[i].model.name + " @ " + v.experiments[i].model.version));
 			}
 			else
 			{
+			    compareType = "protocol";
 				a.appendChild(document.createTextNode(v.experiments[i].protocol.name + " @ " + v.experiments[i].protocol.version));
 			}
 			a.href = contextPath + "/experiment/" + v.experiments[i].model.id + v.experiments[i].protocol.id + "/" + v.experiments[i].id + "/latest";
@@ -633,7 +636,10 @@ function displayVersion (id, showDefault)
 			for (var i = 0; i < compares.length; i++)
 				if (compares[i].checked)
 					url += compares[i].value + "/";
-			document.location = contextPath + "/compare/e/" + url;
+			if (url)
+			    document.location = contextPath + "/compare/e/" + url;
+			else
+			    window.alert("You need to select some " + compareType + "s to compare.");
 		});
 		
 		dv.experimentpartners.appendChild (ul);
