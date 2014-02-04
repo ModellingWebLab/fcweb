@@ -10,6 +10,7 @@ var gotInfos = false;
 var plotDescription;
 var plotFiles = new Array ();
 var filesTable = {};
+var shownDefault = false;
 
 function getFileContent (file, succ)
 {
@@ -141,12 +142,15 @@ function highlightPlots (showDefault)
 		if (row)
 		{
 			row.setAttribute("class", "highlight-plot");
-			/*if (i == 1 && showDefault)
+			if (i == 1 && showDefault && !shownDefault)
 			{
-				var viz = document.getElementById ("filerow-" + plotDescription[i][2] + "-viz-displayPlotFlot");
+				var viz = document.getElementById ("filerow-" + plotDescription[i][2].hashCode () + "-viz-displayPlotFlot");
 				if (viz)
+				{
+					shownDefault = true;
 					viz.click();
-			}*/
+				}
+			}
 		}
 		
 		
@@ -318,7 +322,7 @@ function parseEntities (entityObj)
 					/*files[sig]*/
 				}
 				if (entityObj[i].files[j].name.toLowerCase () == "outputs-default-plots.csv")
-					parsePlotDescription (entityObj[i].files[j], null);
+					parsePlotDescription (entityObj[i].files[j], !(fileName && pluginName));
 				if (entityObj[i].files[j].name.toLowerCase () == "outputs-contents.csv")
 					parseOutputContents (entityObj[i].files[j], null);
 				
@@ -459,7 +463,6 @@ function displayFile (id, pluginName)
 	removeChildren (doc.fileDisplay);
 	doc.fileDisplay.appendChild (f.div[pluginName]);
 	
-	// doc.version.files.style.display = "none";
 	doc.fileDetails.style.display = "block";
 	
 	var pos = getPos (doc.fileDetails);
@@ -472,7 +475,10 @@ function handleReq ()
 	{
 		displayFile (fileName, pluginName);
 		doc.displayClose.href = basicurl;
-		
+	}
+	else
+	{
+		doc.fileDetails.style.display = "none";
 	}
 }
 
@@ -732,6 +738,18 @@ function initCompare ()
 		fileDetails: document.getElementById("filedetails")
 	};
 	doc.fileDetails.style.display = "none";
+	
+	// Prevent redirection to the default plot when we close it
+	doc.displayClose.addEventListener("click", function (ev) {
+		if (ev.which == 1)
+		{
+			ev.preventDefault();
+			doc.fileDetails.style.display = "none";
+			shownDefault = true;
+			nextPage (doc.displayClose.href);
+		}
+    }, true);
+	
 	window.onpopstate = parseUrl;
 	parseUrl ();
 }
