@@ -80,8 +80,11 @@
 	    </div>
 	    
 	    <div id="experiment-files-switcher">
-	    	<button id="experiment-files-switcher-exp">Experiments</button>
+	    	<button id="experiment-files-switcher-exp" title="Compare experiments using this ${entity.type}">Experiments</button>
 	    	<button id="experiment-files-switcher-files">Files</button>
+	    	<c:if test="${entity.type == 'protocol'}">
+    	    	<button id="compare-all-models" title="Compare all available models">Compare all available models</button>
+   	    	</c:if>
 	    </div>
 	    
 	    <div id="entityversiondetails">
@@ -103,6 +106,7 @@
 		</div>
 		
 		<div id="entityexperimentlist">
+		    <h3>Experiments using this ${entity.type}</h3>
 			<div id="entityexperimentlistpartners"></div>
 			<div id="entityexperimentlistpartnersact">
 				[<a id="entityexperimentlistpartnersactall">select all</a>]

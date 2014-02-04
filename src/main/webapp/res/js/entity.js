@@ -642,6 +642,25 @@ function displayVersion (id, showDefault)
 			    window.alert("You need to select some " + compareType + "s to compare.");
 		});
 		
+		if (dv.compareAll)
+		{
+			dv.compareAll = removeListeners(dv.compareAll);
+			if (compares.length > 0)
+			{
+				dv.compareAll.addEventListener("click", function () {
+					var url = "";
+					for (var i = 0; i < compares.length; i++)
+						url += compares[i].value + "/";
+				    document.location = contextPath + "/compare/e/" + url;
+				});
+				dv.compareAll.style.display = "block";
+			}
+			else
+			{
+				dv.compareAll.style.display = "none";
+			}
+		}
+		
 		dv.experimentpartners.appendChild (ul);
 		//dv.experimentlist.style.display = "block";
 		dv.switcher.style.display = "block";
@@ -1087,6 +1106,7 @@ function initModel ()
 				experimentSelAll: document.getElementById("entityexperimentlistpartnersactall"),
 				experimentSelNone: document.getElementById("entityexperimentlistpartnersactnone"),
 				experimentcompare: document.getElementById("entityexperimentlistpartnersactcompare"),
+				compareAll: document.getElementById("compare-all-models"),
 				switcher: document.getElementById("experiment-files-switcher"),
 				visibility: document.getElementById("versionVisibility"),
 				visibilityAction : document.getElementById("versionVisibilityAction"),
