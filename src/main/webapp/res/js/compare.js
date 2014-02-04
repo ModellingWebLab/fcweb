@@ -327,29 +327,16 @@ function parseEntities (entityObj)
 	}
 	var entitiesToCompare = document.getElementById("entitiesToCompare");
 	removeChildren (entitiesToCompare);
-	var ul = document.createElement("ul");
-	entitiesToCompare.appendChild(ul);
-	for (var entity in entities)
-	{
-		var li = document.createElement("li");
-		var a = document.createElement("a");
-		a.href = contextPath + "/"+entityType+"/" + convertForURL (entities[entity].name) + "/" + entities[entity].entityId + "/" + convertForURL (entities[entity].created) + "/" + entities[entity].id;
-		a.innerHTML = entities[entity].name;
-		li.appendChild(a);
-		ul.appendChild(li);
-	}	
-	
-	/*
 	var form = document.createElement("form");
 	entitiesToCompare.appendChild(form);
 	var select_box = document.createElement("select");
 	select_box.name = "experiment_box";
+	select_box.id = "exptSelect";
 	var default_option = document.createElement("option");
 	default_option.selected = true;
 	default_option.value = document.location.href;
-	default_option.innerHTML = "click to view, select to switch to single experiment";
-	select_box.onChange = "document.location.href = document.form.experiment_box.options[document.form.experiment_box.selectedIndex].value;";
-	select_box.value = "GO";
+	default_option.innerHTML = "Click to view, select to show a single experiment";
+	select_box.onchange = function(){sel=document.getElementById("exptSelect"); console.log(sel); document.location.href = sel.options[sel.selectedIndex].value;};
 	select_box.appendChild(default_option);
 	for (var entity in entities)
 	{
@@ -358,9 +345,8 @@ function parseEntities (entityObj)
 		option.innerHTML = entities[entity].name;
 		select_box.appendChild(option);
 	}	
-	form.innerHTML  = "Selected experiments: ";
+	form.innerHTML = "Experiments selected for comparison: ";
 	form.appendChild(select_box);
-	*/
 	
 	buildSite ();
 }
