@@ -22,7 +22,7 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
 		//console.log (getCSVColumns (this.file));
 		//console.log (getCSVColumnsDownsampled (this.file));
 		
-		var csvData = (THISfile.linestyle == "linespoints" || THISfile.linestyle == "points") ? getCSVColumnsNonDownsampled (this.file) : getCSVColumnsDownsampled (this.file);
+		var csvData = (THISfile.linestyle == "linespoints" || THISfile.linestyle == "points") ? getCSVColumnsNonDownsampled (THISfile) : getCSVColumnsDownsampled (THISfile);
 
 		//var plotPoints = true;
 
@@ -31,20 +31,31 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
         this.div.appendChild (div);
 
         div = document.createElement("div");
-        var id = "flotplot-" + this.file.id;
+        var id = "flotplot-" + THISfile.id;
         div.id = id;
         div.style.width = "780px";
         div.style.height = "450px";
         
         // Some of the plots won't come from specified plots, so these are missing.
     	var x_label = "";
-    	var y_label = "";    	
+    	var y_label = "";
+    	var key_vals = [];
     	if (THISfile.xAxes) {
     		x_label = THISfile.xAxes;
     	}
     	if (THISfile.yAxes) {
     		y_label = THISfile.yAxes;
     	}
+    	//console.log(THISfile);
+    	if (THISfile.keyId)
+		{
+    		var keyData = getCSVColumns(THISfile.keyFile);
+    		for (var i=0; i<keyData[0].length; i++)
+    			key_vals.push(keyData[0][i]);
+    		console.log(keyData);
+		}
+	//console.log(key_vals);
+	//console.log(csvData);
 
         var datasets = {};
         for (var i = 1; i < csvData.length; i++)
@@ -56,22 +67,22 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
             //if (curData.length > 100)
             	//plotPoints = false;
             //plot.polyline("line " + i, { x: csvData[0], y: csvData[i], stroke:  colorPalette.getRgba (col), thickness: 1 });
-            datasets["line" + i] = {label : "line " + i, data: curData};
+            if (key_vals.length == csvData.length)
+            	datasets["line" + i] = {label: THISfile.keyName + "=" + key_vals[i] + " " + THISfile.keyUnits, data: curData};
+            else
+            	datasets["line" + i] = {label : "line " + i, data: curData};
         }
 
         this.div.appendChild (div);
 
-        // hard-code color indices to prevent them from shifting as
-        // countries are turned on/off
-
+        // hard-code color indices to prevent them from shifting as lines are turned on/off
         var i = 0;
         $.each(datasets, function(key, val) {
             val.color = i;
             ++i;
         });
 
-
-        // insert checkboxes 
+        // insert checkboxes
         var choiceContainer = $("#choices");
         $.each(datasets, function(key, val) {
             choiceContainer.append("<input type='checkbox' name='" + key +
@@ -125,7 +136,7 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
         choiceContainer.find("input").click(plotAccordingToChoices);
 
         plotAccordingToChoices();
-    }		
+    }
 };
 
 contentFlotPlot.prototype.show = function ()

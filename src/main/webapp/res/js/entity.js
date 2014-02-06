@@ -207,7 +207,7 @@ function sortTable (plots)
 	};
 	
 	/* 
-	according to keytask :    
+	according to keytask :
 	Those CSV files corresponding to plots, in the order given in default-plots.csv
     png & eps files
     Other CSV files corresponding to outputs
@@ -225,6 +225,8 @@ function sortTable (plots)
 function highlightPlots (version, showDefault)
 {
 	//console.log (plotDescription);
+	// Plot description has fields: Plot title,File name,Data file name,Line style,First variable id,Optional second variable id,Optional key variable id
+	// Output contents has fields: Variable id,Variable name,Units,Number of dimensions,File name,Type,Dimensions
 	var plotDescription = version.plotDescription;
 	var outputContents = version.outputContents;
 	var plots = new Array ();
@@ -262,7 +264,21 @@ function highlightPlots (version, showDefault)
 					{
 						files[version.files[f]].yAxes = outputContents[output_idx][1] + ' (' + outputContents[output_idx][2] + ')';
 					}
-				}				
+					if (plotDescription[i].length > 6 && plotDescription[i][6] == outputContents[output_idx][0])
+					{
+						files[version.files[f]].keyId = outputContents[output_idx][0];
+						files[version.files[f]].keyName = outputContents[output_idx][1];
+						files[version.files[f]].keyUnits = outputContents[output_idx][2];
+						for (var fkey=0; fkey < version.files.length; fkey++)
+						{
+							if (files[version.files[fkey]].name == outputContents[output_idx][4])
+							{
+								files[version.files[f]].keyFile = files[version.files[fkey]];
+								files[version.files[f]].keyFile.getContents({getContentsCallback :function (succ) {}}); // TODO: Hack! Race condition!
+							}
+						}
+					}
+				}
 				files[version.files[f]].title = plotDescription[i][0];
 				files[version.files[f]].linestyle = plotDescription[i][3];
 			}
@@ -751,8 +767,8 @@ function parseCSVContent (file)
 						min = file.columns[i][j];
 				}
 			}
-                dropDist.push ( (max - min) / 500.0 );
-                //console.log( "scale for line " + i + ": " + min + ":" + dropDist[dropDist.length-1] + ":" + max);
+        dropDist.push ( (max - min) / 500.0 );
+        //console.log( "scale for line " + i + ": " + min + ":" + dropDist[dropDist.length-1] + ":" + max);
 	}
 	file.nonDownsampled = [];
 	file.downsampled = [];
