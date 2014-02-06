@@ -19,6 +19,12 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
 		this.div.appendChild (document.createTextNode ("failed to load the contents"));
 	else
 	{
+		if (THISfile.keyId && !THISfile.keyFile.contents)
+		{
+			// Load the key data and try again
+			THISfile.keyFile.getContents (this);
+			return;
+		}
 		//console.log (getCSVColumns (this.file));
 		//console.log (getCSVColumnsDownsampled (this.file));
 		
@@ -54,8 +60,8 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
     			key_vals.push(keyData[0][i]);
     		console.log(keyData);
 		}
-	//console.log(key_vals);
-	//console.log(csvData);
+    	//console.log(key_vals);
+    	//console.log(csvData);
 
         var datasets = {};
         for (var i = 1; i < csvData.length; i++)
@@ -68,7 +74,7 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
             	//plotPoints = false;
             //plot.polyline("line " + i, { x: csvData[0], y: csvData[i], stroke:  colorPalette.getRgba (col), thickness: 1 });
             if (key_vals.length == csvData.length)
-            	datasets["line" + i] = {label: THISfile.keyName + "=" + key_vals[i] + " " + THISfile.keyUnits, data: curData};
+            	datasets["line" + i] = {label: THISfile.keyName + " = " + key_vals[i] + " " + THISfile.keyUnits, data: curData};
             else
             	datasets["line" + i] = {label : "line " + i, data: curData};
         }

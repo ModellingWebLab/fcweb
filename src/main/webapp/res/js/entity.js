@@ -274,7 +274,6 @@ function highlightPlots (version, showDefault)
 							if (files[version.files[fkey]].name == outputContents[output_idx][4])
 							{
 								files[version.files[f]].keyFile = files[version.files[fkey]];
-								files[version.files[f]].keyFile.getContents({getContentsCallback :function (succ) {}}); // TODO: Hack! Race condition!
 							}
 						}
 					}
