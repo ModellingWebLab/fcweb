@@ -138,7 +138,7 @@
 		
 		<%-- finish the site --%>
 		<footer>
-			Functional Curation Cardiac Prototype &copy; 2013 University of Oxford
+			Functional Curation Cardiac Prototype &copy; 2014 University of Oxford
 		</footer>
 		
 		
