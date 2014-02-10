@@ -143,6 +143,7 @@ function drawMatrix (matrix)
 	removeChildren (div);
 	
 	for (var key in matrix.experiments)
+	{
 		if (matrix.experiments.hasOwnProperty (key))
 		{
 			var exp = matrix.experiments[key];
@@ -160,7 +161,7 @@ function drawMatrix (matrix)
 			var col = protocolMapper[exp.protocol.id].col;
 			mat[row][col].experiment = exp;
 		}
-	
+	}
 	
 	
 	

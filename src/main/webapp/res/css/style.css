@@ -419,17 +419,17 @@ li.entityviz-RESTRICTED,
 li.entityviz-PRIVATE,
 li.entityviz-PUBLIC
 {
-    padding-left: 25px; 
-background-repeat: no-repeat;
-background-position: 0px 5px; 
+	padding-left: 25px; 
+	background-repeat: no-repeat;
+	background-position: 0px 5px; 
 }
 li.entityviz-PUBLIC
 {
-background-image: url(../img/green-dot.png);
+	background-image: url(../img/green-dot.png);
 }
 li.entityviz-RESTRICTED
 {
-background-image: url(../img/yellow-dot.png);
+	background-image: url(../img/yellow-dot.png);
 }
 li.entityviz-PRIVATE
 {
@@ -442,7 +442,7 @@ background-image: url(../img/red-dot.png);
 #entityversionfilesreadme
 {
 	font-size:.8em;
-    background-color: #dddddd;
+	background-color: #dddddd;
 	border: 1px solid #ccc;
 	border-radius: 5px;
 	padding:15px;
@@ -452,19 +452,23 @@ background-image: url(../img/red-dot.png);
 {
 	background-color: #eee;
 }
+
 #cluetip
 {
 	font-size:.8em;
 }
+
 #entityexperimentlistpartnersact a
 {
 	font-size:.8em;
 }
+
 .matrixTableCol,
 .matrixTableRow
 {
 	font-size:.8em;
 }
+
 /*.matrixTableCol
 {
 	transform:rotate(-90deg);
@@ -474,11 +478,13 @@ background-image: url(../img/red-dot.png);
 	-o-transform: rotate(-90deg);
 	width: 1.2em;
 }*/
+
 .vertical-text {
 	display: inline-block;
 	overflow: hidden;
 	width: 1.5em;
 }
+
 .vertical-text__inner {
 	display: inline-block;
 	white-space: nowrap;
@@ -491,6 +497,7 @@ background-image: url(../img/red-dot.png);
 	-ms-transform:rotate(-90deg);
 	-o-transform: rotate(-90deg);
 }
+
 /* This element stretches the parent to be square
    by using the mechanics of vertical margins  */
 .vertical-text__inner:after {
@@ -498,26 +505,33 @@ background-image: url(../img/red-dot.png);
 	display: block;
 	margin: -1.5em 0 100%;
 }
+
 .matrixTable .experiment-RUNNING
 {
 	background-color:#86b6f1;
 }
+
 .matrixTable .experiment-INAPPRORIATE
 {
 	background-color:#f1c886;
 }
+
 .matrixTable .experiment-FAILED
 {
 	background-color:#db0000;
 }
+
 .matrixTable .experiment-SUCCESS
 {
 	background-color:#05db00;
 }
+
 .matrixTable td
 {
 	border-bottom:1px dashed #ccc;
 	border-right:1px dashed #ccc;
+	border-top:1px dashed #ccc;
+	border-left:1px dashed #ccc;
 }
 
 .center
