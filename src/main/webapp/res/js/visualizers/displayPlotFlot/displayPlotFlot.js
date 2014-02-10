@@ -61,6 +61,14 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
 
         this.div.appendChild (div);
 
+        /* button to reset plot */
+        var resetButtonId = 'reset';
+        var resetButton = document.createElement('input');
+        resetButton.id = resetButtonId;
+        resetButton.type = 'button';
+        resetButton.value = 'reset graph';
+        this.div.appendChild(resetButton);
+
         // hard-code color indices to prevent them from shifting as
         // countries are turned on/off
 
@@ -85,8 +93,8 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
         legendContainer.id = "legend";
         this.div.appendChild (legendContainer);
 
-
-        function plotAccordingToChoices() {
+        var plottedGraph;
+        function plotAccordingToChoices(coords) {
 
             var data = [];
 
@@ -99,33 +107,69 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
 
             //if (data.length > 0) {
                 //$plot("#flotplot-262", data, {
-                       
-                var settings = {
-                    xaxis: { tickDecimals: 0, 
-                             position: 'bottom', 
-                             axisLabel: x_label, 
-                             axisLabelPadding: 10, 
-                             axisLabelUseCanvas: true  },
-                    yaxis: { position: 'left', 
-                             axisLabel: y_label, 
-                             axisLabelPadding: 10, 
-                             axisLabelUseCanvas: true},
-                    lines: { show: true},
-                    zoom: {	interactive: true },
-                    pan: { interactive: true },
-                    legend: {backgroundOpacity: 0,container: $("#legend")} 
-                };
-                            
+            var genericSettings = {
+              xaxis: { tickDecimals: 0, 
+                       position: 'bottom', 
+                       axisLabel: x_label, 
+                       axisLabelPadding: 10, 
+                       axisLabelUseCanvas: true  },
+              yaxis: { position: 'left', 
+                       axisLabel: y_label, 
+                       axisLabelPadding: 10, 
+                       axisLabelUseCanvas: true},
+              lines: { show: true},
+              selection: { mode: 'xy' },
+              legend: {backgroundOpacity: 0,container: $("#legend")} 
+            };
+
+            var settings;
+            if (coords != undefined) {
+              settings = $.extend(true, {}, genericSettings, {
+                xaxis: { min: coords.x[0], max: coords.x[1] },
+                yaxis: { min: coords.y[0], max: coords.y[1] }
+              });
+            } else {
+              settings = genericSettings;
+            }
+
                 if (THISfile.linestyle == "linespoints" || THISfile.linestyle == "points")
                     settings.points = { show: true, radius:2};
-                    $.plot("#" + id, data, settings);
+                    plottedGraph = $.plot("#" + id, data, settings);
             //}
+
         };
-                
-        choiceContainer.find("input").click(plotAccordingToChoices);
 
         plotAccordingToChoices();
-    }		
+        choiceContainer.find("input").click(function() {
+          /* re-plot using existing coordinates */
+          var xAxis = plottedGraph.getAxes().xaxis;
+          var yAxis = plottedGraph.getAxes().yaxis;
+          var coords = { 'x': [xAxis.min, xAxis.max],
+                         'y': [yAxis.min, yAxis.max] };
+          plotAccordingToChoices(coords);
+        });
+
+        /* listen to user selecting an area of the plot to zoom into */
+        $('#' + id).bind('plotselected', function (event, ranges) {
+          /* clamp the zooming to prevent eternal zoom */
+          if (ranges.xaxis.to - ranges.xaxis.from < 0.00001)
+            ranges.xaxis.to = ranges.xaxis.from + 0.00001;
+          if (ranges.yaxis.to - ranges.yaxis.from < 0.00001)
+            ranges.yaxis.to = ranges.yaxis.from + 0.00001;
+
+          var coords = { 'x': [ranges.xaxis.from, ranges.xaxis.to],
+                         'y': [ranges.yaxis.from, ranges.yaxis.to] };
+
+          plottedGraph.setSelection(ranges, true);
+          plotAccordingToChoices(coords);
+        });
+
+        /* reset plot when button clicked */
+        $('#' + resetButtonId).click(function() {
+          plotAccordingToChoices();
+        });
+
+	}		
 };
 
 contentFlotPlot.prototype.show = function ()
@@ -275,8 +319,7 @@ contentFlotPlotComparer.prototype.showContents = function ()
                              axisLabelPadding: 10, 
                              axisLabelUseCanvas: true },
                     lines: { show: true},
-                    zoom: {	interactive: true },
-                    pan: { interactive: true },
+                    selection: { mode: 'xy' },
                     legend: {backgroundOpacity: 0,container: $("#legend")}
                 };
                         
@@ -318,7 +361,7 @@ function flotContent ()
 	addScript (contextPath + "/res/js/visualizers/displayPlotFlot/flot/jquery.flot.js");
 	addScript (contextPath + "/res/js/visualizers/displayPlotFlot/flot/jquery.flot.navigate.min.js");
 	addScript (contextPath + "/res/js/visualizers/displayPlotFlot/flot/jquery.flot.axislabels.js");
-	//addScript (contextPath + "/res/js/visualizers/displayPlotFlot/flot/jquery.flot.navigationControl.js");
+	addScript (contextPath + "/res/js/visualizers/displayPlotFlot/flot/jquery.flot.selection.js");
 };
 
 flotContent.prototype.canRead = function (file)
