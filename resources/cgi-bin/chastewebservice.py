@@ -65,9 +65,10 @@ else:
             print "Missing terms are:<br/>"
             for term in missing_terms:
                 print "&nbsp;" * 4, term, "<br/>"
-            print "Missing optional terms are:<br/>"
-            for term in missing_optional_terms:
-                print "&nbsp;" * 4, term, "<br/>"
+            if missing_optional_terms:
+                print "Missing optional terms are:<br/>"
+                for term in missing_optional_terms:
+                    print "&nbsp;" * 4, term, "<br/>"
         else:
             # call the chaste handler via batch -> it will be executed if load average drops below 1.5
             # seems to be the most convenient mech, to not blow the machine...
