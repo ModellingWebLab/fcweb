@@ -1,9 +1,8 @@
 
 var uploadedFiles = new Array ();
-//var knownTypes = ["unknown", "CellML", "CSV", "HDF5", "EPS", "PNG", "XMLPROTOCOL", "TXTPROTOCOL"];
 var knownTypes = ["unknown", "CellML", "CSV", "HDF5", "EPS", "PNG", "XMLPROTOCOL", "TXTPROTOCOL"];
 
-function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction, storeAction)
+function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction, storeAction, visibilityAction)
 {
     elem.innerHTML = "<img src='"+contextPath+"/res/img/loading2-new.gif' alt='loading' />";
     
@@ -24,14 +23,14 @@ function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction,
 
     xmlhttp.onreadystatechange = function()
     {
-        if(xmlhttp.readyState != 4)
+        if (xmlhttp.readyState != 4)
         	return;
         
     	var json = JSON.parse(xmlhttp.responseText);
     	console.log (json);
     	displayNotifications (json);
     	
-        if(xmlhttp.status == 200)
+        if (xmlhttp.status == 200)
         {
         	
         	if (json.entityName && entityNameAction)
@@ -50,6 +49,11 @@ function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction,
 	        	else
 	        		versionNameAction.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + msg;
         	}
+        	if (json.visibility && visibilityAction)
+        	{
+        	    document.getElementById("visibility-" + json.visibility).selected = true;
+        	    visibilityAction.innerHTML = "";
+        	}
         	if (json.createNewEntity)
         	{
 	        	var msg = json.createNewEntity.responseText;
@@ -67,10 +71,15 @@ function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction,
 	        		form.appendChild(h1);
 	        		
 	        		var p = document.createElement("p");
-	        		p.appendChild(document.createTextNode ("You've just created a new entity! Have a look at "));
+	        		p.appendChild(document.createTextNode ("You've just created a "));
+                    var a = document.createElement("a");
+                    a.href = contextPath + "/" + json.createNewEntity.versionType + "/id/" + json.createNewEntity.entityId + "/version/" + json.createNewEntity.versionId;
+                    a.appendChild(document.createTextNode ("new " + json.createNewEntity.versionType));
+                    p.appendChild(a);
+	        		p.appendChild(document.createTextNode ("! Have a look at "));
 	        		var a = document.createElement("a");
 	        		a.href = contextPath + "/myfiles.html";
-	        		a.appendChild(document.createTextNode ("your files"));
+	        		a.appendChild(document.createTextNode ("all your files"));
 	        		p.appendChild(a);
 	        		p.appendChild(document.createTextNode ("."));
 	        		form.appendChild(p);
@@ -108,6 +117,8 @@ function initNewEntity ()
 {
 	var entityName = document.getElementById("entityname");
 	var versionName = document.getElementById("versionname");
+	var visibilityElt = document.getElementById("visibility");
+	var visibilityAction = document.getElementById("visibilityaction");
 	var entityNameAction = document.getElementById("entityaction");
 	var versionNameAction = document.getElementById("versionaction");
 	var storeAction = document.getElementById("saveaction");
@@ -118,7 +129,7 @@ function initNewEntity ()
 		verifyNewEntity ({
 	    	task: "verifyNewEntity",
 	    	entityName: entityName.value
-	    }, entityNameAction, entityNameAction, versionNameAction, storeAction);
+	    }, entityNameAction, entityNameAction, versionNameAction, storeAction, visibilityAction);
 	  }, true);
 	
 	versionName.addEventListener("blur", function( event ) {
@@ -126,7 +137,7 @@ function initNewEntity ()
 	    	task: "verifyNewEntity",
 	    	entityName: entityName.value,
 	    	versionName: versionName.value
-	    }, versionNameAction, entityNameAction, versionNameAction, storeAction);
+	    }, versionNameAction, entityNameAction, versionNameAction, storeAction, visibilityAction);
 	  }, true);
 	
 	
@@ -140,23 +151,28 @@ function initNewEntity ()
 		}
 	}, true);
 	
-
-	
-	
+	// Get initial visibility, if any
+	if (entityName.value)
+	{
+    	verifyNewEntity({
+    	        task: "verifyNewEntity",
+    	        entityName: entityName.value
+    	    }, visibilityAction, entityNameAction, versionNameAction, storeAction, visibilityAction);
+    }
 	
 	initUpload (uploadedFiles, knownTypes);
 	
-
 	svbtn.addEventListener("click", function (ev) {
 		verifyNewEntity(
 		{
 	    	task: "createNewEntity",
 	    	entityName: entityName.value,
 	    	versionName: versionName.value,
+	    	visibility: visibilityElt.options[visibilityElt.selectedIndex].value,
 	    	files: uploadedFiles,
 	    	mainFile: $('input[name="mainEntry"]:checked').val (),
 	    	rerunExperiments: document.getElementById('reRunExperiments').checked
-	    }, storeAction, entityNameAction, versionNameAction, storeAction);
+	    }, storeAction, entityNameAction, versionNameAction, storeAction, visibilityAction);
 	}, true);
 	
 }

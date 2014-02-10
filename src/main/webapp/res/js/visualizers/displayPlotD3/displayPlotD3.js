@@ -1,6 +1,4 @@
 
-
-
 function D3Plotter (file, div)
 {
 	this.file = file;
@@ -24,7 +22,7 @@ D3Plotter.prototype.getContentsCallback = function (succ)
 		var id = "D3Plot-" + this.file.id;
 		div.id = id;
 		div.style.width = "780px";
-		div.style.height = "450px";
+		div.style.height = "780px";
 		this.div.appendChild (div);
 		
 		// don't know whats the point in doing so, but looks like i have to invalidate this document...
@@ -33,7 +31,6 @@ D3Plotter.prototype.getContentsCallback = function (succ)
 		var plot = D3.asPlot(div);
 		
 		var colorPalette = D3.ColorPalette.parse("red,green,blue");
-
 		
 		for (var i = 1; i < csvData.length; i++)
 		{
@@ -47,9 +44,7 @@ D3Plotter.prototype.getContentsCallback = function (succ)
 			}
 			plot.polyline("line " + i, { x: xkoord, y: ykoord, stroke:  colorPalette.getRgba (col), thickness: 1 });
 		}
-
-	}
-		
+	}		
 };
 
 D3Plotter.prototype.show = function ()
@@ -60,18 +55,12 @@ D3Plotter.prototype.show = function ()
 		this.file.getContents (this);
 };
 
-
-
-
-
-
 function D3Plot ()
 {
 	this.name = "displayPlotD3";
 	this.icon = "displayPlotD3.png";
 	this.description = "display graphs using D3JS library";
-	
-	
+		
 	addLink (contextPath + "/res/js/visualizers/displayPlotD3/d3js-1.0.1/css/d3.css");
 
 	addScript (contextPath + "/res/js/visualizers/displayPlotD3/d3js-1.0.1/script/rx.js");
@@ -108,14 +97,9 @@ D3Plot.prototype.setUp = function (file, div)
 	return new D3Plotter (file, div);
 };
 
-
-
-
 function initD3PlotContent ()
 {
 	visualizers["displayPlotD3"] = new D3Plot ();
 }
-
-
 
 document.addEventListener("DOMContentLoaded", initD3PlotContent, false);

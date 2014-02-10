@@ -35,7 +35,7 @@
     		<c:if test="${entity.type ne 'experiment'}">
 	   			<small>(<a href="${contextPath}/${entity.type}/createnew/?newentityname=${entity.id}">add new version</a>)</small>
 	   		</c:if>
-	   		<c:forEach items="${entity.versions}" var="version" >
+	   		<c:forEach items="${entity.orderedVersions}" var="version" >
 	    		<p title="${version.value.created} -- Visibility: ${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> -- ${version.value.status}</c:if>" class="entityviz-${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> experiment-${version.value.status}</c:if>">
 					<c:choose>
 						<c:when test="${entity.type == 'experiment' && version.value.numFiles eq 0}">
@@ -80,8 +80,12 @@
 	    </div>
 	    
 	    <div id="experiment-files-switcher">
-	    	<button id="experiment-files-switcher-exp">Experiments</button>
-	    	<button id="experiment-files-switcher-files">Files</button>
+	    	<button style="float:left;" id="experiment-files-switcher-exp" title="Compare experiments using this ${entity.type}">Experiments</button>
+	    	<button style="margin-left:5px; float:left;" id="experiment-files-switcher-files">Files</button>
+	    	<c:if test="${entity.type == 'protocol'}">
+    	    	    <button style="margin-left:5px; float:left;" id="compare-all-models" title="Compare all available models">Compare all available models</button>
+   	    	</c:if>
+		<br/>
 	    </div>
 	    
 	    <div id="entityversiondetails">
@@ -103,6 +107,7 @@
 		</div>
 		
 		<div id="entityexperimentlist">
+		    <h3>Experiments using this ${entity.type}</h3>
 			<div id="entityexperimentlistpartners"></div>
 			<div id="entityexperimentlistpartnersact">
 				[<a id="entityexperimentlistpartnersactall">select all</a>]

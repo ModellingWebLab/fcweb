@@ -67,8 +67,10 @@ def UnpackArchive(archivePath, tempPath, contentType):
 
 def GetProtoInterface(protoPath):
     """Get the set of ontology terms used by the given protocol, recursively processing imports."""
-    nested_proto = CSP.MakeKw('nests') + CSP.MakeKw('protocol') - CSP.CompactSyntaxParser.quotedUri
-    var_ref = CSP.CompactSyntaxParser.cIdent.re
+    parser = CSP.CompactSyntaxParser
+    nested_proto = CSP.MakeKw('nests') + CSP.MakeKw('protocol') - parser.quotedUri
+    import_stmt = CSP.p.Group(CSP.MakeKw('import') - CSP.Optional(parser.ncIdent + parser.eq, default='') + parser.quotedUri)
+    var_ref = parser.cIdent.re
     ns_maps = {}
     terms = set()
     optional_terms = set()
@@ -102,11 +104,11 @@ def GetProtoInterface(protoPath):
         import_terms, import_optional_terms = GetProtoInterface(source)
         terms.update(import_terms)
         optional_terms.update(import_optional_terms)
-    grammars = {CSP.CompactSyntaxParser.nsDecl: ProcessNsDecl,
-                CSP.CompactSyntaxParser.importStmt: (lambda res: ProcessImport(res[0][1])),
-                CSP.CompactSyntaxParser.inputVariable: ProcessInput,
-                CSP.CompactSyntaxParser.outputVariable: ProcessOutput,
-                CSP.CompactSyntaxParser.optionalVariable: ProcessOptional,
+    grammars = {parser.nsDecl: ProcessNsDecl,
+                import_stmt: (lambda res: ProcessImport(res[0][1])),
+                parser.inputVariable: ProcessInput,
+                parser.outputVariable: ProcessOutput,
+                parser.optionalVariable: ProcessOptional,
                 nested_proto: (lambda res: ProcessImport(res[0]))}
     in_conversion_rule = False
     for line in open(protoPath, 'rU'):
@@ -118,7 +120,7 @@ def GetProtoInterface(protoPath):
             try:
                 match = grammar.parseString(line)
                 in_conversion_rule = False
-            except CSP.p.ParseException:
+            except CSP.p.ParseBaseException:
                 continue
             processor(match)
             break

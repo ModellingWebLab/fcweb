@@ -108,12 +108,22 @@ function sendFile (uploaded, file, name, types)
         		fileType: "unknown"
         	};
         	
+        	// Set default fileType based on extension, where sensible
+        	if (name.endsWith(".cellml"))
+        	    array.fileType = "CellML";
+        	else if (name.endsWith(".txt"))
+        	    array.fileType = "TXTPROTOCOL";
+        	else if (name.endsWith(".xml"))
+        	    array.fileType = "XMLPROTOCOL";
+        	
         	var type = document.createElement("select");
         	for (var i = 0; i < types.length; i++)
         	{
         		var opt = document.createElement("option");
         		opt.value = types[i];
         		opt.appendChild (document.createTextNode(types[i]));
+        		if (opt.value == array.fileType)
+        		    opt.selected = true;
         		type.appendChild(opt);
         	}
         	type.addEventListener("click", function () {

@@ -118,17 +118,17 @@ extends ChasteEntityManager
 	/**
 	 * This is not supported for experiments. Use
 	 * <pre>
-	 * createVersion (int, String, User)
+	 * createVersion (int, String, User, String)
 	 * </pre>
 	 * or
 	 * <pre>
-	 * createVersion (ChasteEntityVersion, ChasteEntityVersion, String, User)
+	 * createVersion (ChasteEntityVersion, ChasteEntityVersion, String, User, boolean)
 	 * </pre>
 	 * instead.
 	 * 
 	 * @deprecated
 	 */
-	public int createVersion (int entityid, String versionName, String filePath, User u)
+	public int createVersion (int entityid, String versionName, String filePath, User u, String visibility)
 	{
 		throw new IllegalStateException ("not supported for experiments");
 	}

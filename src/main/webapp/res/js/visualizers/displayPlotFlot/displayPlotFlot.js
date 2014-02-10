@@ -1,6 +1,5 @@
 
 
-
 function contentFlotPlot (file, div)
 {
 	this.file = file;
@@ -36,98 +35,97 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
         div.id = id;
         div.style.width = "780px";
         div.style.height = "450px";
-
+        
+        // Some of the plots won't come from specified plots, so these are missing.
+    	var x_label = "";
+    	var y_label = "";    	
+    	if (THISfile.xAxes) {
+    		x_label = THISfile.xAxes;
+    	}
+    	if (THISfile.yAxes) {
+    		y_label = THISfile.yAxes;
+    	}
 
         var datasets = {};
         for (var i = 1; i < csvData.length; i++)
         {
-                var curData = [];
-                for (var j = 0; j < csvData[i].length; j++)
-                        curData.push ([csvData[i][j].x, csvData[i][j].y]);
-                //if (curData.length > 100)
-                	//plotPoints = false;
-                //plot.polyline("line " + i, { x: csvData[0], y: csvData[i], stroke:  colorPalette.getRgba (col), thickness: 1 });
-                datasets["line" + i] = {label : "line " + i, data: curData};
+            var curData = [];
+            for (var j = 0; j < csvData[i].length; j++)
+                    curData.push ([csvData[i][j].x, csvData[i][j].y]);
+
+            //if (curData.length > 100)
+            	//plotPoints = false;
+            //plot.polyline("line " + i, { x: csvData[0], y: csvData[i], stroke:  colorPalette.getRgba (col), thickness: 1 });
+            datasets["line" + i] = {label : "line " + i, data: curData};
         }
-    	
-
-
 
         this.div.appendChild (div);
 
-                // hard-code color indices to prevent them from shifting as
-                // countries are turned on/off
+        // hard-code color indices to prevent them from shifting as
+        // countries are turned on/off
 
-                var i = 0;
-                $.each(datasets, function(key, val) {
-                    val.color = i;
-                    ++i;
-                });
-
-
-                // insert checkboxes 
-                var choiceContainer = $("#choices");
-                $.each(datasets, function(key, val) {
-                    choiceContainer.append("<input type='checkbox' name='" + key +
-                        //"' id='id" + key + "'></input>" +
-                        "' checked='checked' id='id" + key + "'></input>" +
-                        "<label for='id" + key + "'>"
-                        + val.label + "</label>");
-                });
-
-var legendContainer =  document.createElement("div");
-legendContainer.id = "legend";
-this.div.appendChild (legendContainer);
+        var i = 0;
+        $.each(datasets, function(key, val) {
+            val.color = i;
+            ++i;
+        });
 
 
-                function plotAccordingToChoices() {
+        // insert checkboxes 
+        var choiceContainer = $("#choices");
+        $.each(datasets, function(key, val) {
+            choiceContainer.append("<input type='checkbox' name='" + key +
+                //"' id='id" + key + "'></input>" +
+                "' checked='checked' id='id" + key + "'></input>" +
+                "<label for='id" + key + "'>"
+                + val.label + "</label>");
+        });
 
-                    var data = [];
-
-                    choiceContainer.find("input:checked").each(function () {
-                        var key = $(this).attr("name");
-                        if (key && datasets[key]) {
-                            data.push(datasets[key]);
-                        }
-                    });
-
-                    //if (data.length > 0) {
-                        //$.plot("#flotplot-262", data, {
-                        var settings = {
-                            /*yaxis: {
-                                min: 0
-                            },*/
-                            xaxis: {
-                                tickDecimals: 0
-                            }
-,
-lines: { show: true},
+        var legendContainer =  document.createElement("div");
+        legendContainer.id = "legend";
+        this.div.appendChild (legendContainer);
 
 
+        function plotAccordingToChoices() {
 
-zoom: {
-	interactive: true
-	},
-	pan: {
-	interactive: true
-	},
-legend: {backgroundOpacity: 0,container: $("#legend")}
-                        };
-                        
-                        if (THISfile.linestyle == "linespoints" || THISfile.linestyle == "points")
-                        	settings.points = { show: true, radius:2};
-                        
-                        $.plot("#" + id, data, settings);
-                    //}
+            var data = [];
+
+            choiceContainer.find("input:checked").each(function () {
+                var key = $(this).attr("name");
+                if (key && datasets[key]) {
+                    data.push(datasets[key]);
+                }
+            });
+
+            //if (data.length > 0) {
+                //$plot("#flotplot-262", data, {
+                       
+                var settings = {
+                    xaxis: { tickDecimals: 0, 
+                             position: 'bottom', 
+                             axisLabel: x_label, 
+                             axisLabelPadding: 10, 
+                             axisLabelUseCanvas: true  },
+                    yaxis: { position: 'left', 
+                             axisLabel: y_label, 
+                             axisLabelPadding: 10, 
+                             axisLabelUseCanvas: true},
+                    lines: { show: true},
+                    zoom: {	interactive: true },
+                    pan: { interactive: true },
+                    legend: {backgroundOpacity: 0,container: $("#legend")} 
                 };
+                            
+                if (THISfile.linestyle == "linespoints" || THISfile.linestyle == "points")
+                    settings.points = { show: true, radius:2};
+                    $.plot("#" + id, data, settings);
+            //}
+        };
                 
-                
-                choiceContainer.find("input").click(plotAccordingToChoices);
+        choiceContainer.find("input").click(plotAccordingToChoices);
 
-                plotAccordingToChoices();
-        }
-
-		
+        plotAccordingToChoices();
+    }		
 };
 
 contentFlotPlot.prototype.show = function ()
@@ -137,16 +135,6 @@ contentFlotPlot.prototype.show = function ()
 	if (!this.setUp)
 		this.file.getContents (this);
 };
-
-
-
-
-
-
-
-
-
-
 
 function contentFlotPlotComparer (file, div)
 {
@@ -158,6 +146,7 @@ function contentFlotPlotComparer (file, div)
 	this.gotFileContents = 0;
 	this.ok = true;
 };
+
 contentFlotPlotComparer.prototype.getContentsCallback = function (succ)
 {
 	//console.log ("getContentsCallback : " + succ + " -> so far: " + this.gotFileContents + " of " + this.file.entities.length);
@@ -189,6 +178,16 @@ contentFlotPlotComparer.prototype.showContents = function ()
 		
 		var lineStyle = this.file.linestyle;
 		
+		// Some of the plots won't come from specified plots, so these are missing.
+    	var x_label = "";
+    	var y_label = "";    	
+    	if (this.file.xAxes) {
+    		x_label = this.file.xAxes;
+    	}
+    	if (this.file.yAxes) {
+    		y_label = this.file.yAxes;
+    	}
+		
 		var csvDatas = new Array ();
 		
 		for (var i = 0; i < this.file.entities.length; i++)
@@ -200,8 +199,6 @@ contentFlotPlotComparer.prototype.showContents = function ()
 					file: this.file.entities[i].entityFileLink
 			});
 		}
-		
-		
 
 		//var plotPoints = true;
 
@@ -215,9 +212,8 @@ contentFlotPlotComparer.prototype.showContents = function ()
         div.style.width = "780px";
         div.style.height = "450px";
 
-
-                // insert checkboxes 
-                var choiceContainer = $("#choices");
+        // insert checkboxes 
+        var choiceContainer = $("#choices");
                 
         var datasets = {};
         var curColor = 0;
@@ -249,61 +245,53 @@ contentFlotPlotComparer.prototype.showContents = function ()
         }
     	//console.log (datasets);
 
-
         this.div.appendChild (div);
-
                 
-                
-                
-var legendContainer =  document.createElement("div");
-legendContainer.id = "legend";
-this.div.appendChild (legendContainer);
+        var legendContainer =  document.createElement("div");
+        legendContainer.id = "legend";
+        this.div.appendChild (legendContainer);
 
 
-                function plotAccordingToChoices() {
+        function plotAccordingToChoices() {
 
-                    var data = [];
+            var data = [];
 
-                    choiceContainer.find("input:checked").each(function () {
-                        var key = $(this).attr("name");
-                        if (key && datasets[key]) {
-                            data.push(datasets[key]);
-                        }
-                    });
-
-                    //if (data.length > 0) {
-                        var settings = {
-                            xaxis: {
-                                tickDecimals: 0
-                            }
-,
-lines: { show: true},
-
-
-
-zoom: {
-	interactive: true
-	},
-	pan: {
-	interactive: true
-	},
-legend: {backgroundOpacity: 0,container: $("#legend")}
-                        };
-                        
-                        if (lineStyle == "linespoints" || lineStyle == "points")
-                        	settings.points = { show: true, radius:2};
-                        
-                        $.plot("#" + id, data, settings);
-                    //}
+            choiceContainer.find("input:checked").each(function () {
+                var key = $(this).attr("name");
+                if (key && datasets[key]) {
+                    data.push(datasets[key]);
+                }
+            });      
+            
+            //if (data.length > 0) {
+                var settings = {
+                    xaxis: { tickDecimals: 0,
+                             position: 'bottom', 
+                             axisLabel: x_label, 
+                             axisLabelPadding: 10, 
+                             axisLabelUseCanvas: true },
+                    yaxis: { position: 'left', 
+                             axisLabel: y_label, 
+                             axisLabelPadding: 10, 
+                             axisLabelUseCanvas: true },
+                    lines: { show: true},
+                    zoom: {	interactive: true },
+                    pan: { interactive: true },
+                    legend: {backgroundOpacity: 0,container: $("#legend")}
                 };
+                        
+                if (lineStyle == "linespoints" || lineStyle == "points")
+                	settings.points = { show: true, radius:2};
                 
+                $.plot("#" + id, data, settings);
+            //}
+            
+        };
                 
-                choiceContainer.find("input").click(plotAccordingToChoices);
+        choiceContainer.find("input").click(plotAccordingToChoices);
 
-                plotAccordingToChoices ();
-        }
-
-		
+        plotAccordingToChoices ();
+    }
 };
 
 contentFlotPlotComparer.prototype.show = function ()
@@ -315,19 +303,10 @@ contentFlotPlotComparer.prototype.show = function ()
 		this.file.getContents (this);
 	}
 	else
+	{
 		this.showContents ();
+	}
 };
-
-
-
-
-
-
-
-
-
-
-
 
 
 function flotContent ()
@@ -338,6 +317,7 @@ function flotContent ()
 	
 	addScript (contextPath + "/res/js/visualizers/displayPlotFlot/flot/jquery.flot.js");
 	addScript (contextPath + "/res/js/visualizers/displayPlotFlot/flot/jquery.flot.navigate.min.js");
+	addScript (contextPath + "/res/js/visualizers/displayPlotFlot/flot/jquery.flot.axislabels.js");
 	//addScript (contextPath + "/res/js/visualizers/displayPlotFlot/flot/jquery.flot.navigationControl.js");
 };
 
@@ -379,13 +359,11 @@ flotContent.prototype.setUpComparision = function (files, div)
 };
 
 
-
-
 function initFlotContent ()
 {
 	visualizers["displayPlotFlot"] = new flotContent ();
 }
 
-
+document.addEventListener("DOMContentLoaded", initFlotContent, false);
 
 document.addEventListener("DOMContentLoaded", initFlotContent, false);

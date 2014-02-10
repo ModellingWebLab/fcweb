@@ -409,14 +409,31 @@ public class EntityView extends WebModule
 	@SuppressWarnings("unchecked")
 	private void createNewEntity (Object task, Notifications notifications, DatabaseConnector db, JSONObject querry, User user, JSONObject answer, ChasteEntityManager entityMgmt, ChasteFileManager fileMgmt) throws IOException, ChastePermissionException
 	{
-		LOGGER.debug ("creating new entity");
+		LOGGER.debug ("creating new entity; task=" + task.toString() + ".");
 		String entityName = null;
 		String versionName = null;
+		String visibility = null;
 		String filePath = null;
 		File entityDir = null;
 		HashMap<String, NewFile> files = new HashMap<String, NewFile> ();
 		boolean createOk = task.equals ("createNewEntity");
 		ChasteEntity entity = null;
+		if (querry.get ("visibility") != null)
+		{
+			String userVisibility = querry.get ("visibility").toString();
+			if (!userVisibility.equals(ChasteEntityVersion.VISIBILITY_PRIVATE)
+				&& !userVisibility.equals(ChasteEntityVersion.VISIBILITY_RESTRICTED)
+				&& !userVisibility.equals(ChasteEntityVersion.VISIBILITY_PUBLIC))
+			{
+				LOGGER.warn("Invalid visibility '" + userVisibility + "' sent.");
+				notifications.addError("Invalid visibility '" + userVisibility + "' sent.");
+				createOk = false;
+			}
+			else
+			{
+				visibility = userVisibility;
+			}
+		}
 		if (querry.get ("entityName") != null)
 		{
 			JSONObject obj = new JSONObject ();
@@ -441,15 +458,29 @@ public class EntityView extends WebModule
 			{
 				if (entity.getAuthor ().getId () != user.getId ())
 				{
-					// not allowed to create a new version to a model of somebody else -> otherwise we get a delte problem...
-					obj.put ("response", false);
-					obj.put ("responseText", "name exists, but "+entityMgmt.getEntityColumn ()+" belongs to somebody else. please choose a different name.");
-					createOk = false;
+					if (user.isAdmin())
+					{
+						// Pretend to be the original author and allow the creation to proceed
+						user.authById(entity.getAuthor().getId());
+					}
+					else
+					{
+						// not allowed to create a new version to a model of somebody else -> otherwise we get a delete problem...
+						obj.put ("response", false);
+						obj.put ("responseText", "name exists, but "+entityMgmt.getEntityColumn ()+" belongs to somebody else. Please choose a different name.");
+						createOk = false;
+					}
 				}
 				else
 				{
 					obj.put ("response", true);
-					obj.put ("responseText", "name exists. you're going to upload a new version to an existing "+entityMgmt.getEntityColumn ()+".");
+					obj.put ("responseText", "name exists. You're going to upload a new version to an existing "+entityMgmt.getEntityColumn ()+".");
+				}
+				// Set visibility to match the latest version, if not already specified
+				if (visibility == null)
+				{
+					visibility = entity.getLatestVersion().getVisibility();
+					answer.put("visibility", visibility);
 				}
 			}
 		}
@@ -468,12 +499,11 @@ public class EntityView extends WebModule
 			if (versionName.length () < 2)
 			{
 				obj.put ("response", false);
-				obj.put ("responseText", "needs to be at least 5 characters in length");
+				obj.put ("responseText", "needs to be at least 2 characters in length");
 				createOk = false;
 			}
 			// else ok
 			
-
 			if (entity != null)
 			{
 				if (entity.getVersion (versionName) != null)
@@ -493,7 +523,7 @@ public class EntityView extends WebModule
 		if (createOk)
 		{
 			// do we have any files?
-			// creating an empty entities makes no sense..
+			// creating an empty entity makes no sense
 			if (querry.get ("files") != null)
 			{
 				filePath = UUID.randomUUID ().toString ();
@@ -527,7 +557,7 @@ public class EntityView extends WebModule
 					if (name == null || name.length () < 1)
 					{
 						LOGGER.warn ("user provided file name is empty or null.");
-						throw new IOException ("detected empty file name. that's not allowed.");
+						throw new IOException ("detected empty file name. That's not allowed.");
 					}
 					if (name.contains ("/") || name.contains ("\\"))
 					{
@@ -540,7 +570,7 @@ public class EntityView extends WebModule
 					File tmp = FileTransfer.getTempFile (tmpName);
 					if (tmp == null)
 					{
-						notifications.addError ("cannot find file " + name + ". please upload again.");
+						notifications.addError ("cannot find file " + name + ". Please upload again.");
 						createOk = false;
 					}
 					else
@@ -551,13 +581,13 @@ public class EntityView extends WebModule
 			if (files.size () < 1)
 			{
 				createOk = false;
-				notifications.addError ("no files chosen. empty "+entityMgmt.getEntityColumn ()+"s don't make much sense");
+				notifications.addError ("no files chosen. Empty "+entityMgmt.getEntityColumn ()+"s don't make much sense.");
 			}
 			
 			if (FileTransfer.ambiguous (files))
 			{
 				createOk = false;
-				notifications.addError ("there was an error with the files. the provided information is ambiguous");
+				notifications.addError ("there was an error with the files. The provided information is ambiguous.");
 			}
 		}
 		
@@ -572,6 +602,9 @@ public class EntityView extends WebModule
 		
 		if (createOk)
 		{
+			// default visibility if none specified
+			if (visibility == null)
+				visibility = ChasteEntityVersion.VISIBILITY_PRIVATE;
 			// create a entity if it not yet exists
 			int entityId = -1;
 			if (entity == null)
@@ -590,7 +623,7 @@ public class EntityView extends WebModule
 				latestVersion = entityMgmt.getEntityById (entityId).getLatestVersion ();
 			
 			// create version
-			int versionId = entityMgmt.createVersion (entityId, versionName, filePath, user);
+			int versionId = entityMgmt.createVersion (entityId, versionName, filePath, user, visibility);
 			if (versionId < 0)
 			{
 				cleanUp (null, versionId, files, fileMgmt, entityMgmt);
@@ -817,8 +850,8 @@ public class EntityView extends WebModule
 				{}
 			}
 			
-
 			res.put ("responseText", "added version successfully");
+			res.put ("entityId", entityId);
 			res.put ("versionId", versionId);
 			res.put ("versionType", entityMgmt.getEntityColumn ());
 			answer.put ("createNewEntity", res);
