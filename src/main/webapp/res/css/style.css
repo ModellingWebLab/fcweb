@@ -250,8 +250,6 @@ table.leftright th {
 	font-weight: bold;
 }
 
-
-
 /* model page */
 /*#modelversion,
 #modelversionfiledetails
@@ -276,7 +274,6 @@ h3#entityversionfilename
         font-size: .8em;
 }
 
-
 #entityversion,
 #entityversionfiledetails,
 #filedetails
@@ -286,8 +283,7 @@ h3#entityversionfilename
 	padding: 10px;
 	border: 1px solid #ccc;
 	border-radius: 5px;
-	overflow:auto;
-	
+	overflow:auto;	
 }
 #entityversionfiledisplay
 {
@@ -299,15 +295,12 @@ td.right {
 	text-align: right;
 }
 
-
-
-
-
 table
 {
         width: 100%;
         border-collapse:collapse;
 }
+
 tr:nth-child(5n+1)
 {
 	border-bottom:1px dashed #ccc;
@@ -338,6 +331,7 @@ tr:nth-child(5n+1)
 {
 	background-color:#f1d39a;
 }
+
 #experimentlist li.experiment-FAILED,
 #entitydetails p.experiment-FAILED,
 .experiment-FAILED
@@ -362,14 +356,17 @@ tr:nth-child(5n+1)
 {
 	float:left;
 }
+
 #newexp
 {
 	margin-left:20px;
 }
+
 #newexpheadline
 {
 	font-weight:bold;
 }
+
 #newexpcontainer
 {
 	margin-top: 20px;
@@ -423,22 +420,27 @@ li.entityviz-PUBLIC
 	background-repeat: no-repeat;
 	background-position: 0px 5px; 
 }
+
 li.entityviz-PUBLIC
 {
 	background-image: url(../img/green-dot.png);
 }
+
 li.entityviz-RESTRICTED
 {
 	background-image: url(../img/yellow-dot.png);
 }
+
 li.entityviz-PRIVATE
 {
-background-image: url(../img/red-dot.png);
+    background-image: url(../img/red-dot.png);
 }
+
 #expversioncolorlegend
 {
 	font-size:.8em;
 }
+
 #entityversionfilesreadme
 {
 	font-size:.8em;
