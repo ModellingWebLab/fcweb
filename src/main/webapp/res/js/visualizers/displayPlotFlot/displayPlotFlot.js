@@ -277,6 +277,7 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
 
         var choicesContainer = $('#' + choicesDivId);
         var onlyOneDataset = (datasetNumber == 1);
+        
         /* insert checkboxes - note that colours will be applied to spans after plotting */ 
         $.each(datasets, function(key, val) {
             var thisDatasetNumber = val.color;
@@ -400,8 +401,8 @@ contentFlotPlotComparer.prototype.showContents = function ()
             var fileSig = eachCSVData.file.sig;
             var csvData = eachCSVData.data;
 
-            var paragraph = $('<p />').html(entityName).css('font-weight', 'bold');
-            choicesContainer.append(paragraph);
+            //var paragraph = $('<p />').html(eachCSVData.entity.name).css('font-weight', 'bold');
+            //choicesContainer.append(paragraph);
 
             for (var i = 1; i < csvData.length; i++)
             {
@@ -415,15 +416,19 @@ contentFlotPlotComparer.prototype.showContents = function ()
 
                 var colouredSpan = $('<span />').attr('id', colouredSpanIdPrefix + curColor)
                                                 .addClass('flotColour')
-                                                .html('&nbsp;&nbsp;&nbsp;');
+                                                .html('&nbsp;&nbsp;');
                 var inputId = 'id' + key;
-                var newLabel = $('<label />').attr('for', inputId).html('line ' + i);
+                var newLabel = $('<label />').attr('for', inputId).html('line ' + i + ':&nbsp;' + entityName);
                 var newInput = $('<input />').attr({ 'type': 'checkbox',
                                                      'name': key,
                                                      'checked': 'checked',
                                                      'id': inputId });
                 choicesContainer.append(newInput).append(colouredSpan).append('&nbsp;').append(newLabel);
                 curColor++;
+                if (i!=csvData.length)
+            	{
+                	choicesContainer.append('<br/>');
+            	}
             }
         }
 

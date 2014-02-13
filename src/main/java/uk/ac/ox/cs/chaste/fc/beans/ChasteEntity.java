@@ -39,8 +39,7 @@ public class ChasteEntity
 			return a.name.compareTo (b.name);
 		}
 	}
-	
-	
+		
 	public ChasteEntity (int id, String name, User author, Timestamp created, String type)
 	{
 		this.id = id;
@@ -67,8 +66,7 @@ public class ChasteEntity
 				return v;
 		return null;
 	}
-	
-	
+		
 	public String getUrl ()
 	{
 		return url;
@@ -78,7 +76,6 @@ public class ChasteEntity
 	{
 		return id;
 	}
-
 	
 	public Map<Integer, ChasteEntityVersion> getVersions ()
 	{
@@ -106,7 +103,6 @@ public class ChasteEntity
 	{
 		this.versions.put (version.getId (), version);
 	}
-
 
 
 	public User getAuthor ()
