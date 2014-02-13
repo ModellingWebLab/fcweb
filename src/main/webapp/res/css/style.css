@@ -250,6 +250,8 @@ table.leftright th {
 	font-weight: bold;
 }
 
+
+
 /* model page */
 /*#modelversion,
 #modelversionfiledetails
@@ -274,6 +276,7 @@ h3#entityversionfilename
         font-size: .8em;
 }
 
+
 #entityversion,
 #entityversionfiledetails,
 #filedetails
@@ -283,7 +286,8 @@ h3#entityversionfilename
 	padding: 10px;
 	border: 1px solid #ccc;
 	border-radius: 5px;
-	overflow:auto;	
+	overflow:auto;
+	
 }
 #entityversionfiledisplay
 {
@@ -295,12 +299,15 @@ td.right {
 	text-align: right;
 }
 
+
+
+
+
 table
 {
         width: 100%;
         border-collapse:collapse;
 }
-
 tr:nth-child(5n+1)
 {
 	border-bottom:1px dashed #ccc;
@@ -331,7 +338,6 @@ tr:nth-child(5n+1)
 {
 	background-color:#f1d39a;
 }
-
 #experimentlist li.experiment-FAILED,
 #entitydetails p.experiment-FAILED,
 .experiment-FAILED
@@ -356,17 +362,14 @@ tr:nth-child(5n+1)
 {
 	float:left;
 }
-
 #newexp
 {
 	margin-left:20px;
 }
-
 #newexpheadline
 {
 	font-weight:bold;
 }
-
 #newexpcontainer
 {
 	margin-top: 20px;
@@ -416,35 +419,30 @@ li.entityviz-RESTRICTED,
 li.entityviz-PRIVATE,
 li.entityviz-PUBLIC
 {
-	padding-left: 25px; 
-	background-repeat: no-repeat;
-	background-position: 0px 5px; 
+    padding-left: 25px; 
+background-repeat: no-repeat;
+background-position: 0px 5px; 
 }
-
 li.entityviz-PUBLIC
 {
-	background-image: url(../img/green-dot.png);
+background-image: url(../img/green-dot.png);
 }
-
 li.entityviz-RESTRICTED
 {
-	background-image: url(../img/yellow-dot.png);
+background-image: url(../img/yellow-dot.png);
 }
-
 li.entityviz-PRIVATE
 {
-    background-image: url(../img/red-dot.png);
+background-image: url(../img/red-dot.png);
 }
-
 #expversioncolorlegend
 {
 	font-size:.8em;
 }
-
 #entityversionfilesreadme
 {
 	font-size:.8em;
-	background-color: #dddddd;
+    background-color: #dddddd;
 	border: 1px solid #ccc;
 	border-radius: 5px;
 	padding:15px;
@@ -454,23 +452,19 @@ li.entityviz-PRIVATE
 {
 	background-color: #eee;
 }
-
 #cluetip
 {
 	font-size:.8em;
 }
-
 #entityexperimentlistpartnersact a
 {
 	font-size:.8em;
 }
-
 .matrixTableCol,
 .matrixTableRow
 {
 	font-size:.8em;
 }
-
 /*.matrixTableCol
 {
 	transform:rotate(-90deg);
@@ -480,13 +474,11 @@ li.entityviz-PRIVATE
 	-o-transform: rotate(-90deg);
 	width: 1.2em;
 }*/
-
 .vertical-text {
 	display: inline-block;
 	overflow: hidden;
 	width: 1.5em;
 }
-
 .vertical-text__inner {
 	display: inline-block;
 	white-space: nowrap;
@@ -499,7 +491,6 @@ li.entityviz-PRIVATE
 	-ms-transform:rotate(-90deg);
 	-o-transform: rotate(-90deg);
 }
-
 /* This element stretches the parent to be square
    by using the mechanics of vertical margins  */
 .vertical-text__inner:after {
@@ -507,33 +498,26 @@ li.entityviz-PRIVATE
 	display: block;
 	margin: -1.5em 0 100%;
 }
-
 .matrixTable .experiment-RUNNING
 {
 	background-color:#86b6f1;
 }
-
 .matrixTable .experiment-INAPPRORIATE
 {
 	background-color:#f1c886;
 }
-
 .matrixTable .experiment-FAILED
 {
 	background-color:#db0000;
 }
-
 .matrixTable .experiment-SUCCESS
 {
 	background-color:#05db00;
 }
-
 .matrixTable td
 {
 	border-bottom:1px dashed #ccc;
 	border-right:1px dashed #ccc;
-	border-top:1px dashed #ccc;
-	border-left:1px dashed #ccc;
 }
 
 .center
@@ -548,4 +532,17 @@ li.entityviz-PRIVATE
 .masterFile
 {
 	background-color: #bbd3ff;
+}
+
+span.flotColour
+{
+  padding:1px;
+  display:inline;
+  display:inline-block;
+  line-height:0.8em;
+  vertical-align:middle;
+}
+div.flotDiv
+{
+  overflow: hidden;
 }

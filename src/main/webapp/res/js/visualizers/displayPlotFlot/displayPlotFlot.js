@@ -1,4 +1,225 @@
+var choicesDivId = 'choices';
+var colouredSpanIdPrefix = 'span';
+var legendDivId = 'legend';
+var plottedGraph = {};
+var resetButtonId = 'resetButton';
+var selectTogglerId = 'selectToggler';
 
+/* create and append the div for showing the plot choices */
+function createAppendChoicesDiv(parentDiv) {
+    var choicesDiv = document.createElement("div");
+    choicesDiv.id = choicesDivId;
+    parentDiv.appendChild (choicesDiv);
+}
+
+/* create and append the flot plotting div element with specified id attr */
+function createAppendFlotPlotDiv(parentDiv, flotPlotDivId) {
+    var flotPlotDiv = document.createElement("div");
+    flotPlotDiv.id = flotPlotDivId;
+    flotPlotDiv.title = "Zoom available by selecting an area of the plot";
+    flotPlotDiv.style.width = "780px";
+    flotPlotDiv.style.height = "450px";
+    parentDiv.appendChild(flotPlotDiv);
+}
+
+/* create and append the div for showing the legend */
+function createAppendLegendDiv(parentDiv) {
+    var legendContainer =  document.createElement("div");
+    legendContainer.id = legendDivId;
+    parentDiv.appendChild (legendContainer);
+}
+
+/* create and append a reset button to the div element */
+function createAppendResetButton(parentDiv) {
+    var resetButton = document.createElement('input');
+    resetButton.id = resetButtonId;
+    resetButton.title = 'Reset graph based on currently selected datasets';
+    resetButton.type = 'button';
+    resetButton.value = 'reset graph';
+    parentDiv.appendChild (resetButton);
+}
+
+/* create and append a select toggler to the div element */
+function createAppendSelectToggler(parentDiv) {
+    var selectTogglerEl = document.createElement('input');
+    selectTogglerEl.id = selectTogglerId;
+    selectTogglerEl.type = 'checkbox';
+    parentDiv.appendChild (selectTogglerEl);
+
+    var selectToggler = $('#' + selectTogglerId);
+    selectToggler.attr({ 'checked': 'checked' });
+    setTogglerTitle(selectToggler);
+}
+
+/* indicator of linestyle type */
+function isStyleLinespointsOrPoints(lineStyle) {
+  return (lineStyle == "linespoints" || lineStyle == "points");
+}
+
+/* Plot the graph */
+function plotAccordingToChoices(plotProperties, selectedCoords) {
+    var choicesContainer = plotProperties.choicesContainer;
+    var datasets = plotProperties.datasets;
+    var styleLinespointsOrPoints = plotProperties.styleLinespointsOrPoints;
+    var flotPlotDivId = plotProperties.flotPlotDivId;
+    var x_label = plotProperties.x_label;
+    var y_label = plotProperties.y_label;
+
+    var data = [];
+
+    choicesContainer.find("input:checked").each(function () {
+        var key = $(this).attr("name");
+        if (key && datasets[key]) {
+            data.push(datasets[key]);
+        }
+    });
+
+    var genericSettings = retrieveGenericSettings($('#' + legendDivId));
+    var settings;
+    if (selectedCoords != undefined)
+    {
+        settings = $.extend(true, {}, genericSettings, {
+          xaxis: { min: selectedCoords.x[0], max: selectedCoords.x[1] },
+          yaxis: { min: selectedCoords.y[0], max: selectedCoords.y[1] }
+        });
+    }
+    else
+    {
+        settings = genericSettings;
+    }
+    settings.xaxis.axisLabel = x_label;
+    settings.yaxis.axisLabel = y_label;
+
+    if (styleLinespointsOrPoints)
+        settings.points = { show: true, radius: 2 };
+
+    plottedGraph = $.plot("#" + flotPlotDivId, data, settings);
+};
+
+/* retrieve min and max x and y axes values of current plot */
+function retrieveCurrentPlotCoords(plottedGraph) {
+  var xAxis = plottedGraph.getAxes().xaxis;
+  var yAxis = plottedGraph.getAxes().yaxis;
+  var coords = { 'x': [xAxis.min, xAxis.max],
+                 'y': [yAxis.min, yAxis.max] };
+  return coords;
+}
+
+/* Retrieve generic plot settings */
+function retrieveGenericSettings(legendContainer) {
+  var genericSettings = {
+      xaxis: { tickDecimals: 0, 
+               position: 'bottom', 
+               axisLabelPadding: 10, 
+               axisLabelUseCanvas: true  },
+      yaxis: { position: 'left', 
+               axisLabelPadding: 10, 
+               axisLabelUseCanvas: true},
+      lines: { show: true},
+      selection: { mode: 'xy' },
+      legend: { backgroundOpacity: 0,
+                container: legendContainer } 
+  };
+  return genericSettings;
+}
+
+/* attach the click, select listeners to the plot */
+function setListeners(plotProperties, moreThanOneDataset) {
+    var choicesContainer = plotProperties.choicesContainer;
+    var flotPlotDivId = plotProperties.flotPlotDivId;
+
+    /* someone's clicked on a dataset checkbox */
+    choicesContainer.find("input").click(function() {
+        var checkedCount = choicesContainer.find('input:checkbox:checked').length;
+        if (checkedCount == 0) {
+          /* should not happen! */
+        }
+        else
+        {
+          if (checkedCount == 1) {
+            /* disable the input checkbox on whichever checked dataset remains */
+            $('#' + choicesDivId + ' input:checkbox:checked').prop('disabled', true);
+          }
+          else
+          {
+            /* more than one dataset selected, remove any disabled */
+            $('#' + choicesDivId + ' input:checkbox:disabled').prop('disabled', false);
+          }
+          /* re-plot using existing coordinates */
+          plotAccordingToChoices(plotProperties, retrieveCurrentPlotCoords(plottedGraph));
+        }
+    });
+
+    /* listen to user selecting an area of the plot to zoom into */
+    $('#' + flotPlotDivId).bind('plotselected', function (event, ranges) {
+        /* clamp the zooming to prevent eternal zoom */
+        if (ranges.xaxis.to - ranges.xaxis.from < 0.00001)
+          ranges.xaxis.to = ranges.xaxis.from + 0.00001;
+        if (ranges.yaxis.to - ranges.yaxis.from < 0.00001)
+          ranges.yaxis.to = ranges.yaxis.from + 0.00001;
+
+        var coords = { 'x': [ranges.xaxis.from, ranges.xaxis.to],
+                       'y': [ranges.yaxis.from, ranges.yaxis.to] };
+
+        plottedGraph.setSelection(ranges, true);
+        plotAccordingToChoices(plotProperties, coords);
+    });
+
+    /* reset graphical display according to ranges defined by current dataset selection */
+    $('#' + resetButtonId).click(function() {
+        plotAccordingToChoices(plotProperties);
+    });
+
+    if (moreThanOneDataset)
+    {
+        /* action when all datasets toggler is clicked */
+        $('#' + selectTogglerId).click(function() {
+          var toggler = $(this);
+          setTogglerTitle(toggler);
+          /* remove any disabled inputs */
+          $('#' + choicesDivId + ' input:checkbox:disabled').prop('disabled', false);
+          if (toggler.is(':checked'))
+          {
+            /* check all currently unchecked datasets */
+            choicesContainer.find('input:checkbox:not(:checked)').each(function() {
+              $(this).prop('checked', true);
+            });
+          }
+          else
+          {
+            /* remove all the checked properties except on the first (and disabled that!) */
+            choicesContainer.find('input:checkbox:not(:eq(0))').each(function() {
+              $(this).prop('checked', false);
+            });
+            /* switch on the first (just in case it was already de-selected) and disable it */
+            $('#' + choicesDivId + ' input:checkbox:eq(0)').prop({ 'disabled': true, 'checked': true });
+          }
+          plotAccordingToChoices(plotProperties, retrieveCurrentPlotCoords(plottedGraph));
+      });
+    }
+}
+
+/* provide dataset toggler title */
+function setTogglerTitle(toggler) {
+  toggler.attr('title', toggler.is(':checked') ? 'Select one (cannot select none!)' : 'Select all');
+}
+
+/* Transfer the colours placed into the legend div by flot's plotting, to the spans corresponding
+to the dataset plot label. Once transfered the legend div serves no purpose. */
+function transferLegendColours(datasets) {
+ /* we don't want to see the legend data so hide immediately, only use it to pinch the colour! */
+ $('#' + legendDivId).hide();
+ $.each(datasets, function(key, val) {
+     /* class legendColorBox defined in jquery.flot.js in function insertLegend() */
+     var thisDatasetNumber = val.color;
+     var legendColorBox = $('td.legendColorBox:eq(' + thisDatasetNumber + ') div div');
+     /* moz wasn't happy using border-color, which IE didn't mind */
+     var colour = legendColorBox.css('border-left-color');
+     $('#' + colouredSpanIdPrefix + thisDatasetNumber).css('background-color', colour);
+ });
+ /* legend element is no longer required */
+ $('#' + legendDivId).remove();
+}
 
 function contentFlotPlot (file, div)
 {
@@ -11,165 +232,89 @@ function contentFlotPlot (file, div)
 
 contentFlotPlot.prototype.getContentsCallback = function (succ)
 {
-	//console.log ("insert content");
-	//console.log (this.div);
-	var THISfile = this.file;
-	removeChildren (this.div);
-	if (!succ)
-		this.div.appendChild (document.createTextNode ("failed to load the contents"));
-	else
-	{
-		//console.log (getCSVColumns (this.file));
-		//console.log (getCSVColumnsDownsampled (this.file));
-		
-		var csvData = (THISfile.linestyle == "linespoints" || THISfile.linestyle == "points") ? getCSVColumnsNonDownsampled (this.file) : getCSVColumnsDownsampled (this.file);
+    var thisFile = this.file;
+    var thisFileId = thisFile.id;
+    var thisDiv = this.div;
 
-		//var plotPoints = true;
-
-        var div = document.createElement("div");
-        div.id = "choices";
-        this.div.appendChild (div);
-
-        div = document.createElement("div");
-        var id = "flotplot-" + this.file.id;
-        div.id = id;
-        div.style.width = "780px";
-        div.style.height = "450px";
-        
-        // Some of the plots won't come from specified plots, so these are missing.
-    	var x_label = "";
-    	var y_label = "";    	
-    	if (THISfile.xAxes) {
-    		x_label = THISfile.xAxes;
-    	}
-    	if (THISfile.yAxes) {
-    		y_label = THISfile.yAxes;
-    	}
+    removeChildren (thisDiv);
+    if (!succ)
+        thisDiv.appendChild (document.createTextNode ("failed to load the contents"));
+    else
+    {
+        var lineStyle = thisFile.linestyle;
+        var styleLinespointsOrPoints = isStyleLinespointsOrPoints(lineStyle);
+        var csvData = styleLinespointsOrPoints ? getCSVColumnsNonDownsampled (thisFile) :
+                                                 getCSVColumnsDownsampled (thisFile);
 
         var datasets = {};
         for (var i = 1; i < csvData.length; i++)
         {
             var curData = [];
             for (var j = 0; j < csvData[i].length; j++)
-                    curData.push ([csvData[i][j].x, csvData[i][j].y]);
+                curData.push ([csvData[i][j].x, csvData[i][j].y]);
 
-            //if (curData.length > 100)
-            	//plotPoints = false;
-            //plot.polyline("line " + i, { x: csvData[0], y: csvData[i], stroke:  colorPalette.getRgba (col), thickness: 1 });
             datasets["line" + i] = {label : "line " + i, data: curData};
         }
 
-        this.div.appendChild (div);
+        // Some of the plots won't come from specified plots, so these are missing.
+        var x_label = thisFile.xAxes || "";
+        var y_label = thisFile.yAxes || "";
 
-        /* button to reset plot */
-        var resetButtonId = 'reset';
-        var resetButton = document.createElement('input');
-        resetButton.id = resetButtonId;
-        resetButton.type = 'button';
-        resetButton.value = 'reset graph';
-        this.div.appendChild(resetButton);
-
-        // hard-code color indices to prevent them from shifting as
-        // countries are turned on/off
-
-        var i = 0;
-        $.each(datasets, function(key, val) {
-            val.color = i;
-            ++i;
+        /* hard-coded colour indexes to prevent from shifting when turned off */
+        var datasetNumber = 0;
+        $.each(datasets, function(key, val)
+        {
+            val.color = datasetNumber++;
         });
+        var lastDatasetNumber = datasetNumber - 1;
 
+        var flotPlotDivId = 'flotplot-' + thisFileId;
+        createAppendFlotPlotDiv(thisDiv, flotPlotDivId);
+        (datasetNumber > 1) && createAppendSelectToggler(thisDiv);
+        createAppendResetButton(thisDiv);
+        createAppendChoicesDiv(thisDiv);
+        createAppendLegendDiv(thisDiv);
 
-        // insert checkboxes 
-        var choiceContainer = $("#choices");
+        var choicesContainer = $('#' + choicesDivId);
+        var onlyOneDataset = (datasetNumber == 1);
+        /* insert checkboxes - note that colours will be applied to spans after plotting */ 
         $.each(datasets, function(key, val) {
-            choiceContainer.append("<input type='checkbox' name='" + key +
-                //"' id='id" + key + "'></input>" +
-                "' checked='checked' id='id" + key + "'></input>" +
-                "<label for='id" + key + "'>"
-                + val.label + "</label>");
-        });
-
-        var legendContainer =  document.createElement("div");
-        legendContainer.id = "legend";
-        this.div.appendChild (legendContainer);
-
-        var plottedGraph;
-        function plotAccordingToChoices(coords) {
-
-            var data = [];
-
-            choiceContainer.find("input:checked").each(function () {
-                var key = $(this).attr("name");
-                if (key && datasets[key]) {
-                    data.push(datasets[key]);
-                }
-            });
-
-            //if (data.length > 0) {
-                //$plot("#flotplot-262", data, {
-            var genericSettings = {
-              xaxis: { tickDecimals: 0, 
-                       position: 'bottom', 
-                       axisLabel: x_label, 
-                       axisLabelPadding: 10, 
-                       axisLabelUseCanvas: true  },
-              yaxis: { position: 'left', 
-                       axisLabel: y_label, 
-                       axisLabelPadding: 10, 
-                       axisLabelUseCanvas: true},
-              lines: { show: true},
-              selection: { mode: 'xy' },
-              legend: {backgroundOpacity: 0,container: $("#legend")} 
-            };
-
-            var settings;
-            if (coords != undefined) {
-              settings = $.extend(true, {}, genericSettings, {
-                xaxis: { min: coords.x[0], max: coords.x[1] },
-                yaxis: { min: coords.y[0], max: coords.y[1] }
-              });
-            } else {
-              settings = genericSettings;
+            var thisDatasetNumber = val.color;
+            var colouredSpan = $('<span />').attr('id', colouredSpanIdPrefix + thisDatasetNumber)
+                                            .addClass('flotColour')
+                                            .html('&nbsp;&nbsp;');
+            var inputId = 'id' + key;
+            var newLabel = $('<label />').attr('for', inputId).html(val.label);
+            var newInput = $('<input />').attr({ 'type': 'checkbox',
+                                                 'name': key,
+                                                 'checked': 'checked',
+                                                 'id': inputId });
+            if (onlyOneDataset)
+            {
+                newInput.attr('disabled', 'disabled');
             }
+            choicesContainer.append(newInput).append(colouredSpan).append('&nbsp;').append(newLabel);
+            /* if more than one dataset and it's not the last one to be processed.. */
+            if (!onlyOneDataset && (thisDatasetNumber != lastDatasetNumber))
+            {
+                choicesContainer.append('<br />');
+            }
+        });
 
-                if (THISfile.linestyle == "linespoints" || THISfile.linestyle == "points")
-                    settings.points = { show: true, radius:2};
-                    plottedGraph = $.plot("#" + id, data, settings);
-            //}
-
+        var plotProperties = {
+          'choicesContainer': choicesContainer,
+          'datasets': datasets,
+          'styleLinespointsOrPoints': styleLinespointsOrPoints,
+          'flotPlotDivId': flotPlotDivId,
+          'x_label': x_label,
+          'y_label': y_label
         };
 
-        plotAccordingToChoices();
-        choiceContainer.find("input").click(function() {
-          /* re-plot using existing coordinates */
-          var xAxis = plottedGraph.getAxes().xaxis;
-          var yAxis = plottedGraph.getAxes().yaxis;
-          var coords = { 'x': [xAxis.min, xAxis.max],
-                         'y': [yAxis.min, yAxis.max] };
-          plotAccordingToChoices(coords);
-        });
-
-        /* listen to user selecting an area of the plot to zoom into */
-        $('#' + id).bind('plotselected', function (event, ranges) {
-          /* clamp the zooming to prevent eternal zoom */
-          if (ranges.xaxis.to - ranges.xaxis.from < 0.00001)
-            ranges.xaxis.to = ranges.xaxis.from + 0.00001;
-          if (ranges.yaxis.to - ranges.yaxis.from < 0.00001)
-            ranges.yaxis.to = ranges.yaxis.from + 0.00001;
-
-          var coords = { 'x': [ranges.xaxis.from, ranges.xaxis.to],
-                         'y': [ranges.yaxis.from, ranges.yaxis.to] };
-
-          plottedGraph.setSelection(ranges, true);
-          plotAccordingToChoices(coords);
-        });
-
-        /* reset plot when button clicked */
-        $('#' + resetButtonId).click(function() {
-          plotAccordingToChoices();
-        });
-
-	}		
+        plotAccordingToChoices(plotProperties, undefined);
+        /* legend generated when graph plotted, so this must follow the plot creation! */
+        transferLegendColours(datasets);
+        setListeners(plotProperties, (datasetNumber > 1));
+    }
 };
 
 contentFlotPlot.prototype.show = function ()
@@ -205,135 +350,96 @@ contentFlotPlotComparer.prototype.getContentsCallback = function (succ)
 
 contentFlotPlotComparer.prototype.showContents = function ()
 {
-	//console.log ("insert content");
-	//console.log (this.div);
-	//var THISfile = this.file;
-	removeChildren (this.div);
-	if (!this.ok)
-		this.div.appendChild (document.createTextNode ("failed to load the contents"));
-	else
-	{
-		this.setUp = true;
-		//this.div.appendChild (document.createTextNode ("loaded"));
-		//console.log ("nondown -vs- down");
-		//console.log (getCSVColumns (this.file));
-		//console.log (getCSVColumnsDownsampled (this.file));
-		console.log (this.file);
-		
-		var lineStyle = this.file.linestyle;
-		
-		// Some of the plots won't come from specified plots, so these are missing.
-    	var x_label = "";
-    	var y_label = "";    	
-    	if (this.file.xAxes) {
-    		x_label = this.file.xAxes;
-    	}
-    	if (this.file.yAxes) {
-    		y_label = this.file.yAxes;
-    	}
-		
-		var csvDatas = new Array ();
-		
-		for (var i = 0; i < this.file.entities.length; i++)
-		{
-			csvDatas.push ({
-					data: (lineStyle == "linespoints" || lineStyle == "points") ?
-							getCSVColumnsNonDownsampled (this.file.entities[i].entityFileLink) : getCSVColumnsDownsampled (this.file.entities[i].entityFileLink),
-					entity: this.file.entities[i].entityLink,
-					file: this.file.entities[i].entityFileLink
-			});
-		}
+    var thisFile = this.file;
+    var thisFileSig = thisFile.sig;
+    var thisDiv = this.div;
 
-		//var plotPoints = true;
+    removeChildren (thisDiv);
+    if (!this.ok)
+        thisDiv.appendChild (document.createTextNode ("failed to load the contents"));
+    else
+    {
+        this.setUp = true;
 
-        var div = document.createElement("div");
-        div.id = "choices";
-        this.div.appendChild (div);
+        var lineStyle = thisFile.linestyle;
+        var styleLinespointsOrPoints = isStyleLinespointsOrPoints(lineStyle);
 
-        div = document.createElement("div");
-        var id = "flotplot-" + this.file.sig;
-        div.id = id;
-        div.style.width = "780px";
-        div.style.height = "450px";
+        var csvDatas = new Array ();
+        for (var i = 0; i < thisFile.entities.length; i++)
+        {
+            csvDatas.push ({
+                data: (styleLinespointsOrPoints) ? getCSVColumnsNonDownsampled (thisFile.entities[i].entityFileLink) :
+                                                   getCSVColumnsDownsampled (thisFile.entities[i].entityFileLink),
+                entity: thisFile.entities[i].entityLink,
+                file: thisFile.entities[i].entityFileLink
+            });
+        }
+
+        // Some of the plots won't come from specified plots, so these are missing.
+        var x_label = thisFile.xAxes || "";
+        var y_label = thisFile.yAxes || "";
+
+        var flotPlotDivId = 'flotplot-' + thisFileSig;
+        createAppendFlotPlotDiv(thisDiv, flotPlotDivId);
+        createAppendSelectToggler(thisDiv);
+        createAppendResetButton(thisDiv);
+        createAppendChoicesDiv(thisDiv);
+        createAppendLegendDiv(thisDiv);
 
         // insert checkboxes 
-        var choiceContainer = $("#choices");
-                
+        var choicesContainer = $('#' + choicesDivId);
+
         var datasets = {};
         var curColor = 0;
 
         for (var j = 0; j < csvDatas.length; j++)
         {
-        	//console.log (csvDatas[j]);
-        	var tmp = "<p><strong>" + csvDatas[j].entity.name + ":</strong> ";
-        	var csvData = csvDatas[j].data;
-        	for (var i = 1; i < csvData.length; i++)
-        	{
-        		var curData = [];
-	            for (var k = 0; k < csvData[i].length; k++)
-	                curData.push ([csvData[i][k].x, csvData[i][k].y]);
-	            
-	            var key = csvDatas[j].entity.id + "-" + csvDatas[j].file.sig + "-" + i;
-	            var label = csvDatas[j].entity.name + " line " + i;
-	            datasets[key] = {label : label, data: curData, color: curColor};
-	            curColor++;
-	            
-	            tmp += "<input type='checkbox' name='" + key +
-                //"' id='id" + key + "'></input>" +
-                "' checked='checked' id='id" + key + "'></input>" +
-                "<label for='id" + key + "'>"
-                + " line " + i + "</label>";
-        	}
-        	choiceContainer.append(tmp + "</p>");
-        	
+            var eachCSVData = csvDatas[j];
+            var entityName = eachCSVData.entity.name;
+            var entityId = eachCSVData.entity.id;
+            var fileSig = eachCSVData.file.sig;
+            var csvData = eachCSVData.data;
+
+            var paragraph = $('<p />').html(entityName).css('font-weight', 'bold');
+            choicesContainer.append(paragraph);
+
+            for (var i = 1; i < csvData.length; i++)
+            {
+                var curData = [];
+                for (var k = 0; k < csvData[i].length; k++)
+                    curData.push ([csvData[i][k].x, csvData[i][k].y]);
+
+                var key = entityId + "-" + fileSig + "-" + i;
+                var label = entityName + " line " + i;
+                datasets[key] = {label : label, data: curData, color: curColor};
+
+                var colouredSpan = $('<span />').attr('id', colouredSpanIdPrefix + curColor)
+                                                .addClass('flotColour')
+                                                .html('&nbsp;&nbsp;&nbsp;');
+                var inputId = 'id' + key;
+                var newLabel = $('<label />').attr('for', inputId).html('line ' + i);
+                var newInput = $('<input />').attr({ 'type': 'checkbox',
+                                                     'name': key,
+                                                     'checked': 'checked',
+                                                     'id': inputId });
+                choicesContainer.append(newInput).append(colouredSpan).append('&nbsp;').append(newLabel);
+                curColor++;
+            }
         }
-    	//console.log (datasets);
 
-        this.div.appendChild (div);
-                
-        var legendContainer =  document.createElement("div");
-        legendContainer.id = "legend";
-        this.div.appendChild (legendContainer);
-
-
-        function plotAccordingToChoices() {
-
-            var data = [];
-
-            choiceContainer.find("input:checked").each(function () {
-                var key = $(this).attr("name");
-                if (key && datasets[key]) {
-                    data.push(datasets[key]);
-                }
-            });      
-            
-            //if (data.length > 0) {
-                var settings = {
-                    xaxis: { tickDecimals: 0,
-                             position: 'bottom', 
-                             axisLabel: x_label, 
-                             axisLabelPadding: 10, 
-                             axisLabelUseCanvas: true },
-                    yaxis: { position: 'left', 
-                             axisLabel: y_label, 
-                             axisLabelPadding: 10, 
-                             axisLabelUseCanvas: true },
-                    lines: { show: true},
-                    selection: { mode: 'xy' },
-                    legend: {backgroundOpacity: 0,container: $("#legend")}
-                };
-                        
-                if (lineStyle == "linespoints" || lineStyle == "points")
-                	settings.points = { show: true, radius:2};
-                
-                $.plot("#" + id, data, settings);
-            //}
-            
+        var plotProperties = {
+            'choicesContainer': choicesContainer,
+            'datasets': datasets,
+            'styleLinespointsOrPoints': styleLinespointsOrPoints,
+            'flotPlotDivId': flotPlotDivId,
+            'x_label': x_label,
+            'y_label': y_label
         };
-                
-        choiceContainer.find("input").click(plotAccordingToChoices);
 
-        plotAccordingToChoices ();
+        plotAccordingToChoices(plotProperties, undefined);
+        /* legend generated when graph plotted, so this must follow the plot creation! */
+        transferLegendColours(datasets);
+        setListeners(plotProperties, true);
     }
 };
 
@@ -410,3 +516,4 @@ function initFlotContent ()
 document.addEventListener("DOMContentLoaded", initFlotContent, false);
 
 document.addEventListener("DOMContentLoaded", initFlotContent, false);
+
