@@ -86,7 +86,6 @@ padding: 10px;
 }
 
 .navbar li {
-	/*padding: 20px;*/
 	height: auto;
 	/*width: 100px; Each menu item is 80px wide */
 	float: left; /* This lines up the menu items horizontally */
@@ -94,7 +93,7 @@ padding: 10px;
 	list-style: none;
 	/* Removes the default styling (bullets) for the list */
 	/*font: normal bold 12px/1.2em Arial, Verdana, Helvetica;  */
-	padding: 5px;
+	padding: 10px;
 	/*
 			margin: 0;*/
 	/*background-color: #366b82;*/
