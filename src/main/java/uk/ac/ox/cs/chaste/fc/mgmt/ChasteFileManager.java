@@ -79,17 +79,17 @@ public class ChasteFileManager
 	public boolean removeFile (int fileId)
 	{
 		PreparedStatement st = db.prepareStatement ("DELETE FROM `files` WHERE `id`=?");
-    ResultSet rs = null;
-    boolean ok = false;
+	    ResultSet rs = null;
+	    boolean ok = false;
 		
 		try
 		{
 			st.setInt (1, fileId);
 			
 			int affectedRows = st.executeUpdate();
-      if (affectedRows == 0)
-          throw new SQLException("Removing file failed, no rows affected.");
-      ok = true;
+	      if (affectedRows == 0)
+	          throw new SQLException("Removing file failed, no rows affected.");
+	      ok = true;
 		}
 		catch (SQLException e)
 		{
@@ -115,8 +115,8 @@ public class ChasteFileManager
 	public int addFile (String name, String type, int user, long size, boolean mainFile)
 	{
 		PreparedStatement st = db.prepareStatement ("INSERT INTO `files`(`relpath`, `type`, `author`, `size`, `masterFile`) VALUES (?,?,?,?,?)");
-    ResultSet rs = null;
-    int id = -1;
+	    ResultSet rs = null;
+	    int id = -1;
 		
 		try
 		{
@@ -127,14 +127,14 @@ public class ChasteFileManager
 			st.setBoolean (5, mainFile);
 			
 			int affectedRows = st.executeUpdate();
-      if (affectedRows == 0)
-      {
-          throw new SQLException("Creating file failed, no rows affected.");
-      }
+			if (affectedRows == 0)
+			{
+				throw new SQLException("Creating file failed, no rows affected.");
+			}
 
-      rs = st.getGeneratedKeys();
-      if (rs.next())
-      	id = rs.getInt (1);
+			rs = st.getGeneratedKeys();
+			if (rs.next())
+				id = rs.getInt (1);
 		}
 		catch (SQLException e)
 		{
@@ -155,8 +155,8 @@ public class ChasteFileManager
 	public boolean associateFile (int fileId, ChasteEntityVersion entity, ChasteEntityManager entityMgmt)
 	{
 		PreparedStatement st = db.prepareStatement ("INSERT INTO `"+entityMgmt.getEntityFilesTable ()+"`(`"+entityMgmt.getEntityColumn ()+"`, `file`) VALUES (?,?)");
-    ResultSet rs = null;
-    boolean ok = false;
+		ResultSet rs = null;
+		boolean ok = false;
 		
 		try
 		{
@@ -164,9 +164,9 @@ public class ChasteFileManager
 			st.setInt (2, fileId);
 			
 			int affectedRows = st.executeUpdate();
-      if (affectedRows == 0)
-          throw new SQLException("Associating file to "+entityMgmt.getEntityColumn ()+" failed, no rows affected.");
-      ok = true;
+			if (affectedRows == 0)
+				throw new SQLException("Associating file to "+entityMgmt.getEntityColumn ()+" failed, no rows affected.");
+			ok = true;
 		}
 		catch (SQLException e)
 		{
@@ -188,8 +188,8 @@ public class ChasteFileManager
 	public boolean associateFile (int fileId, int versionId, String tableName, String columnName)
 	{
 		PreparedStatement st = db.prepareStatement ("INSERT INTO `"+tableName+"`(`"+columnName+"`, `file`) VALUES (?,?)");
-    ResultSet rs = null;
-    boolean ok = false;
+	    ResultSet rs = null;
+	    boolean ok = false;
 		
 		try
 		{
@@ -197,9 +197,9 @@ public class ChasteFileManager
 			st.setInt (2, fileId);
 			
 			int affectedRows = st.executeUpdate();
-      if (affectedRows == 0)
-          throw new SQLException("Associating file to "+columnName+" failed, no rows affected.");
-      ok = true;
+			if (affectedRows == 0)
+				throw new SQLException("Associating file to "+columnName+" failed, no rows affected.");
+			ok = true;
 		}
 		catch (SQLException e)
 		{
