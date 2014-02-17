@@ -45,6 +45,11 @@ function createAppendSelectToggler(parentDiv) {
     selectTogglerEl.id = selectTogglerId;
     selectTogglerEl.type = 'checkbox';
     parentDiv.appendChild (selectTogglerEl);
+    
+    var label = document.createElement('label')
+    label.setAttribute('for', selectTogglerId);
+    label.innerHTML = 'select all';
+    parentDiv.appendChild(label);
 
     var selectToggler = $('#' + selectTogglerId);
     selectToggler.attr({ 'checked': 'checked' });
