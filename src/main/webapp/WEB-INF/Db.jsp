@@ -17,8 +17,8 @@
         <span id="actionIndicator"></span><br/>
         <div id="matrixdiv"></div>
         <br/>
+        Key:
         <table class="matrixTable small">
-            <tr><td>Colour key</td></tr>
             <tr>
                 <td class="center">not run</td>
                 <td class="experiment-RUNNING center">running</td>
