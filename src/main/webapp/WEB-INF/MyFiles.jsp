@@ -3,14 +3,14 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}My Files - " contextPath="${contextPath}" newExpModelName="${newExpModelName}" newExpProtocolName="${newExpProtocolName}">
-    <h1>Your Files</h1>
+    <h1>Your files</h1>
     
     <button id="modelchooser">models</button>
     <button id="protocolchooser">protocols</button>
     <button id="experimentchooser">experiments</button>
     
     <section id="modellist">
-	    <h2>Your Models</h2>
+	    <h2>Your models</h2>
 	    <c:if test="${User.allowedCreateModel}"> 
 	    	<small><a href="${contextPath}/model/createnew" id="addmodellink" class="pointer">create a new model</a></small>
 		</c:if>
@@ -26,7 +26,7 @@
     </section>
     
     <section id="protocollist">
-	    <h2>Your Protocols</h2>
+	    <h2>Your protocols</h2>
 	    <c:if test="${User.allowedCreateProtocol}"> 
 	    	<small><a href="${contextPath}/protocol/createnew" id="addprotocol" class="pointer">create a new protocol</a></small>
 		</c:if>
@@ -43,7 +43,7 @@
     </section>
     
     <section id="experimentlist">
-	    <h2>Your Experiments</h2>
+	    <h2>Your experiments</h2>
 	    
 	    <ul>
 	    	<c:forEach items="${experiments}" var="experiment" >

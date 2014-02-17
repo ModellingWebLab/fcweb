@@ -31,7 +31,7 @@
         <a href="${contextPath}/contact.html">contact us</a>.
     </p>
 
-    <h2>Future Plans</h2>
+    <h2>Future plans</h2>
     <p>
         The main features on our "to do" list include:
         <ul>

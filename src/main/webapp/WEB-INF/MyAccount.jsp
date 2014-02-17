@@ -3,45 +3,58 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}My Account - " contextPath="${contextPath}">
-    <h1>Your Account</h1>
+    <h1>Your account</h1>
     <table id="myaccounttable" class="leftright">
     	<tr>
-    		<th>Mail Address</th>
+    		<th>E-mail address</th>
     		<td>${User.mail}</td>
     	</tr>
     	<tr>
-    		<th>Nick</th>
+    		<th>Nickname</th>
     		<td>${User.nick}</td>
     	</tr>
     	<tr>
     		<th>Institution</th>
-    		<td><input type="text" id="instituteChanger" value="${User.institution}" /> <span id="instituteChangeaction"></span></td>
+    		<td>
+    		    <input type="text" id="instituteChanger" value="${User.institution}"/>
+    		    <span id="instituteChangeaction"></span>
+    		</td>
     	</tr>
     	<tr>
-    		<th>Role</th>
-    		<td>${User.role}</td>
+    		<th>Permissions</th>
+    		<td>${User.role}:&nbsp 
+    		    <c:if test="${User.role == 'ADMIN'}">
+                    you have full administrative privileges.
+                </c:if>
+                <c:if test="${User.role == 'GUEST'}">
+                    to upload new models please <a href="${contextPath}/contact.html">contact us</a>.
+                </c:if>
+                <c:if test="${User.role == 'MODELER'}">
+                    to upload your own protocols please <a href="${contextPath}/contact.html">contact us</a>.
+                </c:if>    		
+    		</td>
     	</tr>
     	<tr>
-    		<th>Registered</th>
+    		<th>Registered since</th>
     		<td><time>${User.created}</time></td>
     	</tr>
     	<tr>
-    		<th>Send me Mails</th>
+    		<th>E-mail preferences</th>
     		<td><input type="checkbox" id="sendMailsCheckbox" <c:if test="${User.sendMails}">checked="checked"</c:if> > Inform me about finished experiments. <span id="sendMailsChangeaction"></span></td>
     	</tr>
     </table>
     
-    <h2>Change Your Password</h2>
+    <h2>Change your password</h2>
     <p>
-    	<label for="oldpassword">Old Password:</label><br/>
+    	<label for="oldpassword">Old password:</label><br/>
     	<input type="password" id="oldpassword" placeholder="old password"/>
     </p>
     <p>
-    	<label for="newpassword1">New Password:</label><br/>
+    	<label for="newpassword1">New password:</label><br/>
     	<input type="password" id="newpassword1" placeholder="new password"/>
     </p>
     <p>
-    	<label for="newpassword2">Please repeat the new Password:</label><br/>
+    	<label for="newpassword2">Please repeat the new password:</label><br/>
     	<input type="password" id="newpassword2" placeholder="repeat password"/>
     </p>
     <p>

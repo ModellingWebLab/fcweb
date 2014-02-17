@@ -25,12 +25,12 @@
 	    		<td>
 	    		<c:choose>
 						<c:when test="${User.id == cur.id}">
-							its you
+							it's you!
 						</c:when>
 						<c:otherwise>
 							<select class='role-chooser' id='user-role-${cur.id}'>
 								<option <c:if test="${cur.role == 'GUEST'}">selected="selected"</c:if> value="GUEST">guest</option>
-								<option <c:if test="${cur.role == 'MODELER'}">selected="selected"</c:if> value="MODELER">modeler</option>
+								<option <c:if test="${cur.role == 'MODELER'}">selected="selected"</c:if> value="MODELER">modeller</option>
 								<option <c:if test="${cur.role == 'ADMIN'}">selected="selected"</c:if> value="ADMIN">admin</option>
 							</select>
 						</c:otherwise>
