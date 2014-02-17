@@ -1,9 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}${entity.type} - " contextPath="${contextPath}" newExpModelName="${newExpModelName}" newExpProtocolName="${newExpProtocolName}">
-    <h1 id="entityname"><small>${entity.type}: </small>${entity.name}</h1>
+    <h1 id="entityname">
+        <small>${fn:toUpperCase(fn:substring(entity.type, 0, 1))}${fn:toLowerCase(fn:substring(entity.type, 1,fn:length(entity.type)))}: </small>
+        ${entity.name}
+    </h1>    
+    
 	<div class="suppl"><small>Created <time>${entity.created}</time> by <em>${entity.author}</em>. 
 	    <c:if test="${entity.author == User.nick || User.admin}">
 	    	Delete ${entity.type}: <a id='deleteEntity' title="delete all versions of this ${entity.type}"><img src="${contextPath}/res/img/delete.png" alt="delete all versions of this ${entity.type}" title="delete all versions of this ${entity.type}"/></a>

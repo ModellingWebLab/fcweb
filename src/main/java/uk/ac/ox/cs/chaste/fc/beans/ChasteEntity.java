@@ -30,7 +30,6 @@ public class ChasteEntity
 	private Timestamp created;
 	private HashMap<Integer, ChasteEntityVersion> versions;
 	private String type;
-	private String Type;
 	
 	public static class SortByName implements Comparator<ChasteEntity>
 	{
@@ -49,7 +48,6 @@ public class ChasteEntity
 		this.created = created;
 		this.author = author;
 		this.type = type;
-		this.Type = type.substring(0, 1).toUpperCase() + type.substring(1);
 		versions = new HashMap<Integer, ChasteEntityVersion> ();
 	}
 	
