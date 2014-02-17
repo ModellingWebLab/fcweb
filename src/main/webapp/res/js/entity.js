@@ -415,7 +415,7 @@ function displayVersion (id, showDefault)
 	}
 	//console.log(v);
 	var dv = doc.version;
-	dv.name.innerHTML = v.name + " ";
+	dv.name.innerHTML = "<small>Version: </small>" + v.name + " ";
 	
 	if (entityType != "experiment" && ROLE.isAllowedToCreateNewExperiment)
 	{
@@ -440,6 +440,7 @@ function displayVersion (id, showDefault)
 		createBatchImg.src = contextPath + "/res/img/batch.png";
 		createBatchImg.alt = "create batch jobs from this " + entityType;
 		createBatchLink.appendChild (createBatchImg);
+		createBatchLink.title = "create batch jobs from this " + entityType;
 		createBatchLink.href = contextPath + "/batch/" + entityType + "/" + convertForURL (v.name) + "/" + v.id;
 		dv.name.appendChild (createBatchLink);
 	}
@@ -513,7 +514,7 @@ function displayVersion (id, showDefault)
 	td.appendChild(document.createTextNode ("Type"));
 	tr.appendChild(td);
 	td = document.createElement("th");
-	td.colSpan = 2;
+	//td.colSpan = 2;
 	td.appendChild(document.createTextNode ("Size"));
 	tr.appendChild(td);
 	td = document.createElement("th");
@@ -537,12 +538,12 @@ function displayVersion (id, showDefault)
 		
 		var fsize = humanReadableBytes (file.size).split (" ");
 		td = document.createElement("td");
-		td.appendChild(document.createTextNode (fsize[0]));
-		td.setAttribute("class", "right");
+		td.appendChild(document.createTextNode (fsize[0] + " " + fsize[1]));
+//		td.setAttribute("class", "right");
 		tr.appendChild(td);
-		td = document.createElement("td");
-		td.appendChild(document.createTextNode (fsize[1]));
-		tr.appendChild(td);
+//		td = document.createElement("td");
+//		td.appendChild(document.createTextNode (fsize[1]));
+//		tr.appendChild(td);
 		td = document.createElement("td");
 		
 		if (!v.readme && file.name.toLowerCase () == "readme.md")
@@ -967,7 +968,7 @@ function displayFile (id, pluginName)
 		return;
 	}
     var df = doc.file;
-	df.name.innerHTML = f.name;
+	df.name.innerHTML = "<small>File: </small>" + f.name;
 	df.time.setAttribute ("datetime", f.created);
 	df.time.innerHTML = beautifyTimeStamp (f.created);
 	df.author.innerHTML = f.author;
