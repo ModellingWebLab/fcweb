@@ -132,7 +132,10 @@ function sortTable (plots)
 
 function highlightPlots (showDefault)
 {
-	//console.log (plotDescription);
+//	console.log (plotDescription);
+//	console.log(outputContents);
+    // Plot description has fields: Plot title,File name,Data file name,Line style,First variable id,Optional second variable id,Optional key variable id
+    // Output contents has fields: Variable id,Variable name,Units,Number of dimensions,File name,Type,Dimensions
 	for (var i = 1; i < plotDescription.length; i++)
 	{
 		if (plotDescription[i].length < 2)
@@ -171,32 +174,26 @@ function highlightPlots (showDefault)
 				{
 					f.yAxes = outputContents[output_idx][1] + ' (' + outputContents[output_idx][2] + ')';
 				}
+                if (plotDescription[i].length > 6 && plotDescription[i][6] == outputContents[output_idx][0])
+                {
+//                    console.log("Key exists : " + outputContents[output_idx][0]);
+//                    console.log(f);
+                    // TODO: This may not handle keys differing between experiments. Does this matter?
+                    for (var ent_idx=0; ent_idx<f.entities.length; ent_idx++)
+                    {
+                        var ent_f = f.entities[ent_idx].entityFileLink;
+                        ent_f.keyId = outputContents[output_idx][0];
+                        ent_f.keyName = outputContents[output_idx][1];
+                        ent_f.keyUnits = outputContents[output_idx][2];
+                        ent_f.keyFile = files[outputContents[output_idx][4].hashCode()].entities[ent_idx].entityFileLink;
+                    }
+                }
 			}
 			f.title = plotDescription[i][0];
 			f.linestyle = plotDescription[i][3];
 			
 			plotFiles.push (plotDescription[i][2]);
 		}
-		/*else
-		{
-			console.log ("no entry for " + files[plotDescription[i][2].hashCode ()]);
-			console.log (files);
-		}*/
-
-		//console.log ("files: ")
-		//console.log (version.files);
-		/*for (var f = 0; f < version.files.length; f++)
-		{
-			if (files[version.files[f]].name == plotDescription[i][2])
-			{
-				files[version.files[f]].xAxes = plotDescription[i][4];
-				files[version.files[f]].yAxes = plotDescription[i][5];
-				files[version.files[f]].title = plotDescription[i][0];
-				files[version.files[f]].linestyle = plotDescription[i][3];
-			}
-			//console.log ("file: ")
-			//console.log (files[version.files[f]]);
-		}*/
 	}
 	sortTable (plotFiles);
 }

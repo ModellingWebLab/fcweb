@@ -226,6 +226,20 @@ function transferLegendColours(datasets) {
  $('#' + legendDivId).remove();
 }
 
+/* Extract key data for a file if available. */
+function getKeyValues(file)
+{
+    var keyVals = [];
+    if (file.keyId)
+    {
+        var keyData = getCSVColumns(file.keyFile);
+        if (keyData.length > 0)
+            for (var i=0; i<keyData[0].length; i++)
+                keyVals.push(keyData[0][i]);
+    }
+    return keyVals;
+}
+
 function contentFlotPlot (file, div)
 {
     this.file = file;
@@ -257,17 +271,7 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
         var styleLinespointsOrPoints = isStyleLinespointsOrPoints(lineStyle);
         var csvData = styleLinespointsOrPoints ? getCSVColumnsNonDownsampled (thisFile) :
                                                  getCSVColumnsDownsampled (thisFile);
-
-        // Extract key data if available
-        var keyVals = [];
-        if (thisFile.keyId)
-        {
-            var keyData = getCSVColumns(thisFile.keyFile);
-            for (var i=0; i<keyData[0].length; i++)
-                keyVals.push(keyData[0][i]);
-            //console.log(keyData);
-        }
-        //console.log(keyVals);
+        var keyVals = getKeyValues(thisFile);
 
         var datasets = {};
         for (var i = 1; i < csvData.length; i++)
@@ -360,19 +364,32 @@ function contentFlotPlotComparer (file, div)
     div.appendChild (document.createTextNode ("loading"));
     div.setAttribute ("class", "flotDiv");
     this.gotFileContents = 0;
+    this.gotKeyContents = 0;
+    this.expectedKeyContents = -1;
     this.ok = true;
 };
 
 contentFlotPlotComparer.prototype.getContentsCallback = function (succ)
 {
-    //console.log ("getContentsCallback : " + succ + " -> so far: " + this.gotFileContents + " of " + this.file.entities.length);
+//    console.log ("getContentsCallback : " + succ + " -> so far: " + this.gotFileContents + " of " + this.file.entities.length);
     if (!succ)
         this.ok = false;
-    
-    this.gotFileContents++;
-    
-    if (this.gotFileContents >= this.file.entities.length)
-        this.showContents ();
+
+    if (this.expectedKeyContents > 0)
+    {
+//        console.log("getKey: " + succ + " so far: " + this.gotKeyContents + " of " + this.expectedKeyContents);
+        // We've loaded the main data, and are now loading plot key data
+        this.gotKeyContents++;
+        if (this.gotKeyContents >= this.expectedKeyContents)
+            this.showContents();
+    }
+    else
+    {
+        // We're loading the main plot data
+        this.gotFileContents++;
+        if (this.gotFileContents >= this.file.entities.length)
+            this.showContents ();
+    }
 };
 
 contentFlotPlotComparer.prototype.showContents = function ()
@@ -386,6 +403,34 @@ contentFlotPlotComparer.prototype.showContents = function ()
         thisDiv.appendChild (document.createTextNode ("failed to load the contents"));
     else
     {
+        // Check whether we need to load plot key data
+        if (this.expectedKeyContents == -1)
+        {
+            this.expectedKeyContents = 0;
+            // First figure out how many keys we expect
+            for (var i = 0; i < thisFile.entities.length; i++)
+            {
+                var f = thisFile.entities[i].entityFileLink;
+                if (f.keyId && !f.keyFile.contents)
+                {
+                    this.expectedKeyContents++;
+//                    console.log("Found key " + f.keyId);
+                }
+            }
+//            console.log("Expecting " + this.expectedKeyContents + " keys");
+            // Then set them loading and wait!
+            for (var i = 0; i < thisFile.entities.length; i++)
+            {
+                var f = thisFile.entities[i].entityFileLink;
+                if (f.keyId && !f.keyFile.contents)
+                {
+                    getFileContent(f.keyFile, this);
+                }
+            }
+            if (this.expectedKeyContents > 0)
+                return;
+        }
+
         this.setUp = true;
 
         var lineStyle = thisFile.linestyle;
@@ -426,6 +471,7 @@ contentFlotPlotComparer.prototype.showContents = function ()
             var entityId = eachCSVData.entity.id;
             var fileSig = eachCSVData.file.sig;
             var csvData = eachCSVData.data;
+            var keyVals = getKeyValues(eachCSVData.file);
 
             //var paragraph = $('<p />').html(eachCSVData.entity.name).css('font-weight', 'bold');
             //choicesContainer.append(paragraph);
@@ -437,14 +483,18 @@ contentFlotPlotComparer.prototype.showContents = function ()
                     curData.push ([csvData[i][k].x, csvData[i][k].y]);
 
                 var key = entityId + "-" + fileSig + "-" + i;
-                var label = entityName + " line " + i;
-                datasets[key] = {label : label, data: curData, color: curColor};
+                var label = entityName;
+                if (keyVals.length == csvData.length)
+                    label += ", " + eachCSVData.file.keyName + " = " + keyVals[i] + " " + eachCSVData.file.keyUnits
+                else if (csvData.length > 2)
+                    label += " line " + i;
+                datasets[key] = {label: label, data: curData, color: curColor};
 
                 var colouredSpan = $('<span />').attr('id', colouredSpanIdPrefix + curColor)
                                                 .addClass('flotColour')
                                                 .html('&nbsp;&nbsp;');
                 var inputId = 'id' + key;
-                var newLabel = $('<label />').attr('for', inputId).html('line ' + i + ':&nbsp;' + entityName);
+                var newLabel = $('<label />').attr('for', inputId).html(label);
                 var newInput = $('<input />').attr({ 'type': 'checkbox',
                                                      'name': key,
                                                      'checked': 'checked',
