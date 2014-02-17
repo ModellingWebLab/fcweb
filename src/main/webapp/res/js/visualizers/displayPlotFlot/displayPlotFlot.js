@@ -1,4 +1,5 @@
 var choicesDivId = 'choices';
+var resetButtonDivId = 'reset-button-div'
 var colouredSpanIdPrefix = 'span';
 var legendDivId = 'legend';
 var plottedGraph = {};
@@ -31,12 +32,16 @@ function createAppendLegendDiv(parentDiv) {
 
 /* create and append a reset button to the div element */
 function createAppendResetButton(parentDiv) {
+    var resetButtonDiv = document.createElement("div");
+    resetButtonDiv.id = resetButtonDivId;
+    parentDiv.appendChild(resetButtonDiv);
+	
     var resetButton = document.createElement('input');
     resetButton.id = resetButtonId;
-    resetButton.title = 'Reset graph based on currently selected datasets';
+    resetButton.title = 'Reset graph zoom based on currently selected datasets';
     resetButton.type = 'button';
-    resetButton.value = 'reset graph';
-    parentDiv.appendChild (resetButton);
+    resetButton.value = 'reset zoom';
+    resetButtonDiv.appendChild (resetButton);
 }
 
 /* create and append a select toggler to the div element */
@@ -48,7 +53,7 @@ function createAppendSelectToggler(parentDiv) {
     
     var label = document.createElement('label')
     label.setAttribute('for', selectTogglerId);
-    label.innerHTML = 'select all';
+    label.innerHTML = 'select all ';
     parentDiv.appendChild(label);
 
     var selectToggler = $('#' + selectTogglerId);

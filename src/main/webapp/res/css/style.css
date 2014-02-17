@@ -575,6 +575,13 @@ span.flotColour
 	vertical-align:middle;
 }
 
+#reset-button-div
+{
+    float: right;
+    text-align: right;
+    width: 150px;
+}
+
 div.flotDiv
 {
 	overflow: hidden;
