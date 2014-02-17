@@ -69,7 +69,7 @@
 					<li><a href="${contextPath}/about.html">About</a></li>
 					<c:choose>
 						<c:when test="${user != null && user.authorized}">
-							<li><a href="${contextPath}/myfiles.html">${user.nick}</a>
+							<li id="usernavbar"><a href="${contextPath}/myfiles.html">${user.nick}</a>
 								<ul>
 									<li><a href="${contextPath}/myfiles.html">My files</a></li>
 									<li><a href="${contextPath}/myaccount.html">Account</a></li>

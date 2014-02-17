@@ -64,17 +64,18 @@ nav ul
 {
 display: inline;
 padding: 10px;
-}*/
+}
 .navbar li a:before {
 	content: "\00BB";
 }
-
+*/
 .navbar li ul li a:before {
-	content: "";
+	content: '\00BB\00A0';
 }
 
+
 .navbar {
-	height: 50px;
+	height: 60px;
 	padding: 0;
 	margin: 0;
 	position: absolute;
@@ -85,9 +86,9 @@ padding: 10px;
 }
 
 .navbar li {
-	padding: 20px;
+	/*padding: 20px;*/
 	height: auto;
-	/*width: 70px; Each menu item is 80px wide */
+	/*width: 100px; Each menu item is 80px wide */
 	float: left; /* This lines up the menu items horizontally */
 	text-align: center; /* All text is placed in the center of the box */
 	list-style: none;
@@ -98,6 +99,10 @@ padding: 10px;
 			margin: 0;*/
 	/*background-color: #366b82;*/
 	margin-right: 20px;
+}
+
+#usernavbar {
+    min-width: 100px;
 }
 
 .navbar a, .navbar a:hover, .navbar a:active {
@@ -122,7 +127,7 @@ padding: 10px;
 .navbar li ul {
 	display: none; /* Hides the drop-down menu */
 	height: auto;
-	width: 80px;
+	width: 100px;
 	margin: 0; /* Aligns drop-down box underneath the menu item */
 	padding: 0; /* Aligns drop-down box underneath the menu item */
 }
@@ -137,16 +142,17 @@ padding: 10px;
 	/* Displays the drop-down box when the menu item is hovered over */
 }
 
-.navbar li ul li { /*background-color: #54879d;*/
-	border-left: 1px solid #263e6a;
+.navbar li ul li { 
+    background-color: #ffffff;
+	/*border-left: 1px solid #263e6a;*/
 	padding: 0;
 }
 
 .navbar li ul li a {
 	/*border-left: 1px solid #1f5065; 
-		border-right: 1px solid #1f5065; 
-		border-top: 1px solid #74a3b7; 
-		border-bottom: 1px solid #1f5065; */
+    border-right: 1px solid #1f5065; 
+    border-top: 1px solid #74a3b7; 
+    border-bottom: 1px solid #1f5065; */
 	
 }
 
