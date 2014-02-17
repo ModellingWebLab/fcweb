@@ -53,7 +53,7 @@ function createAppendSelectToggler(parentDiv) {
     
     var label = document.createElement('label')
     label.setAttribute('for', selectTogglerId);
-    label.innerHTML = 'select all ';
+    label.innerHTML = 'select all';
     parentDiv.appendChild(label);
 
     var selectToggler = $('#' + selectTogglerId);
