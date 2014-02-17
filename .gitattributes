@@ -1,0 +1,6 @@
+# Specify which file extensions represent text files, and should have normalised line endings
+*.css text
+*.js text
+*.java text
+*.jsp text
+*.xml text

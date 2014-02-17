@@ -326,7 +326,6 @@ tr:nth-child(1)
 #accounttable
 {
 	font-size:.8em;
-	text-align: left;
 }
 
 #experimentlist li.experiment-RUNNING,
