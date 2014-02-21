@@ -9,20 +9,22 @@
         ${entity.name}
     </h1>    
     
-	<div class="suppl"><small>Created <time>${entity.created}</time> by <em>${entity.author}</em>. 
-	    <c:if test="${entity.author == User.nick || User.admin}">
-	    	Delete ${entity.type}: <a id='deleteEntity' title="delete all versions of this ${entity.type}"><img src="${contextPath}/res/img/delete.png" alt="delete all versions of this ${entity.type}" title="delete all versions of this ${entity.type}"/></a>
-	    </c:if>
-	    </small> 
-		<c:if test="${User.allowedToForceNewExperiment && entity.type == 'experiment'}">
-			<a id="rerunExperiment"><img src="${contextPath}/res/img/refresh.png" alt="rerun experiment" title="rerun experiment"/></a> <span id="rerunExperimentAction"></span>
-		</c:if>
-		<c:if test="${entity.type == 'experiment'}">
-			<br/>corresponding model: 
-			<a href="${contextPath}/${correspondingModel.entity.type}/${correspondingModel.entity.url}/${correspondingModel.entity.id}/${correspondingModel.url}/${correspondingModel.id}">${correspondingModel.name}</a>
-			&mdash; corresponding protocol: 
-			<a href="${contextPath}/${correspondingProtocol.entity.type}/${correspondingProtocol.entity.url}/${correspondingProtocol.entity.id}/${correspondingProtocol.url}/${correspondingProtocol.id}">${correspondingProtocol.name}</a>
-		</c:if>
+	<div class="suppl">
+	    <small>Created <time>${entity.created}</time> by <em>${entity.author}</em>. 
+    	    <c:if test="${entity.author == User.nick || User.admin}">
+    	    	Delete ${entity.type}: <a id='deleteEntity' title="delete all versions of this ${entity.type}"><img src="${contextPath}/res/img/delete.png" alt="delete all versions of this ${entity.type}" title="delete all versions of this ${entity.type}"/></a>
+    	    </c:if>
+    	    
+    		<c:if test="${User.allowedToForceNewExperiment && entity.type == 'experiment'}">
+    			<a id="rerunExperiment"><img src="${contextPath}/res/img/refresh.png" alt="rerun experiment" title="rerun experiment"/></a> <span id="rerunExperimentAction"></span>
+    		</c:if>
+    		<c:if test="${entity.type == 'experiment'}">
+    			<br/>Corresponding model: 
+    			<a href="${contextPath}/${correspondingModel.entity.type}/${correspondingModel.entity.url}/${correspondingModel.entity.id}/${correspondingModel.url}/${correspondingModel.id}">${correspondingModel.name}</a>
+    			&amp; protocol: 
+    			<a href="${contextPath}/${correspondingProtocol.entity.type}/${correspondingProtocol.entity.url}/${correspondingProtocol.entity.id}/${correspondingProtocol.url}/${correspondingProtocol.id}">${correspondingProtocol.name}</a>
+    		</c:if>
+		</small> 
 	</div>
 	
     
@@ -68,9 +70,14 @@
     </div>
     
     <div id="entityversion">
-    	<div class="closebtn"><small><a id="entityversionclose">&otimes; close / see  version table</a></small></div>
+    	<div class="closebtn"><small><a id="entityversionclose">&otimes; close / see version table</a></small></div>
     	<h2 id="entityversionname"></h2>
-	    <div class="suppl"><small>Created <time id="entityversiontime"></time> by <em id="entityversionauthor"></em>.
+	    <div class="suppl"><small>
+	    <c:choose>
+    	    <c:when test="${entity.type == 'experiment'}">Run</c:when>
+    	    <c:otherwise>Created</c:otherwise>
+	    </c:choose>
+	    <time id="entityversiontime"></time> by <em id="entityversionauthor"></em>.
 		    <c:if test="${entity.author == User.nick && entity.type != 'experiment'}">
 		    	Change visibility: 
 		    	<select id="versionVisibility">
@@ -81,7 +88,7 @@
 		    	<span id="versionVisibilityAction"></span>
 		    </c:if>
 		    <c:if test="${entity.author == User.nick || User.admin}">
-		    	delete version: <a id='deleteVersion'><img src="${contextPath}/res/img/delete.png" alt="delete version" title="delete this version of the ${entity.type}" /></a>
+		    	Delete version: <a id='deleteVersion'><img src="${contextPath}/res/img/delete.png" alt="delete version" title="delete this version of the ${entity.type}" /></a>
 		    </c:if>
 		    </small>
 	    </div>
