@@ -4,13 +4,6 @@ var modelMapper = {};
 var protocolMapper = {};
 var lock = true;
 
-/*var colorMapper = {
-		"RUNNING": "#86b6f1",
-		"SUCCESS": "#05db00",
-		"FAILED": "#db0000",
-		"INAPPRORIATE": "#f1c886"
-};*/
-
 function submitNewExperiment (jsonObject, notificationElement, td)
 {
 	if (notificationElement)
@@ -45,7 +38,7 @@ function submitNewExperiment (jsonObject, notificationElement, td)
     	console.log (td);
     	
     	if (td)
-    		td.removeClass ("experiment-RUNNING").removeClass ("experiment-INAPPRORIATE").removeClass ("experiment-FAILED").removeClass ("experiment-SUCCESS");
+    		td.removeClass ("experiment-RUNNING").removeClass ("experiment-INAPPRORIATE").removeClass ("experiment-FAILED").removeClass ("experiment-PARTIAL").removeClass ("experiment-SUCCESS");
     	
         if(xmlhttp.status == 200)
         {
@@ -183,10 +176,6 @@ function drawMatrix (matrix)
 		{
 			var td = document.createElement("td");
 			tr.appendChild (td);
-			/*if (mat[row][col].experiment)
-				ctx.fillStyle = colorMapper[mat[row][col].experiment.latestResult];
-			else
-				ctx.fillStyle="#fff";*/
 			
 			//console.log ("row " + row + " col " + col);
 			
@@ -226,12 +215,6 @@ function drawMatrix (matrix)
 				td.setAttribute("class", "experiment experiment-"+mat[row][col].experiment.latestResult);
 			else
 				td.setAttribute("class", "experiment experiment-NONE");
-			
-
-			//td.setAttribute("rel", "test123|test");
-			//td.setAttribute("rel", "test123");
-			//td.setAttribute("title", "test123");
-			
 
 			var titleText = "";
 

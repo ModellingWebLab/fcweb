@@ -631,9 +631,9 @@ public class FileTransfer extends WebModule
 	    if (res.trim ().equals (signature + " succ"))
 	    	return new SubmitResult (true, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_RUNNING);
 	    if (res.trim ().startsWith (signature + " inappropriate"))
-	    {
 	    	return new SubmitResult (false, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_INAPPRORIATE);
-	    }
+	    if (res.trim ().startsWith (signature + " partial"))
+	    	return new SubmitResult (false, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_PARTIAL);
 	    if (res.trim ().startsWith (signature))
 	    {
 	    	LOGGER.error ("Chaste backend answered with error: " + res);

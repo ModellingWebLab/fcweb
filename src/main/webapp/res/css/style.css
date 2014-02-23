@@ -346,13 +346,19 @@ tr:nth-child(1)
 #entitydetails p.experiment-INAPPRORIATE,
 .experiment-INAPPRORIATE
 {
-	background-color:#f1d39a;
+	background-color:#bdbdbd;
 }
 #experimentlist li.experiment-FAILED,
 #entitydetails p.experiment-FAILED,
 .experiment-FAILED
 {
 	background-color:#ffe0e0;
+}
+#experimentlist li.experiment-PARTIAL,
+#entitydetails p.experiment-PARTIAL,
+.experiment-PARTIAL
+{
+    background-color:#f7be81;
 }
 #matrixTable .experiment-SUCCESS
 {
@@ -534,11 +540,15 @@ li.entityviz-PRIVATE
 }
 .matrixTable .experiment-INAPPRORIATE
 {
-	background-color:#f1c886;
+	background-color:#bdbdbd;
 }
 .matrixTable .experiment-FAILED
 {
 	background-color:#db0000;
+}
+.matrixTable .experiment-PARTIAL
+{
+    background-color:#ff8000;
 }
 .matrixTable .experiment-SUCCESS
 {

@@ -37,6 +37,7 @@
     				<span class="experiment-RUNNING">running</span>
     				<span class="experiment-INAPPRORIATE">inappropriate</span>
     				<span class="experiment-FAILED">failed</span>
+    				<span class="experiment-PARTIAL">partial failure</span>
     				<span class="experiment-SUCCESS">success</span>
     			</p>
     		</c:if>

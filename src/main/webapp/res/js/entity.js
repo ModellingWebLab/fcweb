@@ -1088,7 +1088,7 @@ function render ()
 	{
 		if (url.length > 0 && url[0] == "latest")
 		{
-			//document.getElementById("entityversionlist")
+			// The 'return false' means we only follow the first matching link
 			$(".entityversionlink").each(function (){nextPage ($(this).attr('href')); return false;});
 		}
 		doc.entity.version.style.display = "none";

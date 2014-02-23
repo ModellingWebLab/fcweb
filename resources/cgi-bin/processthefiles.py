@@ -69,7 +69,15 @@ output_zip.write(child_stdout_name, 'stdout.txt')
 for ofile in output_files:
     if os.path.isfile(ofile):
         output_zip.write(ofile, os.path.basename(ofile))
-outcome = 'success' if 'success' in output_zip.namelist() else 'failed'
+if 'success' in output_zip.namelist():
+    outcome = 'success'
+else:
+    for filename in output_zip.namelist():
+        if filename.endswith('gnuplot_data.csv'):
+            outcome = 'partial' # Some output plots created => might be useful
+            break
+    else:
+        outcome = 'failed' # No outputs created => total failure
 # Add a manifest if Chaste didn't create one
 if 'manifest.xml' not in output_zip.namelist():
     manifest = open(os.path.join(temp_dir, 'manifest.xml'), 'w')

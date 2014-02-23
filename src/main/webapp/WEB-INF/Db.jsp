@@ -23,6 +23,7 @@
                 <td class="center">not run</td>
                 <td class="experiment-RUNNING center">running</td>
                 <td class="experiment-SUCCESS center">ran successfully</td>
+                <td class="experiment-PARTIAL center">partially ran</td>
                 <td class="experiment-FAILED center">failed to complete</td>
                 <td class="experiment-INAPPRORIATE center">inappropriate</td>
             </tr>
