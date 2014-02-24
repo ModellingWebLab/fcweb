@@ -419,22 +419,7 @@ function displayVersion (id, showDefault)
 	
 	if (entityType != "experiment" && ROLE.isAllowedToCreateNewExperiment)
 	{
-		/*var createExpLink = document.createElement("a");
-		var createExpImg = document.createElement("img");
-		createExpImg.src = contextPath + "/res/img/create-experiment-small.png";
-		createExpImg.alt = "create experiment from this " + entityType;
-		createExpLink.addEventListener("click", function (ev) {
-			if (entityType == "model")
-				newExperimentModel (v.id, v.name);
-			else
-				newExperimentProtocol (v.id, v.name);
-	    	}, true);
-		createExpLink.appendChild (createExpImg);
-		createExpLink.setAttribute ("class", "pointer");
-		dv.name.appendChild (createExpLink);
-		
-		dv.name.appendChild (document.createTextNode (" "));*/
-		
+	    // Show link to create new experiments using this model/protocol
 		var createBatchLink = document.createElement("a");
 		var createBatchImg = document.createElement("img");
 		createBatchImg.src = contextPath + "/res/img/batch.png";
@@ -447,9 +432,8 @@ function displayVersion (id, showDefault)
 	
 	if (dv.visibility)
 	{
-		//var new_element = dv.visibility.cloneNode(true);
-		//dv.visibility.parentNode.replaceChild (new_element, dv.visibility);
-		dv.visibility = removeListeners (dv.visibility);//new_element;
+	    // Show chooser for changing entity visibility
+		dv.visibility = removeListeners (dv.visibility);
 		
 		document.getElementById("visibility-" + v.visibility).selected=true;
 		
@@ -462,21 +446,11 @@ function displayVersion (id, showDefault)
 		    	visibility: dv.visibility.options[dv.visibility.selectedIndex].value
 		    }, dv.visibilityAction);
 	    }, true);
-/*
-		if (dv.visibility)
-		{
-			dv.visibility.addEventListener("change", function () {
-				console.log (curVersionId);
-				console.log (dv.visibility.options[dv.visibility.selectedIndex].value);
-		    }, true);
-		}*/
 	}
 	
 	if (dv.deleteBtn)
 	{
-		//var new_element = dv.deleteBtn.cloneNode(true);
-		//dv.deleteBtn.parentNode.replaceChild (new_element, dv.deleteBtn);
-		dv.deleteBtn = removeListeners (dv.deleteBtn); //new_element;
+		dv.deleteBtn = removeListeners (dv.deleteBtn);
 		
 		dv.deleteBtn.addEventListener("click", function () {
 			if (confirm("Are you sure to delete this version? (including all files and experiments associated to it)"))
@@ -486,9 +460,6 @@ function displayVersion (id, showDefault)
 			    	version: v.id
 				});
 			}
-				//console.log ("deleting " + v.id);
-			/*else
-				console.log ("not deleting " + v.id);*/
 		});
 	}
 	
