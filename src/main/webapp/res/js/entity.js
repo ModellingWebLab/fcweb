@@ -239,6 +239,7 @@ function highlightPlots (version, showDefault)
 		if (row)
 		{
 			row.setAttribute("class", "highlight-plot");
+			// Show the first plot defined by the protocol using flot, if there is one available
 			if (i == 1 && showDefault)
 			{
 				var viz = document.getElementById ("filerow-" + plotDescription[i][2] + "-viz-displayPlotFlot");
@@ -816,9 +817,7 @@ function registerFileDisplayer (elem)
 		if (ev.which == 1)
 		{
 			ev.preventDefault();
-			//doc.file.close.href = closeurl;
 			nextPage (elem.href);
-			//displayFile (fileid);
 		}
     	}, true);
 }
@@ -829,9 +828,7 @@ function registerVersionDisplayer (elem)
 		if (ev.which == 1)
 		{
 			ev.preventDefault();
-			//doc.file.close.href = closeurl;
 			nextPage (elem.href);
-			//displayFile (fileid);
 		}
     	}, true);
 }
