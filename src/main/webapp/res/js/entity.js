@@ -397,6 +397,7 @@ function parseReadme (file, version)
 				{
 					version.readme = converter.makeHtml (file.contents);
 					doc.version.readme.innerHTML = version.readme;
+					doc.version.readme.style.display = "block";
 				}
 			}
 	};
@@ -662,7 +663,12 @@ function displayVersion (id, showDefault)
 	
 	removeChildren (dv.readme);
 	if (v.readme)
+	{
 		dv.readme.innerHTML = v.readme;
+        dv.readme.style.display = "block";
+	}
+	else
+	    dv.readme.style.display = "none";
 	if (v.plotDescription)
 		highlightPlots (v, showDefault);
 	
