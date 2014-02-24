@@ -239,23 +239,14 @@ public class FileTransfer extends WebModule
 	
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 
-	private final static String buildMailBody (String nick, String result)
+	private final static String buildMailBody (String nick, String result, String msg)
 	{
-		return "Hi " + nick + ",\n\nthe experiment you submitted is finished.\nReturn message: "
-	+result
-	+"\nHave a look at your files: "+Tools.getThisUrl ()+"myfiles.html"
-	+ "\n\nSincerely,\nChaste dev-team";
+		return "Hi " + nick + ",\n\nthe experiment you submitted is finished.\n"
+			+"Result: "+result+"\n"
+			+"Return message: "+msg+"\n"
+			+"\nHave a look at your files: "+Tools.getThisUrl ()+"myfiles.html"
+			+ "\n\nSincerely,\nChaste dev-team";
 	}
 	
 	
@@ -314,9 +305,14 @@ public class FileTransfer extends WebModule
 				String returntype = request.getParameter ("returntype");
 				if (returntype == null)
 					returntype = "success";
-				boolean returnType = returntype.trim ().equals ("success");
+				returntype = returntype.trim ();
+				String exptStatus = ChasteExperimentVersion.STATUS_FAILED;
+				if (returntype.equals ("success"))
+					exptStatus = ChasteExperimentVersion.STATUS_SUCCESS;
+				if (returntype.equals ("partial"))
+					exptStatus = ChasteExperimentVersion.STATUS_PARTIAL;
 				
-				LOGGER.debug ("supp: " + returnmsg + " -- " + returntype + " --> " + returnType);
+				LOGGER.debug ("supp: " + returnmsg + " -- " + returntype + " --> " + exptStatus);
 				
 				
 				user.setRole (preRole);
@@ -325,7 +321,7 @@ public class FileTransfer extends WebModule
 				try
 				{
 					if (u.isSendMails ())
-						Tools.sendMail (u.getMail (), u.getNick (), "Chaste Experiment finished", buildMailBody (u.getNick (), returnmsg));
+						Tools.sendMail (u.getMail (), u.getNick (), "Chaste Experiment finished", buildMailBody (u.getNick (), returntype, returnmsg));
 				}
 				catch (MessagingException e)
 				{
@@ -424,7 +420,7 @@ public class FileTransfer extends WebModule
 							}
 						}
 						
-						exp.updateExperiment (expMgmt, returnmsg, returnType ? ChasteExperimentVersion.STATUS_SUCCESS : ChasteExperimentVersion.STATUS_FAILED);
+						exp.updateExperiment (expMgmt, returnmsg, exptStatus);
 						answer.put ("experiment", "ok");
 					}
 					catch (Exception e)
@@ -449,7 +445,7 @@ public class FileTransfer extends WebModule
 				{
 					// delete from db
 					// inform the user -> failed/succeeded
-					exp.updateExperiment (expMgmt, returnmsg + " (backend returned no archive)", returnType ? ChasteExperimentVersion.STATUS_SUCCESS : ChasteExperimentVersion.STATUS_FAILED);
+					exp.updateExperiment (expMgmt, returnmsg + " (backend returned no archive)", exptStatus);
 					
 					//TODO write to db
 					answer.put ("error", "no archive found");
@@ -468,10 +464,6 @@ public class FileTransfer extends WebModule
 		
 		if (!user.isAuthorized () || !user.isAllowedToUpload ())
 			throw new ChastePermissionException ("not allowed.");
-		
-		// TODO: delete
-		/*if (Math.random () > 0.5)
-			throw new IOException ("you just ran into a random fail");*/
 		
 		try
 		{
@@ -627,13 +619,12 @@ public class FileTransfer extends WebModule
 	    post.setEntity(myEntity);
 	    HttpResponse response = client.execute(post);
 	    String res = getContent (response);
+	    // Check whether we know immediately on submission (i.e. before running) that there's an issue
 	    LOGGER.debug ("response: " + res);
 	    if (res.trim ().equals (signature + " succ"))
 	    	return new SubmitResult (true, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_RUNNING);
 	    if (res.trim ().startsWith (signature + " inappropriate"))
 	    	return new SubmitResult (false, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_INAPPRORIATE);
-	    if (res.trim ().startsWith (signature + " partial"))
-	    	return new SubmitResult (false, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_PARTIAL);
 	    if (res.trim ().startsWith (signature))
 	    {
 	    	LOGGER.error ("Chaste backend answered with error: " + res);
