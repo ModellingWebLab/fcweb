@@ -357,9 +357,15 @@ function switchPage (page)
 	for (var i = 0; i < pages.length; i++)
 	{
 		if (pages[i] == page)
+		{
 			document.getElementById(pages[i] + "Tab").style.display = "block";
+			$("#" + pages[i] + "chooser").addClass("selected");
+		}
 		else
+		{
 			document.getElementById(pages[i] + "Tab").style.display = "none";
+			$("#" + pages[i] + "chooser").removeClass("selected");
+		}
 	}
 }
 function registerSwitchPagesListener (btn, page)
