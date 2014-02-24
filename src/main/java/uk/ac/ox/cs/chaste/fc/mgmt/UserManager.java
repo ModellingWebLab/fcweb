@@ -20,10 +20,6 @@ import uk.ac.ox.cs.chaste.fc.beans.User;
  */
 public class UserManager
 {
-	public static final String ROLE_ADMIN = "ADMIN";
-	public static final String ROLE_GUEST = "GUEST";
-	public static final String ROLE_MODELER = "MODELER";
-	
 	public HashMap<Integer, User> knownUsers;
 	private Notifications note;
 	private DatabaseConnector db;

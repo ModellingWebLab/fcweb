@@ -203,7 +203,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `acronym` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `institution` text COLLATE utf8_unicode_ci NOT NULL,
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `role` enum('ADMIN','GUEST','READER','MODELER') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'GUEST',
+  `role` enum('ADMIN','GUEST','MODELER','PROTO_AUTHOR') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'GUEST',
   `cookie` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
   `givenName` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `familyName` varchar(100) COLLATE utf8_unicode_ci NOT NULL,

@@ -20,6 +20,7 @@ import uk.ac.ox.cs.chaste.fc.mgmt.Tools;
 public class ChasteExperimentVersion
 extends ChasteEntityVersion
 {
+	// Note that these must match the `status` fields in the `experimentversions` table
 	public static final String STATUS_RUNNING = "RUNNING";
 	public static final String STATUS_SUCCESS = "SUCCESS";
 	public static final String STATUS_PARTIAL = "PARTIAL";

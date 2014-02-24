@@ -24,9 +24,11 @@ public class User
 	private static final String COOKIE_NAME = "ChasteUser";
 	private static final String SESSION_ATTR = "ChasteUser";
 
+	// Note that these must match the options for the `role` column in the `user` table
 	public static final String ROLE_ADMIN = "ADMIN";
-	public static final String ROLE_GUEST = "GUEST";
+	public static final String ROLE_PROTO_AUTHOR = "PROTO_AUTHOR";
 	public static final String ROLE_MODELER = "MODELER";
+	public static final String ROLE_GUEST = "GUEST";
 	
 	private String givenName;
 
@@ -352,42 +354,42 @@ public class User
 	
 	public boolean isAllowedToCreateNewExperiment ()
 	{
-		return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_ADMIN));
+		return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_PROTO_AUTHOR) || role.equals (ROLE_ADMIN));
 	}
 	
 	public boolean isAllowedToDeleteEntityVersion (ChasteEntityVersion version)
 	{
-		return isAuthorized () && ((role.equals (ROLE_MODELER) && version.getAuthor ().getId () == id) || role.equals (ROLE_ADMIN));
+		return isAuthorized () && (((role.equals (ROLE_MODELER) || role.equals (ROLE_PROTO_AUTHOR)) && version.getAuthor ().getId () == id) || role.equals (ROLE_ADMIN));
 	}
 	
 	public boolean isAllowedToDeleteEntity (ChasteEntity entity)
 	{
-		return isAuthorized () && ((role.equals (ROLE_MODELER) && entity.getAuthor ().getId () == id) || role.equals (ROLE_ADMIN));
+		return isAuthorized () && (((role.equals (ROLE_MODELER) || role.equals (ROLE_PROTO_AUTHOR)) && entity.getAuthor ().getId () == id) || role.equals (ROLE_ADMIN));
 	}
 	
 	public boolean isAllowedCreateModel ()
 	{
-		return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_ADMIN));
+		return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_PROTO_AUTHOR) || role.equals (ROLE_ADMIN));
 	}
 	
 	public boolean isAllowedCreateProtocol ()
 	{
-		return isAuthorized () && role.equals (ROLE_ADMIN);
+		return isAuthorized () && (role.equals (ROLE_PROTO_AUTHOR) || role.equals (ROLE_ADMIN));
 	}
 	
 	public boolean isAllowedCreateEntity ()
 	{
-		return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_ADMIN));
+		return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_PROTO_AUTHOR) || role.equals (ROLE_ADMIN));
 	}
 	
 	public boolean isAllowedCreateEntityVersion ()
 	{
-		return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_ADMIN));
+		return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_PROTO_AUTHOR) || role.equals (ROLE_ADMIN));
 	}
 	
 	public boolean isAllowedToUpload ()
 	{
-		return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_ADMIN));
+		return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_PROTO_AUTHOR) || role.equals (ROLE_ADMIN));
 	}
 	
 	public boolean isAllowedToSeeEntityVersion (ChasteEntityVersion version)
@@ -397,7 +399,7 @@ public class User
 		if (vis.equals (ChasteEntityVersion.VISIBILITY_PUBLIC))
 			return true;
 		if (vis.equals (ChasteEntityVersion.VISIBILITY_RESTRICTED))
-			return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_ADMIN));
+			return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_PROTO_AUTHOR) || role.equals (ROLE_ADMIN));
 		
 		return isAuthorized () && version.getAuthor ().getId () == id;
 	}

@@ -18,6 +18,7 @@ import uk.ac.ox.cs.chaste.fc.mgmt.Tools;
  */
 public class ChasteEntityVersion
 {
+	// Note that these must match the `visibility` fields in the `*versions` tables
 	public static final String VISIBILITY_PRIVATE = "PRIVATE";
 	public static final String VISIBILITY_RESTRICTED = "RESTRICTED";
 	public static final String VISIBILITY_PUBLIC = "PUBLIC";

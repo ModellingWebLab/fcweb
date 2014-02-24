@@ -221,8 +221,8 @@ public class Register extends WebModule
 			return false;
 		}
 
-		Matcher regMatcher   = PATTERN_NICK.matcher(nick);
-    if(!regMatcher.matches())
+		Matcher regMatcher = PATTERN_NICK.matcher(nick);
+		if (!regMatcher.matches())
 		{
 			obj.put ("response", false);
 			obj.put ("responseText", "nickname has to start with [A-Za-z0-9] and only the following characters are allowed: [_A-Za-z0-9-]");

@@ -85,12 +85,14 @@ public class Admin extends WebModule
 				throw new IOException ("not allowed to change your own rule");
 			
 			Object role = querry.get ("role");
-			if (role.equals (UserManager.ROLE_ADMIN))
-				userMgmt.updateUserRole (id, UserManager.ROLE_ADMIN);
-			else if (role.equals (UserManager.ROLE_MODELER))
-				userMgmt.updateUserRole (id, UserManager.ROLE_MODELER);
-			else if (role.equals (UserManager.ROLE_GUEST))
-				userMgmt.updateUserRole (id, UserManager.ROLE_GUEST);
+			if (role.equals (User.ROLE_ADMIN))
+				userMgmt.updateUserRole (id, User.ROLE_ADMIN);
+			else if (role.equals (User.ROLE_PROTO_AUTHOR))
+				userMgmt.updateUserRole (id, User.ROLE_PROTO_AUTHOR);
+			else if (role.equals (User.ROLE_MODELER))
+				userMgmt.updateUserRole (id, User.ROLE_MODELER);
+			else if (role.equals (User.ROLE_GUEST))
+				userMgmt.updateUserRole (id, User.ROLE_GUEST);
 			else
 				throw new IOException ("unknown rule");
 			

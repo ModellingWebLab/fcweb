@@ -22,16 +22,19 @@
     	</tr>
     	<tr>
     		<th>Permissions</th>
-    		<td>${User.role}:&nbsp 
+    		<td>
     		    <c:if test="${User.role == 'ADMIN'}">
-                    you have full administrative privileges.
+                    Administrator: you have full administrative privileges.
                 </c:if>
                 <c:if test="${User.role == 'GUEST'}">
-                    to upload new models please <a href="${contextPath}/contact.html">contact us</a>.
+                    Guest: to upload new models please <a href="${contextPath}/contact.html">contact us</a>.
                 </c:if>
                 <c:if test="${User.role == 'MODELER'}">
-                    to upload your own protocols please <a href="${contextPath}/contact.html">contact us</a>.
-                </c:if>    		
+                    Modeller: you may add your models to the system; to upload your own protocols please <a href="${contextPath}/contact.html">contact us</a>.
+                </c:if>
+                <c:if test="${User.role == 'PROTO_AUTHOR'}">
+                    Advanced modeller: you may upload both models and protocols.
+                </c:if>
     		</td>
     	</tr>
     	<tr>

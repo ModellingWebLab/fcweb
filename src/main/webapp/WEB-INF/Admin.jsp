@@ -31,6 +31,7 @@
 							<select class='role-chooser' id='user-role-${cur.id}'>
 								<option <c:if test="${cur.role == 'GUEST'}">selected="selected"</c:if> value="GUEST">guest</option>
 								<option <c:if test="${cur.role == 'MODELER'}">selected="selected"</c:if> value="MODELER">modeller</option>
+                                <option <c:if test="${cur.role == 'PROTO_AUTHOR'}">selected="selected"</c:if> value="PROTO_AUTHOR">protocol author</option>
 								<option <c:if test="${cur.role == 'ADMIN'}">selected="selected"</c:if> value="ADMIN">admin</option>
 							</select>
 						</c:otherwise>
