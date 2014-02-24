@@ -13,6 +13,7 @@
    	<button id="checkAll">check all</button>
    	<button id="checkLatest">check latest</button>
    	<button id="uncheckAll">uncheck all</button>
+   	<button id="batchcreator1">create jobs</button> <span id="batchcreatoraction1"></span>
 	
     <div id="batchlist">
 	   	<c:forEach items="${options}" var="opt" >
@@ -31,7 +32,7 @@
 	    		</c:forEach>
 	   		</ul>
 	   	</c:forEach>
-	   	<button id="batchcreator">Create Jobs</button> <span id="batchcreatoraction"></span>
+	   	<button id="batchcreator2">Create Jobs</button> <span id="batchcreatoraction2"></span>
    	</div>
 </t:skeleton>
 

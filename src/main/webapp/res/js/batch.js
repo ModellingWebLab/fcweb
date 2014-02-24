@@ -49,41 +49,51 @@ function submitBatch (jsonObject, actionIndicator)
 }
 
 
-function initBatch ()
+/* Factory function for creating event handlers for clicks on the 'create jobs' buttons.
+ * The handler will figure out which experiments to start, and call submitBatch.
+ * @param createButton  the button to add a handler to
+ * @param actionIndicator  a span element for use in keeping the user informed
+ */
+function createListener(createButton, actionIndicator)
 {
-	var btn = document.getElementById("batchcreator");
-	var actionIndicator = document.getElementById("batchcreatoraction");
-
-	if (btn)
-		btn.addEventListener("click", 
+    createButton.addEventListener("click",
         function (event)
         {
-			var toCreate = [];
-			var toForce = false;
-			var boxes = document.getElementsByTagName("input");
-			for (var i = 0; i < boxes.length; i++)
-			{
-				if (boxes[i].type != "checkbox")
-					continue;
-				if (boxes[i].checked)
-				{
-					if (boxes[i].id == "forceoverwrite")
-						toForce = true;
-					else
-						toCreate.push(boxes[i].name);
-				}
-			}
-			
-			console.log(toCreate);
-			console.log(toForce);
-			submitBatch ({
-		    	task: "batchSubmit",
-		    	entities: toCreate,
-		    	force: toForce
-		    }, actionIndicator);
-        }, 
+            var toCreate = [];
+            var toForce = false;
+            var boxes = document.getElementsByTagName("input");
+            for (var i = 0; i < boxes.length; i++)
+            {
+                if (boxes[i].type != "checkbox")
+                    continue;
+                if (boxes[i].checked)
+                {
+                    if (boxes[i].id == "forceoverwrite")
+                        toForce = true;
+                    else
+                        toCreate.push(boxes[i].name);
+                }
+            }
+
+            console.log(toCreate);
+            console.log(toForce);
+            submitBatch ({
+                task: "batchSubmit",
+                entities: toCreate,
+                force: toForce
+            }, actionIndicator);
+        },
         false);
-	
+}
+
+function initBatch ()
+{
+    var btn = document.getElementById("batchcreator1");
+    if (btn)
+        createListener(btn, document.getElementById("batchcreatoraction1"));
+    btn = document.getElementById("batchcreator2");
+    if (btn)
+        createListener(btn, document.getElementById("batchcreatoraction2"));
 
 	var checker = document.getElementById("checkAll");
 	var checkerLatest = document.getElementById("checkLatest");
