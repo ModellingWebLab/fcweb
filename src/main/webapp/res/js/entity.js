@@ -700,6 +700,8 @@ function displayVersion (id, showDefault)
 	doc.entity.version.style.display = "block";
 
 	doc.version.files.style.display = "block";
+	$("#experiment-files-switcher-files").addClass("selected");
+	$("#experiment-files-switcher-exp").removeClass("selected");
 	//doc.version.filedetails.style.display = "none";
 	// update address bar
 	
@@ -1141,11 +1143,15 @@ function initModel ()
 	render ();
 	
 	document.getElementById("experiment-files-switcher-exp").addEventListener("click", function (ev) {
+	    $("#experiment-files-switcher-exp").addClass("selected");
+	    $("#experiment-files-switcher-files").removeClass("selected");
 		doc.version.details.style.display = "none";
 		doc.version.experimentlist.style.display = "block";
 	}, false);
 	
 	document.getElementById("experiment-files-switcher-files").addEventListener("click", function (ev) {
+	    $("#experiment-files-switcher-files").addClass("selected");
+        $("#experiment-files-switcher-exp").removeClass("selected");
 		doc.version.experimentlist.style.display = "none";
 		doc.version.details.style.display = "block";
 	}, false);

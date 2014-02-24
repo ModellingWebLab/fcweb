@@ -43,7 +43,7 @@ button:active {
 	border: 1px solid #39578e;
 }
 
-button:hover {
+button:hover, button.selected {
 	background-color: #39578e;
 	border: 1px solid #39578e;
 }
