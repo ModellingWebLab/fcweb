@@ -1014,12 +1014,17 @@ function requestInformation (jsonObject, onSuccess)
     xmlhttp.send(JSON.stringify(jsonObject));
 }
 
-function nextPage (url)
+/*
+ * Note that if the 'replace' argument is not supplied, it in effect defaults to false
+ */
+function nextPage (url, replace)
 {
-	//if (//url)
-	window.history.pushState(document.location.href, "", url);
-	
-	render ();
+    if (replace)
+        window.history.replaceState(document.location.href, "", url);
+    else
+        window.history.pushState(document.location.href, "", url);
+
+    render ();
 }
 
 function render ()
@@ -1068,7 +1073,7 @@ function render ()
 		if (url.length > 0 && url[0] == "latest")
 		{
 			// The 'return false' means we only follow the first matching link
-			$(".entityversionlink").each(function (){nextPage ($(this).attr('href')); return false;});
+			$(".entityversionlink").each(function (){nextPage ($(this).attr('href'), true); return false;});
 		}
 		doc.entity.version.style.display = "none";
 		doc.entity.details.style.display = "block";
