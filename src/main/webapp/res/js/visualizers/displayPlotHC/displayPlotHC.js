@@ -16,12 +16,13 @@ HCPlotter.prototype.getContentsCallback = function (succ)
 		this.div.appendChild (document.createTextNode ("failed to load the contents"));
 	else
 	{
+	    var thisFile = this.file;
 		//var plotPoints = true;
 		//var csvData = getCSVColumnsDownsampled (this.file);
-		var csvData = (this.file.linestyle == "linespoints" || THISfile.linestyle == "points") ? getCSVColumnsNonDownsampled (this.file) : getCSVColumnsDownsampled (this.file);
+		var csvData = (thisFile.linestyle == "linespoints" || thisFile.linestyle == "points") ? getCSVColumnsNonDownsampled (thisFile) : getCSVColumnsDownsampled (thisFile);
 		
 		var div = document.createElement("div");
-		var id = "hcplot-" + this.file.id;
+		var id = "hcplot-" + thisFile.id;
 		div.id = id;
 		div.style.width = "780px";
 		div.style.height = "450px";
@@ -50,7 +51,7 @@ HCPlotter.prototype.getContentsCallback = function (succ)
 	            },
 	            line: {
 	            	marker: {
-	            		enabled: this.file.linestyle == "linespoints"
+	            		enabled: thisFile.linestyle == "linespoints"
 	            	}
 	            }
 	        },
@@ -58,12 +59,12 @@ HCPlotter.prototype.getContentsCallback = function (succ)
 	        series: datasets
 		};
 		
-		if (this.file.xAxes)
-			options.xAxis = {title : { text : this.file.xAxes}};
-		if (this.file.yAxes)
-			options.yAxis = {title : { text : this.file.yAxes}};
-		if (this.file.title)
-			options.title = {text : this.file.title};
+		if (thisFile.xAxes)
+			options.xAxis = {title : { text : thisFile.xAxes}};
+		if (thisFile.yAxes)
+			options.yAxis = {title : { text : thisFile.yAxes}};
+		if (thisFile.title)
+			options.title = {text : thisFile.title};
 		
 		
 		$("#"+id).highcharts(options);
@@ -112,28 +113,26 @@ HCPlotterComparer.prototype.showContents = function ()
 	else
 	{
 		this.setUp = true;
+		var thisFile = this.file;
 		//var plotPoints = true;
 		//var csvData = getCSVColumnsDownsampled (this.file);
 		
-		var lineStyle = this.file.linestyle;
+		var lineStyle = thisFile.linestyle;
 		
 		var csvDatas = new Array ();
 		
-		for (var i = 0; i < this.file.entities.length; i++)
+		for (var i = 0; i < thisFile.entities.length; i++)
 		{
 			csvDatas.push ({
 					data: (lineStyle == "linespoints" || lineStyle == "points") ?
-							getCSVColumnsNonDownsampled (this.file.entities[i].entityFileLink) : getCSVColumnsDownsampled (this.file.entities[i].entityFileLink),
-					entity: this.file.entities[i].entityLink,
-					file: this.file.entities[i].entityFileLink
+							getCSVColumnsNonDownsampled (thisFile.entities[i].entityFileLink) : getCSVColumnsDownsampled (thisFile.entities[i].entityFileLink),
+					entity: thisFile.entities[i].entityLink,
+					file: thisFile.entities[i].entityFileLink
 			});
 		}
 		
-		
-		//var csvData = (this.file.linestyle == "linespoints" || THISfile.linestyle == "points") ? getCSVColumnsNonDownsampled (this.file) : getCSVColumnsDownsampled (this.file);
-		
 		var div = document.createElement("div");
-		var id = "hcplot-" + this.file.id;
+		var id = "hcplot-" + thisFile.id;
 		div.id = id;
 		div.style.width = "780px";
 		div.style.height = "450px";
@@ -192,7 +191,7 @@ HCPlotterComparer.prototype.showContents = function ()
 	            },
 	            line: {
 	            	marker: {
-	            		enabled: this.file.linestyle == "linespoints"
+	            		enabled: thisFile.linestyle == "linespoints"
 	            	}
 	            }
 	        },
@@ -200,12 +199,12 @@ HCPlotterComparer.prototype.showContents = function ()
 	        series: datasets
 		};
 		
-		if (this.file.xAxes)
-			options.xAxis = {title : { text : this.file.xAxes}};
-		if (this.file.yAxes)
-			options.yAxis = {title : { text : this.file.yAxes}};
-		if (this.file.title)
-			options.title = {text : this.file.title};
+		if (thisFile.xAxes)
+			options.xAxis = {title : { text : thisFile.xAxes}};
+		if (thisFile.yAxes)
+			options.yAxis = {title : { text : thisFile.yAxes}};
+		if (thisFile.title)
+			options.title = {text : thisFile.title};
 		
 		
 		$("#"+id).highcharts(options);
