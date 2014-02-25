@@ -327,7 +327,7 @@ function parseOutputContents (file, version)
 					csv[csv.length - 1].push (value);
 				}
 				
-				version.outputContents = csv;			
+				version.outputContents = csv;
 			}
 		}
 	};
@@ -938,8 +938,6 @@ function displayFile (id, pluginName)
 	var f = files[id];
 	if (!f)
 	{
-		//console.log (id);
-		//console.log (files);
 		addNotification ("no such file", "error");
 		return;
 	}
@@ -954,15 +952,12 @@ function displayFile (id, pluginName)
 		f.div[pluginName] = document.createElement("div");
 		f.viz[pluginName] = visualizers[pluginName].setUp (f, f.div[pluginName]);
 	}
-	
-	f.viz[pluginName].show ();
-	
-	removeChildren (df.display);
+    removeChildren (df.display);
 	df.display.appendChild (f.div[pluginName]);
+    f.viz[pluginName].show ();
 	
-	// doc.version.files.style.display = "none";
+    // Show parent div of the file display, and scroll there
 	doc.version.filedetails.style.display = "block";
-	
 	var pos = getPos (doc.version.filedetails);
 	window.scrollTo(pos.xPos, pos.yPos);
 }

@@ -326,6 +326,8 @@ function parseEntities (entityObj)
 				files[sig].entities.push ({entityLink: entityObj[i], entityFileLink: entityObj[i].files[j]});
 			}
 	}
+	
+	// Create a drop-down box that allows display of/navigate to experiments being compared
 	var entitiesToCompare = document.getElementById("entitiesToCompare");
 	removeChildren (entitiesToCompare);
 	var form = document.createElement("form");
@@ -445,23 +447,26 @@ function displayFile (id, pluginName)
 		addNotification ("no such file", "error");
 		return;
 	}
-    //var df = doc.file;
-	//console.log (f);
 	doc.fileName.innerHTML = f.name;
 	
 	if (!f.div[pluginName])
 	{
+//	    console.log("Creating visualizer");
 		f.div[pluginName] = document.createElement("div");
 		f.viz[pluginName] = visualizers[pluginName].setUpComparision (f, f.div[pluginName]);
+//		console.log(f);
 	}
-	
-	f.viz[pluginName].show ();
-	
-	removeChildren (doc.fileDisplay);
+//	else
+//	{
+//	    console.log("Reusing vis");
+//	    console.log(f);
+//	}
+    removeChildren (doc.fileDisplay);
 	doc.fileDisplay.appendChild (f.div[pluginName]);
-	
+    f.viz[pluginName].show ();
+
+    // Show parent div of the file display, and scroll there
 	doc.fileDetails.style.display = "block";
-	
 	var pos = getPos (doc.fileDetails);
 	window.scrollTo(pos.xPos, pos.yPos);
 }

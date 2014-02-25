@@ -2,7 +2,7 @@ var choicesDivId = 'choices';
 var resetButtonDivId = 'reset-button-div'
 var colouredSpanIdPrefix = 'span';
 var legendDivId = 'legend';
-var plottedGraph = {};
+var plottedGraph = {}; // TODO: probably safer if this is an instance property!
 var resetButtonId = 'resetButton';
 var selectTogglerId = 'selectToggler';
 
@@ -250,7 +250,7 @@ function contentFlotPlot (file, div)
     this.file = file;
     this.div = div;
     this.setUp = false;
-    div.appendChild (document.createTextNode ("loading"));
+    div.appendChild (document.createTextNode ("loading..."));
     div.setAttribute ("class", "flotDiv");
 };
 
@@ -268,6 +268,7 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
         if (thisFile.keyId && !thisFile.keyFile.contents)
         {
             // Load the key data and try again
+            thisDiv.appendChild (document.createTextNode ("loading plot key data..."));
             thisFile.keyFile.getContents (this);
             return;
         }
@@ -366,7 +367,7 @@ function contentFlotPlotComparer (file, div)
     this.file = file;
     this.div = div;
     this.setUp = false;
-    div.appendChild (document.createTextNode ("loading"));
+    div.appendChild (document.createTextNode ("loading..."));
     div.setAttribute ("class", "flotDiv");
     this.gotFileContents = 0;
     this.gotKeyContents = 0;
@@ -433,7 +434,10 @@ contentFlotPlotComparer.prototype.showContents = function ()
                 }
             }
             if (this.expectedKeyContents > 0)
+            {
+                thisDiv.appendChild (document.createTextNode ("loading plot legend data..."));
                 return;
+            }
         }
 
         this.setUp = true;
@@ -600,6 +604,3 @@ function initFlotContent ()
 }
 
 document.addEventListener("DOMContentLoaded", initFlotContent, false);
-
-document.addEventListener("DOMContentLoaded", initFlotContent, false);
-
