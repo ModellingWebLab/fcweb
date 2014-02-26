@@ -11,7 +11,14 @@ HCPlotter.prototype.getContentsCallback = function (succ)
 {
 	//console.log ("insert content");
 	//console.log (this.div);
-	removeChildren (this.div);
+    if ($(this.div).highcharts === undefined)
+    {
+        // Wait for the library to finish loading!
+        var t = this;
+        window.setTimeout(function(){t.getContentsCallback(succ)}, 100);
+        return;
+    }
+    removeChildren (this.div);
 	if (!succ)
 		this.div.appendChild (document.createTextNode ("failed to load the contents"));
 	else
@@ -74,8 +81,6 @@ HCPlotter.prototype.getContentsCallback = function (succ)
 
 HCPlotter.prototype.show = function ()
 {
-	console.log ("show");
-	console.log (this.div);
 	if (!this.setUp)
 		this.file.getContents (this);
 };
@@ -107,6 +112,13 @@ HCPlotterComparer.prototype.showContents = function ()
 {
 	//console.log ("insert content");
 	//console.log (this.div);
+    if ($(this.div).highcharts === undefined)
+    {
+        // Wait for the library to finish loading!
+        var t = this;
+        window.setTimeout(function(){t.showContents()}, 100);
+        return;
+    }
 	removeChildren (this.div);
 	if (!this.ok)
 		this.div.appendChild (document.createTextNode ("failed to load the contents"));

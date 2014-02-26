@@ -390,7 +390,11 @@ function displayFile (id, pluginName)
 	if (!gotInfos)
 		return;
 	if (outputContents === null || plotDescription === null)
-	    window.setTimeout(function(){displayFile(id, pluginName)}, 100); // Try again in 0.1s, by which time hopefully they have been parsed
+    {
+	    // Try again in 0.1s, by which time hopefully they have been parsed
+        window.setTimeout(function(){displayFile(id, pluginName)}, 100);
+        return;
+    }
 	var f = files[id];
 	if (!f)
 	{

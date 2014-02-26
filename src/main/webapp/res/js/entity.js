@@ -859,7 +859,11 @@ function updateFile (rf, v)
 function displayFile (version, id, pluginName)
 {
     if (version.plotDescription === null || version.outputContents === null)
-        window.setTimeout(function(){displayFile(version, id, pluginName)}, 100); // Try again in 0.1s, by which time hopefully they have been parsed
+    {
+        // Try again in 0.1s, by which time hopefully they have been parsed
+        window.setTimeout(function(){displayFile(version, id, pluginName)}, 100);
+        return;
+    }
 	var f = files[id];
 	if (!f)
 	{
