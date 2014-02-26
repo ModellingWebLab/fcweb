@@ -44,7 +44,7 @@ function getFileContent (file, succ)
     xmlhttp.send(null);
 }
 
-function nextPage (url)
+function nextPage (url, replace)
 {
     if (replace)
         window.history.replaceState(document.location.href, "", url);
