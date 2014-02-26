@@ -129,9 +129,9 @@ function sortTable (plots)
     Other files
     */
 	resortPartially (filesTable.plots, "plots");
+    resortPartially (filesTable.defaults, "defaults");
 	resortPartially (filesTable.pngeps, "pngeps");
 	resortPartially (filesTable.otherCSV, "otherCSV");
-	resortPartially (filesTable.defaults, "defaults");
     resortPartially (filesTable.text, "text");
     resortPartially (filesTable.other, "other");
 }

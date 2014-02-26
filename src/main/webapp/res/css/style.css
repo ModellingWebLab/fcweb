@@ -482,6 +482,16 @@ li.entityviz-PRIVATE
 	background-color: #eee;
 }
 
+.filesTable-defaults
+{
+    background-color: #F7D358;
+}
+
+.filesTable-text
+{
+    background-color: #A9D0F5;
+}
+
 #cluetip
 {
 	font-size:.8em;
