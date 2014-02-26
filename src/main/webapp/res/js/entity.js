@@ -244,7 +244,7 @@ function highlightPlots (version, showDefault)
 			{
 				var viz = document.getElementById ("filerow-" + plotDescription[i][2] + "-viz-displayPlotFlot");
 				if (viz)
-					viz.click();
+					nextPage(vis.href, true); // 'Invisible' redirect
 			}
 		}
 
