@@ -102,6 +102,8 @@ function sortTable (plots)
 			filesTable.defaults[f.name] = f;
 		else if (f.name.endsWith ("csv"))
 			filesTable.otherCSV[f.name] = f;
+        else if (f.name.endsWith ("txt"))
+            filesTable.text[f.name] = f;
 		else 
 			filesTable.other[f.name] = f;
 	}
@@ -117,19 +119,21 @@ function sortTable (plots)
 		}
 	};
 	
-	/* 
-	according to keytask :    
+	/*
+	according to keytask :
 	Those CSV files corresponding to plots, in the order given in default-plots.csv
     png & eps files
     Other CSV files corresponding to outputs
     The contents & default-plots files (although don't give buttons to plot these!)
-    Other files 
+    Text files
+    Other files
     */
 	resortPartially (filesTable.plots, "plots");
 	resortPartially (filesTable.pngeps, "pngeps");
 	resortPartially (filesTable.otherCSV, "otherCSV");
 	resortPartially (filesTable.defaults, "defaults");
-	resortPartially (filesTable.other, "other");
+    resortPartially (filesTable.text, "text");
+    resortPartially (filesTable.other, "other");
 }
 
 function highlightPlots (showDefault)
@@ -314,6 +318,7 @@ function buildSite ()
 	filesTable.pngeps = {};
 	filesTable.otherCSV = {};
 	filesTable.defaults = {};
+	filesTable.text = {};
 	filesTable.other = {};
 	filesTable.all = new Array ();
 	
