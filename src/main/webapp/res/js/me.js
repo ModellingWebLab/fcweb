@@ -1,6 +1,7 @@
 
+// Sub-pages of myfiles.html, and which we're currently viewing
 var pages = [ "model", "protocol", "experiment" ];
-
+var curPage = null;
 
 
 function updateUser (jsonObject, elem)
@@ -119,14 +120,19 @@ function initMe ()
 	else
 	{
 		// files page
-		
+	    window.onpopstate = initMe;
+        var hash_index = document.location.href.lastIndexOf("#");
+        var page = document.location.href.substr(hash_index + 1);
 		for (var i = 0; i < pages.length; i++)
 		{
 			var btn = document.getElementById(pages[i] + "chooser");
 			registerSwitchPagesListener (btn, pages[i]);
+			if (page == pages[i])
+			    curPage = page;
 		}
-		switchPage ("model");
-		
+		if (curPage === null || hash_index == -1)
+		    curPage = "model";
+		switchPage (curPage);
 		
 		var modellist = document.getElementById("modellist");
 		var protocollist = document.getElementById("protocollist");
@@ -141,31 +147,33 @@ function initMe ()
 		uls = modellist.getElementsByTagName("ul");
 		for (var i = 0; i < uls.length; i++)
 			sortChildrenByAttribute (uls[i], false, "title");
-		/*
-		var modelchooser = document.getElementById("modelchooser");
-		var protocolchooser = document.getElementById("protocolchooser");
-		var experimentchooser = document.getElementById("experimentchooser");
-		
-		modelchooser.addEventListener("click", function () {
-			
-		}, true);*/
-		
 	}
 }
 function switchPage (page)
 {
-	console.log ("switching to " + page);
+    if (page != curPage)
+    {
+        window.history.pushState(document.location.href, "", contextPath + "/myfiles.html#" + page);
+    }
+    
 	for (var i = 0; i < pages.length; i++)
 	{
+	    var div = document.getElementById(pages[i] + "list");
+	    var btn = $(document.getElementById(pages[i] + "chooser"));
 		if (pages[i] == page)
-			document.getElementById(pages[i] + "list").style.display = "block";
+		{
+			div.style.display = "block";
+			btn.addClass("selected");
+		}
 		else
-			document.getElementById(pages[i] + "list").style.display = "none";
+	    {
+			div.style.display = "none";
+			btn.removeClass("selected");
+	    }
 	}
 }
 function registerSwitchPagesListener (btn, page)
 {
-	console.log ("register switch listener: " + page);
 	btn.addEventListener("click", function () {
 		console.log ("switch listener triggered " + page);
 		switchPage (page);
