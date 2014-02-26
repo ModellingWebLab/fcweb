@@ -777,11 +777,14 @@ function updateVersion (rv)
 	v.id = rv.id;
 	v.readme = null;
 	v.files = new Array ();
-	for (var i = 0; i < rv.files.length; i++)
-	{
-		updateFile (rv.files[i], v);
-		v.files.push (rv.files[i].id);
-	}
+	if (rv.files)
+    {
+	    for (var i = 0; i < rv.files.length; i++)
+	    {
+	        updateFile (rv.files[i], v);
+	        v.files.push (rv.files[i].id);
+	    }
+    }
 	v.experiments = new Array ();
 	if (rv.experiments)
 		for (var i = 0; i < rv.experiments.length; i++)
