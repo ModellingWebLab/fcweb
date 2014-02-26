@@ -143,32 +143,34 @@ function highlightPlots (entity, showDefault)
     // Output contents has fields: Variable id,Variable name,Units,Number of dimensions,File name,Type,Dimensions
     plotDescription = entity.plotDescription;
     outputContents = entity.outputContents;
+    var default_viz = null, default_entity_count = 0;
 	for (var i = 1; i < plotDescription.length; i++)
 	{
 		if (plotDescription[i].length < 2)
 			continue;
-		//console.log (plotDescription[i][2]);
-		var row = document.getElementById ("filerow-" + plotDescription[i][2].hashCode ());
-		if (row)
-		{
-			row.setAttribute("class", "highlight-plot");
-			if (i == 1 && showDefault && !shownDefault)
-			{
-				var viz = document.getElementById ("filerow-" + plotDescription[i][2].hashCode () + "-viz-displayPlotFlot");
-				if (viz)
-				{
-					shownDefault = true;
-					nextPage(viz.href, true); // 'Invisible' redirect
-				}
-			}
-		}
-		
-		
-		if (files[plotDescription[i][2].hashCode ()])
-		{
-			//console.log (files[plotDescription[i][2].hashCode ()]);
-			
-			var f = files[plotDescription[i][2].hashCode ()];
+        if (files[plotDescription[i][2].hashCode ()])
+        {
+            //console.log (files[plotDescription[i][2].hashCode ()]);
+            var f = files[plotDescription[i][2].hashCode ()];
+
+            // See if we should show this as the default plot
+    		var row = document.getElementById ("filerow-" + plotDescription[i][2].hashCode ());
+    		if (row)
+    		{
+    			row.setAttribute("class", "highlight-plot");
+    			if (showDefault && !shownDefault)
+    			{
+    				var viz = document.getElementById ("filerow-" + plotDescription[i][2].hashCode () + "-viz-displayPlotFlot");
+    				if (viz)
+    				{
+    				    if (f.entities.length > default_entity_count)
+				        {
+    				        default_viz = viz;
+    				        default_entity_count = f.entities.length;
+				        }
+    				}
+    			}
+    		}
 			
 			// Find the plot x and y object names and units from the output contents file.
 			for (var output_idx = 0; output_idx < outputContents.length; output_idx++)
@@ -205,6 +207,11 @@ function highlightPlots (entity, showDefault)
 			plotFiles.push (plotDescription[i][2]);
 		}
 	}
+	if (default_viz)
+    {
+        shownDefault = true;
+        nextPage(default_viz.href, true); // 'Invisible' redirect
+    }
 	sortTable (plotFiles);
 }
 
