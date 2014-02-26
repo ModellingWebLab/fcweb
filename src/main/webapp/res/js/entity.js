@@ -293,6 +293,7 @@ function highlightPlots (version, showDefault)
 
 function parseOutputContents (file, version, showDefault)
 {
+    version.outputContents = null; // Note that there is one to parse
 	var goForIt = {
 		getContentsCallback : function (succ)
 		{
@@ -315,6 +316,7 @@ function parsePlotDescription (file, version, showDefault)
 	if (file.plotDescription) // TODO: Always false => remove?
 		return converter.makeHtml (file.contents);
 	
+	version.plotDescription = null; // Note that there is one to parse
 	var goForIt = {
 		getContentsCallback : function (succ)
 		{
@@ -854,8 +856,10 @@ function updateFile (rf, v)
 	};
 }
 
-function displayFile (id, pluginName)
+function displayFile (version, id, pluginName)
 {
+    if (version.plotDescription === null || version.outputContents === null)
+        window.setTimeout(function(){displayFile(version, id, pluginName)}, 100); // Try again in 0.1s, by which time hopefully they have been parsed
 	var f = files[id];
 	if (!f)
 	{
@@ -974,7 +978,7 @@ function render ()
 		
 		if (curFileId && pluginName)
 		{
-			displayFile (curFileId, pluginName);
+			displayFile (curVersionId, curFileId, pluginName);
 			doc.file.close.href = basicurl + convertForURL (v.name) + "/" + v.id + "/";
 		}
 		else

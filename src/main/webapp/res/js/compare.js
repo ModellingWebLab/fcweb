@@ -200,6 +200,8 @@ function highlightPlots (showDefault)
 
 function parseOutputContents (file, showDefault)
 {
+    outputContents = null; // Note that there is one to parse
+    
 	var goForIt = {
 		getContentsCallback : function (succ)
 		{
@@ -219,6 +221,7 @@ function parseOutputContents (file, showDefault)
 
 function parsePlotDescription (file, showDefault)
 {
+    plotDescription = null; // Note that there is one to parse
 	
 	var goForIt = {
 		getContentsCallback : function (succ)
@@ -386,6 +389,8 @@ function displayFile (id, pluginName)
 {
 	if (!gotInfos)
 		return;
+	if (outputContents === null || plotDescription === null)
+	    window.setTimeout(function(){displayFile(id, pluginName)}, 100); // Try again in 0.1s, by which time hopefully they have been parsed
 	var f = files[id];
 	if (!f)
 	{
