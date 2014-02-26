@@ -198,43 +198,17 @@ function highlightPlots (showDefault)
 	sortTable (plotFiles);
 }
 
-function parseOutputContents (file, version)
+function parseOutputContents (file, showDefault)
 {
 	var goForIt = {
 		getContentsCallback : function (succ)
 		{
 			if (succ)
 			{
-				var str = file.contents.replace(/\s*#.*\n/gm,"");
-				var delimiter = ",";
-				var patterns = new RegExp(
-			    		(
-			    			// Delimiters.
-			    			"(\\" + delimiter + "|\\r?\\n|\\r|^)" +
-			    			// Quoted fields.
-			    			"(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
-			    			// Standard fields.
-			    			"([^\"\\" + delimiter + "\\r\\n]*))"
-			    		),
-			    		"gi"
-			    		);
-				var csv = [[]];
-				var matches = null;
-				while (matches = patterns.exec (str))
-				{
-					var value;
-					var matchDel = matches[1];
-					if (matchDel.length && matchDel != delimiter)
-			    			csv.push([]);
-					if (matches[2])
-						value = matches[2].replace (new RegExp ("\"\"", "g"), "\"");
-					else
-						value = matches[3];
-					
-					csv[csv.length - 1].push (value);
-				}
-				
-				outputContents = csv;			
+				parseCsvRaw(file);
+				outputContents = file.csv;
+				if (plotDescription)
+                    highlightPlots (showDefault);
 			}
 		}
 	};
@@ -245,45 +219,16 @@ function parseOutputContents (file, version)
 
 function parsePlotDescription (file, showDefault)
 {
-	/*if (file.plotDescription)
-		return converter.makeHtml (file.contents);*/
 	
 	var goForIt = {
 		getContentsCallback : function (succ)
 		{
 			if (succ)
 			{
-				var str = file.contents.replace(/\s*#.*\n/gm,"");
-				var delimiter = ",";
-				var patterns = new RegExp(
-			    		(
-			    			// Delimiters.
-			    			"(\\" + delimiter + "|\\r?\\n|\\r|^)" +
-			    			// Quoted fields.
-			    			"(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
-			    			// Standard fields.
-			    			"([^\"\\" + delimiter + "\\r\\n]*))"
-			    		),
-			    		"gi"
-			    		);
-				var csv = [[]];
-				var matches = null;
-				while (matches = patterns.exec (str))
-				{
-					var value;
-					var matchDel = matches[1];
-					if (matchDel.length && matchDel != delimiter)
-			    			csv.push([]);
-					if (matches[2])
-						value = matches[2].replace (new RegExp ("\"\"", "g"), "\"");
-					else
-						value = matches[3];
-					
-					csv[csv.length - 1].push (value);
-				}
-				
-				plotDescription = csv;
-				highlightPlots (showDefault);
+			    parseCsvRaw(file);
+				plotDescription = file.csv;
+				if (outputContents)
+				    highlightPlots (showDefault);
 			}
 		}
 	};
@@ -321,7 +266,7 @@ function parseEntities (entityObj)
 				if (entityObj[i].files[j].name.toLowerCase () == "outputs-default-plots.csv")
 					parsePlotDescription (entityObj[i].files[j], !(fileName && pluginName));
 				if (entityObj[i].files[j].name.toLowerCase () == "outputs-contents.csv")
-					parseOutputContents (entityObj[i].files[j], null);
+					parseOutputContents (entityObj[i].files[j], !(fileName && pluginName));
 				
 				files[sig].entities.push ({entityLink: entityObj[i], entityFileLink: entityObj[i].files[j]});
 			}
@@ -619,36 +564,8 @@ function maxDist (val1, val2, val3)
 function parseCSVContent (file)
 {
 	//console.log ("parsing csv: " + file.contents);
-	
-	var str = file.contents.replace(/\s*#.*\n/gm,"");
-	var delimiter = ",";
-	var patterns = new RegExp(
-    		(
-    			// Delimiters.
-    			"(\\" + delimiter + "|\\r?\\n|\\r|^)" +
-    			// Quoted fields.
-    			"(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
-    			// Standard fields.
-    			"([^\"\\" + delimiter + "\\r\\n]*))"
-    		),
-    		"gi"
-    		);
-	var csv = [[]];
-	var matches = null;
-	while (matches = patterns.exec (str))
-	{
-		var value;
-		var matchDel = matches[1];
-		if (matchDel.length && matchDel != delimiter)
-    			csv.push([]);
-		if (matches[2])
-			value = matches[2].replace (new RegExp ("\"\"", "g"), "\"");
-		else 
-			value = matches[3];
-		
-		csv[csv.length - 1].push (value);
-	}
-	file.csv = csv;
+	parseCsvRaw(file);
+	var csv = file.csv;
 
 	file.columns = [];
 	var dropDist = [];

@@ -291,43 +291,17 @@ function highlightPlots (version, showDefault)
 	sortTable (plots);
 }
 
-function parseOutputContents (file, version)
+function parseOutputContents (file, version, showDefault)
 {
 	var goForIt = {
 		getContentsCallback : function (succ)
 		{
 			if (succ)
 			{
-				var str = file.contents.replace(/\s*#.*\n/gm,"");
-				var delimiter = ",";
-				var patterns = new RegExp(
-			    		(
-			    			// Delimiters.
-			    			"(\\" + delimiter + "|\\r?\\n|\\r|^)" +
-			    			// Quoted fields.
-			    			"(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
-			    			// Standard fields.
-			    			"([^\"\\" + delimiter + "\\r\\n]*))"
-			    		),
-			    		"gi"
-			    		);
-				var csv = [[]];
-				var matches = null;
-				while (matches = patterns.exec (str))
-				{
-					var value;
-					var matchDel = matches[1];
-					if (matchDel.length && matchDel != delimiter)
-			    			csv.push([]);
-					if (matches[2])
-						value = matches[2].replace (new RegExp ("\"\"", "g"), "\"");
-					else
-						value = matches[3];
-					
-					csv[csv.length - 1].push (value);
-				}
-				
-				version.outputContents = csv;
+			    parseCsvRaw(file);
+				version.outputContents = file.csv;
+                if (version.plotDescription)
+                    highlightPlots (version, showDefault);
 			}
 		}
 	};
@@ -338,7 +312,7 @@ function parseOutputContents (file, version)
 
 function parsePlotDescription (file, version, showDefault)
 {
-	if (file.plotDescription)
+	if (file.plotDescription) // TODO: Always false => remove?
 		return converter.makeHtml (file.contents);
 	
 	var goForIt = {
@@ -346,37 +320,10 @@ function parsePlotDescription (file, version, showDefault)
 		{
 			if (succ)
 			{
-				var str = file.contents.replace(/\s*#.*\n/gm,"");
-				var delimiter = ",";
-				var patterns = new RegExp(
-			    		(
-			    			// Delimiters.
-			    			"(\\" + delimiter + "|\\r?\\n|\\r|^)" +
-			    			// Quoted fields.
-			    			"(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
-			    			// Standard fields.
-			    			"([^\"\\" + delimiter + "\\r\\n]*))"
-			    		),
-			    		"gi"
-			    		);
-				var csv = [[]];
-				var matches = null;
-				while (matches = patterns.exec (str))
-				{
-					var value;
-					var matchDel = matches[1];
-					if (matchDel.length && matchDel != delimiter)
-			    			csv.push([]);
-					if (matches[2])
-						value = matches[2].replace (new RegExp ("\"\"", "g"), "\"");
-					else
-						value = matches[3];
-					
-					csv[csv.length - 1].push (value);
-				}
-				
-				version.plotDescription = csv;
-				highlightPlots (version, showDefault);
+			    parseCsvRaw(file);
+				version.plotDescription = file.csv;
+				if (version.outputContents)
+				    highlightPlots (version, showDefault);
 				
 			}
 		}
@@ -526,7 +473,7 @@ function displayVersion (id, showDefault)
 			parsePlotDescription (file, v, showDefault);
 		
 		if (!v.outputContents && file.name.toLowerCase () == "outputs-contents.csv")
-			parseOutputContents (file, v);
+			parseOutputContents (file, v, showDefault);
 		
 
 		filesTable.all.push ({
@@ -670,7 +617,7 @@ function displayVersion (id, showDefault)
 	}
 	else
 	    dv.readme.style.display = "none";
-	if (v.plotDescription)
+	if (v.plotDescription && v.outputContents)
 		highlightPlots (v, showDefault);
 	
 	
@@ -699,34 +646,8 @@ function maxDist (val1, val2, val3)
 
 function parseCSVContent (file)
 {
-	var str = file.contents.replace(/\s*#.*\n/gm,"");
-	var delimiter = ",";
-	var patterns = new RegExp(
-    		(
-    			// Delimiters.
-    			"(\\" + delimiter + "|\\r?\\n|\\r|^)" +
-    			// Quoted fields.
-    			"(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
-    			// Standard fields.
-    			"([^\"\\" + delimiter + "\\r\\n]*))"
-    		),
-    		"gi"
-    		);
-	var csv = [[]];
-	var matches = null;
-	while (matches = patterns.exec (str))
-	{
-		var value;
-		var matchDel = matches[1];
-		if (matchDel.length && matchDel != delimiter)
-    			csv.push([]);
-		if (matches[2])
-			value = matches[2].replace (new RegExp ("\"\"", "g"), "\"");
-		else 
-			value = matches[3];
-		
-		csv[csv.length - 1].push (value);
-	}
+    parseCsvRaw(file);
+	var csv = file.csv;
 
 	file.columns = [];
 	var dropDist = [];
