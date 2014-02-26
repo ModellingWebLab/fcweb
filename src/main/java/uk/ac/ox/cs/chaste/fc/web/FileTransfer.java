@@ -43,6 +43,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 
+import uk.ac.ox.cs.chaste.fc.beans.ChasteEntity;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntityVersion;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteExperimentVersion;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteFile;
@@ -240,13 +241,15 @@ public class FileTransfer extends WebModule
 	
 	
 
-	private final static String buildMailBody (String nick, String result, String msg)
+	private final static String buildMailBody (String nick, String result, ChasteEntityVersion vers)
 	{
-		return "Hi " + nick + ",\n\nthe experiment you submitted is finished.\n"
-			+"Result: "+result+"\n"
-			+"Return message: "+msg+"\n"
-			+"\nHave a look at your files: "+Tools.getThisUrl ()+"myfiles.html"
-			+ "\n\nSincerely,\nChaste dev-team";
+		ChasteEntity ent = vers.getEntity();
+		String url = Tools.getThisUrl() + "experiment/" + ent.getUrl() + "/" + ent.getId() + "/" + vers.getUrl() + "/" + vers.getId() + "/";
+		
+		return "Hi " + nick + ",\n\nAn experiment you submitted has finished.\n"
+			+"Status: "+result+".\n"
+			+"The resulting files can be viewed at: "+url+"\n"
+			+ "\nYours sincerely,\nChaste functional curation website";
 	}
 	
 	
@@ -321,7 +324,8 @@ public class FileTransfer extends WebModule
 				try
 				{
 					if (u.isSendMails ())
-						Tools.sendMail (u.getMail (), u.getNick (), "Chaste Experiment finished", buildMailBody (u.getNick (), returntype, returnmsg));
+						Tools.sendMail (u.getMail (), u.getNick (), "Functional curation experiment finished",
+								buildMailBody (u.getNick (), returntype, exp));
 				}
 				catch (MessagingException e)
 				{
