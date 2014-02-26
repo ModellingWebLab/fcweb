@@ -14,6 +14,11 @@ var plotDescription;
 var plotFiles = new Array ();
 var filesTable = {};
 var shownDefault = false;
+
+// State for figuring out whether we're comparing multiple protocols on a single model, or multiple models on a single protocol
+var firstModelName = "", firstProtoName = "";
+var singleModel = true, singleProto = true;
+
 // Used for stripping out redundant (repeated) text in plot line labels
 var plotLabelStripText = null;
 
@@ -158,7 +163,9 @@ function highlightPlots (entity, showDefault)
             //console.log (files[plotDescription[i][2].hashCode ()]);
             var f = files[plotDescription[i][2].hashCode ()];
 
-            // See if we should show this as the default plot
+            // See if we should show this as the default plot.
+            // If a single protocol, we choose the first listed in the default-plots file.
+            // Otherwise, we choose the first one appearing in the most experiments.
     		var row = document.getElementById ("filerow-" + plotDescription[i][2].hashCode ());
     		if (row)
     		{
@@ -168,7 +175,7 @@ function highlightPlots (entity, showDefault)
     				var viz = document.getElementById ("filerow-" + plotDescription[i][2].hashCode () + "-viz-displayPlotFlot");
     				if (viz)
     				{
-    				    if (f.entities.length > default_entity_count)
+    				    if ((i == 1 || !singleProto) && f.entities.length > default_entity_count)
 				        {
     				        default_viz = viz;
     				        default_entity_count = f.entities.length;
@@ -267,9 +274,8 @@ function parseEntities (entityObj)
 	//console.log (entityObj);
     
     // State for figuring out whether we're comparing multiple protocols on a single model, or multiple models on a single protocol
-    var firstModelName = entityObj[0].modelName;
-    var firstProtoName = entityObj[0].protoName;
-    var singleModel = true, singleProto = true;
+    firstModelName = entityObj[0].modelName;
+    firstProtoName = entityObj[0].protoName;
     
 	for (var i = 0; i < entityObj.length; i++)
 	{
