@@ -136,12 +136,13 @@ function sortTable (plots)
     resortPartially (filesTable.other, "other");
 }
 
-function highlightPlots (showDefault)
+function highlightPlots (entity, showDefault)
 {
-//	console.log (plotDescription);
-//	console.log(outputContents);
+//    console.log(entity);
     // Plot description has fields: Plot title,File name,Data file name,Line style,First variable id,Optional second variable id,Optional key variable id
     // Output contents has fields: Variable id,Variable name,Units,Number of dimensions,File name,Type,Dimensions
+    plotDescription = entity.plotDescription;
+    outputContents = entity.outputContents;
 	for (var i = 1; i < plotDescription.length; i++)
 	{
 		if (plotDescription[i].length < 2)
@@ -187,11 +188,14 @@ function highlightPlots (showDefault)
                     // TODO: This may not handle keys differing between experiments. Does this matter?
                     for (var ent_idx=0; ent_idx<f.entities.length; ent_idx++)
                     {
-                        var ent_f = f.entities[ent_idx].entityFileLink;
-                        ent_f.keyId = outputContents[output_idx][0];
-                        ent_f.keyName = outputContents[output_idx][1];
-                        ent_f.keyUnits = outputContents[output_idx][2];
-                        ent_f.keyFile = files[outputContents[output_idx][4].hashCode()].entities[ent_idx].entityFileLink;
+                        if (f.entities[ent_idx].entityLink === entity)
+                        {
+                            var ent_f = f.entities[ent_idx].entityFileLink;
+                            ent_f.keyId = outputContents[output_idx][0];
+                            ent_f.keyName = outputContents[output_idx][1];
+                            ent_f.keyUnits = outputContents[output_idx][2];
+                            ent_f.keyFile = files[outputContents[output_idx][4].hashCode()].entities[ent_idx].entityFileLink;
+                        }
                     }
                 }
 			}
@@ -204,9 +208,9 @@ function highlightPlots (showDefault)
 	sortTable (plotFiles);
 }
 
-function parseOutputContents (file, showDefault)
+function parseOutputContents (entity, file, showDefault)
 {
-    outputContents = null; // Note that there is one to parse
+    entity.outputContents = null; // Note that there is one to parse
     
 	var goForIt = {
 		getContentsCallback : function (succ)
@@ -214,9 +218,9 @@ function parseOutputContents (file, showDefault)
 			if (succ)
 			{
 				parseCsvRaw(file);
-				outputContents = file.csv;
-				if (plotDescription)
-                    highlightPlots (showDefault);
+				entity.outputContents = file.csv;
+				if (entity.plotDescription)
+                    highlightPlots (entity, showDefault);
 			}
 		}
 	};
@@ -225,9 +229,9 @@ function parseOutputContents (file, showDefault)
 	return null;
 }
 
-function parsePlotDescription (file, showDefault)
+function parsePlotDescription (entity, file, showDefault)
 {
-    plotDescription = null; // Note that there is one to parse
+    entity.plotDescription = null; // Note that there is one to parse
 	
 	var goForIt = {
 		getContentsCallback : function (succ)
@@ -235,9 +239,9 @@ function parsePlotDescription (file, showDefault)
 			if (succ)
 			{
 			    parseCsvRaw(file);
-				plotDescription = file.csv;
-				if (outputContents)
-				    highlightPlots (showDefault);
+			    entity.plotDescription = file.csv;
+				if (entity.outputContents)
+				    highlightPlots (entity, showDefault);
 			}
 		}
 	};
@@ -273,9 +277,9 @@ function parseEntities (entityObj)
 					/*files[sig]*/
 				}
 				if (entityObj[i].files[j].name.toLowerCase () == "outputs-default-plots.csv")
-					parsePlotDescription (entityObj[i].files[j], !(fileName && pluginName));
+					parsePlotDescription (entityObj[i], entityObj[i].files[j], !(fileName && pluginName));
 				if (entityObj[i].files[j].name.toLowerCase () == "outputs-contents.csv")
-					parseOutputContents (entityObj[i].files[j], !(fileName && pluginName));
+					parseOutputContents (entityObj[i], entityObj[i].files[j], !(fileName && pluginName));
 				
 				files[sig].entities.push ({entityLink: entityObj[i], entityFileLink: entityObj[i].files[j]});
 			}
@@ -396,18 +400,22 @@ function displayFile (id, pluginName)
 {
 	if (!gotInfos)
 		return;
-	if (outputContents === null || plotDescription === null)
+    var f = files[id];
+    if (!f)
     {
-	    // Try again in 0.1s, by which time hopefully they have been parsed
-	    console.log("Waiting for metadata to be parsed.");
-        window.setTimeout(function(){displayFile(id, pluginName)}, 100);
+        addNotification ("no such file", "error");
         return;
     }
-	var f = files[id];
-	if (!f)
+	for (var ent_idx=0; ent_idx<f.entities.length; ent_idx++)
 	{
-		addNotification ("no such file", "error");
-		return;
+	    var entity = f.entities[ent_idx].entityLink;
+	    if (entity.outputContents === null || entity.plotDescription === null)
+	    {
+	        // Try again in 0.1s, by which time hopefully they have been parsed
+	        console.log("Waiting for metadata to be parsed.");
+	        window.setTimeout(function(){displayFile(id, pluginName)}, 100);
+	        return;
+	    }
 	}
 	doc.fileName.innerHTML = f.name;
 	
