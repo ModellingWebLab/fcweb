@@ -106,8 +106,9 @@ function drawMatrix (matrix)
 			protocols.push(version);
 		}
 
-        models.sort(function(a,b) {return (modelMapper[a].name > modelMapper[b].name) ? 1 : ((modelMapper[b].name > modelMapper[a].name) ? -1 : 0);});
-        protocols.sort(function(a,b) {return (protocolMapper[a].name > protocolMapper[b].name) ? 1 : ((protocolMapper[b].name > protocolMapper[a].name) ? -1 : 0);});
+    // Sort rows & columns alphabetically (case insensitive)
+    models.sort(function(a,b) {return (modelMapper[a].name.toLocaleLowerCase() > modelMapper[b].name.toLocaleLowerCase()) ? 1 : ((modelMapper[b].name.toLocaleLowerCase() > modelMapper[a].name.toLocaleLowerCase()) ? -1 : 0);});
+    protocols.sort(function(a,b) {return (protocolMapper[a].name.toLocaleLowerCase() > protocolMapper[b].name.toLocaleLowerCase()) ? 1 : ((protocolMapper[b].name.toLocaleLowerCase() > protocolMapper[a].name.toLocaleLowerCase()) ? -1 : 0);});
 	
 	/*console.log ("models");
 	console.log (modelMapper);
