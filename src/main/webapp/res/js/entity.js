@@ -861,6 +861,7 @@ function displayFile (version, id, pluginName)
     if (version.plotDescription === null || version.outputContents === null)
     {
         // Try again in 0.1s, by which time hopefully they have been parsed
+        console.log("Waiting for metadata to be parsed.");
         window.setTimeout(function(){displayFile(version, id, pluginName)}, 100);
         return;
     }
@@ -982,7 +983,7 @@ function render ()
 		
 		if (curFileId && pluginName)
 		{
-			displayFile (curVersionId, curFileId, pluginName);
+			displayFile (v, curFileId, pluginName);
 			doc.file.close.href = basicurl + convertForURL (v.name) + "/" + v.id + "/";
 		}
 		else

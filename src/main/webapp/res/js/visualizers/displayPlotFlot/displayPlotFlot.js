@@ -68,6 +68,14 @@ function isStyleLinespointsOrPoints(lineStyle) {
 
 /* Plot the graph */
 function plotAccordingToChoices(plotProperties, selectedCoords) {
+    if ($.plot === undefined)
+    {
+        /// Wait 0.1s for flot to load and try again
+        console.log("Waiting for flot to load.");
+        window.setTimeout(function(){plotAccordingToChoices(plotProperties, selectedCoords)}, 100);
+        return;
+    }
+    
     var choicesContainer = plotProperties.choicesContainer;
     var datasets = plotProperties.datasets;
     var styleLinespointsOrPoints = plotProperties.styleLinespointsOrPoints;
