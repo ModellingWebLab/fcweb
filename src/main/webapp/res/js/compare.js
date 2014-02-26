@@ -1,4 +1,7 @@
+// Contains information about each experiment being compared
 var entities = {};
+// Contains information about each unique (by name) file within the compared experiments,
+// including references to the experiments in which a file of that name appears
 var files = {};
 var entityType;
 var visualizers = {};
@@ -11,6 +14,8 @@ var plotDescription;
 var plotFiles = new Array ();
 var filesTable = {};
 var shownDefault = false;
+// Used for stripping out redundant (repeated) text in plot line labels
+var plotLabelStripText = null;
 
 function getFileContent (file, succ)
 {
@@ -260,21 +265,35 @@ function parsePlotDescription (entity, file, showDefault)
 function parseEntities (entityObj)
 {
 	//console.log (entityObj);
+    
+    // State for figuring out whether we're comparing multiple protocols on a single model, or multiple models on a single protocol
+    var firstModelName = entityObj[0].modelName;
+    var firstProtoName = entityObj[0].protoName;
+    var singleModel = true, singleProto = true;
+    
 	for (var i = 0; i < entityObj.length; i++)
 	{
-		entities[entityObj[i].id] = entityObj[i];
-		if (entityObj[i].files)
-			for (var j = 0; j < entityObj[i].files.length; j++)
+	    var entity = entityObj[i];
+	    
+	    if (singleModel && entity.modelName != firstModelName)
+	        singleModel = false;
+	    if (singleProto && entity.protoName != firstProtoName)
+            singleProto = false;
+	    
+		entities[entity.id] = entity;
+		if (entity.files)
+			for (var j = 0; j < entity.files.length; j++)
 			{
-				entityObj[i].files[j].signature = entityObj[i].files[j].name.hashCode ();
-				entityObj[i].files[j].url = contextPath + "/download/" + entityType.charAt(0) + "/" + convertForURL (entityObj[i].name) + "/" + entityObj[i].id + "/" + entityObj[i].files[j].id + "/" + convertForURL (entityObj[i].files[j].name);
-				var sig = entityObj[i].files[j].signature;
+			    var file = entity.files[j];
+				file.signature = file.name.hashCode ();
+				file.url = contextPath + "/download/" + entityType.charAt(0) + "/" + convertForURL (entity.name) + "/" + entity.id + "/" + file.id + "/" + convertForURL (file.name);
+				var sig = file.signature;
 				if (!files[sig])
 				{
 					
 					files[sig] = {};
 					files[sig].sig = sig;
-					files[sig].name = entityObj[i].files[j].name;
+					files[sig].name = file.name;
 					files[sig].entities = new Array ();
 					files[sig].div = {};
 					files[sig].viz = {};
@@ -283,14 +302,26 @@ function parseEntities (entityObj)
 					
 					/*files[sig]*/
 				}
-				if (entityObj[i].files[j].name.toLowerCase () == "outputs-default-plots.csv")
-					parsePlotDescription (entityObj[i], entityObj[i].files[j], !(fileName && pluginName));
-				if (entityObj[i].files[j].name.toLowerCase () == "outputs-contents.csv")
-					parseOutputContents (entityObj[i], entityObj[i].files[j], !(fileName && pluginName));
+				if (file.name.toLowerCase () == "outputs-default-plots.csv")
+					parsePlotDescription (entity, file, !(fileName && pluginName));
+				if (file.name.toLowerCase () == "outputs-contents.csv")
+					parseOutputContents (entity, file, !(fileName && pluginName));
 				
-				files[sig].entities.push ({entityLink: entityObj[i], entityFileLink: entityObj[i].files[j]});
+				files[sig].entities.push ({entityLink: entity, entityFileLink: file});
 			}
 	}
+	
+	// Alter heading to reflect type of comparison
+	if (singleModel && !singleProto)
+	{
+	    doc.heading.innerHTML = firstModelName + " experiments: comparison of protocols";
+	    plotLabelStripText = firstModelName + " &amp; ";
+	}
+	else if (singleProto && !singleModel)
+    {
+	    doc.heading.innerHTML = firstProtoName + " experiments: comparison of models";
+	    plotLabelStripText = " &amp; " + firstProtoName;
+    }
 	
 	// Create a drop-down box that allows display of/navigate to experiments being compared
 	var entitiesToCompare = document.getElementById("entitiesToCompare");
@@ -312,7 +343,7 @@ function parseEntities (entityObj)
 		option.value = contextPath + "/"+entityType+"/" + convertForURL (entities[entity].name) + "/" + entities[entity].entityId + "/" + convertForURL (entities[entity].created) + "/" + entities[entity].id;
 		option.innerHTML = entities[entity].name;
 		select_box.appendChild(option);
-	}	
+	}
 	form.innerHTML = "Experiments selected for comparison: ";
 	form.appendChild(select_box);
 	
@@ -444,7 +475,7 @@ function displayFile (id, pluginName)
 
     // Show parent div of the file display, and scroll there
 	doc.fileDetails.style.display = "block";
-	var pos = getPos (doc.fileDetails);
+	var pos = getPos (doc.heading);
 	window.scrollTo(pos.xPos, pos.yPos);
 }
 
@@ -683,6 +714,7 @@ function getCSV (file)
 function initCompare ()
 {
 	doc = {
+	    heading: document.getElementById("heading"),
 		displayClose: document.getElementById("fileclose"),
 		fileName: document.getElementById("filename"),
 		fileDisplay: document.getElementById("filedisplay"),

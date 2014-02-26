@@ -15,6 +15,8 @@ import org.json.simple.JSONObject;
 import de.binfalse.bflog.LOGGER;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntity;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntityVersion;
+import uk.ac.ox.cs.chaste.fc.beans.ChasteExperiment;
+import uk.ac.ox.cs.chaste.fc.beans.ChasteExperimentVersion;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeader;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeaderLink;
@@ -132,8 +134,12 @@ public class Compare extends WebModule
 					ChasteEntityVersion version = entity.getLatestVersion ();
 					fileMgmt.getFiles (version, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ());
 					JSONObject v = version.toJson ();
-					v.put ("name", entity.getName ());
-					v.put ("entityId", entity.getId ());
+					ChasteExperiment expt = (ChasteExperiment) entity;
+					if (expt != null)
+					{
+						v.put ("modelName", expt.getModel().getName());
+						v.put ("protoName", expt.getProtocol().getName());
+					}
 					entities.add (v);
 //					System.out.println ("appended");
 				}

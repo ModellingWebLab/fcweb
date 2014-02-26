@@ -501,6 +501,8 @@ contentFlotPlotComparer.prototype.showContents = function ()
 
                 var key = entityId + "-" + fileSig + "-" + i;
                 var label = entityName;
+                if (plotLabelStripText)
+                    label = label.replace(plotLabelStripText, "");
                 if (keyVals.length == csvData.length)
                     label += ", " + eachCSVData.file.keyName + " = " + keyVals[i] + " " + eachCSVData.file.keyUnits
                 else if (csvData.length > 2)
