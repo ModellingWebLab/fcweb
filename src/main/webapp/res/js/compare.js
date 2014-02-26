@@ -46,9 +46,11 @@ function getFileContent (file, succ)
 
 function nextPage (url)
 {
-	//if (//url)
-	window.history.pushState(document.location.href, "", url);
-	parseUrl ();
+    if (replace)
+        window.history.replaceState(document.location.href, "", url);
+    else
+        window.history.pushState(document.location.href, "", url);
+    parseUrl ();
 }
 
 function registerFileDisplayer (elem)
@@ -151,7 +153,7 @@ function highlightPlots (showDefault)
 				if (viz)
 				{
 					shownDefault = true;
-					viz.click();
+					nextPage(viz.href, true); // 'Invisible' redirect
 				}
 			}
 		}
