@@ -385,13 +385,12 @@ function contentFlotPlotComparer (file, div)
 
 contentFlotPlotComparer.prototype.getContentsCallback = function (succ)
 {
-//    console.log ("getContentsCallback : " + succ + " -> so far: " + this.gotFileContents + " of " + this.file.entities.length);
     if (!succ)
         this.ok = false;
+    this.div.appendChild(document.createTextNode("."));
 
     if (this.expectedKeyContents > 0)
     {
-//        console.log("getKey: " + succ + " so far: " + this.gotKeyContents + " of " + this.expectedKeyContents);
         // We've loaded the main data, and are now loading plot key data
         this.gotKeyContents++;
         if (this.gotKeyContents >= this.expectedKeyContents)

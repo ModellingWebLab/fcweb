@@ -1,4 +1,63 @@
 
+/** Extract key data for a file if available. */
+function getKeyValues(file)
+{
+    var keyVals = [];
+    if (file.keyId)
+    {
+        var keyData = getCSVColumns(file.keyFile);
+        if (keyData.length > 0)
+            for (var i=0; i<keyData[0].length; i++)
+                keyVals.push(keyData[0][i]);
+    }
+    return keyVals;
+}
+
+/**
+ * Actually create a plot using the HighCharts library.
+ * 
+ * @param id  id of the element that should contain the plot
+ * @param datasets  the data to plot
+ * @param thisFile  the 'file' object providing axes labels etc.
+ */
+function doHcPlot(id, datasets, thisFile)
+{
+    if ($("#"+id).highcharts === undefined)
+    {
+        // Wait for the library to finish loading!
+        console.log("Waiting for highcharts to load...");
+        window.setTimeout(function(){doHcPlot(id, datasets, thisFile)}, 100);
+        return;
+    }
+
+    var options = {
+        title: {
+            text: ''
+        },
+        plotOptions: {
+            series: {
+                allowPointSelect: true
+            },
+            line: {
+                marker: {
+                    enabled: thisFile.linestyle == "linespoints"
+                }
+            }
+        },
+        series: datasets
+    };
+    
+    if (thisFile.xAxes)
+        options.xAxis = {title : { text : thisFile.xAxes}};
+    if (thisFile.yAxes)
+        options.yAxis = {title : { text : thisFile.yAxes}};
+    if (thisFile.title)
+        options.title = {text : thisFile.title};
+    
+    $("#"+id).highcharts(options);
+}
+
+
 function HCPlotter (file, div)
 {
 	this.file = file;
@@ -9,24 +68,23 @@ function HCPlotter (file, div)
 
 HCPlotter.prototype.getContentsCallback = function (succ)
 {
-	//console.log ("insert content");
-	//console.log (this.div);
-    if ($(this.div).highcharts === undefined)
-    {
-        // Wait for the library to finish loading!
-        var t = this;
-        window.setTimeout(function(){t.getContentsCallback(succ)}, 100);
-        return;
-    }
     removeChildren (this.div);
 	if (!succ)
 		this.div.appendChild (document.createTextNode ("failed to load the contents"));
 	else
 	{
 	    var thisFile = this.file;
-		//var plotPoints = true;
-		//var csvData = getCSVColumnsDownsampled (this.file);
+
+	    if (thisFile.keyId && !thisFile.keyFile.contents)
+        {
+            // Load the key data and try again
+            this.div.appendChild (document.createTextNode ("loading plot key data..."));
+            thisFile.keyFile.getContents (this);
+            return;
+        }
+
 		var csvData = (thisFile.linestyle == "linespoints" || thisFile.linestyle == "points") ? getCSVColumnsNonDownsampled (thisFile) : getCSVColumnsDownsampled (thisFile);
+		var keyVals = getKeyValues(thisFile);
 		
 		var div = document.createElement("div");
 		var id = "hcplot-" + thisFile.id;
@@ -34,7 +92,6 @@ HCPlotter.prototype.getContentsCallback = function (succ)
 		div.style.width = "780px";
 		div.style.height = "450px";
 		this.div.appendChild (div);
-		
 
         var datasets = [];
         for (var i = 1; i < csvData.length; i++)
@@ -42,39 +99,15 @@ HCPlotter.prototype.getContentsCallback = function (succ)
                 var curData = [];
                 for (var j = 0; j < csvData[i].length; j++)
                         curData.push ([csvData[i][j].x, csvData[i][j].y]);
-                //if (curData.length > 100)
-                //	plotPoints = false;
-                //plot.polyline("line " + i, { x: csvData[0], y: csvData[i], stroke:  colorPalette.getRgba (col), thickness: 1 });
-                datasets.push ({name : "line " + i, data: curData});
+                var label;
+                if (keyVals.length == csvData.length)
+                    label = thisFile.keyName + " = " + keyVals[i] + " " + thisFile.keyUnits;
+                else
+                    label = "line " + i;
+                datasets.push ({name : label, data: curData});
         }
         
-		var options = {
-	        title: {
-	            text: ''
-	        },
-	        plotOptions: {
-	            series: {
-	                allowPointSelect: true
-	            },
-	            line: {
-	            	marker: {
-	            		enabled: thisFile.linestyle == "linespoints"
-	            	}
-	            }
-	        },
-	
-	        series: datasets
-		};
-		
-		if (thisFile.xAxes)
-			options.xAxis = {title : { text : thisFile.xAxes}};
-		if (thisFile.yAxes)
-			options.yAxis = {title : { text : thisFile.yAxes}};
-		if (thisFile.title)
-			options.title = {text : thisFile.title};
-		
-		
-		$("#"+id).highcharts(options);
+        doHcPlot(id, datasets, thisFile);
 	}
 		
 };
@@ -90,44 +123,84 @@ function HCPlotterComparer (file, div)
 	this.file = file;
 	this.div = div;
 	this.setUp = false;
-	div.appendChild (document.createTextNode ("loading"));
+	div.appendChild (document.createTextNode ("loading..."));
 	div.setAttribute ("class", "HighChartDiv");
 	this.gotFileContents = 0;
+    this.gotKeyContents = 0;
+    this.expectedKeyContents = -1;
 	this.ok = true;
 };
 
 HCPlotterComparer.prototype.getContentsCallback = function (succ)
 {
-	//console.log ("getContentsCallback : " + succ + " -> so far: " + this.gotFileContents + " of " + this.file.entities.length);
-	if (!succ)
-		this.ok = false;
-	
-	this.gotFileContents++;
-	
-	if (this.gotFileContents >= this.file.entities.length)
-		this.showContents ();
+    if (!succ)
+        this.ok = false;
+    this.div.appendChild(document.createTextNode("."));
+
+    if (this.expectedKeyContents > 0)
+    {
+        // We've loaded the main data, and are now loading plot key data
+        this.gotKeyContents++;
+        if (this.gotKeyContents >= this.expectedKeyContents)
+            this.showContents();
+    }
+    else
+    {
+        // We're loading the main plot data
+        this.gotFileContents++;
+        if (this.gotFileContents >= this.file.entities.length)
+            this.showContents ();
+    }
 };
 
 HCPlotterComparer.prototype.showContents = function ()
 {
-	//console.log ("insert content");
-	//console.log (this.div);
-    if ($(this.div).highcharts === undefined)
+    var thisDiv = this.div;
+    var thisFile = this.file;
+    if ($(thisDiv).highcharts === undefined)
     {
         // Wait for the library to finish loading!
         var t = this;
         window.setTimeout(function(){t.showContents()}, 100);
         return;
     }
-	removeChildren (this.div);
+	removeChildren (thisDiv);
 	if (!this.ok)
-		this.div.appendChild (document.createTextNode ("failed to load the contents"));
+		thisDiv.appendChild (document.createTextNode ("failed to load the contents"));
 	else
 	{
-		this.setUp = true;
-		var thisFile = this.file;
-		//var plotPoints = true;
-		//var csvData = getCSVColumnsDownsampled (this.file);
+        // Check whether we need to load plot key data
+        if (this.expectedKeyContents == -1)
+        {
+            this.expectedKeyContents = 0;
+            // First figure out how many keys we expect
+            for (var i = 0; i < thisFile.entities.length; i++)
+            {
+                var f = thisFile.entities[i].entityFileLink;
+                if (f.keyId && !f.keyFile.contents)
+                {
+                    this.expectedKeyContents++;
+//                    console.log("Found key " + f.keyId);
+                }
+            }
+//            console.log("Expecting " + this.expectedKeyContents + " keys");
+            // Then set them loading and wait!
+            for (var i = 0; i < thisFile.entities.length; i++)
+            {
+                var f = thisFile.entities[i].entityFileLink;
+                if (f.keyId && !f.keyFile.contents)
+                {
+                    getFileContent(f.keyFile, this);
+                }
+            }
+            if (this.expectedKeyContents > 0)
+            {
+                thisDiv.appendChild (document.createTextNode ("loading plot legend data..."));
+                return;
+            }
+        }
+        
+        this.setUp = true;
 		
 		var lineStyle = thisFile.linestyle;
 		
@@ -148,78 +221,34 @@ HCPlotterComparer.prototype.showContents = function ()
 		div.id = id;
 		div.style.width = "780px";
 		div.style.height = "450px";
-		this.div.appendChild (div);
-		
+		thisDiv.appendChild (div);
 		
         var datasets = [];
 
         for (var j = 0; j < csvDatas.length; j++)
         {
-        	//console.log (csvDatas[j]);
-        	//var tmp = "<p><strong>" + csvDatas[j].entity.name + ":</strong> ";
         	var csvData = csvDatas[j].data;
+        	var csvFile = csvDatas[j].file;
+            var keyVals = getKeyValues(csvFile);
         	for (var i = 1; i < csvData.length; i++)
         	{
         		var curData = [];
 	            for (var k = 0; k < csvData[i].length; k++)
 	                curData.push ([csvData[i][k].x, csvData[i][k].y]);
-	            
-	            var key = csvDatas[j].entity.id + "-" + csvDatas[j].file.sig + "-" + i;
-	            var label = csvDatas[j].entity.name + " line " + i;
-	            //datasets[key] = {label : label, data: curData, color: curColor};
-	            //curColor++;
+
+                var label = csvDatas[j].entity.name;
+                if (plotLabelStripText)
+                    label = label.replace(plotLabelStripText, "");
+                if (keyVals.length == csvData.length)
+                    label += ", " + csvFile.keyName + " = " + keyVals[i] + " " + csvFile.keyUnits
+                else if (csvData.length > 2)
+                    label += " line " + i;
+
                 datasets.push ({name : label, data: curData});
-	            
-	            /*tmp += "<input type='checkbox' name='" + key +
-                //"' id='id" + key + "'></input>" +
-                "' checked='checked' id='id" + key + "'></input>" +
-                "<label for='id" + key + "'>"
-                + " line " + i + "</label>";*/
         	}
-        	//choiceContainer.append(tmp + "</p>");
-        	
         }
         
-        
-        
-/*
-        for (var i = 1; i < csvData.length; i++)
-        {
-                var curData = [];
-                for (var j = 0; j < csvData[i].length; j++)
-                        curData.push ([csvData[i][j].x, csvData[i][j].y]);
-                //if (curData.length > 100)
-                //	plotPoints = false;
-                //plot.polyline("line " + i, { x: csvData[0], y: csvData[i], stroke:  colorPalette.getRgba (col), thickness: 1 });
-        }*/
-        
-		var options = {
-	        title: {
-	            text: ''
-	        },
-	        plotOptions: {
-	            series: {
-	                allowPointSelect: true
-	            },
-	            line: {
-	            	marker: {
-	            		enabled: thisFile.linestyle == "linespoints"
-	            	}
-	            }
-	        },
-	
-	        series: datasets
-		};
-		
-		if (thisFile.xAxes)
-			options.xAxis = {title : { text : thisFile.xAxes}};
-		if (thisFile.yAxes)
-			options.yAxis = {title : { text : thisFile.yAxes}};
-		if (thisFile.title)
-			options.title = {text : thisFile.title};
-		
-		
-		$("#"+id).highcharts(options);
+        doHcPlot(id, datasets, thisFile);
 	}
 		
 };
