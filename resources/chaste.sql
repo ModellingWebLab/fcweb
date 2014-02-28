@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS `experimentversions` (
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `finished` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `filepath` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
-  `status` enum('RUNNING','SUCCESS','PARTIAL','FAILED','INAPPRORIATE') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'RUNNING',
+  `status` enum('QUEUED','RUNNING','SUCCESS','PARTIAL','FAILED','INAPPRORIATE') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'QUEUED',
   `returnmsg` text COLLATE utf8_unicode_ci NOT NULL,
   `visibility` enum('PRIVATE','RESTRICTED','PUBLIC') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'PRIVATE',
   PRIMARY KEY (`id`),

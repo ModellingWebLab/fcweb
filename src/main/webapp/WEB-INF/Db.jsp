@@ -21,6 +21,7 @@
         <table class="matrixTable small">
             <tr>
                 <td class="center">not run</td>
+                <td class="experiment-QUEUED center">queued</td>
                 <td class="experiment-RUNNING center">running</td>
                 <td class="experiment-SUCCESS center">ran successfully</td>
                 <td class="experiment-PARTIAL center">partially ran</td>

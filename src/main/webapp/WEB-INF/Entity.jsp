@@ -34,6 +34,7 @@
     		<c:if test="${entity.type == 'experiment'}">
     			<p id='expversioncolorlegend'>
     				Status Legend:
+    				<span class="experiment-QUEUED">queued</span>
     				<span class="experiment-RUNNING">running</span>
     				<span class="experiment-INAPPRORIATE">inappropriate</span>
     				<span class="experiment-FAILED">failed</span>

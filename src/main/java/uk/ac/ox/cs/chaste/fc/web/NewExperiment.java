@@ -365,7 +365,7 @@ public class NewExperiment
 		else
 		{
 			ChasteExperimentVersion exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);
-			expMgmt.updateVersion (exp, "running", ChasteExperimentVersion.STATUS_RUNNING);
+			expMgmt.updateVersion (exp, "running", ChasteExperimentVersion.STATUS_QUEUED);
 		}
 		//return true;
 		return expID;

@@ -335,11 +335,18 @@ tr:nth-child(1)
 	text-align: left;
 }
 
+#experimentlist li.experiment-QUEUED,
+#entitydetails p.experiment-QUEUED,
+.experiment-QUEUED
+{
+    background-color:#d9e3f6;
+}
+
 #experimentlist li.experiment-RUNNING,
 #entitydetails p.experiment-RUNNING,
 .experiment-RUNNING
 {
-	background-color:#d9e3f6;
+	background-color:#93b4f6;
 }
 
 #experimentlist li.experiment-INAPPRORIATE,
@@ -544,9 +551,13 @@ li.entityviz-PRIVATE
 	display: block;
 	margin: -1.5em 0 100%;
 }
+.matrixTable .experiment-QUEUED
+{
+    background-color:#a6cfff;
+}
 .matrixTable .experiment-RUNNING
 {
-	background-color:#86b6f1;
+	background-color:#4996f3;
 }
 .matrixTable .experiment-INAPPRORIATE
 {

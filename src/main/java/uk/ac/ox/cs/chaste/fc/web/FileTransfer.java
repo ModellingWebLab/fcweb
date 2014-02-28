@@ -292,7 +292,8 @@ public class FileTransfer extends WebModule
 
 				LOGGER.debug ("searching for experiment");
 				ChasteExperimentVersion exp = expMgmt.getRunningExperiment (signature.trim ());
-				if (exp == null || !exp.getStatus ().equals (ChasteExperimentVersion.STATUS_RUNNING))
+				if (exp == null || (!exp.getStatus ().equals (ChasteExperimentVersion.STATUS_QUEUED)
+									&& !exp.getStatus ().equals (ChasteExperimentVersion.STATUS_RUNNING)))
 				{
 					LOGGER.debug ("no experiment found");
 					answer.put ("error", "invalid signature");
@@ -310,13 +311,21 @@ public class FileTransfer extends WebModule
 					returntype = "success";
 				returntype = returntype.trim ();
 				String exptStatus = ChasteExperimentVersion.STATUS_FAILED;
-				if (returntype.equals ("success"))
+				if (returntype.equals ("running"))
+					exptStatus = ChasteExperimentVersion.STATUS_RUNNING;
+				else if (returntype.equals ("success"))
 					exptStatus = ChasteExperimentVersion.STATUS_SUCCESS;
-				if (returntype.equals ("partial"))
+				else if (returntype.equals ("partial"))
 					exptStatus = ChasteExperimentVersion.STATUS_PARTIAL;
 				
 				LOGGER.debug ("supp: " + returnmsg + " -- " + returntype + " --> " + exptStatus);
 				
+				if (exptStatus.equals (ChasteExperimentVersion.STATUS_RUNNING))
+				{
+					// This was just a ping to let us know it's started
+					exp.updateExperiment (expMgmt, "started", exptStatus);
+					return answer;
+				}
 				
 				user.setRole (preRole);
 				user.setMail (preMail);
@@ -626,7 +635,7 @@ public class FileTransfer extends WebModule
 	    // Check whether we know immediately on submission (i.e. before running) that there's an issue
 	    LOGGER.debug ("response: " + res);
 	    if (res.trim ().equals (signature + " succ"))
-	    	return new SubmitResult (true, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_RUNNING);
+	    	return new SubmitResult (true, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_QUEUED);
 	    if (res.trim ().startsWith (signature + " inappropriate"))
 	    	return new SubmitResult (false, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_INAPPRORIATE);
 	    if (res.trim ().startsWith (signature))

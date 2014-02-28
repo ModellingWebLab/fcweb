@@ -38,7 +38,7 @@ function submitNewExperiment (jsonObject, notificationElement, td)
     	console.log (td);
     	
     	if (td)
-    		td.removeClass ("experiment-RUNNING").removeClass ("experiment-INAPPRORIATE").removeClass ("experiment-FAILED").removeClass ("experiment-PARTIAL").removeClass ("experiment-SUCCESS");
+    		td.removeClass ("experiment-QUEUED").removeClass ("experiment-RUNNING").removeClass ("experiment-INAPPRORIATE").removeClass ("experiment-FAILED").removeClass ("experiment-PARTIAL").removeClass ("experiment-SUCCESS");
     	
         if(xmlhttp.status == 200)
         {
@@ -50,7 +50,7 @@ function submitNewExperiment (jsonObject, notificationElement, td)
         			if (notificationElement)
         				notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/check.png' alt='valid' /> " + msg;
         			if (td)
-	    				td.addClass ("experiment-RUNNING");
+	    				td.addClass ("experiment-QUEUED");
         				//td.attr ("class", td.attr ("class").replace (/experiment-[A-Z]+/, "") + "experiment-RUNNING");
 	        	}
 	        	else

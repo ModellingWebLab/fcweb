@@ -43,6 +43,10 @@ fout.flush()
 os.fsync(fout)
 fout.close()
 
+# Tell the website we've started running
+r = requests.post(callback_url, data={'signature': signature, 'returntype': 'running'})
+
+
 # Call FunctionalCuration exe, writing output to the temporary folder containing inputs
 # (or rather, a subfolder thereof).
 # Also redirect stdout and stderr so we can debug any issues.
@@ -104,7 +108,7 @@ if 'manifest.xml' not in output_zip.namelist():
 output_zip.close()
 
 files = {'experiment': open(output_path, 'rb')}
-payload = {'signature': sys.argv[2], 'returntype': outcome}
+payload = {'signature': signature, 'returntype': outcome}
 r = requests.post(callback_url, files=files, data=payload)
 
 # Debug
