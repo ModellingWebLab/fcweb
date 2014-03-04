@@ -132,16 +132,19 @@ public class Compare extends WebModule
 				if (entity != null)
 				{
 					ChasteEntityVersion version = entity.getLatestVersion ();
-					fileMgmt.getFiles (version, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ());
-					JSONObject v = version.toJson ();
-					ChasteExperiment expt = (ChasteExperiment) entity;
-					if (expt != null)
+					if (version != null)
 					{
-						v.put ("modelName", expt.getModel().getName());
-						v.put ("protoName", expt.getProtocol().getName());
+						fileMgmt.getFiles (version, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ());
+						JSONObject v = version.toJson ();
+						ChasteExperiment expt = (ChasteExperiment) entity;
+						if (expt != null)
+						{
+							v.put ("modelName", expt.getModel().getName());
+							v.put ("protoName", expt.getProtocol().getName());
+						}
+						entities.add (v);
+	//					System.out.println ("appended");
 					}
-					entities.add (v);
-//					System.out.println ("appended");
 				}
 			}
 			

@@ -108,20 +108,21 @@ public abstract class ChasteEntityManager
 			
 			LOGGER.debug ("getting version of entity " + res.size() + ": " + cur.getId() + " " + cur.getName());
 			
+			ChasteEntityVersion ver;
 			if (knownVersions.get (vid) != null)
-				cur.addVersion (knownVersions.get (vid));
+				ver = knownVersions.get (vid);
 			else
 			{
-				ChasteEntityVersion neu = createEntityVersion (rs, cur);
-				if (neglectPermissions || user.isAllowedToSeeEntityVersion (neu))
-				{
-					LOGGER.debug ("user " + user.getNick() + " allowed; version=" + neu.getVersion());
-					cur.addVersion (neu);
-					knownVersions.put (vid, neu);
-				}
-				else
-					LOGGER.debug ("user " + user.getNick() + " not allowed: " + neu.toJson ());
+				ver = createEntityVersion (rs, cur);
+				knownVersions.put (vid, ver);
 			}
+			if (neglectPermissions || user.isAllowedToSeeEntityVersion (ver))
+			{
+				LOGGER.debug ("user " + user.getNick() + " allowed; version=" + ver.getVersion());
+				cur.addVersion (ver);
+			}
+			else
+				LOGGER.debug ("user " + user.getNick() + " not allowed: " + ver.toJson ());
 			
 			//System.out.println ("cur w/ version: " + cur.toJson ());
 		}
