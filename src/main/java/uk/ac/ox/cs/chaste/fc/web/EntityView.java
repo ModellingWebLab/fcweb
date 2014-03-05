@@ -776,12 +776,12 @@ public class EntityView extends WebModule
 			res.put ("response", true);
 			
 			
+			// Re-run any experiments associated with this model/protocol using the new version?
 			if (latestVersion != null && querry.get ("rerunExperiments") != null)
 			{
 				try
 				{
 					boolean rerunExperiments = Boolean.parseBoolean (querry.get ("rerunExperiments").toString ());
-
 					
 					if (rerunExperiments)
 					{
@@ -793,55 +793,52 @@ public class EntityView extends WebModule
 						int ok = 0, failed = 0;
 						
 						ChasteEntityVersion newVersion = entityMgmt.getVersionById (versionId);
-								
-						TreeSet<ChasteEntity> exp = null;
+						
+						TreeSet<ChasteEntity> exps = null;
 						if (entityMgmt.getEntityColumn ().equals ("model"))
 						{
-							 exp = expMgmt.getExperimentByModel (latestVersion.getId ());
-								if (exp != null)
+							exps = expMgmt.getExperimentsByModel (latestVersion.getId ());
+							if (exps != null)
+							{
+								for (ChasteEntity ex : exps)
 								{
-									for (ChasteEntity ex : exp)
+									ChasteExperiment e = (ChasteExperiment) ex;
+									try
 									{
-										ChasteExperiment e = (ChasteExperiment) ex;
-										try
-										{
-											if (0 < NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, newVersion, e.getProtocol (), modelMgmt, protocolMgmt, true))
-												//Batch.reRunExperiment ((ChasteExperiment) ex, db, notifications, expMgmt, userMgmt, user, modelMgmt, protocolMgmt, true))
-												ok++;
-											else
-												failed++;
-										}
-										catch (Exception e1)
-										{
+										if (0 < NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, newVersion, e.getProtocol (), modelMgmt, protocolMgmt, true))
+											ok++;
+										else
 											failed++;
-										}
+									}
+									catch (Exception e1)
+									{
+										failed++;
 									}
 								}
+							}
 						}
 						else if (entityMgmt.getEntityColumn ().equals ("protocol"))
 						{
-							 exp = expMgmt.getExperimentByProtocol (latestVersion.getId ());
-								if (exp != null)
+							exps = expMgmt.getExperimentsByProtocol (latestVersion.getId ());
+							if (exps != null)
+							{
+								for (ChasteEntity ex : exps)
 								{
-									for (ChasteEntity ex : exp)
+									ChasteExperiment e = (ChasteExperiment) ex;
+									try
 									{
-										ChasteExperiment e = (ChasteExperiment) ex;
-										try
-										{
-											if (0 < NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, e.getModel (), newVersion, modelMgmt, protocolMgmt, true))
-												//Batch.reRunExperiment ((ChasteExperiment) ex, db, notifications, expMgmt, userMgmt, user, modelMgmt, protocolMgmt, true))
-												ok++;
-											else
-												failed++;
-										}
-										catch (Exception e1)
-										{
+										if (0 < NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, e.getModel (), newVersion, modelMgmt, protocolMgmt, true))
+											ok++;
+										else
 											failed++;
-										}
+									}
+									catch (Exception e1)
+									{
+										failed++;
 									}
 								}
+							}
 						}
-							// exp = expMgmt.getExperimentByProtocol (latestVersion.getId ());
 						
 						res.put ("expCreation", "created " + ok + " experiments; " + failed + " failed");
 					}
@@ -855,7 +852,6 @@ public class EntityView extends WebModule
 			res.put ("versionId", versionId);
 			res.put ("versionType", entityMgmt.getEntityColumn ());
 			answer.put ("createNewEntity", res);
-			
 		}
 		
 		if (!createOk)

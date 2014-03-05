@@ -394,7 +394,7 @@ extends ChasteEntityManager
 	}
 
 	
-	public TreeSet<ChasteEntity> getExperimentByProtocol (int protocolId)
+	public TreeSet<ChasteEntity> getExperimentsByProtocol (int protocolId)
 	{
 		PreparedStatement st = db.prepareStatement (buildSelectQuery (" WHERE mo.protocol=?"));
 		ResultSet rs = null;
@@ -423,7 +423,7 @@ extends ChasteEntityManager
 	}
 
 	
-	public TreeSet<ChasteEntity> getExperimentByModel (int modelId)
+	public TreeSet<ChasteEntity> getExperimentsByModel (int modelId)
 	{
 		PreparedStatement st = db.prepareStatement (buildSelectQuery (" WHERE mo.model=?"));
 		ResultSet rs = null;
@@ -456,15 +456,18 @@ extends ChasteEntityManager
 	{
 		TreeSet<ChasteEntity> exp = null;
 		if (entityColumn.equals ("model"))
-			 exp = getExperimentByModel (vers.getId ());
+			 exp = getExperimentsByModel (vers.getId ());
 		else if (entityColumn.equals ("protocol"))
-			 exp = getExperimentByProtocol (vers.getId ());
+			 exp = getExperimentsByProtocol (vers.getId ());
 		
 		if (exp != null)
 		{
 			for (ChasteEntity e : exp)
 			{
-				vers.addExperiment ((ChasteExperiment) e);
+				if (e.hasVersions())
+				{
+					vers.addExperiment ((ChasteExperiment) e);
+				}
 			}
 		}
 	}

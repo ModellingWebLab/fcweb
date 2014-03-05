@@ -87,21 +87,17 @@ public abstract class ChasteEntityManager
 			int mid = rs.getInt ("entityid");
 			//LOGGER.debug("row " + rs.getRow());
 
-			//System.out.println ("creating cur");
 			ChasteEntity cur = null;
 			if (knownEntities.get (mid) != null)
 			{
-				//System.out.println ("was there");
 				cur = knownEntities.get (mid);
 				res.add (cur);
 			}
 			else
 			{
-				//System.out.println ("wasn't there");
 				cur = createEntity (rs);
 				if (cur == null)
 					continue;
-				//System.out.println ("found");
 				res.add (cur);
 				knownEntities.put (mid, cur);
 			}
@@ -118,13 +114,11 @@ public abstract class ChasteEntityManager
 			}
 			if (neglectPermissions || user.isAllowedToSeeEntityVersion (ver))
 			{
-				LOGGER.debug ("user " + user.getNick() + " allowed; version=" + ver.getVersion());
+				LOGGER.debug ("user " + user.getNick() + " allowed" + (neglectPermissions ? " (perm ignored)" : "") + ": " + ver.toJson());
 				cur.addVersion (ver);
 			}
 			else
 				LOGGER.debug ("user " + user.getNick() + " not allowed: " + ver.toJson ());
-			
-			//System.out.println ("cur w/ version: " + cur.toJson ());
 		}
 		return res;
 	}

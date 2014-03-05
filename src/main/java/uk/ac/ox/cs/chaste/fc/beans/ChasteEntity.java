@@ -91,7 +91,7 @@ public class ChasteEntity
 	
 	public ChasteEntityVersion getLatestVersion ()
 	{
-		if (versions.size () < 1)
+		if (versions.isEmpty())
 			return null;
 		List<Integer> list = new ArrayList<Integer> (versions.keySet ());
 		Collections.sort (list);
@@ -103,32 +103,31 @@ public class ChasteEntity
 	{
 		this.versions.put (version.getId (), version);
 	}
-
+	
+	public boolean hasVersions ()
+	{
+		return !versions.isEmpty();
+	}
 
 	public User getAuthor ()
 	{
 		return author;
 	}
-
-
 	
 	public String getCreated ()
 	{
 		return Tools.formatTimeStamp (created);
 	}
 
-
 	public String getName ()
 	{
 		return name;
 	}
-
 	
 	public String getType ()
 	{
 		return type;
 	}
-	
 	
 	public ChasteEntityVersion getVersionByFilePath (String path)
 	{
@@ -137,7 +136,6 @@ public class ChasteEntity
 				return v;
 		return null;
 	}
-
 
 	@SuppressWarnings("unchecked")
 	public JSONObject toJson ()
@@ -150,7 +148,7 @@ public class ChasteEntity
 		json.put ("id", id);
 
 		JSONObject version = new JSONObject ();
-		if (versions != null && versions.size () > 0)
+		if (!versions.isEmpty())
 			for (ChasteEntityVersion v : versions.values ())
 				version.put (v.getId (), v.toJson ());
 
