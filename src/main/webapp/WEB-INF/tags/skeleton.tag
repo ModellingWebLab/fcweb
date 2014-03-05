@@ -102,7 +102,7 @@
 				
 				
 					<div id="error"  <c:if test="${notes == null || !notes.error}">class="invisible"</c:if>     >
-						<h3>Following errors occurred:</h3>
+						<h3>The following errors occurred:</h3>
 						<ul id='errorlist'>
 							<c:forEach items="${notes.errors}" var="err" >
 								<li>${err}</li>
