@@ -9,7 +9,7 @@
         against experimental data. When computational models are being re-used in new studies, it is similarly
         important to check that they behave appropriately in the new situation to which you're applying them.
     </p>
-    <p>    
+    <p>
         To achieve this goal, it's a pre-requisite to be able to replicate in-silico precisely the same protocols 
         used in an experiment of interest.
         We are therefore developing a language for describing rich 'virtual experiment' protocols, 
@@ -22,12 +22,12 @@
     </p>
     <p>
         Please browse around and view the results of protocols encoded so far, run on a range of cell models.
-        If you wish to evaluate your own models under these protocols, you will need to register for an account.
+        If you wish to evaluate your own models under these protocols, you will need to register for an account and have it approved.
         By default your own models, protocols and experiments are private so that only you may view them.
         This can be altered to 'restricted', providing visibility to all logged-in users, or 'public' to publish them to the world.
     </p>
     <p>
-        Currently only administrators may upload new protocols, but if you have one you'd like to add to the system, please do
+        Currently only trusted users may upload new protocols, but if you have one you'd like to add to the system, please do
         <a href="${contextPath}/contact.html">contact us</a>.
     </p>
 
@@ -36,7 +36,7 @@
         The main features on our "to do" list include:
         <ul>
             <li>Utilise an ontology for the standardised names used to identify model constructs accessible to protocols, 
-            to allow more sophisticated interfacing between models and protocols.</li>
+            to allow even more sophisticated interfacing between models and protocols.</li>
             <li>With community agreement, annotate models directly in the CellML repository using these standardised names.</li>
             <li>Develop a protocol editor, facilitating the creation of new protocols.</li>
             <li>Propose some of our protocol language features for the next versions of SED-ML.</li>
@@ -47,11 +47,13 @@
         </ul>
         Please <a href="${contextPath}/contact.html">get in touch</a> if you would like to join forces to help with any of these.
     </p>
-    
+
     <h2>Acknowledgements</h2>
+    <img style="float:left;" src="${contextPath}/res/img/chaste.jpg" alt="Chaste project logo"/>
     <p>
         We would like to thank Steve Niederer and the Noble modelling group for discussions on ways to test cell model behaviour.
         We gratefully acknowledge funding from the <a href="http://www.2020science.net/research/functional-curation">2020 Science Programme</a>.
+        The functional curation software is built on top of <a href="https://chaste.cs.ox.ac.uk">Chaste</a>.
     </p>
 </t:skeleton>
 

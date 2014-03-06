@@ -169,6 +169,7 @@ footer {
 	background-color: #263e6a;
 	color: white;
 	padding: 15px;
+	clear: both;
 }
 
 a,a:active,a:visited

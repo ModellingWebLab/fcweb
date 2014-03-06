@@ -22,8 +22,12 @@
         virtual experiment protocols encoded in our own language,
         using <a href="https://chaste.cs.ox.ac.uk/trac/wiki/ChasteGuides/CodeGenerationFromCellML#Standardisednames">
         standardised tags</a> to generate interfaces between them, doing all the necessary units conversions.
+        The results of these experiments can be viewed and compared.
     </p>
-    
+    <p>
+        If you wish to analyse your own models or create new protocols, you will need to <a href="${contextPath}/register.html">register for an account</a> and have it approved.
+    </p>
+
     <div align="center" style="width:790px; text-align:center; margin: 0.5em 0pt 0.5em 0.8em; border: 1px solid #D1D1D1; padding: 10px;">
       <img alt="Chaste - Functional Curation Schematic" src="/FunctionalCuration/res/img/fc_schematic.png" width="780"/>
       <div style="width:770px;text-align:left;">
@@ -31,7 +35,7 @@
          This website provides an interface to a Model/Protocol Simulator, storing and displaying the results.
       </div>
     </div>
-    
+
     <p>
         What's great about this is that for the first time you can:
         <ul>

@@ -20,7 +20,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title><c:if test="${not empty title}">${title}</c:if>Functional Curation @ Chaste - Prototype</title>
+		<title><c:if test="${not empty title}">${title}</c:if>Functional Curation @ Chaste - Cardiac Electrophysiology</title>
 		
 		<%-- static header fields -> used on every page --%>
 		<script type='text/javascript'>
@@ -57,7 +57,8 @@
 		<header>
 			<div id="logo">
 				<a href="${contextPath}/index.html">
-					<img alt="Chaste - Functional Curation" src="${contextPath}/res/img/chaste.jpg" />
+					<!-- <img alt="Chaste - Functional Curation" src="${contextPath}/res/img/chaste.jpg" /> -->
+					<br/><br/>
 				</a>
 			</div>
 			
