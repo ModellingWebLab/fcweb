@@ -195,7 +195,7 @@ extends ChasteEntityManager
 		if (!user.isAllowedToCreateNewExperiment ())
 			throw new ChastePermissionException ("you are not allowed to create a new experiment");
 		
-		ChasteEntity exp = getExperiment (model.getId (), protocol.getId ());
+		ChasteEntity exp = getExperiment (model.getId (), protocol.getId (), false);
 		int expId = -1;
 		
 		if (exp == null)
@@ -262,7 +262,7 @@ extends ChasteEntityManager
 		return id;
 	}
 	
-	public ChasteEntity getExperiment (int modelId, int protocolId)
+	public ChasteEntity getExperiment (int modelId, int protocolId, boolean filterEmptyEntities)
 	{
 		PreparedStatement st = db.prepareStatement (buildSelectQuery (" WHERE mo.model=? AND mo.protocol=?"));
 		ResultSet rs = null;
@@ -272,8 +272,8 @@ extends ChasteEntityManager
 			st.setInt (2, protocolId);
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> res = evaluateResult (rs, false);
-			if (res.size () > 0)
+			TreeSet<ChasteEntity> res = evaluateResult (rs, false, filterEmptyEntities);
+			if (!res.isEmpty())
 				return res.first ();
 		}
 		catch (SQLException e)
@@ -332,12 +332,10 @@ extends ChasteEntityManager
 		try
 		{
 			st.setString (1, signature);
-			// TODO: remove
-			System.out.println (st.toString ());
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> entity = evaluateResult (rs, true);
-			if (entity != null && entity.size () > 0)
+			TreeSet<ChasteEntity> entity = evaluateResult (rs, true, false);
+			if (entity != null && !entity.isEmpty())
 				return (ChasteExperimentVersion) entity.first ().getVersionByFilePath (signature);
 		}
 		catch (SQLException e)
@@ -394,7 +392,11 @@ extends ChasteEntityManager
 	}
 
 	
-	public TreeSet<ChasteEntity> getExperimentsByProtocol (int protocolId)
+	/**
+	 * Get all experiments involving the given protocol.
+	 * @param filterEmptyEntities  whether to filter out experiments that don't have any visible versions
+	 */
+	public TreeSet<ChasteEntity> getExperimentsByProtocol (int protocolId, boolean filterEmptyEntities)
 	{
 		PreparedStatement st = db.prepareStatement (buildSelectQuery (" WHERE mo.protocol=?"));
 		ResultSet rs = null;
@@ -403,8 +405,8 @@ extends ChasteEntityManager
 			st.setInt (1, protocolId);
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> res = evaluateResult (rs, false);
-			if (res.size () > 0)
+			TreeSet<ChasteEntity> res = evaluateResult (rs, false, filterEmptyEntities);
+			if (!res.isEmpty())
 				return res;
 		}
 		catch (SQLException e)
@@ -422,8 +424,11 @@ extends ChasteEntityManager
 		return null;
 	}
 
-	
-	public TreeSet<ChasteEntity> getExperimentsByModel (int modelId)
+	/**
+	 * Get all experiments involving the given model.
+	 * @param filterEmptyEntities  whether to filter out experiments that don't have any visible versions
+	 */
+	public TreeSet<ChasteEntity> getExperimentsByModel (int modelId, boolean filterEmptyEntities)
 	{
 		PreparedStatement st = db.prepareStatement (buildSelectQuery (" WHERE mo.model=?"));
 		ResultSet rs = null;
@@ -432,9 +437,8 @@ extends ChasteEntityManager
 			st.setInt (1, modelId);
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> res = evaluateResult (rs, false);
-			System.out.println("Num expts for " + modelId + " found: " + res.size());
-			if (res.size () > 0)
+			TreeSet<ChasteEntity> res = evaluateResult (rs, false, filterEmptyEntities);
+			if (!res.isEmpty())
 				return res;
 		}
 		catch (SQLException e)
@@ -452,22 +456,22 @@ extends ChasteEntityManager
 		return null;
 	}
 
+	/**
+	 * Get all experiments involving the given entity version for which we are able to see at least one version.
+	 */
 	public void getExperiments (ChasteEntityVersion vers, String entityColumn)
 	{
 		TreeSet<ChasteEntity> exp = null;
 		if (entityColumn.equals ("model"))
-			 exp = getExperimentsByModel (vers.getId ());
+			 exp = getExperimentsByModel (vers.getId (), true);
 		else if (entityColumn.equals ("protocol"))
-			 exp = getExperimentsByProtocol (vers.getId ());
+			 exp = getExperimentsByProtocol (vers.getId (), true);
 		
 		if (exp != null)
 		{
 			for (ChasteEntity e : exp)
 			{
-				if (e.hasVersions())
-				{
-					vers.addExperiment ((ChasteExperiment) e);
-				}
+				vers.addExperiment ((ChasteExperiment) e);
 			}
 		}
 	}

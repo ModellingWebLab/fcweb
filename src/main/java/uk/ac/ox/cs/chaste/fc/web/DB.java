@@ -80,18 +80,25 @@ public class DB extends WebModule
 		return answer;
 	}
 	
+	/**
+	 * Get the latest visible version of all visible entities from the given manager.
+	 * The list will be sorted by name by the manager.
+	 */
 	private Vector<ChasteEntityVersion> getEntityVersions (ChasteEntityManager entityMgmt)
 	{
 		Vector<ChasteEntityVersion> entities = new Vector<ChasteEntityVersion> ();
 
-		TreeSet<ChasteEntity> entity = entityMgmt.getAll (false);
+		TreeSet<ChasteEntity> entity = entityMgmt.getAll (false, true);
 		for (ChasteEntity e : entity)
-			if (e.hasVersions ())
-				entities.add (e.getLatestVersion ());
+			entities.add (e.getLatestVersion ());
 		
 		return entities;
 	}
 	
+	/**
+	 * Get all visible experiment versions involving a model/protocol combination from the given lists
+	 * (i.e. form the cross product).
+	 */
 	private Vector<ChasteEntity> getExperimentVersions (Vector<ChasteEntityVersion> modelVersions, Vector<ChasteEntityVersion> protocolVersions, ExperimentManager entityMgmt)
 	{
 		Vector<ChasteEntity> exps = new Vector<ChasteEntity> ();
@@ -99,7 +106,7 @@ public class DB extends WebModule
 		for (ChasteEntityVersion model : modelVersions)
 			for (ChasteEntityVersion protocol : protocolVersions)
 			{
-				ChasteEntity ent = entityMgmt.getExperiment (model.getId (), protocol.getId ());
+				ChasteEntity ent = entityMgmt.getExperiment (model.getId (), protocol.getId (), true);
 				if (ent != null)
 					exps.add (ent);
 			}

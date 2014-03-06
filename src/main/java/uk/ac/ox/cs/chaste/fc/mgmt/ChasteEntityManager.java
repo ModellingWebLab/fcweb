@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.TreeSet;
 
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntity;
@@ -78,7 +79,15 @@ public abstract class ChasteEntityManager
 		);
 	}
 	
-	protected TreeSet<ChasteEntity> evaluateResult (ResultSet rs, boolean neglectPermissions) throws SQLException
+	/**
+	 * Convert the results of a database query into a set of entities, with version information attached.
+	 * @param rs  the query results
+	 * @param neglectPermissions  whether to include all entities (true), or only those the current user has permission to view (false)
+	 * @param filterEmptyEntities  whether to filter out entities for which the user cannot see any version
+	 * @return  entities sorted by name
+	 * @throws SQLException
+	 */
+	protected TreeSet<ChasteEntity> evaluateResult (ResultSet rs, boolean neglectPermissions, boolean filterEmptyEntities) throws SQLException
 	{
 		TreeSet<ChasteEntity> res = new TreeSet<ChasteEntity> (new ChasteEntity.SortByName ());
 		while (rs != null && rs.next ())
@@ -119,6 +128,13 @@ public abstract class ChasteEntityManager
 			}
 			else
 				LOGGER.debug ("user " + user.getNick() + " not allowed: " + ver.toJson ());
+		}
+		if (filterEmptyEntities)
+		{
+			Iterator<ChasteEntity> it=res.iterator();
+			while (it.hasNext())
+				if (!it.next().hasVersions())
+					it.remove();
 		}
 		return res;
 	}
@@ -215,7 +231,7 @@ public abstract class ChasteEntityManager
 			st.setInt (1, id);
 			st.execute ();
 			rs = st.getResultSet ();
-			evaluateResult (rs, false);
+			evaluateResult (rs, false, false);
 		}
 		catch (SQLException e)
 		{
@@ -243,7 +259,7 @@ public abstract class ChasteEntityManager
 			st.setString (1, name);
 			st.execute ();
 			rs = st.getResultSet ();
-			evaluateResult (rs, false);
+			evaluateResult (rs, false, false);
 		}
 		catch (SQLException e)
 		{
@@ -282,7 +298,7 @@ public abstract class ChasteEntityManager
 			st.setInt (1, id);
 			st.execute ();
 			rs = st.getResultSet ();
-			evaluateResult (rs, neglectPermissions);
+			evaluateResult (rs, neglectPermissions, false);
 		}
 		catch (SQLException e)
 		{
@@ -308,8 +324,8 @@ public abstract class ChasteEntityManager
 			st.setString (1, filePath);
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> entity = evaluateResult (rs, true);
-			if (entity != null && entity.size () > 0)
+			TreeSet<ChasteEntity> entity = evaluateResult (rs, true, true);
+			if (entity != null && !entity.isEmpty())
 				return entity.first ().getVersionByFilePath (filePath);
 		}
 		catch (SQLException e)
@@ -336,7 +352,7 @@ public abstract class ChasteEntityManager
 			st.setString (1, nick);
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> res = evaluateResult (rs, false);
+			TreeSet<ChasteEntity> res = evaluateResult (rs, false, false);
 			db.closeRes (st);
 			db.closeRes (rs);
 			return res;
@@ -355,7 +371,12 @@ public abstract class ChasteEntityManager
 		return null;
 	}
 	
-	public TreeSet<ChasteEntity> getAll (boolean neglectPermissions)
+	/**
+	 * @param neglectPermissions  if false, only return entity versions the current user has permission to view
+	 * @param filterEmptyEntities  if true, don't return entities for which the current user can't see any versions
+	 * @return  a set of all (visible) entities of this manager's type
+	 */
+	public TreeSet<ChasteEntity> getAll (boolean neglectPermissions, boolean filterEmptyEntities)
 	{
 		PreparedStatement st = db.prepareStatement (buildSelectQuery (""));
 		ResultSet rs = null;
@@ -363,7 +384,7 @@ public abstract class ChasteEntityManager
 		{
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> res = evaluateResult (rs, neglectPermissions);
+			TreeSet<ChasteEntity> res = evaluateResult (rs, neglectPermissions, filterEmptyEntities);
 			db.closeRes (st);
 			db.closeRes (rs);
 			return res;

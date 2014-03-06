@@ -797,7 +797,7 @@ public class EntityView extends WebModule
 						TreeSet<ChasteEntity> exps = null;
 						if (entityMgmt.getEntityColumn ().equals ("model"))
 						{
-							exps = expMgmt.getExperimentsByModel (latestVersion.getId ());
+							exps = expMgmt.getExperimentsByModel (latestVersion.getId (), false);
 							if (exps != null)
 							{
 								for (ChasteEntity ex : exps)
@@ -819,7 +819,7 @@ public class EntityView extends WebModule
 						}
 						else if (entityMgmt.getEntityColumn ().equals ("protocol"))
 						{
-							exps = expMgmt.getExperimentsByProtocol (latestVersion.getId ());
+							exps = expMgmt.getExperimentsByProtocol (latestVersion.getId (), false);
 							if (exps != null)
 							{
 								for (ChasteEntity ex : exps)

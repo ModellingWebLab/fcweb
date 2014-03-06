@@ -88,7 +88,7 @@ public class Batch extends WebModule
 			if (entity == null)
 				return errorPage (request, response, null);
 			request.setAttribute ("entity", entity);
-			request.setAttribute ("options", optionsMgmt.getAll (false));
+			request.setAttribute ("options", optionsMgmt.getAll (false, true));
 			
 			header.addScript (new PageHeaderScript ("res/js/batch.js", "text/javascript", "UTF-8", null));
 		}
@@ -304,7 +304,7 @@ public class Batch extends WebModule
 			if (experiment == -42)
 			{
 				// rerun all experiments
-				TreeSet<ChasteEntity> experiments = expMgmt.getAll (false);
+				TreeSet<ChasteEntity> experiments = expMgmt.getAll (false, false);
 				for (ChasteEntity exp : experiments)
 				{
 					if (reRunExperiment ((ChasteExperiment) exp, db, notifications, expMgmt, userMgmt, user, modelMgmt, protocolMgmt, force))
