@@ -7,7 +7,7 @@
     <h1 id="entityname">
         <small>${fn:toUpperCase(fn:substring(entity.type, 0, 1))}${fn:toLowerCase(fn:substring(entity.type, 1,fn:length(entity.type)))}: </small>
         ${entity.name}
-    </h1>    
+    </h1>
     
 	<div class="suppl">
 	    <small>Created <time>${entity.created}</time> by <em>${entity.author}</em>. 
@@ -24,7 +24,7 @@
     			&amp; protocol: 
     			<a href="${contextPath}/${correspondingProtocol.entity.type}/${correspondingProtocol.entity.url}/${correspondingProtocol.entity.id}/${correspondingProtocol.url}/${correspondingProtocol.id}">${correspondingProtocol.name}</a>
     		</c:if>
-		</small> 
+		</small>
 	</div>
 	
     

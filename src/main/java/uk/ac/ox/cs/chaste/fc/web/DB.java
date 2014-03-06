@@ -70,9 +70,9 @@ public class DB extends WebModule
 			
 			Vector<ChasteEntity> experiments = getExperimentVersions (modelVersions, protocolVersions, new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt));
 			
-			obj.put ("models", versionsToJson (modelVersions));//prepareEntities (modelMgmt, false));
-			obj.put ("protocols", versionsToJson (protocolVersions));//prepareEntities (protocolMgmt, false));
-			obj.put ("experiments", entitiesToJson (experiments));//prepareEntities (new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt), true));
+			obj.put ("models", versionsToJson (modelVersions));
+			obj.put ("protocols", versionsToJson (protocolVersions));
+			obj.put ("experiments", entitiesToJson (experiments));
 			
 			answer.put ("getMatrix", obj);
 		}
@@ -86,7 +86,7 @@ public class DB extends WebModule
 
 		TreeSet<ChasteEntity> entity = entityMgmt.getAll (false);
 		for (ChasteEntity e : entity)
-			if (e.getVersions ().size () > 0)
+			if (e.hasVersions ())
 				entities.add (e.getLatestVersion ());
 		
 		return entities;
@@ -123,24 +123,4 @@ public class DB extends WebModule
 			obj.put (e.getId (), e.toJson ());
 		return obj;
 	}
-	
-	/*prepareEntities (ChasteEntityManager entityMgmt, boolean exp)
-	{
-		JSONObject obj = new JSONObject ();
-		
-		TreeSet<ChasteEntity> entity = entityMgmt.getAll (true);
-		for (ChasteEntity e : entity)
-		{
-			if (e.getVersions ().size () > 0)
-			{
-				if (exp)
-					obj.put (e.getId (), e.toJson ());
-				else
-					obj.put (e.getId (), e.getLatestVersion ().toJson ());
-			}
-		}
-		
-		return obj;
-	}*/
-
 }
