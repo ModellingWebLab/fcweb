@@ -4,6 +4,10 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}${entity.type} - " contextPath="${contextPath}" newExpModelName="${newExpModelName}" newExpProtocolName="${newExpProtocolName}">
+    <c:choose>
+        <c:when test="${entity.type eq 'model'}"><c:set var="otherType" value="protocol"/></c:when>
+        <c:otherwise><c:set var="otherType" value="model"/></c:otherwise>
+    </c:choose>
     <h1 id="entityname">
         <small>${fn:toUpperCase(fn:substring(entity.type, 0, 1))}${fn:toLowerCase(fn:substring(entity.type, 1,fn:length(entity.type)))}: </small>
         ${entity.name}
@@ -92,12 +96,15 @@
 		    <c:if test="${entity.author == User.nick || User.admin}">
 		    	Delete version: <a id='deleteVersion'><img src="${contextPath}/res/img/delete.png" alt="delete version" title="delete this version of the ${entity.type}" /></a>
 		    </c:if>
+		    <c:if test="${entity.type != 'experiment' && User.isAllowedToCreateNewExperiment()}">
+		        Run experiments: <a class='runExpts' title="Run experiments using this ${entity.type}"><img alt="Run experiments using this ${entity.type}" src="${contextPath}/res/img/batch.png"/></a>
+		    </c:if>
 		    </small>
 	    </div>
 	    
 	    <div id="experiment-files-switcher">
 	    	<button style="float:left;" id="experiment-files-switcher-files" title="View files associated with this ${entity.type}">Files</button>
-            <button style="margin-left:5px; float:left;" id="experiment-files-switcher-exp" title="Compare experiments using this ${entity.type}">Experiments</button>
+            <button style="margin-left:5px; float:left;" id="experiment-files-switcher-exp" title="View &amp; compare experiments using this ${entity.type}">Experiments</button>
 	    	<c:if test="${entity.type == 'protocol'}">
     	    	    <button style="margin-left:5px; float:left;" id="compare-all-models" title="Compare all available models">Compare all available models</button>
    	    	</c:if>
@@ -126,6 +133,13 @@
 		
 		<div id="entityexperimentlist">
 		    <h3>Experiments using this ${entity.type}</h3>
+		    <p>
+		        This ${entity.type} has been run with the following ${otherType}s.
+		        Click to view results, or select multiple experiments to compare.
+                <c:if test="${entity.type != 'experiment' && User.isAllowedToCreateNewExperiment()}">
+                    You may also <a class='runExpts' title="Run experiments using this ${entity.type}">run new experiments using this ${entity.type}</a>.
+                </c:if>
+		    </p>
 			<div id="entityexperimentlistpartners"></div>
 			<div id="entityexperimentlistpartnersact">
 				[<a id="entityexperimentlistpartnersactall">select all</a>]

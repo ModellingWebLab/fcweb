@@ -92,12 +92,11 @@ function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction,
 	        		}
 	        		
 	        		p = document.createElement("p");
-	        		p.appendChild(document.createTextNode ("Schedule  "));
 	        		a = document.createElement("a");
 	        		a.href = contextPath + "/batch/" + json.createNewEntity.versionType + "/newVersion/" + json.createNewEntity.versionId;
-	        		a.appendChild(document.createTextNode ("Batch Jobs"));
+	        		a.appendChild(document.createTextNode ("Run experiments"));
 	        		p.appendChild(a);
-	        		p.appendChild(document.createTextNode (" using this entity."));
+	        		p.appendChild(document.createTextNode (" using this " + json.createNewEntity.versionType + "."));
 	        		form.appendChild(p);
 	        	}
 	        	else

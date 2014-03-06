@@ -372,19 +372,6 @@ function displayVersion (id, showDefault)
 	var dv = doc.version;
 	dv.name.innerHTML = "<small>Version: </small>" + v.name + " ";
 	
-	if (entityType != "experiment" && ROLE.isAllowedToCreateNewExperiment)
-	{
-	    // Show link to create new experiments using this model/protocol
-		var createBatchLink = document.createElement("a");
-		var createBatchImg = document.createElement("img");
-		createBatchImg.src = contextPath + "/res/img/batch.png";
-		createBatchImg.alt = "create batch jobs from this " + entityType;
-		createBatchLink.appendChild (createBatchImg);
-		createBatchLink.title = "create batch jobs from this " + entityType;
-		createBatchLink.href = contextPath + "/batch/" + entityType + "/" + convertForURL (v.name) + "/" + v.id;
-		dv.name.appendChild (createBatchLink);
-	}
-	
 	if (dv.visibility)
 	{
 	    // Show chooser for changing entity visibility
@@ -418,6 +405,12 @@ function displayVersion (id, showDefault)
 		});
 	}
 	
+    if (entityType != "experiment" && ROLE.isAllowedToCreateNewExperiment)
+    {
+        // Specify links to create new experiments using this model/protocol
+        $(".runExpts").each(function (){this.href = contextPath + "/batch/" + entityType + "/" + convertForURL (v.name) + "/" + v.id;});
+    }
+    
 	dv.author.innerHTML = v.author;
 	dv.time.setAttribute ("datetime", v.created);
 	dv.time.innerHTML = beautifyTimeStamp (v.created);

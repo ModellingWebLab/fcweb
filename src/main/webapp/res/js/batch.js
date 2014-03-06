@@ -86,8 +86,24 @@ function createListener(createButton, actionIndicator)
         false);
 }
 
+/**
+ * Set whether each model/protocol selection checkbox is checked or unchecked.
+ * @param checked  what to set as the state of each checkbox
+ */
+function setChecks(checked)
+{
+    var boxes = document.getElementsByTagName("input");
+    for (var i = 0; i < boxes.length; i++)
+    {
+        if (boxes[i].type != "checkbox" || boxes[i].id == "forceoverwrite")
+            continue;
+        boxes[i].checked = checked;
+    }
+}
+
 function initBatch ()
 {
+    // Add listeners for clicks on our various buttons
     var btn = document.getElementById("batchcreator1");
     if (btn)
         createListener(btn, document.getElementById("batchcreatoraction1"));
@@ -98,30 +114,16 @@ function initBatch ()
 	var checker = document.getElementById("checkAll");
 	var checkerLatest = document.getElementById("checkLatest");
 	var unchecker = document.getElementById("uncheckAll");
-	checker.addEventListener("click", function ()
-	{
-		var boxes = document.getElementsByTagName("input");
-		for (var i = 0; i < boxes.length; i++)
-		{
-			if (boxes[i].type != "checkbox" || boxes[i].id == "forceoverwrite")
-				continue;
-			boxes[i].checked = true;
-		}
-	}, false);
+	checker.addEventListener("click", function () { setChecks(true); }, false);
 	checkerLatest.addEventListener("click", function ()
 	{
-		$( ".latestVersion" ).prop('checked', true);
+	    setChecks(false);
+	    $( ".latestVersion" ).prop('checked', true);
 	}, false);
-	unchecker.addEventListener("click", function ()
-	{
-		var boxes = document.getElementsByTagName("input");
-		for (var i = 0; i < boxes.length; i++)
-		{
-			if (boxes[i].type != "checkbox" || boxes[i].id == "forceoverwrite")
-				continue;
-			boxes[i].checked = false;
-		}
-	}, false);
+	unchecker.addEventListener("click", function () { setChecks(false); }, false);
+	
+	// Start with just the latest versions checked
+	$( ".latestVersion" ).prop('checked', true);
 }
 
 document.addEventListener("DOMContentLoaded", initBatch, false);
