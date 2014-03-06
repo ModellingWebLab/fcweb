@@ -40,7 +40,6 @@ public class Batch extends WebModule
 {
 	private final int TYPE_MODEL = 1;
 	private final int TYPE_PROTOCOL = 2;
-	private final int TYPE_EXPERIMENT = 4;
 	
 	private int type;
 
@@ -218,21 +217,11 @@ public class Batch extends WebModule
 				expFAIL++;
 				continue;
 			}
-
-			try
-			{
-				NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, model, protocol, modelMgmt, protocolMgmt, force);
-			}
-			catch (Exception e)
-			{
-				notifications.addError ("exp failed: [" + model.getName () + "@" + model.getVersion () + "] -- [" + protocol.getName () + "@" + protocol.getVersion () + "]");
-				LOGGER.warn ("exp failed to start: [" + model.getName () + "@" + model.getVersion () + "] -- [" + protocol.getName () + "@" + protocol.getVersion () + "]", e);
+			
+			if (tryCreateExperiment(model, protocol, db, notifications, expMgmt, userMgmt, user, modelMgmt, protocolMgmt, force))
+				expOK++;
+			else
 				expFAIL++;
-				continue;
-			}
-
-			notifications.addInfo ("exp started:  [" + model.getName () + "@" + model.getVersion () + "] -- [" + protocol.getName () + "@" + protocol.getVersion () + "]");
-			expOK++;
 		}
 
 		JSONObject obj = new JSONObject ();
@@ -331,28 +320,6 @@ public class Batch extends WebModule
 					ok++;
 				else
 					failed++;
-				/*if (exp == null)
-				{
-					notifications.addError ("experiment not found");
-					LOGGER.error ("user requested experiment invalid or not found, experiment id: " + experiment);
-					failed++;
-				}
-				ChasteEntityVersion modelVersion = exp.getModel (modelMgmt);
-				ChasteEntityVersion protocolVersion = exp.getProtocol (protocolMgmt);
-				try
-				{
-					NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, modelVersion, protocolVersion, modelMgmt, protocolMgmt, force);
-				}
-				catch (Exception e)
-				{
-					notifications.addError ("experiment failed: [" + modelVersion.getName () + "@" + modelVersion.getVersion () + "] -- [" + protocolVersion.getName () + "@" + protocolVersion.getVersion () + "]");
-					LOGGER.warn ("exp failed to start: [" + modelVersion.getName () + "@" + modelVersion.getVersion () + "] -- [" + protocolVersion.getName () + "@" + protocolVersion.getVersion () + "]", e);
-					failed++;
-					continue;
-				}
-
-				notifications.addInfo ("experiment started:  [" + modelVersion.getName () + "@" + modelVersion.getVersion () + "] -- [" + protocolVersion.getName () + "@" + protocolVersion.getVersion () + "]");
-				ok++;*/
 			}
 			else if (model >= 0 || protocol >= 0)
 			{
@@ -372,22 +339,13 @@ public class Batch extends WebModule
 					notifications.addError (e.getMessage ());
 					LOGGER.error ("user requested entity invalid or not found", e);
 					failed++;
-				}
-
-				try
-				{
-					NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, modelVersion, protocolVersion, modelMgmt, protocolMgmt, force);
-				}
-				catch (Exception e)
-				{
-					notifications.addError ("experiment failed: [" + modelVersion.getName () + "@" + modelVersion.getVersion () + "] -- [" + protocolVersion.getName () + "@" + protocolVersion.getVersion () + "]");
-					LOGGER.warn ("exp failed to start: [" + modelVersion.getName () + "@" + modelVersion.getVersion () + "] -- [" + protocolVersion.getName () + "@" + protocolVersion.getVersion () + "]", e);
-					failed++;
 					continue;
 				}
-
-				notifications.addInfo ("experiment started:  [" + modelVersion.getName () + "@" + modelVersion.getVersion () + "] -- [" + protocolVersion.getName () + "@" + protocolVersion.getVersion () + "]");
-				ok++;
+				
+				if (tryCreateExperiment(modelVersion, protocolVersion, db, notifications, expMgmt, userMgmt, user, modelMgmt, protocolMgmt, force))
+					ok++;
+				else
+					failed++;
 			}
 			else
 			{
@@ -404,6 +362,31 @@ public class Batch extends WebModule
 		return answer;
 	}
 	
+	/**
+	 * Try to create a new experiment with the given model & protocol versions, and return whether it was queued for execution.
+	 * As a side effect, set error/info notifications indicating success or failure.
+	 */
+	public static boolean tryCreateExperiment(ChasteEntityVersion model, ChasteEntityVersion protocol,
+			DatabaseConnector db, Notifications notifications, ExperimentManager expMgmt, UserManager userMgmt, User user, ModelManager modelMgmt, ProtocolManager protocolMgmt, boolean force)
+	{
+		try
+		{
+			NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, model, protocol, modelMgmt, protocolMgmt, force);
+		}
+		catch (Exception e)
+		{
+			notifications.addError ("experiment failed to start: [" + model.getName () + "@" + model.getVersion () + "] -- [" + protocol.getName () + "@" + protocol.getVersion () + "]: " + e.getLocalizedMessage());
+			LOGGER.warn ("exp failed to start: [" + model.getName () + "@" + model.getVersion () + "] -- [" + protocol.getName () + "@" + protocol.getVersion () + "]", e);
+			return false;
+		}
+		notifications.addInfo ("experiment queued:  [" + model.getName () + "@" + model.getVersion () + "] -- [" + protocol.getName () + "@" + protocol.getVersion () + "]");
+		return true;
+	}
+	
+	/**
+	 * Try to run a new version of the given experiment, and return whether it was queued for execution.
+	 * As a side effect, set error/info notifications indicating success or failure.
+	 */
 	public static boolean reRunExperiment (ChasteExperiment exp, DatabaseConnector db, Notifications notifications, ExperimentManager expMgmt, UserManager userMgmt, User user, ModelManager modelMgmt, ProtocolManager protocolMgmt, boolean force)
 	{
 		if (exp == null)
@@ -415,18 +398,6 @@ public class Batch extends WebModule
 		
 		ChasteEntityVersion modelVersion = exp.getModel ();
 		ChasteEntityVersion protocolVersion = exp.getProtocol ();
-
-		try
-		{
-			NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, modelVersion, protocolVersion, modelMgmt, protocolMgmt, force);
-		}
-		catch (Exception e)
-		{
-			notifications.addError ("experiment failed: [" + modelVersion.getName () + "@" + modelVersion.getVersion () + "] -- [" + protocolVersion.getName () + "@" + protocolVersion.getVersion () + "]");
-			LOGGER.warn ("exp failed to start: [" + modelVersion.getName () + "@" + modelVersion.getVersion () + "] -- [" + protocolVersion.getName () + "@" + protocolVersion.getVersion () + "]", e);
-			return false;
-		}
-		notifications.addInfo ("experiment started:  [" + modelVersion.getName () + "@" + modelVersion.getVersion () + "] -- [" + protocolVersion.getName () + "@" + protocolVersion.getVersion () + "]");
-		return true;
+		return tryCreateExperiment(modelVersion, protocolVersion, db, notifications, expMgmt, userMgmt, user, modelMgmt, protocolMgmt, force);
 	}
 }

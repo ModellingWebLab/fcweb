@@ -306,7 +306,7 @@ public class NewExperiment
 		{
 			LOGGER.error ("couldn't create combine archives to run experiment", e);
 			e.printStackTrace ();
-			throw new IOException ("error creating combine archives");
+			throw new IOException ("error collecting model and protocol files");
 		}
 		
 		// create experiment directory file
@@ -332,7 +332,7 @@ public class NewExperiment
 		if (expID < 0)
 		{
 			LOGGER.error ("couldn't create new DB entry for experiment");
-			throw new IOException ("couldn't create new DB entry for experiment. (there may already exist an experiment of this model/protocol combination and you're not allowed to overwrite it.)");
+			throw new IOException ("couldn't register experiment (there may already exist an experiment of this model/protocol combination and you're not allowed to overwrite it)");
 		}
 		
 		
