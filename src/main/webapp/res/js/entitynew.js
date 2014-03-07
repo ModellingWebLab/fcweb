@@ -59,6 +59,7 @@ function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction,
 	        	var msg = json.createNewEntity.responseText;
 	        	if (json.createNewEntity.response)
 	        	{
+	        	    clearNotifications("error"); // Get rid of any leftover errors from failed creation attempts
 	        		var form = document.getElementById ("newentityform");
 	        		removeChildren (form);
 	        		var h1 = document.createElement("h1");

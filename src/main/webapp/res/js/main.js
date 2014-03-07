@@ -260,8 +260,9 @@ function runExperiment (force)
 
 function removeChildren (elem)
 {
-	while (elem.firstChild)
-		elem.removeChild(elem.firstChild);
+    if (elem)
+        while (elem.firstChild)
+            elem.removeChild(elem.firstChild);
 }
 
 function clearNotifications (type)
