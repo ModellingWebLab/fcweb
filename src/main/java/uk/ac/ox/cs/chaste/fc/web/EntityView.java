@@ -581,7 +581,7 @@ public class EntityView extends WebModule
 			if (files.size () < 1)
 			{
 				createOk = false;
-				notifications.addError ("no files chosen. Empty "+entityMgmt.getEntityColumn ()+"s don't make much sense.");
+				notifications.addError ("no files included in this "+entityMgmt.getEntityColumn ()+".");
 			}
 			
 			if (FileTransfer.ambiguous (files))
@@ -616,7 +616,7 @@ public class EntityView extends WebModule
 			{
 				cleanUp (null, -1, files, fileMgmt, entityMgmt);
 				LOGGER.error ("error inserting/creating "+entityMgmt.getEntityColumn ()+" to db");
-				throw new IOException ("wasn't able to create/insert "+entityMgmt.getEntityColumn ()+" to db.");
+				throw new IOException ("wasn't able to create/insert "+entityMgmt.getEntityColumn ()+" to database.");
 			}
 			ChasteEntityVersion latestVersion = null;
 			if (entityMgmt.getEntityById (entityId) != null)
@@ -628,7 +628,7 @@ public class EntityView extends WebModule
 			{
 				cleanUp (null, versionId, files, fileMgmt, entityMgmt);
 				LOGGER.error ("error inserting/creating "+entityMgmt.getEntityColumn ()+" version to db");
-				throw new IOException ("wasn't able to create/insert "+entityMgmt.getEntityColumn ()+" version to db.");
+				throw new IOException ("wasn't able to create/insert "+entityMgmt.getEntityColumn ()+" version to database.");
 			}
 			
 			if (!entityDir.mkdirs ()) // This should fail if entityDir already exists, so catching race conditions
@@ -652,7 +652,7 @@ public class EntityView extends WebModule
 				{
 					cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
 					LOGGER.error ("error inserting file to db: " + f.name + " -> " + f.tmpFile);
-					throw new IOException ("wasn't able to insert file " + f.name + " to db.");
+					throw new IOException ("wasn't able to insert file " + f.name + " to database.");
 				}
 				f.dbId = fileId;
 				
@@ -661,7 +661,7 @@ public class EntityView extends WebModule
 				{
 					cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
 					LOGGER.error ("error inserting file to db: " + f.name + " -> " + f.tmpFile);
-					throw new IOException ("wasn't able to insert file " + f.name + " to db.");
+					throw new IOException ("wasn't able to insert file " + f.name + " to database.");
 				}
 				
 				//copy file
@@ -674,7 +674,7 @@ public class EntityView extends WebModule
 					e.printStackTrace ();
 					cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
 					LOGGER.error ("error copying file from tmp to "+entityMgmt.getEntityColumn ()+" dir", e);
-					throw new IOException ("wasn't able to copy a file. sry, our fault.");
+					throw new IOException ("wasn't able to copy a file. Sorry, our fault.");
 				}
 				
 				extractReadme = extractReadme && !f.name.toLowerCase ().equals ("readme.md");
@@ -726,7 +726,7 @@ public class EntityView extends WebModule
 								{
 									readMeFile.delete ();
 									LOGGER.error ("error inserting file to db: README.md");
-									throw new IOException ("wasn't able to insert file README.md to db.");
+									throw new IOException ("wasn't able to insert file README.md to database.");
 								}
 								
 								// associate files+version
@@ -734,7 +734,7 @@ public class EntityView extends WebModule
 								{
 									readMeFile.delete ();
 									LOGGER.error ("error inserting file to db: README.md");
-									throw new IOException ("wasn't able to insert file README.md to db.");
+									throw new IOException ("wasn't able to insert file README.md to database.");
 								}
 								
 								break;
@@ -765,7 +765,7 @@ public class EntityView extends WebModule
 							try
 						{
 							br.close ();
-							}
+						}
 						catch (Exception e)
 						{}
 					}
