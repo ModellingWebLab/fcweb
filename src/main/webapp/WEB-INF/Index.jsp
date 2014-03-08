@@ -27,11 +27,11 @@
         virtual experiment protocols encoded in our own language,
         using <a href="https://chaste.cs.ox.ac.uk/trac/wiki/ChasteGuides/CodeGenerationFromCellML#Standardisednames">
         standardised tags</a> to generate interfaces between them, doing all the necessary units conversions.
-        The stored results of these experiments can be viewed and compared.
+        The <a href="${contextPath}/db.html">stored results of these experiments can be viewed</a> and compared.
     </p>
-    
+
     <p>
-        Examples:<br/>
+        Comparison examples:<br/>
         <a href="${contextPath}/compare/e/508/509/510/511/512/514/515/516/517/518/519/521/522/523/524/525/526/">
             <button>Action potentials under steady 1Hz pacing</button></a>
         <a href="${contextPath}/compare/e/326/327/458/330/345/331/333/334/335/337/338/339/400/341/">
