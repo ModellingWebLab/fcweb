@@ -3,6 +3,12 @@
 
 <t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}Register - " contextPath="${contextPath}">
     <h1>Register for this Functional Curation system</h1>
+    
+    <p>
+        Only users with an account are able to upload their own models and/or protocols for analysis.
+        Once you have registered, you will need to wait for an admin to approve the account before you are able to upload files.
+    </p>
+    
       <section id="registerform">
     	<p>
 	    	<label for="mail">E-mail Address* <small>(for sending you a password, and for meta data of your files)</small></label>
