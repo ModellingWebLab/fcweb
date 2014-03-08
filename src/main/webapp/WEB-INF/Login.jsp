@@ -12,7 +12,7 @@
     	
     	<p>
     		<input type="checkbox" name="remember" id="remember"/>
-    		<label for="remember">Remember me on this computer. <small>(you need to accept cookies)</small></label>
+    		<label for="remember">Remember me on this computer. <small>(you need to accept cookies for this to work)</small></label>
     	</p>
     	
     	<p>

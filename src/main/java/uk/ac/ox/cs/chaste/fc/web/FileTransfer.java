@@ -249,7 +249,7 @@ public class FileTransfer extends WebModule
 		return "Hi " + nick + ",\n\nAn experiment you submitted has finished.\n"
 			+"Status: "+result+".\n"
 			+"The resulting files can be viewed at: "+url+"\n"
-			+ "\nYours sincerely,\nChaste functional curation website";
+			+ "\nYours sincerely,\nCardiac functional curation website";
 	}
 	
 	

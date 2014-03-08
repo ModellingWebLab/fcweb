@@ -140,7 +140,7 @@
 		
 		<%-- finish the site --%>
 		<footer>
-			Functional Curation Cardiac Prototype &copy; 2014 University of Oxford
+			Functional Curation for Cardiac Cellular Electrophysiology &copy; 2014 University of Oxford
 		</footer>
 		
 		

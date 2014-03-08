@@ -176,10 +176,10 @@ public class Register extends WebModule
 	
 	private void informAdmins (String newUser)
 	{
-		String mailSubject = "New Registration at Chaste Functional Curation Web Interface";
-		String mailBody = "Hey Admin,\n\ngood news: "+newUser+" just registered for the Chaste Functional Curation Web Interface!"
+		String mailSubject = "New Registration at Cardiac Functional Curation Web Interface";
+		String mailBody = "Hi Admin,\n\nGood news: "+newUser+" just registered for the Cardiac Functional Curation Web Interface!"
 			+ "\nPlease go to the Admin interface and check their role:\n\n" + Tools.getThisUrl () + "admin.html"
-			+ "\n\nBest wishes,\nThe Functional Curation Development Team";
+			+ "\n\nBest wishes,\nCardiac functional curation website";
 		
 		Vector<User> users = userMgmt.getUsers ();
 		for (User u: users)
@@ -200,9 +200,9 @@ public class Register extends WebModule
 	
 	private final static String buildMailBody (String nick, String password)
 	{
-		return "Hi " + nick + ",\n\nWe successfully registered an account for you in the Functional Curation system!\n\n"
+		return "Hi " + nick + ",\n\nWe successfully registered an account for you in the Cardiac Functional Curation system!\n\n"
 				+ "Your password is: " + password + "\n\nNow go to " + Tools.getThisUrl () + " to see if everything's working.\n\n"
-				+ "Sincerely,\nFunctional Curation Development Team";
+				+ "Yours sincerely,\nCardiac functional curation website";
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -217,7 +217,7 @@ public class Register extends WebModule
 		if (nick.length () > 99)
 		{
 			obj.put ("response", false);
-			obj.put ("responseText", "sorry, we didn't expect such a long nickname. Please contact one of us.");
+			obj.put ("responseText", "sorry, we didn't expect such a long username. Please contact us to ask for the limit to be extended.");
 			return false;
 		}
 
@@ -225,7 +225,7 @@ public class Register extends WebModule
 		if (!regMatcher.matches())
 		{
 			obj.put ("response", false);
-			obj.put ("responseText", "nickname has to start with [A-Za-z0-9] and only the following characters are allowed: [_A-Za-z0-9-]");
+			obj.put ("responseText", "username has to start with [A-Za-z0-9] and only the following characters are allowed: [_A-Za-z0-9-]");
 			return false;
 		}
 
@@ -241,7 +241,7 @@ public class Register extends WebModule
 			if (rs.getInt(1) > 0)
 			{
 				obj.put ("response", false);
-				obj.put ("responseText", "nickname already in use");
+				obj.put ("responseText", "username already in use");
 				return false;
 			}
 			else
@@ -255,7 +255,7 @@ public class Register extends WebModule
 		{
 			e.printStackTrace();
 			LOGGER.error ("SQLException: cannot execute statement", e);
-			throw new IOException ("sql problem.");
+			throw new IOException ("sql problem");
 		}
 		finally
 		{
@@ -279,7 +279,7 @@ public class Register extends WebModule
 		if (mail.length () > 99)
 		{
 			obj.put ("response", false);
-			obj.put ("responseText", "sorry, we didn't expect such a long mail address. please contact one of us.");
+			obj.put ("responseText", "sorry, we didn't expect such a long mail address. Please contact us to have the limit extended.");
 			return false;
 		}
 		
@@ -318,7 +318,7 @@ public class Register extends WebModule
 		{
 			e.printStackTrace();
 			LOGGER.error ("SQLException: cannot execute statement", e);
-			throw new IOException ("sql problem.");
+			throw new IOException ("sql problem");
 		}
 		finally
 		{
