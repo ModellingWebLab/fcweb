@@ -3,11 +3,14 @@
  */
 package uk.ac.ox.cs.chaste.fc.mgmt;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Vector;
+
+import javax.mail.MessagingException;
 
 import de.binfalse.bflog.LOGGER;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
@@ -122,8 +125,28 @@ public class UserManager
 
 	public void updateUserRole (int id, String role)
 	{
+		// Check whether the role is changing, so we can send them an email if so
+		User user = getUser(id);
+		if (!user.getRole().equals(role))
+		{
+			user.setRole(role);
+			String body = "Hi " + user.getNick() + ",\n\n"
+					+ "Your account permissions have been updated to:\n  " + user.getRoleDescription(false) + "\n"
+					+ "Visit the site at " + Tools.getThisUrl() + "\n\n"
+					+ "Yours sincerely,\nCardiac functional curation website";
+			try
+			{
+				Tools.sendMail(user.getMail(), user.getNick(), "Cardiac Functional Curation account updated", body);
+			}
+			catch (MessagingException | UnsupportedEncodingException e)
+			{
+				LOGGER.error ("couldn't send mail to user (role changed)", e);
+			}
+		}
+		
+		// Update the role in the DB
 		PreparedStatement st = db.prepareStatement ("UPDATE `user` SET `role`=? WHERE `id`=?");
-    ResultSet rs = null;
+		ResultSet rs = null;
 		
 		try
 		{
@@ -131,10 +154,10 @@ public class UserManager
 			st.setInt (2, id);
 			
 			int affectedRows = st.executeUpdate();
-      if (affectedRows == 0)
-      {
-          throw new SQLException("Creating file failed, no rows affected.");
-      }
+			if (affectedRows == 0)
+			{
+				throw new SQLException("Creating file failed, no rows affected.");
+			}
 		}
 		catch (SQLException e)
 		{

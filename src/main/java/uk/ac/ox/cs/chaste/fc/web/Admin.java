@@ -82,7 +82,7 @@ public class Admin extends WebModule
 			}
 			
 			if (id == user.getId ())
-				throw new IOException ("not allowed to change your own rule");
+				throw new IOException ("not allowed to change your own role");
 			
 			Object role = querry.get ("role");
 			if (role.equals (User.ROLE_ADMIN))
@@ -94,11 +94,11 @@ public class Admin extends WebModule
 			else if (role.equals (User.ROLE_GUEST))
 				userMgmt.updateUserRole (id, User.ROLE_GUEST);
 			else
-				throw new IOException ("unknown rule");
+				throw new IOException ("unknown role");
 			
 			JSONObject obj = new JSONObject ();
 			obj.put ("response", true);
-			obj.put ("responseText", "updated user");
+			obj.put ("responseText", "updated user permissions");
 			answer.put ("updateUserRole", obj);
 		}
 		

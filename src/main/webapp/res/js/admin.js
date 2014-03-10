@@ -22,12 +22,11 @@ function updateUser (jsonObject)
         	return;
         
     	var json = JSON.parse(xmlhttp.responseText);
-    	console.log (json);
     	displayNotifications (json);
     	
         if(xmlhttp.status == 200)
         {
-        	addNotification ("updated user.", "info");
+        	addNotification (json.updateUserRole.responseText, "info");
         }
     };
     xmlhttp.send(JSON.stringify(jsonObject));

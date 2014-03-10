@@ -199,13 +199,42 @@ public class User
 	{
 		this.role = role;
 	}
-
 	
 	public String getRole ()
 	{
 		return role;
 	}
-
+	
+	public String getRoleDescription (boolean contactUrl)
+	{
+		String contact = "contact us";
+		if (contactUrl)
+		{
+			contact = "<a href='contact.html'>" + contact + "</a>";
+		}
+		if (role.equals(ROLE_ADMIN))
+		{
+			return "Administrator: you have full administrative privileges.";
+		}
+		if (role.equals(ROLE_GUEST))
+		{
+			return "Guest: to upload new models please " + contact + ".";
+		}
+		if (role.equals(ROLE_MODELER))
+		{
+			return "Modeller: you may add your models to the system; to upload your own protocols please " + contact + ".";
+		}
+		if (role.equals(ROLE_PROTO_AUTHOR))
+		{
+			return "Advanced modeller: you may upload both models and protocols.";
+		}
+		return "";
+	}
+	
+	public String getRoleDescription ()
+	{
+		return getRoleDescription(true);
+	}
 	
 	public int getId ()
 	{
