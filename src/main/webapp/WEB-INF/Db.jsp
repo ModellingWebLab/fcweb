@@ -31,6 +31,7 @@
         </table>
         <p>
         Note that you can compare models' behaviours under a particular protocol by viewing the protocol (click on a column heading), selecting the 'Experiments' button, and comparing the experiments using models of interest.
+        The converse comparison (one model, many protocols) is available via viewing a model.
         </p>
     </section>
 </t:skeleton>
