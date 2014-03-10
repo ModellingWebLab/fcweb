@@ -267,33 +267,29 @@ function addMatrixClickListener (td, link)
 
 function createClueTip (td, mat, r, c)
 {
-
 	$(td).cluetip({
-		  hoverIntent: {
-			    sensitivity:  1,
-			    interval:     350,
-			    timeout:      350
-			  },
+		hoverIntent: {
+			sensitivity:  1,
+			interval:     800, // Delay before showing, in ms
+			timeout:      350 // Delay after leaving element before removing cluetip, in ms
+			},
 		cluetipClass: 'jtip',
-		  dropShadow: false,
-		  mouseOutClose: true,
-		  sticky: true,
-		  positionBy: 'bottomTop', topOffset: 0,
-		  showTitle: false,
-		  splitTitle: '|',
-		  onShow:           function(ct, ci){
-			  console.log ("shown: " + '#create-'+r+'-'+c);
-			  $('#create-'+r+'-'+c).click (function () {
-				  console.log ("clicked");
+		dropShadow: false,
+		mouseOutClose: true,
+		sticky: true,
+		positionBy: 'bottomTop', topOffset: 0,
+		showTitle: false,
+		splitTitle: '|',
+		onShow: function(ct, ci){
+			console.log ("shown: " + '#create-'+r+'-'+c);
+			$('#create-'+r+'-'+c).click (function () {
 					submitNewExperiment ({
 						task: "newExperiment",
 						model: mat[r][c].model.id,
 						protocol: mat[r][c].protocol.id
 					}, document.getElementById ("actionIndicator"), $(td));
-					  console.log ("clicked2");
 				});
-			  console.log ("shown2");
-		  },
+			},
 		});
 }
 
