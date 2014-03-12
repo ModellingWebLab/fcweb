@@ -14,6 +14,9 @@
 	    <c:if test="${User.allowedCreateModel}"> 
 	    	<small><a href="${contextPath}/model/createnew" id="addmodellink" class="pointer">create a new model</a></small>
 		</c:if>
+		<c:if test="${!User.allowedCreateModel}">
+		    <small>Your account doesn't have the authority to upload models; please <a href="${contextPath}/contact.html">contact us</a> to request permission.</small>
+		</c:if>
 	    <ul>
 	    	<c:forEach items="${models}" var="model" >
 	    		<li title="${model.name}"><strong><a href="${contextPath}/model/${model.url}/${model.id}/${model.latestVersion.url}/${model.latestVersion.id}">${model.name}</a></strong> 
@@ -30,7 +33,9 @@
 	    <c:if test="${User.allowedCreateProtocol}"> 
 	    	<small><a href="${contextPath}/protocol/createnew" id="addprotocol" class="pointer">create a new protocol</a></small>
 		</c:if>
-	    
+        <c:if test="${!User.allowedCreateProtocol}">
+            <small>Your account doesn't have the authority to upload protocols; please <a href="${contextPath}/contact.html">contact us</a> to request permission.</small>
+        </c:if>
 	    <ul>
 	    	<c:forEach items="${protocols}" var="protocol" >
 	    		<li title="${protocol.name}"><strong><a href="${contextPath}/protocol/${protocol.url}/${protocol.id}/${protocol.latestVersion.url}/${protocol.latestVersion.id}">${protocol.name}</a></strong> 
