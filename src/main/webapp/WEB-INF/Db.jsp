@@ -14,7 +14,6 @@
     
     <section id="matrixTab">
         <h2>Matrix overview</h2>
-        <span id="actionIndicator"></span><br/>
         <div id="matrixdiv"></div>
         <br/>
         Key:

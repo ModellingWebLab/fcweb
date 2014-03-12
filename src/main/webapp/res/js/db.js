@@ -4,12 +4,18 @@ var modelMapper = {};
 var protocolMapper = {};
 var lock = true;
 
-function submitNewExperiment (jsonObject, notificationElement, td)
+/**
+ * Submit a request to create an experiment.
+ * @param jsonObject  the data to send
+ * @param linkElement  jQuery wrapper around the link element that was clicked
+ * @param td  the table cell to contain this experiment
+ * @param entry  the entry for this experiment in the data matrix
+ */
+function submitNewExperiment (jsonObject, linkElement, td, entry)
 {
-	if (notificationElement)
-		notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/loading2-new.gif' alt='loading' />";
-	
-	var xmlhttp = null;
+    linkElement.append("<img src='"+contextPath+"/res/img/loading2-new.gif' alt='loading' />");
+
+    var xmlhttp = null;
     // !IE
     if (window.XMLHttpRequest)
     {
@@ -20,7 +26,7 @@ function submitNewExperiment (jsonObject, notificationElement, td)
     {
         xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
     }
-    
+
     xmlhttp.open("POST", contextPath + '/newexperiment.html', true);
     xmlhttp.setRequestHeader("Content-type", "application/json");
 
@@ -28,18 +34,13 @@ function submitNewExperiment (jsonObject, notificationElement, td)
     {
         if(xmlhttp.readyState != 4)
         	return;
-        
-        console.log (xmlhttp.responseText);
+
     	var json = JSON.parse(xmlhttp.responseText);
-    	console.log (json);
     	displayNotifications (json);
 
-    	console.log ("td prev");
-    	console.log (td);
-    	
     	if (td)
     		td.removeClass ("experiment-QUEUED").removeClass ("experiment-RUNNING").removeClass ("experiment-INAPPRORIATE").removeClass ("experiment-FAILED").removeClass ("experiment-PARTIAL").removeClass ("experiment-SUCCESS");
-    	
+
         if(xmlhttp.status == 200)
         {
         	if (json.newExperiment)
@@ -47,32 +48,40 @@ function submitNewExperiment (jsonObject, notificationElement, td)
 	        	var msg = json.newExperiment.responseText;
         		if (json.newExperiment.response)
 	        	{
-        			if (notificationElement)
-        				notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/check.png' alt='valid' /> " + msg;
+        		    addNotification(msg, "info");
+                    linkElement.unbind("click");
+                    linkElement.contents().remove();
+                    linkElement.removeAttr("id");
+                    entry.experiment = {name: json.newExperiment.expName, id: json.newExperiment.expId};
+        		    var expUrl = contextPath + "/experiment/" + convertForURL(entry.experiment.name) + "/" + entry.experiment.id + "/latest";
+        		    linkElement.attr("href", expUrl);
+        		    linkElement.append("<img src='"+contextPath+"/res/img/check.png' alt='valid' /> ");
+        		    linkElement.append(entry.experiment.name);
         			if (td)
+        			{
 	    				td.addClass ("experiment-QUEUED");
-        				//td.attr ("class", td.attr ("class").replace (/experiment-[A-Z]+/, "") + "experiment-RUNNING");
+	    				setTitleAndClickListener(td.get(0), entry);
+	    				createClueTip(td, entry);
+        			}
 	        	}
 	        	else
 	        	{
-	        		if (notificationElement)
-	        			notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + msg;
+	        	    addNotification(msg, "error");
+                    linkElement.replaceWith("<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> failed to create experiment");
 	    			if (td)
-	    				td.addClass ("experiment-INAPPRORIATE");
-	    				//td.attr ("class", td.attr ("class").replace (/experiment-[A-Z]+/, "") + "experiment-INAPPRORIATE");
+	    			{
+                        td.addClass ("experiment-INAPPRORIATE");
+	    			}
 	        	}
         	}
         }
         else
         {
         	if (notificationElement)
-        		notificationElement.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='error' /> sorry, serverside error occurred.";
+        		notificationElement.replaceWith("<img src='"+contextPath+"/res/img/failed.png' alt='error' /> sorry, serverside error occurred.");
 			if (td)
 				td.addClass ("experiment-INAPPRORIATE");
-				//td.attr ("class", td.attr ("class").replace (/experiment-[A-Z]+/, "") + "experiment-INAPPRORIATE");
         }
-    	console.log ("td post");
-    	console.log (td);
     };
     xmlhttp.send(JSON.stringify(jsonObject));
 }
@@ -183,6 +192,7 @@ function drawMatrix (matrix)
 			if (row == -1 && col == -1)
 				continue;
 			
+			// Top row: protocol names
 			if (row == -1)
 			{
 				var d1 = document.createElement("div");
@@ -200,6 +210,7 @@ function drawMatrix (matrix)
 				continue;
 			}
 			
+			// Left column: model names
 			if (col == -1)
 			{
 				var a = document.createElement("a");
@@ -211,63 +222,68 @@ function drawMatrix (matrix)
 				continue;
 			}
 			
-			
-			if (mat[row][col].experiment)
-				td.setAttribute("class", "experiment experiment-"+mat[row][col].experiment.latestResult);
+			// Normal case
+			var entry = mat[row][col];
+			entry.row = row;
+			entry.col = col;
+			if (entry.experiment)
+				td.setAttribute("class", "experiment experiment-"+entry.experiment.latestResult);
 			else
 				td.setAttribute("class", "experiment experiment-NONE");
-
-			var titleText = "";
-
-			//var r = row, c = col;
 			
-			if (mat[row][col].model)
-			{
-				titleText += 
-					"M: <a href='" + contextPath + "/model/" + convertForURL (mat[row][col].model.name) + "/" + mat[row][col].model.entityId
-					+ "/" + convertForURL (mat[row][col].model.version) + "/" + mat[row][col].model.id + "/'>" + mat[row][col].model.name + " @ " + mat[row][col].model.version + "</a>|";
-			}
-			
-			if (mat[row][col].protocol)
-				//protocolLink.innerHTML = mat[row][col].protocol.name + " @ " + mat[row][col].protocol.version;
-				titleText += 
-					"P: <a href='" + contextPath + "/protocol/" + convertForURL (mat[row][col].protocol.name) + "/" + mat[row][col].protocol.entityId
-					+ "/" + convertForURL (mat[row][col].protocol.version) + "/" + mat[row][col].protocol.id + "/'>" + mat[row][col].protocol.name + " @ " + mat[row][col].protocol.version + "</a>|";
-						
-			if (mat[row][col].experiment)
-			{
-				//expLink.innerHTML = mat[row][col].experiment.name;
-				titleText +=  
-					"E: <a href='" + contextPath + "/experiment/" + convertForURL (mat[row][col].experiment.name) + "/"
-					+  mat[row][col].experiment.id + "/latest/'>" + mat[row][col].experiment.name + "</a>";
-				//if (mat[row][col].experiment.latestResult == "")
-				addMatrixClickListener (td, contextPath + "/experiment/" + convertForURL (mat[row][col].experiment.name) + "/"
-				+  mat[row][col].experiment.id + "/latest");
-			}
-			else
-			{
-				titleText +=  
-					"E: <a id='create-"+row+"-"+col+"'>create experiment</a>";
-				
-			}
-			
-			td.setAttribute("title", titleText);
-			createClueTip (td, mat, row, col);
+			setTitleAndClickListener(td, entry);
+		    createClueTip($(td), entry);
 		}
 	}
-	
+}
+
+/**
+ * Set up the title text and click listener for the given matrix entry
+ * @param td  the table cell
+ * @param entry  mat[row][col] for this table cell
+ */
+function setTitleAndClickListener(td, entry)
+{
+    var titleText = "";
+
+    if (entry.model)
+    {
+        titleText +=
+            "M: <a href='" + contextPath + "/model/" + convertForURL(entry.model.name) + "/" + entry.model.entityId
+            + "/" + convertForURL(entry.model.version) + "/" + entry.model.id + "/'>" + entry.model.name + " @ " + entry.model.version + "</a>|";
+    }
+
+    if (entry.protocol)
+    {
+        titleText +=
+            "P: <a href='" + contextPath + "/protocol/" + convertForURL(entry.protocol.name) + "/" + entry.protocol.entityId
+            + "/" + convertForURL(entry.protocol.version) + "/" + entry.protocol.id + "/'>" + entry.protocol.name + " @ " + entry.protocol.version + "</a>|";
+    }
+
+    if (entry.experiment)
+    {
+        var expUrl = contextPath + "/experiment/" + convertForURL(entry.experiment.name) + "/" + entry.experiment.id + "/latest";
+        titleText += "E: <a href='" + expUrl + "'>" + entry.experiment.name + "</a>";
+        addMatrixClickListener(td, expUrl);
+    }
+    else
+    {
+        titleText += "E: <a id='create-"+entry.row+"-"+entry.col+"'>create experiment</a>";
+    }
+
+    td.setAttribute("title", titleText);
 }
 
 function addMatrixClickListener (td, link)
 {
-				td.addEventListener("click", function () {
-					document.location.href = link;
-				}, false);
+	td.addEventListener("click", function () {
+		document.location.href = link;
+	}, false);
 }
 
-function createClueTip (td, mat, r, c)
+function createClueTip (td, entry)
 {
-	$(td).cluetip({
+	td.cluetip({
 		hoverIntent: {
 			sensitivity:  1,
 			interval:     800, // Delay before showing, in ms
@@ -281,13 +297,13 @@ function createClueTip (td, mat, r, c)
 		showTitle: false,
 		splitTitle: '|',
 		onShow: function(ct, ci){
-			console.log ("shown: " + '#create-'+r+'-'+c);
-			$('#create-'+r+'-'+c).click (function () {
+			var link = $('#create-'+entry.row+'-'+entry.col);
+			link.click (function () {
 					submitNewExperiment ({
 						task: "newExperiment",
-						model: mat[r][c].model.id,
-						protocol: mat[r][c].protocol.id
-					}, document.getElementById ("actionIndicator"), $(td));
+						model: entry.model.id,
+						protocol: entry.protocol.id
+					}, link, td, entry);
 				});
 			},
 		});
@@ -296,8 +312,7 @@ function createClueTip (td, mat, r, c)
 
 function getMatrix (jsonObject, actionIndicator)
 {
-    
-	var xmlhttp = null;
+    var xmlhttp = null;
     // !IE
     if (window.XMLHttpRequest)
     {
