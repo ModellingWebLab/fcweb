@@ -193,7 +193,7 @@ public class NewExperiment
 				return answer;
 			}
 			
-			//int expID = 
+			ChasteExperimentVersion expVer =
 				createExperiment (db, notifications, new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt), userMgmt, user, model, protocol, modelMgmt, protocolMgmt, force);
 			
 
@@ -204,8 +204,10 @@ public class NewExperiment
 			// TODO: cronjob for experiments that are not processed after 24h? -> send mails to admins?
 			JSONObject obj = new JSONObject ();
 				obj.put ("response", true);
-				obj.put ("responseText", "Experiment submitted. Based on the size of the Queue it might take some time until we can process your job.");
-				//obj.put ("expID", expID);
+				obj.put ("responseText", "Experiment submitted. Based on the size of the queue it might take some time until we can process your job.");
+				obj.put ("versionId", expVer.getId());
+				obj.put ("expId", expVer.getExperiment().getId());
+				obj.put ("expName", expVer.getName());
 			answer.put ("runExperiment", obj);
 			return answer;
 		}
@@ -267,14 +269,16 @@ public class NewExperiment
 			}
 			force &= user.isAllowedToForceNewExperiment ();
 
-			//int expID = 
+			ChasteExperimentVersion expVer =
 				createExperiment (db, notifications, new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt), userMgmt, user, model, protocol, modelMgmt, protocolMgmt, force);
 			
 			// TODO: cronjob for experiments that are not processed after 24h? -> send mails to admins?
 			JSONObject obj = new JSONObject ();
 				obj.put ("response", true);
-				obj.put ("responseText", "Experiment submitted. Based on the size of the Queue it might take some time until we can process your job.");
-				//obj.put ("expID", expID);
+				obj.put ("responseText", "Experiment submitted. Based on the size of the queue it might take some time until we can process your job.");
+				obj.put ("versionId", expVer.getId());
+				obj.put ("expId", expVer.getExperiment().getId());
+				obj.put ("expName", expVer.getName());
 			answer.put ("newExperiment", obj);
 			return answer;
 			
@@ -283,11 +287,10 @@ public class NewExperiment
 		throw new IOException ("nothing to do.");
 	}
 	
-	public static int createExperiment (DatabaseConnector db,
+	public static ChasteExperimentVersion createExperiment (DatabaseConnector db,
 		Notifications notifications, ExperimentManager expMgmt, UserManager userMgmt, User user, ChasteEntityVersion model,
 		ChasteEntityVersion protocol, ModelManager modelMgmt, ProtocolManager protocolMgmt, boolean force) throws Exception
 	{
-
 		// create archives
 		File modelFile = null;
 		File protocolFile = null;
@@ -357,18 +360,19 @@ public class NewExperiment
 			throw e;
 		}
 		
+		ChasteExperimentVersion exp;
 		if (!res.result)
 		{
-			ChasteExperimentVersion exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);
+			exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);
 			expMgmt.updateVersion (exp, res.response, res.status);
 		}
 		else
 		{
-			ChasteExperimentVersion exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);
-			expMgmt.updateVersion (exp, "running", ChasteExperimentVersion.STATUS_QUEUED);
+			exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);
+			expMgmt.updateVersion (exp, "queued", ChasteExperimentVersion.STATUS_QUEUED);
 		}
 		//return true;
-		return expID;
+		return exp;
 	}
 	
 	

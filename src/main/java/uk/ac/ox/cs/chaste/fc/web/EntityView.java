@@ -805,7 +805,7 @@ public class EntityView extends WebModule
 									ChasteExperiment e = (ChasteExperiment) ex;
 									try
 									{
-										if (0 < NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, newVersion, e.getProtocol (), modelMgmt, protocolMgmt, true))
+										if (NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, newVersion, e.getProtocol (), modelMgmt, protocolMgmt, true) != null)
 											ok++;
 										else
 											failed++;
@@ -827,7 +827,7 @@ public class EntityView extends WebModule
 									ChasteExperiment e = (ChasteExperiment) ex;
 									try
 									{
-										if (0 < NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, e.getModel (), newVersion, modelMgmt, protocolMgmt, true))
+										if (NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, e.getModel (), newVersion, modelMgmt, protocolMgmt, true) != null)
 											ok++;
 										else
 											failed++;

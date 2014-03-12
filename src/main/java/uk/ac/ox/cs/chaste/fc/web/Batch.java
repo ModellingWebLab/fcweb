@@ -369,17 +369,21 @@ public class Batch extends WebModule
 	public static boolean tryCreateExperiment(ChasteEntityVersion model, ChasteEntityVersion protocol,
 			DatabaseConnector db, Notifications notifications, ExperimentManager expMgmt, UserManager userMgmt, User user, ModelManager modelMgmt, ProtocolManager protocolMgmt, boolean force)
 	{
+		String expName = "[" + model.getName() + "@" + model.getVersion() + "] -- [" + protocol.getName() + "@" + protocol.getVersion() + "]";
+		ChasteExperimentVersion expVer = null;
 		try
 		{
-			NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, model, protocol, modelMgmt, protocolMgmt, force);
+			expVer = NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, model, protocol, modelMgmt, protocolMgmt, force);
 		}
 		catch (Exception e)
 		{
-			notifications.addError ("experiment failed to start: [" + model.getName () + "@" + model.getVersion () + "] -- [" + protocol.getName () + "@" + protocol.getVersion () + "]: " + e.getLocalizedMessage());
-			LOGGER.warn ("exp failed to start: [" + model.getName () + "@" + model.getVersion () + "] -- [" + protocol.getName () + "@" + protocol.getVersion () + "]", e);
+			notifications.addError ("experiment failed to start: " + expName + ": " + e.getLocalizedMessage());
+			LOGGER.warn ("exp failed to start: " + expName, e);
 			return false;
 		}
-		notifications.addInfo ("experiment queued:  [" + model.getName () + "@" + model.getVersion () + "] -- [" + protocol.getName () + "@" + protocol.getVersion () + "]");
+		ChasteExperiment exp = expVer.getExperiment();
+		String expUrl = Tools.getThisUrl() + "experiment/" + Tools.convertForURL(expVer.getName()) + "/" + exp.getId() + "/" + Tools.convertForURL(expVer.getVersion()) + "/" + expVer.getId() + "/";
+		notifications.addInfo ("experiment queued: <a href='" + expUrl + "'>" + expName + "</a>");
 		return true;
 	}
 	

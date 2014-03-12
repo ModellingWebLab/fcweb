@@ -6,7 +6,7 @@ function addNotification (err, list)
 	var errsList = document.getElementById(list + "list");
 	var errors = document.getElementById(list);
 	var item = document.createElement("li");
-	item.appendChild(document.createTextNode (err));
+	item.innerHTML = err;
 	errsList.appendChild(item);
 
 	if (errsList.firstChild)
