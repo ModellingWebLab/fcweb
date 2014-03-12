@@ -372,6 +372,16 @@ function displayVersion (id, showDefault)
 	var dv = doc.version;
 	dv.name.innerHTML = "<small>Version: </small>" + v.name + " ";
 	
+	// If an experiment, show indication of status, perhaps including a note that we don't expect any results yet!
+	if (entityType == 'experiment')
+	{
+	    if (v.status == 'RUNNING' || v.status == 'QUEUED')
+	        dv.exptRunningNote.style.display = "block";
+	    else
+	        dv.exptRunningNote.style.display = "none";
+        dv.exptStatus.innerHTML = "Status: " + v.status + ".";
+	}
+	
 	if (dv.visibility)
 	{
 	    // Show chooser for changing entity visibility
@@ -768,6 +778,7 @@ function updateVersion (rv)
 	v.created = rv.created;
 	v.visibility = rv.visibility;
 	v.id = rv.id;
+	v.status = rv.status;
 	v.readme = null;
 	v.files = new Array ();
 	if (rv.files)
@@ -981,7 +992,6 @@ function render ()
 			curVersion = v;
 		}
 		
-		
 		if (curFileId && pluginName)
 		{
 			displayFile (v, curFileId, pluginName);
@@ -1033,7 +1043,9 @@ function initModel ()
 				switcher: document.getElementById("experiment-files-switcher"),
 				visibility: document.getElementById("versionVisibility"),
 				visibilityAction : document.getElementById("versionVisibilityAction"),
-				deleteBtn : document.getElementById("deleteVersion")
+				deleteBtn: document.getElementById("deleteVersion"),
+				exptRunningNote: document.getElementById("running-experiment-note"),
+				exptStatus: document.getElementById("exptStatus")
 			},
 			file: {
 				close : document.getElementById("entityversionfileclose"),

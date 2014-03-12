@@ -93,6 +93,7 @@
 		    	</select>
 		    	<span id="versionVisibilityAction"></span>
 		    </c:if>
+		    <span id="exptStatus"></span>
 		    <c:if test="${entity.author == User.nick || User.admin}">
 		    	Delete version: <a id='deleteVersion'><img src="${contextPath}/res/img/delete.png" alt="delete version" title="delete this version of the ${entity.type}" /></a>
 		    </c:if>
@@ -100,6 +101,13 @@
 		        Run experiments: <a class='runExpts' title="Run experiments using this ${entity.type}"><img alt="Run experiments using this ${entity.type}" src="${contextPath}/res/img/batch.png"/></a>
 		    </c:if>
 		    </small>
+	    </div>
+	    
+	    <div id="running-experiment-note" style="display: none;">
+	       <p>
+	           This experiment has not yet finished running, and so no result files are available.
+	           You can refresh the page to see if it has completed.
+	       </p>
 	    </div>
 	    
 	    <div id="experiment-files-switcher">

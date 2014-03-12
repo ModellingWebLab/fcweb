@@ -80,4 +80,12 @@ extends ChasteEntityVersion
 		return exp.getModel ().getJointVisibility (exp.getProtocol());
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Override
+	public JSONObject toJson ()
+	{
+		JSONObject json = super.toJson();
+		json.put("status", status);
+		return json;
+	}
 }
