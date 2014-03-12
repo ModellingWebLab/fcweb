@@ -17,7 +17,8 @@
     <button id="checkAll">check all</button>
     <button id="checkLatest" title="Use only the latest version of each ${otherType}">check latest</button>
     <button id="uncheckAll">uncheck all</button>
-    <button id="batchcreator1">run experiments</button> <span id="batchcreatoraction1"></span>
+    <button id="batchcreator1">run experiments</button>
+    <br/> <span id="batchcreatoraction1"></span>
 
     <p>
         <c:if test="${entity.entity.type eq 'model'}">You may run your model under the following protocols.</c:if>

@@ -323,7 +323,7 @@ public class FileTransfer extends WebModule
 				if (exptStatus.equals (ChasteExperimentVersion.STATUS_RUNNING))
 				{
 					// This was just a ping to let us know it's started
-					exp.updateExperiment (expMgmt, "started", exptStatus);
+					exp.updateExperiment (expMgmt, "running", exptStatus);
 					return answer;
 				}
 				
