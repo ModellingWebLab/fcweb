@@ -264,10 +264,12 @@ function highlightPlots (version, showDefault)
 					if (plotDescription[i][4] == outputContents[output_idx][0])
 					{
 						files[version.files[f]].xAxes = outputContents[output_idx][1] + ' (' + outputContents[output_idx][2] + ')';
+						files[version.files[f]].xUnits = outputContents[output_idx][2];
 					}
 					if (plotDescription[i][5] == outputContents[output_idx][0])
 					{
 						files[version.files[f]].yAxes = outputContents[output_idx][1] + ' (' + outputContents[output_idx][2] + ')';
+						files[version.files[f]].yUnits = outputContents[output_idx][2];
 					}
 					if (plotDescription[i].length > 6 && plotDescription[i][6] == outputContents[output_idx][0])
 					{

@@ -190,10 +190,12 @@ function highlightPlots (entity, showDefault)
 				if (plotDescription[i][4] == outputContents[output_idx][0])
 				{
 					f.xAxes = outputContents[output_idx][1] + ' (' + outputContents[output_idx][2] + ')';
+					f.xUnits = outputContents[output_idx][2];
 				}
 				if (plotDescription[i][5] == outputContents[output_idx][0])
 				{
 					f.yAxes = outputContents[output_idx][1] + ' (' + outputContents[output_idx][2] + ')';
+					f.yUnits = outputContents[output_idx][2];
 				}
                 if (plotDescription[i].length > 6 && plotDescription[i][6] == outputContents[output_idx][0])
                 {

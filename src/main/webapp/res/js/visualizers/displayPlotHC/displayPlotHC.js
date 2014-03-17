@@ -47,13 +47,25 @@ function doHcPlot(id, datasets, thisFile)
                 }
             }
         },
-        series: datasets
+        series: datasets,
+        tooltip: {
+            headerFormat: "",
+            pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.x}{point.y}</b><br/>',
+            valuePrefix: ", ", // This is a hack to allow putting units on the x value!
+            valueSuffix: ""
+        }
     };
     
     if (thisFile.xAxes)
+    {
         options.xAxis = {title : { text : thisFile.xAxes}};
+        options.tooltip.valuePrefix = " " + thisFile.xUnits + ", ";
+    }
     if (thisFile.yAxes)
+    {
         options.yAxis = {title : { text : thisFile.yAxes}};
+        options.tooltip.valueSuffix = " " + thisFile.yUnits;
+    }
     if (thisFile.title)
         options.title = {text : thisFile.title};
     
