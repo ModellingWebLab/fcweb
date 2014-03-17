@@ -23,6 +23,9 @@
     <p>
         <c:if test="${entity.entity.type eq 'model'}">You may run your model under the following protocols.</c:if>
         <c:if test="${entity.entity.type eq 'protocol'}">You may run your protocol on the following models.</c:if>
+        <c:if test="${not(User.allowedToForceNewExperiment)}">
+            Note that only admins are allowed to overwrite the results of existing experiments, so you can only run model/protocol combinations that have not previously been run.
+        </c:if>
     </p>
 
     <div id="batchlist">
