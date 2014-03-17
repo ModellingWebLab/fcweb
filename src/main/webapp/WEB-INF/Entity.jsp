@@ -112,9 +112,9 @@
 	    
 	    <div id="experiment-files-switcher">
 	    	<button style="float:left;" id="experiment-files-switcher-files" title="View files associated with this ${entity.type}">Files</button>
-            <button style="margin-left:5px; float:left;" id="experiment-files-switcher-exp" title="View &amp; compare experiments using this ${entity.type}">Experiments</button>
+            <button style="margin-left:5px; float:left;" id="experiment-files-switcher-exp" title="View &amp; compare experiments using this ${entity.type}">Compare ${otherType}s</button>
 	    	<c:if test="${entity.type == 'protocol'}">
-    	    	    <button style="margin-left:5px; float:left;" id="compare-all-models" title="Compare all available models">Compare all available models</button>
+    	    	    <button style="margin-left:5px; float:left;" id="compare-all-models" title="Compare all available models under this protocol">Compare all</button>
    	    	</c:if>
 		<br/>
 	    </div>
@@ -143,9 +143,9 @@
 		    <h3>Experiments using this ${entity.type}</h3>
 		    <p>
 		        This ${entity.type} has been run with the following ${otherType}s.
-		        Click to view results, or select multiple experiments to compare.
+		        Click to view the latest results of each single experiment, or select multiple experiments to compare them.
                 <c:if test="${entity.type != 'experiment' && User.isAllowedToCreateNewExperiment()}">
-                    You may also <a class='runExpts' title="Run experiments using this ${entity.type}">run new experiments using this ${entity.type}</a>.
+                    You may also <a class='runExpts' title="Run experiments using this ${entity.type}">run new experiments using this ${entity.type}</a> and your own ${otherType}s.
                 </c:if>
 		    </p>
 			<div id="entityexperimentlistpartners"></div>
