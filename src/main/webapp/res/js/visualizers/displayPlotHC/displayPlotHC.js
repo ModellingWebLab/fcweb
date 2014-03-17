@@ -34,6 +34,9 @@ function doHcPlot(id, datasets, thisFile)
         title: {
             text: ''
         },
+        chart: {
+            zoomType: "xy"
+        },
         plotOptions: {
             series: {
                 allowPointSelect: true
