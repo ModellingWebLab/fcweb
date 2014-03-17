@@ -522,42 +522,61 @@ li.entityviz-PRIVATE
 	font-size:.8em;
 }
 
-/*.matrixTableCol
+.matrixTable th
 {
-	transform:rotate(-90deg);
-	-webkit-transform: rotate(-90deg); 
-	-moz-transform: rotate(-90deg);	
-	-ms-transform:rotate(-90deg);
-	-o-transform: rotate(-90deg);
-	width: 1.2em;
-}*/
+    border-style: none;
+    font-weight: normal;
+}
+
+.matrixTable tr:nth-child(1)
+{
+    border-top:1px none #ccc;
+}
+
+.matrixTableCol
+{
+    width: 1.5em;
+    height: 15em;
+    position: relative;
+    vertical-align: bottom;
+}
 
 .vertical-text {
-	display: inline-block;
-	overflow: hidden;
-	width: 1.5em;
+    position: relative;
+    top: 0px;
+    left: 6.6em;
+    height: 100%;
+    transform:skew(-45deg,0deg);
+    -ms-transform:skew(-45deg,0deg);
+    -moz-transform:skew(-45deg,0deg);
+    -webkit-transform:skew(-45deg,0deg);
+    -o-transform:skew(-45deg,0deg);
+    overflow: hidden;
 }
 
 .vertical-text__inner {
-	display: inline-block;
-	white-space: nowrap;
-	line-height: 1.5;
-	/*transform: translate(0,100%) rotate(-90deg);
-	transform-origin: 0 0;*/
-	transform:rotate(-90deg);
-	-webkit-transform: rotate(-90deg); 
-	-moz-transform: rotate(-90deg);	
-	-ms-transform:rotate(-90deg);
-	-o-transform: rotate(-90deg);
+    transform:skew(45deg,0deg) rotate(315deg);
+    -ms-transform:skew(45deg,0deg) rotate(315deg);
+    -moz-transform:skew(45deg,0deg) rotate(315deg);
+    -webkit-transform:skew(45deg,0deg) rotate(315deg);
+    -o-transform:skew(45deg,0deg) rotate(315deg);
+    position: absolute;
+    bottom: 5px;
+    left: 0px;
+    display: inline-block;
+    width: 100%;
+    text-align: left;
+    white-space: nowrap;
+    line-height: 1.5;
 }
 
-/* This element stretches the parent to be square
-   by using the mechanics of vertical margins  */
+/* This element stretches the parent to be square by using the mechanics of vertical margins  */
 .vertical-text__inner:after {
 	content: "";
 	display: block;
 	margin: -1.5em 0 100%;
 }
+
 .matrixTable .experiment-QUEUED
 {
     background-color:#a6cfff;

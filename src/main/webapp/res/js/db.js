@@ -184,7 +184,7 @@ function drawMatrix (matrix)
 		table.appendChild (tr);
 		for (var col = -1; col < mat[0].length; col++)
 		{
-			var td = document.createElement("td");
+			var td = row == -1 ? document.createElement("th") : document.createElement("td");
 			tr.appendChild (td);
 			
 			//console.log ("row " + row + " col " + col);
