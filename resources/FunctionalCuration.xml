@@ -31,7 +31,7 @@
         name="storageDir"
         value="/tmp/chaste-storage"
         override="false" />
-    <Parameter description="Where's Chaste webservice located?"
+    <Parameter description="Where's the backend webservice located?"
         name="chasteURL"
         value="https://URLTOBACKEND/chastewebservice.py"
         override="false" />
@@ -39,16 +39,16 @@
         name="thisURL"
         value="https://URLTOFRONTEND/FunctionalCuration/"
         override="false" />
-    <Parameter description="Password for Chaste webservice?"
+    <Parameter description="Password for the backend webservice?"
         name="chastePassword"
         value="PASSWORDFORBACKEND"
         override="false" />
     <Parameter description="Who's the sender of emails?"
         name="mailSender"
-        value="noreply@CHASTESOMETHING"
+        value="LOCAL@MAILDOMAIN"
         override="false" />
     <Parameter description="What's the name of the sender of emails?"
         name="mailSenderName"
-        value="Chaste"
+        value="Functional Curation Website"
         override="false" />
 </Context>

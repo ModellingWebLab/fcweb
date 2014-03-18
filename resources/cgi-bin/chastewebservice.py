@@ -9,12 +9,12 @@ import subprocess
 
 import fcws_utils
 
-password="Ohchej7mo_Fohh:u1ohw"
+config = fcws_utils.config
 
-temporaryDir="/tmp/"
-temporaryFilePrefix="chasteFile"
+temporaryDir = config['temp_dir']
+debugPrefix = config['debug_log_file_prefix']
 
-cgitb.enable(format='text', context=1, logdir=os.path.join(temporaryDir, 'python-webservice-cgitb'))
+cgitb.enable(format='text', context=1, logdir=os.path.join(temporaryDir, debugPrefix+'cgitb'))
 
 
 def WriteFile(source, destination):
@@ -31,7 +31,7 @@ def WriteFile(source, destination):
 
 # parse sent objects
 form = cgi.FieldStorage()
-if (not form.has_key("password")) or (form["password"].value != password) or (not form.has_key("callBack")) or (not form.has_key("signature")) or (not form.has_key("model")) or (not form.has_key("protocol")):
+if (not form.has_key("password")) or (form["password"].value != config['password']) or (not form.has_key("callBack")) or (not form.has_key("signature")) or (not form.has_key("model")) or (not form.has_key("protocol")):
     print "Content-Type: text/html\n\n";
     print '''
         <html><head><title>ChastePermissionError</title></head><body>
@@ -48,7 +48,7 @@ else:
     # Wrap the rest in a try so we alert the caller properly if an exception occurs
     try:
         # Save the submitted COMBINE archives to disk in a temporary folder
-        temp_dir = tempfile.mkdtemp()
+        temp_dir = tempfile.mkdtemp(dir=temporaryDir)
         model_path = os.path.join(temp_dir, 'model.zip')
         proto_path = os.path.join(temp_dir, 'protocol.zip')
         WriteFile(model.file, model_path)
@@ -73,8 +73,9 @@ else:
             # call the chaste handler via batch -> it will be executed if load average drops below 1.5
             # seems to be the most convenient mech, to not blow the machine...
             # but may be replaced by a submit to sge or other scheduling workarounds
-            exec_cmd = ' '.join(["/var/www/cgi-bin/processthefiles.py", callBack.value, signature.value,
-                                  main_model_path, main_proto_path, temp_dir])
+            exec_cmd = ' '.join([os.path.join(os.path.dirname(__file__), "processthefiles.py"),
+                                 callBack.value, signature.value,
+                                 main_model_path, main_proto_path, temp_dir])
             process = subprocess.Popen(['batch'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             (output, errors) = process.communicate(exec_cmd)
             if process.returncode != 0:

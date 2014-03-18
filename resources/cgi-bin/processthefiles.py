@@ -3,7 +3,7 @@
 import sys
 import tempfile
 
-my_output_file = tempfile.NamedTemporaryFile(prefix='python-webservice-output-', delete=False)
+my_output_file = tempfile.NamedTemporaryFile(prefix='fc-webservice-output-', delete=False)
 sys.stderr = my_output_file
 sys.stdout = my_output_file
 
@@ -18,6 +18,8 @@ import zipfile
 
 import requests
 
+config = json.load(open(os.path.join(os.path.dirname(__file__), 'config.json')))
+
 # this file is called via batch -> it is executed if there is CPU time available
 # arguments:
 # sys.argv[1] == callback url
@@ -30,15 +32,13 @@ import requests
 callback_url, signature, model_path, proto_path, temp_dir = sys.argv[1:6]
 
 # Debug
-fout = open ("/tmp/python-webservice.debug", 'a+')
-fout.write ("======")
-fout.write (datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
-fout.write ("======\n")
-fout.write (sys.argv[1] + "\n")
-fout.write (sys.argv[2] + "\n")
-fout.write (sys.argv[3] + "\n")
-fout.write (sys.argv[4] + "\n")
-fout.write (sys.argv[5] + "\n")
+fout = open(os.path.join(config['temp_dir'], config['debug_log_file_prefix'] + 'backend-debug'), 'a+')
+fout.write("======" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M") + "======\n")
+fout.write(sys.argv[1] + "\n")
+fout.write(sys.argv[2] + "\n")
+fout.write(sys.argv[3] + "\n")
+fout.write(sys.argv[4] + "\n")
+fout.write(sys.argv[5] + "\n")
 fout.flush()
 os.fsync(fout)
 fout.close()
@@ -50,16 +50,9 @@ r = requests.post(callback_url, data={'signature': signature, 'returntype': 'run
 # Call FunctionalCuration exe, writing output to the temporary folder containing inputs
 # (or rather, a subfolder thereof).
 # Also redirect stdout and stderr so we can debug any issues.
-os.environ['LD_LIBRARY_PATH'] = '/home/bob/petsc-3.1-p8/linux-gnu-opt/lib:/home/jonc/eclipse/workspace/Chaste/lib'
-os.environ['CHASTE_TEST_OUTPUT'] = '/tmp/python-webservice-testoutput'
-os.environ['USER'] = 'jonc'
-os.environ['GROUP'] = 'www-data'
-os.environ['HOME'] = '/home/jonc'
-args = ['/home/jonc/eclipse/workspace/Chaste/projects/FunctionalCuration/apps/src/FunctionalCuration',
-        model_path,
-        proto_path,
-        os.path.join(temp_dir, 'output')
-       ]
+for key, value in config['environment'].iteritems():
+    os.environ[key] = value
+args = [config['exe_path'], model_path, proto_path, os.path.join(temp_dir, 'output')]
 child_stdout_name = os.path.join(temp_dir, 'stdout.txt')
 output_file = open(child_stdout_name, 'w')
 subprocess.call(args, stdout=output_file, stderr=subprocess.STDOUT)
@@ -112,12 +105,10 @@ payload = {'signature': signature, 'returntype': outcome}
 r = requests.post(callback_url, files=files, data=payload)
 
 # Debug
-fout = open ("/tmp/python-webservice-result.debug", 'a+')
-fout.write ("======")
-fout.write (datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
-fout.write ("======\n")
-fout.write (str(r.status_code) + "\n")
-fout.write (str(r.content) + "\n")
+fout = open(os.path.join(config['temp_dir'], config['debug_log_file_prefix'] + 'backend-result'), 'a+')
+fout.write("======" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M") + "======\n")
+fout.write(str(r.status_code) + "\n")
+fout.write(str(r.content) + "\n")
 fout.flush()
 os.fsync(fout)
 fout.close()
