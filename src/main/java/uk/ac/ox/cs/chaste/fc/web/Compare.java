@@ -32,12 +32,6 @@ import uk.ac.ox.cs.chaste.fc.mgmt.ProtocolManager;
 
 public class Compare extends WebModule
 {
-	private final int TYPE_MODEL = 1;
-	private final int TYPE_PROTOCOL = 2;
-	private final int TYPE_EXPERIMENT = 4;
-	
-	private int type;
-
 	public Compare () throws NamingException, SQLException
 	{
 		super ();
@@ -74,24 +68,18 @@ public class Compare extends WebModule
 		ChasteEntityManager entityMgmt = null;
 		if (req[2].equals ("m"))
 		{
-			type = TYPE_MODEL;
 			entityMgmt = new ModelManager (db, notifications, userMgmt, user);
 		}
 		else if (req[2].equals ("p"))
 		{
-			type = TYPE_PROTOCOL;
 			entityMgmt = new ProtocolManager (db, notifications, userMgmt, user);
 		}
 		else if (req[2].equals ("e"))
 		{
-			type = TYPE_EXPERIMENT;
 			entityMgmt = new ExperimentManager (db, notifications, userMgmt, user, new ModelManager (db, notifications, userMgmt, user), new ProtocolManager (db, notifications, userMgmt, user));
 		}
 		else
 			throw new IOException ("nothing to do.");
-		
-		
-		
 		
 		JSONObject answer = new JSONObject();
 		
@@ -117,7 +105,6 @@ public class Compare extends WebModule
 				int curId;
 				try
 				{
-//					System.out.println ("parsing id string " + id);
 					curId = Integer.parseInt (id.toString ());
 				}
 				catch (NumberFormatException e)
@@ -125,10 +112,8 @@ public class Compare extends WebModule
 					LOGGER.warn ("user provided number which isn't an int: " + id, e);
 					continue;
 				}
-//				System.out.println ("id string " + curId);
 				
 				ChasteEntity entity = entityMgmt.getEntityById (curId);
-//				System.out.println ("entity " + entity);
 				if (entity != null)
 				{
 					ChasteEntityVersion version = entity.getLatestVersion ();
@@ -143,13 +128,11 @@ public class Compare extends WebModule
 							v.put ("protoName", expt.getProtocol().getName());
 						}
 						entities.add (v);
-	//					System.out.println ("appended");
 					}
 				}
 			}
 			
 			obj.put ("entities", entities);
-			
 			answer.put ("getEntityInfos", obj);
 		}
 		
