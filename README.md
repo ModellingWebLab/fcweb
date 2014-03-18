@@ -5,4 +5,4 @@ Our prototype installation is publicly visible at [https://chaste.cs.ox.ac.uk/Fu
 
 ## Installation
 
-See [INSTALL.md](INSTALL.md).
+See [INSTALL.md](src/master/INSTALL.md).
