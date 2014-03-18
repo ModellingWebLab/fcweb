@@ -2,6 +2,7 @@ var choicesDivId = 'choices';
 var resetButtonDivId = 'reset-button-div'
 var colouredSpanIdPrefix = 'span';
 var legendDivId = 'legend';
+var tooltipId = 'flotTooltip';
 var plottedGraph = {}; // TODO: probably safer if this is an instance property!
 var resetButtonId = 'resetButton';
 var selectTogglerId = 'selectToggler';
@@ -126,22 +127,28 @@ function retrieveCurrentPlotCoords(plottedGraph) {
 /* Retrieve generic plot settings */
 function retrieveGenericSettings(legendContainer) {
   var genericSettings = {
-      xaxis: { tickDecimals: 0, 
-               position: 'bottom', 
-               axisLabelPadding: 10, 
-               axisLabelUseCanvas: true  },
-      yaxis: { position: 'left', 
-               axisLabelPadding: 10, 
-               axisLabelUseCanvas: true},
-      lines: { show: true},
+      xaxis: { tickDecimals: 0,
+               position: 'bottom',
+               axisLabelPadding: 10,
+               axisLabelUseCanvas: true },
+      yaxis: { position: 'left',
+               axisLabelPadding: 10,
+               axisLabelUseCanvas: true },
+      lines: { show: true },
       selection: { mode: 'xy' },
+      grid: { hoverable: true},
       legend: { backgroundOpacity: 0,
-                container: legendContainer } 
+                container: legendContainer }
   };
   return genericSettings;
 }
 
-/* attach the click, select listeners to the plot */
+/**
+ * Attach the click, select, hover, etc listeners to the plot
+ * 
+ * @param plotProperties Assembly of various plot properties.
+ * @param moreThanOneDataset True if more than one dataset being plotted.
+ */
 function setListeners(plotProperties, moreThanOneDataset) {
     var choicesContainer = plotProperties.choicesContainer;
     var flotPlotDivId = plotProperties.flotPlotDivId;
@@ -183,6 +190,31 @@ function setListeners(plotProperties, moreThanOneDataset) {
         plotAccordingToChoices(plotProperties, coords);
     });
 
+    /* listen to user hovering over plot */
+    var previousPoint = null;
+    $('#' + flotPlotDivId).bind('plothover', function (event, pos, item) {
+      if (typeof pos.y != 'undefined') {
+        if (item) {
+          if (previousPoint != item.datapoint) {
+            previousPoint = item.datapoint;
+
+            $('#' + tooltipId).remove();
+            var x = item.datapoint[0];
+            var y = item.datapoint[1];
+
+            var content = '[' + item.series.label + '] : ' + 
+                          plotProperties.x_label + ' \'' + x + '\' : ' + 
+                          plotProperties.y_label + ' \'' + y + '\'';
+            show_tooltip(item.pageX, item.pageY, content);
+          }
+        } else {
+          $('#' + tooltipId).remove();
+          previousPoint = null;
+        }
+      }
+    });
+
+
     /* reset graphical display according to ranges defined by current dataset selection */
     $('#' + resetButtonId).click(function() {
         plotAccordingToChoices(plotProperties);
@@ -220,6 +252,22 @@ function setListeners(plotProperties, moreThanOneDataset) {
 /* provide dataset toggler title */
 function setTogglerTitle(toggler) {
   toggler.attr('title', toggler.is(':checked') ? 'Select one (cannot select none!)' : 'Select all');
+}
+
+/**
+ * Pop up a tooltip current x and y axis values. 
+ * 
+ * @param x X-axis coordinate.
+ * @param y Y-axis coordinate.
+ * @param content Content of tooltip.
+ */
+function show_tooltip(x, y, content) {
+  jQuery('<div />').attr({ 'id' : tooltipId })
+                   .css({ 'top': y + 5, 'left': x + 5 })
+                   .addClass('flotTooltip')
+                   .html(content)
+                   .appendTo('body')
+                   .fadeIn(200);
 }
 
 /* Transfer the colours placed into the legend div by flot's plotting, to the spans corresponding

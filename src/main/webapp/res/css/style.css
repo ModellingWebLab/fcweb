@@ -624,3 +624,11 @@ div.flotDiv
 {
 	overflow: hidden;
 }
+.flotTooltip {
+  position: absolute;
+  display: none;
+  border: 1px solid #ccc;
+  padding: 2px;
+  background-color: #ddd;
+  opacity: 0.9;
+}
