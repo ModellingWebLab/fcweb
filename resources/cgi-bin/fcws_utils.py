@@ -4,17 +4,19 @@ Utility module for Functional Curation web services.
 It handles unpacking COMBINE archives containing CellML models or Functional Curation protocols,
 and determining which file within is the primary model/protocol.
 
-It also contains configuration settings (e.g. the path to Chaste) and a method for determining
-whether a model and protocol are compatible.
+It also contains a method for determining whether a model and protocol are compatible.
 """
 
+import json
 import os
 import re
 import sys
 import xml.etree.ElementTree as ET
 import zipfile
 
-CHASTE_ROOT = '/home/jonc/eclipse/workspace/Chaste'
+config = json.load(open(os.path.join(os.path.dirname(__file__), 'config.json')))
+
+CHASTE_ROOT = config['chaste_root']
 FC_ROOT = os.path.join(CHASTE_ROOT, 'projects', 'FunctionalCuration')
 
 EXPECTED_EXTENSIONS = {'model': ['.cellml'],
