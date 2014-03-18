@@ -135,7 +135,6 @@ function retrieveGenericSettings(legendContainer) {
                axisLabelPadding: 10,
                axisLabelUseCanvas: true },
       lines: { show: true },
-      series: { shadowSize: 0 },
       selection: { mode: 'xy' },
       grid: { hoverable: true},
       legend: { backgroundOpacity: 0,
