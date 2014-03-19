@@ -1,0 +1,8 @@
+No publication is yet available specifically for this website resource,
+so at the moment we recommend you cite the reference publication on
+Functional Curation:
+
+ * J. Cooper, G. Mirams, S. Niederer.
+   High throughput functional curation of cellular electrophysiology models.
+   Prog. Biophys. Mol. Biol. 107(1):11-20, 2011.
+   doi: 10.1016/j.pbiomolbio.2011.06.003.
