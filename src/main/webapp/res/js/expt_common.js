@@ -119,3 +119,133 @@ function sortTable (plots)
     // Remember that we've been called!
     filesTable.beenSorted = true;
 }
+
+/**
+ * Calculate the maximum distance between three successive values in a series.
+ */
+function maxDist (val1, val2, val3)
+{
+    var a = val1 > val2 ?
+            (val1 > val3 ? val1 : val3) :
+            (val2 > val3 ? val2 : val3); 
+    var b = val1 < val2 ?
+            (val1 < val3 ? val1 : val3) :
+            (val2 < val3 ? val2 : val3);
+    return a - b;
+}
+
+/**
+ * Parse a CSV file with plotting data. Adds the following fields to the file object:
+ * - csv: the raw parsed numeric data, an array of row arrays
+ * - columns: the transpose of the raw data, an array of column arrays
+ * - nonDownsampled: {x,y} data organised by column
+ * - downsampled: downsampled {x,y} data, with 'close' points removed
+ * 
+ * The point data treats the first column as containing x values, and every other column
+ * as a separate series of y values.  We thus get arrays of columns, each of which is an
+ * array of objects with x and y properties.
+ * 
+ * The downsampling considers each column separately, and includes a point only if it is
+ * at least 1/500th of the range of that column away from either of its neighbours.  The
+ * first and last points are always included.
+ */
+function parseCSVContent (file)
+{
+    parseCsvRaw(file);
+    var csv = file.csv;
+
+    file.columns = [];
+    var dropDist = [];
+    for (var i = 0; i < csv[0].length; i++)
+    {
+        var min = Math.pow(2, 32);
+        var max = -min;
+        file.columns[i] = [];
+        for (var j = 0; j < csv.length; j++)
+            if (csv[j][i])
+            {
+                file.columns[i][j] = Number(csv[j][i]);
+                if (i > 0)
+                {
+                    if (max < file.columns[i][j])
+                        max = file.columns[i][j];
+                    if (min > file.columns[i][j])
+                        min = file.columns[i][j];
+                }
+            }
+        dropDist.push ( (max - min) / 500.0 );
+        //console.log( "scale for line " + i + ": " + min + ":" + dropDist[dropDist.length-1] + ":" + max);
+    }
+    file.nonDownsampled = [];
+    file.downsampled = [];
+    for (var i = 1; i < file.columns.length; i++)
+    {
+        file.downsampled[i] = [];
+        file.nonDownsampled[i] = [];
+        file.downsampled[i][0] = {x : file.columns[0][0], y : file.columns[i][0]};
+        file.nonDownsampled[i][0] = {x : file.columns[0][0], y : file.columns[i][0]};
+        var last_j = file.columns[i].length - 1;
+        for (var j = 1; j <= last_j; j++)
+        {
+            file.nonDownsampled[i].push ({x : file.columns[0][j], y : file.columns[i][j]});
+            var last = file.downsampled[i][file.downsampled[i].length - 1]['y'];
+            var cur = file.columns[i][j];
+            var next = file.columns[i][j + 1];
+            if (j == last_j || maxDist (last, cur, next) > dropDist[i] || (cur < last && cur < next) || (cur > last && cur > next))
+                file.downsampled[i].push ({x : file.columns[0][j], y : file.columns[i][j]});
+        }
+        //console.log ("column " + i + " prev: " + file.columns[i].length + " now: " + file.downsampled[i].length);
+    }
+}
+
+/**
+ * Ensures the CSV plotting data in the given file has been parsed, and returns the non-downsampled column point data.
+ * @see parseCSVContent
+ */
+function getCSVColumnsNonDownsampled (file)
+{
+    if (!file.nonDownsampled)
+    {
+        parseCSVContent (file);
+    }
+    return file.nonDownsampled;
+}
+
+/**
+ * Ensures the CSV plotting data in the given file has been parsed, and returns the downsampled column point data.
+ * @see parseCSVContent
+ */
+function getCSVColumnsDownsampled (file)
+{
+    if (!file.downsampled)
+    {
+        parseCSVContent (file);
+    }
+    return file.downsampled;
+}
+
+/**
+ * Ensures the CSV plotting data in the given file has been parsed, and returns the column-wise raw data.
+ * @see parseCSVContent
+ */
+function getCSVColumns (file)
+{
+    if (!file.columns)
+    {
+        parseCSVContent (file);
+    }
+    return file.columns;
+}
+
+/**
+ * Ensures the CSV plotting data in the given file has been parsed, and returns the row-wise raw data.
+ * @see parseCSVContent
+ */
+function getCSV (file)
+{
+    if (!file.csv)
+    {
+        parseCSVContent (file);
+    }
+    return file.csv;
+}
