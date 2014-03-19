@@ -169,62 +169,6 @@ function deleteEntity (jsonObject)
     xmlhttp.send (JSON.stringify (jsonObject));
 }
 
-function sortTable (plots)
-{
-	for (var i = 0; i < filesTable.all.length; i++)
-	{
-		var f = filesTable.all[i];
-		var found = false;
-		for (var j = 0; j < plots.length; j++)
-			if (f.name == plots[j])
-			{
-				filesTable.plots[f.name] = f;
-				found = true;
-				break;
-			}
-		if (found)
-			continue;
-		if (f.name.endsWith ("png") || f.name.endsWith ("eps"))
-			filesTable.pngeps[f.name] = f;
-		else if (f.name == "outputs-default-plots.csv" || f.name == "outputs-contents.csv")
-			filesTable.defaults[f.name] = f;
-        else if (f.name.endsWith ("csv"))
-            filesTable.otherCSV[f.name] = f;
-        else if (f.name.endsWith ("txt"))
-            filesTable.text[f.name] = f;
-		else 
-			filesTable.other[f.name] = f;
-	}
-	
-
-	var resortPartially = function (arr, css)
-	{
-		var cur = keys(arr).sort();
-		for (var i = 0; i < cur.length; i++)
-		{
-			$(arr[cur[i]].row).addClass ("filesTable-" + css);
-			filesTable.table.removeChild (arr[cur[i]].row);
-			filesTable.table.appendChild (arr[cur[i]].row);
-		}
-	};
-	
-	/*
-	according to keytask :
-	Those CSV files corresponding to plots, in the order given in default-plots.csv
-    png & eps files
-    Other CSV files corresponding to outputs
-    The contents & default-plots files (although don't give buttons to plot these!)
-    Text files
-    Other files
-    */
-	resortPartially (filesTable.plots, "plots");
-    resortPartially (filesTable.defaults, "defaults");
-	resortPartially (filesTable.pngeps, "pngeps");
-	resortPartially (filesTable.otherCSV, "otherCSV");
-    resortPartially (filesTable.text, "text");
-	resortPartially (filesTable.other, "other");
-}
-
 
 function highlightPlots (version, showDefault)
 {
@@ -242,7 +186,6 @@ function highlightPlots (version, showDefault)
 		var row = document.getElementById ("filerow-" + plotDescription[i][2].hashCode ());
 		if (row)
 		{
-			row.setAttribute("class", "highlight-plot");
 			// Show the first plot defined by the protocol using flot, if there is one available
 			if (i == 1 && showDefault)
 			{

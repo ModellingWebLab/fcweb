@@ -42,6 +42,7 @@ public class Compare extends WebModule
 		Notifications notifications, User user, HttpSession session)
 	{
 		header.addScript (new PageHeaderScript ("res/js/compare.js", "text/javascript", "UTF-8", null));
+		header.addScript (new PageHeaderScript ("res/js/expt_common.js", "text/javascript", "UTF-8", null));
 
 		Vector<String> plugins = new Vector<String> ();
 		plugins.add ("displayPlotFlot");

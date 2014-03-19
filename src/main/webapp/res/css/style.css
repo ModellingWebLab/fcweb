@@ -491,7 +491,15 @@ li.entityviz-PRIVATE
 	margin:10px;
 }
 
-.highlight-plot
+.filesTable-header-shown:before
+{
+    content: "\002a53  ";
+}
+.filesTable-header-hidden:before
+{
+    content: "\002a54  ";
+}
+.filesTable-plots
 {
 	background-color: #eee;
 }

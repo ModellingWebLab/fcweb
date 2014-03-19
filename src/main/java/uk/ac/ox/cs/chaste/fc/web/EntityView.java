@@ -155,6 +155,7 @@ public class EntityView extends WebModule
 			}
 			header.addScript (new PageHeaderScript ("res/js/3rd/showdown.js", "text/javascript", "UTF-8", null));
 			header.addScript (new PageHeaderScript ("res/js/entity.js", "text/javascript", "UTF-8", null));
+			header.addScript (new PageHeaderScript ("res/js/expt_common.js", "text/javascript", "UTF-8", null));
 		}
 		catch (NumberFormatException e)
 		{
