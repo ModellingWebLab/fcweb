@@ -1,13 +1,10 @@
 package uk.ac.ox.cs.chaste.fc.web;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.TreeSet;
-import java.util.UUID;
-import java.util.Vector;
-
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,18 +19,15 @@ import uk.ac.ox.cs.chaste.fc.beans.ChasteExperiment;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteExperimentVersion;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeader;
-import uk.ac.ox.cs.chaste.fc.beans.PageHeaderLink;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeaderScript;
 import uk.ac.ox.cs.chaste.fc.beans.User;
 import uk.ac.ox.cs.chaste.fc.mgmt.ChasteEntityManager;
-import uk.ac.ox.cs.chaste.fc.mgmt.ChasteFileManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.DatabaseConnector;
 import uk.ac.ox.cs.chaste.fc.mgmt.ExperimentManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.ModelManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.ProtocolManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.Tools;
 import uk.ac.ox.cs.chaste.fc.mgmt.UserManager;
-import uk.ac.ox.cs.chaste.fc.web.FileTransfer.NewFile;
 import de.binfalse.bflog.LOGGER;
 
 public class Batch extends WebModule
@@ -57,7 +51,6 @@ public class Batch extends WebModule
 		// req[4] = entity id
 		String[] req =  request.getRequestURI().substring(request.getContextPath().length()).split ("/");
 		
-		
 		if (req == null || req.length < 5)
 			return errorPage (request, response, null);
 
@@ -80,7 +73,6 @@ public class Batch extends WebModule
 			return errorPage (request, response, null);
 		
 		
-		
 		try
 		{
 			int entityID = Integer.parseInt (req[4]);
@@ -88,7 +80,52 @@ public class Batch extends WebModule
 			if (entity == null)
 				return errorPage (request, response, null);
 			request.setAttribute ("entity", entity);
-			request.setAttribute ("options", optionsMgmt.getAll (false, true));
+			TreeSet<ChasteEntity> options = optionsMgmt.getAll (false, true);
+			// Filter out any options that the current user is not allowed to run
+			if (!user.isAllowedToForceNewExperiment())
+			{
+				ChasteEntityManager modelMgmt = null;
+				ChasteEntityManager protoMgmt = null;
+				ChasteEntityVersion model = null;
+				ChasteEntityVersion proto = null;
+				if (type == TYPE_MODEL)
+				{
+					modelMgmt = entityMgmt;
+					protoMgmt = optionsMgmt;
+					model = entity;
+				}
+				else
+				{
+					modelMgmt = optionsMgmt;
+					protoMgmt = entityMgmt;
+					proto = entity;
+				}
+				ExperimentManager exptMgmt = new ExperimentManager(db, notifications, userMgmt, user, modelMgmt, protoMgmt);
+				
+				Iterator<ChasteEntity> iter = options.iterator();
+				while (iter.hasNext())
+				{
+					ChasteEntity opt = iter.next();
+					// Check each version
+					Map<Integer, ChasteEntityVersion> versions = opt.getVersions();
+					Iterator<ChasteEntityVersion> vers_iter = versions.values().iterator();
+					while (vers_iter.hasNext())
+					{
+						ChasteEntityVersion ver = vers_iter.next();
+						if (type == TYPE_MODEL)
+							proto = ver;
+						else
+							model = ver;
+						ChasteEntity exp = exptMgmt.getExperiment(model.getId(), proto.getId(), false);
+						if (exp != null) // Experiment already exists, so remove this option version
+							vers_iter.remove();
+					}
+					// If option has no versions left, remove option
+					if (!opt.hasVersions())
+						iter.remove();
+				}
+			}
+			request.setAttribute ("options", options);
 			
 			header.addScript (new PageHeaderScript ("res/js/batch.js", "text/javascript", "UTF-8", null));
 		}
@@ -113,9 +150,6 @@ public class Batch extends WebModule
 		// uploaded files that were not used
 		// created entity dirs that don't exist in entities in db
 		
-		
-		
-
 		String[] req =  request.getRequestURI().substring(request.getContextPath().length()).split ("/");
 		
 		ModelManager modelMgmt = new ModelManager (db, notifications, userMgmt, user);
