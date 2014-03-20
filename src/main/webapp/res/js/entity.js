@@ -184,14 +184,14 @@ function highlightPlots (version, showDefault)
 			continue;
 		//console.log (plotDescription[i][2]);
 		var row = document.getElementById ("filerow-" + plotDescription[i][2].hashCode ());
-		if (row)
+        // Show the first plot defined by the protocol using flot, if there is one available
+		if (row && showDefault)
 		{
-			// Show the first plot defined by the protocol using flot, if there is one available
-			if (i == 1 && showDefault)
+			var viz = document.getElementById ("filerow-" + plotDescription[i][2] + "-viz-displayPlotFlot");
+			if (viz)
 			{
-				var viz = document.getElementById ("filerow-" + plotDescription[i][2] + "-viz-displayPlotFlot");
-				if (viz)
-					nextPage(viz.href, true); // 'Invisible' redirect
+			    showDefault = false;
+				nextPage(viz.href, true); // 'Invisible' redirect
 			}
 		}
 
@@ -238,6 +238,10 @@ function highlightPlots (version, showDefault)
 		plots.push (plotDescription[i][2]);
 	}
 	sortTable (plots);
+	
+	// If there were no graphs to show, but we do have an errors.txt file and want to show a default, then show the errors
+	if (showDefault && version.errorsLink)
+	    nextPage(version.errorsLink, true); // 'Invisible' redirect
 }
 
 function parseOutputContents (file, version, showDefault)
@@ -451,10 +455,13 @@ function displayVersion (id, showDefault)
 			img.alt = viz.getDescription ();
 			img.title = img.alt;
 			a.appendChild(img);
-			//a.appendChild(document.createTextNode ("view"));
-			registerFileDisplayer (a);//, basicurl + convertForURL (v.name) + "/" + v.id + "/");
+			registerFileDisplayer (a);
 			td.appendChild(a);
 			td.appendChild(document.createTextNode (" "));
+			// Note how to default-display the errors.txt file, if there is one; the actual displaying
+			// will be done by highlightPlots if no graphs are available.
+			if (vi == "displayContent" && file.name.toLowerCase() == "errors.txt")
+			    v.errorsLink = a.href;
 		}
 		
 		
@@ -465,7 +472,7 @@ function displayVersion (id, showDefault)
 		img.src = contextPath + "/res/img/document-save-5.png";
 		img.alt = "download document";
 		img.title = "download document";
-		a.appendChild(img);//document.createTextNode ("download"));
+		a.appendChild(img);
 		td.appendChild(a);
 		tr.appendChild(td);
 		dv.filestable.appendChild(tr);
