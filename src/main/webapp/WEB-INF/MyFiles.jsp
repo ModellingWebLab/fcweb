@@ -52,7 +52,7 @@
 	    
 	    <ul>
 	    	<c:forEach items="${experiments}" var="experiment" >
-	    		<li title="${experiment.name}"><strong><a href="${contextPath}/experiment/${experiment.url}/${experiment.id}/${protocol.latestVersion.url}/${experiment.latestVersion.id}">${experiment.name}</a></strong></li>
+	    		<li title="${experiment.name}"><strong><a href="${contextPath}/experiment/${experiment.url}/${experiment.id}/${experiment.latestVersion.url}/${experiment.latestVersion.id}">${experiment.name}</a></strong></li>
 	    	</c:forEach>
     	</ul>
     </section>
