@@ -9,7 +9,7 @@
     <ul>
         <li><a href="${contextPath}/db.html">View results of experiments</a> stored on this site.</li>
         <li>Compare the results of different experiments, e.g.
-            <a href="${contextPath}/compare/e/508/509/510/511/512/514/515/516/517/518/519/521/522/523/524/525/526/">action potentials under steady 1Hz pacing</a>,
+            <a href="${contextPath}/compare/e/925/1231/1307/929/930/931/932/933/934/1432/1451/935/1288/937/1385/938/940/1540/942/944/945/">action potentials under steady 1Hz pacing</a>,
             <a href="${contextPath}/compare/e/326/327/458/330/345/331/333/334/335/337/338/339/400/341/">an IV curve of the fast sodium current</a>, or
             <a href="${contextPath}/compare/e/145/131/">S1-S2 and steady state restitution</a>;
             or <a href="${contextPath}/db.html">set up your own comparisons</a>.</li>
