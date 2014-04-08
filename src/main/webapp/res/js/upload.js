@@ -1,7 +1,12 @@
 
+/// Keep track of files sent to the server but not fully uploaded yet
+var uploading = new Array();
 
 function alreadyExists (uploaded, name)
 {
+    for (var i = 0; i < uploading.length; i++)
+        if (uploading[i] == name)
+            return true;
 	for (var i = 0; i < uploaded.length; i++)
 		if (uploaded[i].fileName == name)
 			return true;
@@ -11,11 +16,13 @@ function alreadyExists (uploaded, name)
 
 function sendFile (uploaded, file, name, types)
 {
+//    console.log("Send " + name);
 	if (alreadyExists (uploaded, name))
 	{
-		addNotification ("there is already a file with the same name - please remove that first.", "error");
+		addNotification ("there is already a file with the name '" + name + "' - please remove that first.", "error");
 		return;
 	}
+	uploading.push(name);
 	
 	var table = document.getElementById("uploadedfiles");
 	var neu = document.createElement("tr");
@@ -83,9 +90,7 @@ function sendFile (uploaded, file, name, types)
     {
         if (xmlhttp.readyState != 4)
         	return;
-    	console.log (xmlhttp.responseText);
     	var json = JSON.parse(xmlhttp.responseText);
-    	console.log (json);
     	if (json)
     		displayNotifications (json);
         if (xmlhttp.status == 200 && json.upload && json.upload.response)
@@ -128,29 +133,34 @@ function sendFile (uploaded, file, name, types)
         	neuName.setAttribute("class", "failed");
         	neuAction.innerHTML = "failed, try again";
         }
+        // Note that this file is no longer uploading
+        for (var i = 0; i < uploading.length; i++)
+            if (uploading[i] == name)
+                uploading.splice(i, 1);
     };
 
 	var fd = new FormData;
 	fd.append('file', file);
-	fd.append('other_data', 'foo bar');
-	
-	console.log (name);
 	
 	neuAction.innerHTML = "uploading";
 	xmlhttp.open('post', contextPath + "/upload.html", true);
 	xmlhttp.send(fd);
 	
 	neuRm.addEventListener("click", function () {
+//        console.log("Remove " + name);
+        for (var i = 0; i < uploaded.length; i++)
+            if (uploaded[i].fileName == name)
+                uploaded.splice(i, 1);
+        for (var i = 0; i < uploading.length; i++)
+            if (uploading[i] == name)
+                uploading.splice(i, 1);
 		if (xmlhttp)
 		{
 			xmlhttp.onreadystatechange = function ()
-			{/* need this cause some browsers will throw a 'done' which we cannot interpret otherwise */};
+			    {/* need this cause some browsers will throw a 'done' which we cannot interpret otherwise */};
 			xmlhttp.abort();
 		}
 		table.removeChild(neu);
-		for (var i = 0; i < uploaded.length; i++)
-			if (uploaded[i].fileName == name)
-				uploaded.splice(i, 1);
 	}, true);
 }
 
