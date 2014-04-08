@@ -8,20 +8,12 @@ function alreadyExists (uploaded, name)
 	return false;
 }
 
-function fileNotifiation (good, msg)
-{
-	var elem = document.getElementById("");
-	if (good)
-		elem.innerHTML = "";
-	else
-		elem.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='error' /> " + msg;
-}
 
 function sendFile (uploaded, file, name, types)
 {
 	if (alreadyExists (uploaded, name))
 	{
-		addNotification ("there is already a file with the same name. please remove that first.", "error");
+		addNotification ("there is already a file with the same name - please remove that first.", "error");
 		return;
 	}
 	
@@ -51,7 +43,6 @@ function sendFile (uploaded, file, name, types)
 	td.appendChild (neuRm);
 	
 	
-
 	td = document.createElement("td");
 	neu.appendChild(td);
 	var neuSize = document.createElement("small");
@@ -76,24 +67,21 @@ function sendFile (uploaded, file, name, types)
     {
         xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
     }
-    xmlhttp.addEventListener('progress', function(e)
-        {
-            var done = e.position || e.loaded;
-            var total = e.totalSize || e.total;
-        	neuAction.innerHTML = (Math.floor(done/total*1000)/10) + "%";
-        }, false);
-    if ( xmlhttp.upload )    {
-        xmlhttp.upload.onprogress = function(e)    {
-            var done = e.position || e.loaded;
-            var total = e.totalSize || e.total;
-            //console.log('xmlhttp.upload progress: ' + done + ' / ' + total + ' = ' + (Math.floor(done/total*1000)/10) + '%');
-            neuAction.innerHTML = (Math.floor(done/total*1000)/10) + '%';
-        };
+    progress_monitor = function(e)
+    {
+        var done = e.position || e.loaded;
+        var total = e.totalSize || e.total;
+        neuAction.innerHTML = (Math.floor(done/total*1000)/10) + "%";
+    };
+    xmlhttp.addEventListener('progress', progress_monitor, false);
+    if ( xmlhttp.upload )
+    {
+        xmlhttp.upload.onprogress = progress_monitor;
     }
     
-    xmlhttp.onreadystatechange = function(e)    {
-
-        if(xmlhttp.readyState != 4)
+    xmlhttp.onreadystatechange = function(e)
+    {
+        if (xmlhttp.readyState != 4)
         	return;
     	console.log (xmlhttp.responseText);
     	var json = JSON.parse(xmlhttp.responseText);
@@ -132,7 +120,6 @@ function sendFile (uploaded, file, name, types)
 
         	neuName.setAttribute("class", "success");
         	removeChildren (neuAction);
-        	//neuAction.appendChild (document.createTextNode("file type: "));
         	neuAction.appendChild (type);
         	uploaded.push (array);
         }
@@ -156,7 +143,8 @@ function sendFile (uploaded, file, name, types)
 	neuRm.addEventListener("click", function () {
 		if (xmlhttp)
 		{
-			xmlhttp.onreadystatechange = function () {/* need this cause some browsers will throw a 'done' which we cannot interpret otherwise */};
+			xmlhttp.onreadystatechange = function ()
+			{/* need this cause some browsers will throw a 'done' which we cannot interpret otherwise */};
 			xmlhttp.abort();
 		}
 		table.removeChild(neu);
@@ -166,34 +154,34 @@ function sendFile (uploaded, file, name, types)
 	}, true);
 }
 
-function handleFileSelect(evt) {
-    evt.stopPropagation();
-    evt.preventDefault();
 
-    var files = evt.dataTransfer.files;
-    for (var i = 0, f; f = files[i]; i++) {
-			sendFile (f, f.name);
-    }
-  }
-
-  function handleDragOver(evt) {
+function handleDragOver(evt) {
     evt.stopPropagation();
     evt.preventDefault();
     evt.dataTransfer.dropEffect = 'copy';
-  }
+}
+
 
 function initUpload(uploaded, types)
 {
-	var inp = document.getElementById('fileupload');
+    /// Handler for file(s) being dropped on the upload pane
+    function handleFileSelect(evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
+        evt.dataTransfer.dropEffect = 'copy';
+
+        var files = evt.dataTransfer.files;
+        for (var i = 0, f; f = files[i]; i++) {
+            sendFile (uploaded, f, f.name, types);
+        }
+    }
+
+    var inp = document.getElementById('fileupload');
 	var dropZone = document.getElementById('dropbox');
+	dropZone.addEventListener('dragenter', handleDragOver, false);
 	dropZone.addEventListener('dragover', handleDragOver, false);
 	dropZone.addEventListener('drop', handleFileSelect, false);
-	dropZone.addEventListener("click", 
-	        function (event)
-	        {
-	        	inp.click ();
-	        }, 
-	        false);
+	dropZone.addEventListener("click", function (event) { inp.click (); }, false);
 	inp.addEventListener('change', function(e) {
 	        var file = this.files[0];
 			var fullPath = inp.value;
