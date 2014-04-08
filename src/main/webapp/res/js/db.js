@@ -1,5 +1,5 @@
 
-var pages = [ "matrix", "search" ];
+var pages = [ "matrix" ];//, "search" ];
 var modelMapper = {};
 var protocolMapper = {};
 var lock = true;
@@ -391,11 +391,11 @@ function registerSwitchPagesListener (btn, page)
 
 function initDb ()
 {
-	for (var i = 0; i < pages.length; i++)
-	{
-		var btn = document.getElementById(pages[i] + "chooser");
-		registerSwitchPagesListener (btn, pages[i]);
-	}
+//	for (var i = 0; i < pages.length; i++)
+//	{
+//		var btn = document.getElementById(pages[i] + "chooser");
+//		registerSwitchPagesListener (btn, pages[i]);
+//	}
 	switchPage (pages[0]);
 	
 	prepareMatrix ();

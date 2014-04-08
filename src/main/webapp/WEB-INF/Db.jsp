@@ -4,16 +4,19 @@
 <t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}All Experiments - " contextPath="${contextPath}" newExpModelName="${newExpModelName}" newExpProtocolName="${newExpProtocolName}">
     <h1>Available experiments</h1>
     
+    <!-- 
     <button id="matrixchooser">matrix</button>
+    
     <button id="searchchooser">search</button>
     
     <section id="searchTab">
         <h2>Search (not yet implemented)</h2>
         <input type="text" id="filter" placeholder="search the DB" /> <button>search</button>
     </section>
-    
+     -->
+     
     <section id="matrixTab">
-        <h2>Matrix overview</h2>
+        <!-- <h2>Matrix overview</h2> -->
         <p>
         Note that you can compare models' behaviours under a particular protocol by viewing the protocol (click on a column heading), selecting the 'Compare models' button, and comparing the experiments using models of interest.
         The converse comparison (one model, many protocols) is available via viewing a model.
