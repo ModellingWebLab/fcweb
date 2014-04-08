@@ -36,8 +36,10 @@
             <span id="visibilityaction"></span>
 	    </p>
 	    <t:upload/>
-	    <p>
-	    	<input type="checkbox" name="reRunExperiments" id="reRunExperiments"/> <label for="reRunExperiments">rerun previous experiments</label> <small>(This might take some seconds.)</small>
+	    <p id="reRunPara" style="display: none;">
+	    	<input type="checkbox" name="reRunExperiments" id="reRunExperiments"/>
+	    	<label for="reRunExperiments">rerun experiments involving previous versions of this ${newentitytype}</label>
+	    	<small>(this might take some time)</small>
 	    </p>
 	    <p>
 	    	<button id="savebutton">Create ${newentitytype}</button>

@@ -476,6 +476,7 @@ public class EntityView extends WebModule
 				{
 					obj.put ("response", true);
 					obj.put ("responseText", "name exists. You're going to upload a new version to an existing "+entityMgmt.getEntityColumn ()+".");
+					answer.put("isNewVersion", true);
 				}
 				// Set visibility to match the latest version, if not already specified
 				if (visibility == null)

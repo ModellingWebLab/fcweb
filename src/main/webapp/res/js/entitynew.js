@@ -40,6 +40,11 @@ function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction,
 	        		entityNameAction.innerHTML = "<img src='"+contextPath+"/res/img/check.png' alt='valid' /> " + msg;
 	        	else
 	        		entityNameAction.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + msg;
+	        	// Decide whether to show the 're-run 
+	        	if (json.isNewVersion)
+	        	    $("#reRunPara").show();
+	        	else
+	        	    $("#reRunPara").hide();
         	}
         	if (json.versionName)
         	{
@@ -77,12 +82,7 @@ function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction,
                     a.href = contextPath + "/" + json.createNewEntity.versionType + "/id/" + json.createNewEntity.entityId + "/version/" + json.createNewEntity.versionId;
                     a.appendChild(document.createTextNode ("new " + json.createNewEntity.versionType));
                     p.appendChild(a);
-	        		p.appendChild(document.createTextNode ("! Have a look at "));
-	        		var a = document.createElement("a");
-	        		a.href = contextPath + "/myfiles.html";
-	        		a.appendChild(document.createTextNode ("all your files"));
-	        		p.appendChild(a);
-	        		p.appendChild(document.createTextNode ("."));
+	        		p.appendChild(document.createTextNode ("!"));
 	        		form.appendChild(p);
 	        		
 	        		if (json.createNewEntity.expCreation)
@@ -158,6 +158,8 @@ function initNewEntity ()
     	        task: "verifyNewEntity",
     	        entityName: entityName.value
     	    }, visibilityAction, entityNameAction, versionNameAction, storeAction, visibilityAction);
+    	// Show the 're-run experiments' checkbox & label
+    	$("#reRunPara").show();
     }
 	
 	initUpload (uploadedFiles, knownTypes);
