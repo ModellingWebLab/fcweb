@@ -133,33 +133,24 @@ function deleteEntity (jsonObject)
         	return;
         
     	var json = JSON.parse(xmlhttp.responseText);
-    	//console.log (json);
     	displayNotifications (json);
     	
-        if(xmlhttp.status == 200)
+        if (xmlhttp.status == 200)
         {
-        	if (json.deleteVersion)
-        	{
-	        	var msg = json.deleteVersion.responseText;
-	        	if (json.deleteVersion.response)
-	        	{
-	        		// go back to version table
-	        		document.location.href = basicurl;
-	        	}
-	        	else
-	            	alert(msg);
-        	}
-        	if (json.deleteEntity)
-        	{
-	        	var msg = json.deleteEntity.responseText;
-	        	if (json.deleteEntity.response)
-	        	{
-	        		// go back to version table
-	        		document.location.href = basicurl;
-	        	}
-	        	else
-	            	alert(msg);
-        	}
+            var resp = json.deleteVersion || json.deleteEntity;
+            if (resp)
+            {
+                var msg = resp.responseText;
+                if (resp.response)
+                {
+                    addNotification(msg, "info");
+                    doc.entity.details.style.display = "none";
+                    doc.entity.version.style.display = "none";
+                    $(".suppl").hide();
+                }
+                else
+                    alert(msg);
+            }
         }
         else
         {

@@ -341,7 +341,7 @@ public class EntityView extends WebModule
 			{
 				entityMgmt.removeVersion (versionId);
 				obj.put ("response", true);
-				obj.put ("responseText", "successfully deleted");
+				obj.put ("responseText", "Successfully deleted version " + vers.getName() + " of " + entityMgmt.getEntityColumn() + " " + vers.getEntity().getName());
 			}
 			return obj;
 		}
@@ -354,31 +354,31 @@ public class EntityView extends WebModule
 	}
 	
 	@SuppressWarnings("unchecked")
-	private JSONObject deleteEntity (Object version, Notifications notifications, JSONObject answer, ChasteEntityManager entityMgmt) throws IOException, ChastePermissionException
+	private JSONObject deleteEntity (Object entity, Notifications notifications, JSONObject answer, ChasteEntityManager entityMgmt) throws IOException, ChastePermissionException
 	{
 		try
 		{
-			int versionId = Integer.parseInt (version.toString ());
-			ChasteEntity vers = entityMgmt.getEntityById (versionId);
+			int entId = Integer.parseInt (entity.toString ());
+			ChasteEntity ent = entityMgmt.getEntityById (entId);
 			
 			JSONObject obj = new JSONObject ();
 			obj.put ("response", false);
 			obj.put ("responseText", "wasn't able to delete the entity");
 			
-			if (vers == null)
+			if (ent == null)
 				notifications.addError ("no version found");
 			else
 			{
-				entityMgmt.removeEntity (versionId);
+				entityMgmt.removeEntity (entId);
 				obj.put ("response", true);
-				obj.put ("responseText", "successfully deleted");
+				obj.put ("responseText", "Successfully deleted " + entityMgmt.getEntityColumn() + " " + ent.getName());
 			}
 			return obj;
 		}
 		catch (NullPointerException | NumberFormatException e)
 		{
 			e.printStackTrace ();
-			LOGGER.warn ("user provided entity id not parseable: " + version + " (type: " + entityMgmt.getEntityColumn () + ")");
+			LOGGER.warn ("user provided entity id not parseable: " + entity + " (type: " + entityMgmt.getEntityColumn () + ")");
 			throw new IOException ("version not found");
 		}
 	}
