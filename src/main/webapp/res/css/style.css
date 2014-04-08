@@ -318,6 +318,11 @@ table
         border-collapse:collapse;
 }
 
+th
+{
+    text-align: left;
+}
+
 tr:nth-child(5n+1)
 {
 	border-bottom:1px dashed #ccc;
