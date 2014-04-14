@@ -528,20 +528,10 @@ public class EntityView extends WebModule
 			// creating an empty entity makes no sense
 			if (querry.get ("files") != null)
 			{
-				filePath = UUID.randomUUID ().toString ();
-				String storageFir = type == TYPE_MODEL ? Tools.getModelStorageDir () : Tools.getProtocolStorageDir ();
-				entityDir = new File (storageFir + Tools.FILESEP + filePath);
-				while (entityDir.exists ())
-				{
-					filePath = UUID.randomUUID ().toString ();
-					entityDir = new File (storageFir + Tools.FILESEP + filePath);
-				}
-				LOGGER.debug ("will write files to " + entityDir);
-				
-				JSONArray array= (JSONArray) querry.get ("files");
+				JSONArray array = (JSONArray) querry.get ("files");
 				for (int i = 0; i < array.size (); i++)
 				{
-					JSONObject file=(JSONObject) array.get (i);
+					JSONObject file = (JSONObject) array.get (i);
 
 					String tmpName = null;
 					String name = null;
@@ -625,20 +615,19 @@ public class EntityView extends WebModule
 			if (entityMgmt.getEntityById (entityId) != null)
 				latestVersion = entityMgmt.getEntityById (entityId).getLatestVersion ();
 			
+			// Creating the version requires knowledge of the storage folder
+			String storageDir = type == TYPE_MODEL ? Tools.getModelStorageDir () : Tools.getProtocolStorageDir ();
+			entityDir = Tools.createUniqueSubDir(storageDir);
+			LOGGER.debug ("will write files to " + entityDir);
+			filePath = entityDir.getName();
+
 			// create version
 			int versionId = entityMgmt.createVersion (entityId, versionName, filePath, user, visibility);
 			if (versionId < 0)
 			{
-				cleanUp (null, versionId, files, fileMgmt, entityMgmt);
+				cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
 				LOGGER.error ("error inserting/creating "+entityMgmt.getEntityColumn ()+" version to db");
 				throw new IOException ("wasn't able to create/insert "+entityMgmt.getEntityColumn ()+" version to database.");
-			}
-			
-			if (!entityDir.mkdirs ()) // This should fail if entityDir already exists, so catching race conditions
-			{
-				cleanUp (null, versionId, files, fileMgmt, entityMgmt);
-				LOGGER.error ("cannot create dir: " + entityDir);
-				throw new IOException ("cannot create directory");
 			}
 			
 			String mainEntry = "";

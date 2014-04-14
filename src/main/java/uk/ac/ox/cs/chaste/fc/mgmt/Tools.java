@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Properties;
 import java.util.Random;
+import java.util.UUID;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -21,6 +22,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+
+import de.binfalse.bflog.LOGGER;
 
 
 public class Tools
@@ -200,5 +203,29 @@ public class Tools
 		while (s.length () < 5)
 			s += getPassword (4, 6);
 		return s;
+	}
+	
+	/**
+	 * Create a randomly-named not-previously-existing subdirectory within the given parent.
+	 * @param parentDir  path of parent within which to create folder
+	 * @return  a newly created folder
+	 * @throws IOException 
+	 */
+	public static File createUniqueSubDir(String parentDir) throws IOException
+	{
+		String leafName = UUID.randomUUID().toString();
+		File subDir = new File(parentDir + Tools.FILESEP + leafName);
+		while (!subDir.mkdirs()) // This will loop if the subdir already exists, or if there's an error on creation
+		{
+			if (!subDir.exists())
+			{
+				// There was an error trying to create the folder(s)
+				LOGGER.error ("cannot create dir: " + subDir);
+				throw new IOException ("cannot create directory");
+			}
+			leafName = UUID.randomUUID().toString();
+			subDir = new File(parentDir + Tools.FILESEP + leafName);
+		}
+		return subDir;
 	}
 }
