@@ -40,6 +40,9 @@ import uk.ac.ox.cs.chaste.fc.mgmt.ProtocolManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.Tools;
 import uk.ac.ox.cs.chaste.fc.web.FileTransfer.NewFile;
 import de.binfalse.bflog.LOGGER;
+import de.unirostock.sems.cbarchive.ArchiveEntry;
+import de.unirostock.sems.cbarchive.CombineArchive;
+import de.unirostock.sems.cbarchive.CombineFormats;
 
 public class EntityView extends WebModule
 {
@@ -406,6 +409,50 @@ public class EntityView extends WebModule
 		}
 	}*/
 	
+	/**
+	 * Unpack a COMBINE archive uploaded as part of a new entity, and use the contents as (potentially only some of) the
+	 * entity's files.
+	 * @param query  the JSON specifying the new entity
+	 * @param files  the list of files making up the entity
+	 * @param archiveFile  the archive to unpack
+	 * @param archiveFileName  the archive name, as specified in the upload form, for use in error messages
+	 * @return true iff the archive was unpacked successfully
+	 */
+	@SuppressWarnings("unchecked")
+	private boolean unpackArchive(JSONObject query, HashMap<String, NewFile> files, File archiveFile, String archiveFileName)
+	{
+		try
+		{
+			// Unpack archive
+			CombineArchive ca = CombineArchive.readArchive(archiveFile);
+			
+			// Record each entry as a file for this entity
+			for (ArchiveEntry entry : ca.getEntries())
+			{
+				String leaf_name = new File(entry.getRelativeName()).getName();
+				String file_type = "unknown";
+				if (leaf_name.endsWith(".cellml") || entry.getFormat().startsWith("http://identifiers.org/combine.specifications/cellml"))
+					file_type = "CellML";
+				else if (!entry.getFormat().startsWith("http"))
+					file_type = entry.getFormat();
+				files.put(leaf_name, new NewFile (entry.getFile(), leaf_name, file_type));
+			}
+			
+			// Use the archive's main entry, if present, as the main file for this entity, if not already specified
+			ArchiveEntry main_entry = ca.getMainEntry();
+			if (query.get("mainFile") == null && main_entry != null)
+			{
+				String leaf_name = new File(main_entry.getRelativeName()).getName();
+				query.put("mainFile", leaf_name);
+			}
+		}
+		catch (Exception e)
+		{
+			LOGGER.error("Error unpacking archive " + archiveFileName, e);
+			return false;
+		}
+		return true;
+	}
 	
 	@SuppressWarnings("unchecked")
 	private void createNewEntity (Object task, Notifications notifications, DatabaseConnector db, JSONObject querry, User user, JSONObject answer, ChasteEntityManager entityMgmt, ChasteFileManager fileMgmt) throws IOException, ChastePermissionException
@@ -564,6 +611,14 @@ public class EntityView extends WebModule
 					{
 						notifications.addError ("cannot find file " + name + ". Please upload again.");
 						createOk = false;
+					}
+					else if (type.equals("COMBINE archive"))
+					{
+						if (!unpackArchive(querry, files, tmp, name))
+						{
+							notifications.addError("failed to unpack COMBINE archive " + name);
+							createOk = false;
+						}
 					}
 					else
 						files.put (tmpName, new NewFile (tmp, name, type));

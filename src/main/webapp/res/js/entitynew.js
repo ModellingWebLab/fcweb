@@ -1,6 +1,6 @@
 
 var uploadedFiles = new Array ();
-var knownTypes = ["unknown", "CellML", "CSV", "HDF5", "EPS", "PNG", "XMLPROTOCOL", "TXTPROTOCOL"];
+var knownTypes = ["unknown", "CellML", "CSV", "HDF5", "EPS", "PNG", "XMLPROTOCOL", "TXTPROTOCOL", "COMBINE archive"];
 
 function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction, storeAction, visibilityAction)
 {
