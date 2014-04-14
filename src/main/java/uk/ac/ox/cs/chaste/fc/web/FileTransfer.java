@@ -497,16 +497,15 @@ public class FileTransfer extends WebModule
 					break;
 			}
 			
-	    filePart.write (tmpFile.getAbsolutePath ());
-	    
-	    if (tmpFile.exists ())
-	    {
-				JSONObject res = new JSONObject ();
-				res.put ("response", true);
-				res.put ("tmpName", tmpName);
-				answer.put ("upload", res);
-	    }
-	    	
+			filePart.write (tmpFile.getAbsolutePath ());
+			if (tmpFile.exists ())
+			{
+					JSONObject res = new JSONObject ();
+					res.put ("response", true);
+					res.put ("tmpName", tmpName);
+					answer.put ("upload", res);
+			}
+
 		}
 		catch (ServletException e)
 		{
@@ -545,16 +544,15 @@ public class FileTransfer extends WebModule
 			targetDirectory.mkdirs ();
 		
 		InputStream in = new FileInputStream (sourceFile.tmpFile);
-    OutputStream out = new FileOutputStream (targetDirectory + Tools.FILESEP + sourceFile.name);
-    
-    byte[] buf = new byte[1024];
-    int len;
-    while ((len = in.read(buf)) > 0)
-        out.write(buf, 0, len);
-    in.close();
-    out.close();
+		OutputStream out = new FileOutputStream (targetDirectory + Tools.FILESEP + sourceFile.name);
+		
+		byte[] buf = new byte[1024];
+		int len;
+		while ((len = in.read(buf)) > 0)
+			out.write(buf, 0, len);
+		in.close();
+		out.close();
 	}
-
 	
 	static public class NewFile
 	{

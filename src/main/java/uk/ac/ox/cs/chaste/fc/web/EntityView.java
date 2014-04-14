@@ -607,6 +607,7 @@ public class EntityView extends WebModule
 			// default visibility if none specified
 			if (visibility == null)
 				visibility = ChasteEntityVersion.VISIBILITY_PRIVATE;
+
 			// create a entity if it not yet exists
 			int entityId = -1;
 			if (entity == null)
