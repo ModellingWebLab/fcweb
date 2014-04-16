@@ -1,10 +1,8 @@
-# Functional Curation -- Web Interface
-
-## Install
+# Functional Curation -- Web Interface -- Installation Instructions
 
 The following instructions assume a Debian-based system (we use Ubuntu) using tomcat7.
 
-### Dependencies
+## Dependencies
 
 * maven
 * java 7
@@ -15,9 +13,69 @@ For the backend:
 
 * All the Chaste dependencies
 * python-requests
+* Celery
+
+## Setup backend
+
+The backend consists of a web service called by the front-end, which manages experiment runs using the Celery task queue.
+For the cardiac domain, the experiment execution program is an extension project to Chaste.
+
+### Experiment task queue
+
+Install the dependencies:
+```
+sudo apt-get install rabbitmq-server
+sudo pip install celery
+sudo pip install python-requests
+```
+
+In the `resources` folder there is a sample init script and configuration file for running Celery on boot.
+Copy `resources/celeryd-init` as `/etc/init.d/celeryd`, and `resources/celeryd-default` as `/etc/default/celeryd`.
+You'll definitely need to edit the latter file to suit your system.
+The server can then be started with `sudo service start celeryd`,
+but don't do this until you've finished the web service setup below.
+
+For some additional security, you might want to stop the rabbitmq broker listening on external ports,
+although the default account only accepts logins from localhost anyway.
+A sample `/etc/rabbitmq/rabbitmq.conf.d/fcws.conf` is:
+```
+# Settings for Functional Curation Web Service
+NODE_IP_ADDRESS=127.0.0.1
+```
+
+Note that at present workers need to be able to access the same filestore as the web server used for the backend web service,
+since the web server will create temporary folders containing the submitted model and protocol.
+Since the experiment running task will try to clean these up when it completes, it's easiest if celery runs as the same user,
+but see comments in `celeryd-default` for more details.
+
+TODO: configuring multiple queues, so admin/internal users get dedicated workers for their experiments:
+-Q arguments, possibly name workers for clarity.
+
+### Web service setup
+
+Setup a webserver/vhost that is able to execute Python CGI scripts.
+Copy the contents of `resources/cgi-bin` to the webserver, so that the scripts are executable from the frontend.
+(The default configuration in `celeryd-default` assumes these are in `/var/www/cgi-bin`.)
+Ensure that the password in the `config.json` file matches the one you specify in `FunctionalCuration.xml` (see below),
+and check that the paths etc. there match your system.
+
+There is a sample Apache site configuration file at the end of these instructions.
+
+If the backend is accessed via https and the certificate isn't signed by a standard authority,
+you'll need to add it to the Java key store, using a command like:
+
+```
+/usr/lib/jvm/java-7-openjdk-amd64/jre/bin/keytool 
+    -import -alias [SOME ALIAS]
+    -file [CERT]
+    -keystore [KEYSTORE]
+# keystore is usually $JAVAHOME/jre/lib/security/cacerts
+```
 
 ### FunctionalCuration executable
 
+These steps need to be performed as the user that celery will run as,
+to ensure the correct permissions for running experiments.
 Check out Chaste, and check out the FunctionalCuration project within its projects folder.
 You should then be able to build the project executable.
 For instance, to build using 4 cores:
@@ -30,6 +88,7 @@ cd ..
 scons -j4 b=GccOptNative cl=1 exe=1 projects/FunctionalCuration/apps
 ```
 
+## Setup front-end
 
 ### Setup database
 
@@ -41,36 +100,6 @@ create user chaste identified by 'password';
 grant all on chaste.* to 'chaste'@'localhost' identified by 'password';
 flush privileges;
 ```
-
-### Setup backend
-
-Setup a webserver/vhost that is able to execute Python CGI scripts.
-Copy the contents of `resources/cgi-bin` to the webserver, so that the scripts are executable from the frontend.
-Ensure that the password in the config file matches the one you specify in `FunctionalCuration.xml` (see below),
-and check that the paths etc. there match your system.
-
-There is a sample Apache site configuration file below.
-
-Currently the backend 'schedules' jobs using `batch`.  It is thus
-recommended to edit `/etc/init/atd.conf` so that multiple experiments can be
-run at once on a multi-processor system.  Use an `exec` line something like
-`exec atd -l 11.5` (for a 12 processor machine).
-
-If the backend is accessed via https and the certificate isn't signed by a
-standard authority, you'll need to add it to the Java key store, using a
-command like:
-
-```
-/usr/lib/jvm/java-7-openjdk-amd64/jre/bin/keytool 
-	-import -alias [SOME ALIAS]
-	-file [CERT]
-	-keystore [KEYSTORE]
-# keystore is usually $JAVAHOME/jre/lib/security/cacerts
-```
-
-You must also ensure that the user account running the webserver is
-permitted to launch jobs via `batch`, and that it can execute the
-FunctionalCuration program.
 
 ### Tomcat configuration
 Make sure tomcat is using at least Java version 7. Tomcat's Java home can be configured in `/etc/default/tomcat7`.
@@ -84,10 +113,11 @@ Then, context files are stored in `/var/lib/tomcat7/context` and your apps are e
 
 Copy `resources/FunctionalCuration.xml` to `/var/lib/tomcat7/context` and configure the file properly, including database credentials and link to the backend.
 
-add jdbc mysql driver to /var/lib/tomcat7/lib. (http://dev.mysql.com/downloads/connector/j/)
+Add jdbc mysql driver to /var/lib/tomcat7/lib. (http://dev.mysql.com/downloads/connector/j/)
+
 ### Build project
 
-add the sems maven repository to your list of repositories: http://sems.uni-rostock.de/2013/10/maven-repository/
+Add the sems maven repository to your list of repositories: http://sems.uni-rostock.de/2013/10/maven-repository/
 
 and move into project source directory and call
 
@@ -138,8 +168,6 @@ The following example is suitable:
         </profiles>
         <activeProfiles/>
     </settings>
-
-
 
 ### Install project
 
@@ -193,7 +221,4 @@ A sample vhost configuration might look like:
 	</VirtualHost>
 
 Try to access http://your.company/FunctionalCuration
-
-
-
 

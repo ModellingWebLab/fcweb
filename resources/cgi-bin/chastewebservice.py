@@ -7,12 +7,11 @@ import time
 import random
 import subprocess
 
-import fcws_utils
+import fcws
+import fcws.utils
 
-config = fcws_utils.config
-
-temporaryDir = config['temp_dir']
-debugPrefix = config['debug_log_file_prefix']
+temporaryDir = fcws.config['temp_dir']
+debugPrefix = fcws.config['debug_log_file_prefix']
 
 cgitb.enable(format='text', context=1, logdir=os.path.join(temporaryDir, debugPrefix+'cgitb'))
 
@@ -31,7 +30,7 @@ def WriteFile(source, destination):
 
 # parse sent objects
 form = cgi.FieldStorage()
-if (not form.has_key("password")) or (form["password"].value != config['password']) or (not form.has_key("callBack")) or (not form.has_key("signature")) or (not form.has_key("model")) or (not form.has_key("protocol")):
+if (not form.has_key("password")) or (form["password"].value != fcws.config['password']) or (not form.has_key("callBack")) or (not form.has_key("signature")) or (not form.has_key("model")) or (not form.has_key("protocol")):
     print "Content-Type: text/html\n\n";
     print '''
         <html><head><title>ChastePermissionError</title></head><body>
@@ -55,11 +54,11 @@ else:
         WriteFile(protocol.file, proto_path)
         
         # Unpack the model & protocol
-        main_model_path = fcws_utils.UnpackArchive(model_path, temp_dir, 'model')
-        main_proto_path = fcws_utils.UnpackArchive(proto_path, temp_dir, 'proto')
+        main_model_path = fcws.utils.UnpackArchive(model_path, temp_dir, 'model')
+        main_proto_path = fcws.utils.UnpackArchive(proto_path, temp_dir, 'proto')
         
         # Check whether their interfaces are compatible
-        missing_terms, missing_optional_terms = fcws_utils.DetermineCompatibility(main_proto_path, main_model_path)
+        missing_terms, missing_optional_terms = fcws.utils.DetermineCompatibility(main_proto_path, main_model_path)
         if missing_terms:
             print signature.value, "inappropriate - required ontology terms are not present in the model."
             print "Missing terms are:<br/>"
@@ -70,21 +69,12 @@ else:
                 for term in missing_optional_terms:
                     print "&nbsp;" * 4, term, "<br/>"
         else:
-            # call the chaste handler via batch -> it will be executed if load average drops below 1.5
-            # seems to be the most convenient mech, to not blow the machine...
-            # but may be replaced by a submit to sge or other scheduling workarounds
-            exec_cmd = ' '.join([os.path.join(os.path.dirname(__file__), "processthefiles.py"),
-                                 callBack.value, signature.value,
-                                 main_model_path, main_proto_path, temp_dir])
-            process = subprocess.Popen(['batch'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            (output, errors) = process.communicate(exec_cmd)
-            if process.returncode != 0:
-                print signature.value, "failed to launch job - system error<br/>"
-                print "<p>Output:", output, "</p>"
-                print "<p>Error output:", errors, "</p>"
-            else:
-                # print success to calling script -> tell web interface that the call was successful
-                print signature.value, "succ"
+            # Make all the files we've created group-writable, so the experiment can clean them up when it's done
+            os.chmod(temp_dir, 0o770)
+            for root, dirs, files in os.walk(temp_dir):
+                for leaf in dirs + files:
+                    os.chmod(os.path.join(root, leaf), 0o770)
+            fcws.ScheduleExperiment(callBack.value, signature.value, main_model_path, main_proto_path, temp_dir)
     except Exception, e:
         print signature.value, "failed due to unexpected error:", e, "<br/>"
         print "Full internal details follow:<br/>"

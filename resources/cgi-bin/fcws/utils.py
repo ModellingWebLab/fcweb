@@ -14,7 +14,7 @@ import sys
 import xml.etree.ElementTree as ET
 import zipfile
 
-config = json.load(open(os.path.join(os.path.dirname(__file__), 'config.json')))
+from . import config
 
 CHASTE_ROOT = config['chaste_root']
 FC_ROOT = os.path.join(CHASTE_ROOT, 'projects', 'FunctionalCuration')
