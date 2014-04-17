@@ -14,8 +14,6 @@
 <%@ attribute name="user" required="false" type="uk.ac.ox.cs.chaste.fc.beans.User"%>
 <%@ attribute name="headerImports" required="true" type="uk.ac.ox.cs.chaste.fc.beans.PageHeader"%>
 <%@ attribute name="notes" required="false" type="uk.ac.ox.cs.chaste.fc.beans.Notifications"%>
-<%@ attribute name="newExpModelName" required="false"%>
-<%@ attribute name="newExpProtocolName" required="false"%>
 
 <!DOCTYPE html>
 <html>

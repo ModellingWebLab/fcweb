@@ -2,7 +2,7 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}Comparison - " contextPath="${contextPath}" newExpModelName="${newExpModelName}" newExpProtocolName="${newExpProtocolName}">
+<t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}Comparison - " contextPath="${contextPath}">
     <h1 id="heading">Comparison</h1>
     
     <div id="entitiesToCompare">
