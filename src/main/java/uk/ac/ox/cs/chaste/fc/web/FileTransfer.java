@@ -122,13 +122,13 @@ public class FileTransfer extends WebModule
 		
 		if (entityId < 0 || (fileId < 0 && !archive))
 			return errorPage (request, response, null);
-
+		
 		if (req[2].equals ("m"))
-			return passEntity (request, response, db, notifications, entityId, archive, fileId, new ModelManager (db, notifications, userMgmt, user));
+			return passEntity (request, response, db, notifications, entityId, archive, fileId, req[6], new ModelManager (db, notifications, userMgmt, user));
 		else if (req[2].equals ("p"))
-			return passEntity (request, response, db, notifications, entityId, archive, fileId, new ProtocolManager (db, notifications, userMgmt, user));
+			return passEntity (request, response, db, notifications, entityId, archive, fileId, req[6], new ProtocolManager (db, notifications, userMgmt, user));
 		else if (req[2].equals ("e"))
-			return passEntity (request, response, db, notifications, entityId, archive, fileId, new ExperimentManager (db, notifications, userMgmt, user, new ModelManager (db, notifications, userMgmt, user), new ProtocolManager (db, notifications, userMgmt, user)));
+			return passEntity (request, response, db, notifications, entityId, archive, fileId, req[6], new ExperimentManager (db, notifications, userMgmt, user, new ModelManager (db, notifications, userMgmt, user), new ProtocolManager (db, notifications, userMgmt, user)));
 
 		LOGGER.debug ("failed to transfer file");
 		// nothing of the above?
@@ -137,13 +137,16 @@ public class FileTransfer extends WebModule
 	}
 	
 	private String passEntity (HttpServletRequest request, HttpServletResponse response, DatabaseConnector db,
-		Notifications notifications, int entityId, boolean archive, int fileId, ChasteEntityManager entityMgmt)
+		Notifications notifications, int entityId, boolean archive, int fileId, String signature, ChasteEntityManager entityMgmt)
 	{
 		File file = null;
 		String fileName = null;
 		
+		// Check if this is a download for running an experiment
+		boolean neglectPermissions = archive && checkSignature(signature);
+		
 		// get file from entity
-		ChasteEntityVersion version = entityMgmt.getVersionById (entityId);
+		ChasteEntityVersion version = entityMgmt.getVersionById (entityId, neglectPermissions);
 		LOGGER.debug ("version: " + version);
 		if (version == null)
 			return errorPage (request, response, null);
@@ -237,6 +240,14 @@ public class FileTransfer extends WebModule
 		return errorPage (request, response, null);
 	}
 	
+	/**
+	 * Check if the provided signature matches an experiment being run.
+	 */
+	private boolean checkSignature(String signature)
+	{
+		File tmp_dir = new File(Tools.getTempDir() + Tools.FILESEP + signature);
+		return tmp_dir.isDirectory();
+	}
 	
 	
 	
@@ -601,7 +612,7 @@ public class FileTransfer extends WebModule
 		
 	}
 	
-	public static SubmitResult submitExperiment (File model, File protocol, String signature) throws Exception
+	public static SubmitResult submitExperiment (int modelId, int protocolId, String signature) throws Exception
 	{
 		// the current chaste web service doesn't have a valid SSL cert. thus, the following will fail.
 		// to import a self-signed cert to your keystore run smth like:
@@ -616,11 +627,8 @@ public class FileTransfer extends WebModule
 	    MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 	    builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
 
-	    FileBody modelBody = new FileBody(model);
-	    FileBody protocolBody = new FileBody(protocol);
-
-	    builder.addPart("model", modelBody);
-	    builder.addPart("protocol", protocolBody);
+	    builder.addTextBody("model", Tools.getThisUrl() + "download/m/name/" + modelId + "/a/" + signature);
+	    builder.addTextBody("protocol", Tools.getThisUrl() + "download/p/name/" + protocolId + "/a/" + signature);
 	    builder.addTextBody("signature", signature);
 	    builder.addTextBody("callBack", Tools.getThisUrl () + "submitExperiment.html");
 	    builder.addTextBody("password", Tools.getChastePassword ());

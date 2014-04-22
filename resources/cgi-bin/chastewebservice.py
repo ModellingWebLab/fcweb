@@ -3,9 +3,7 @@ import cgi
 import cgitb
 import os
 import tempfile
-import time
-import random
-import subprocess
+import urllib2
 
 import fcws
 import fcws.utils
@@ -15,18 +13,17 @@ debugPrefix = fcws.config['debug_log_file_prefix']
 
 cgitb.enable(format='text', context=1, logdir=os.path.join(temporaryDir, debugPrefix+'cgitb'))
 
-
-def WriteFile(source, destination):
-    """Save a file submitted by HTTP POST to disk at the given path."""
-    fout = open(destination, 'wb')
-    while 1:
+def Wget(url, localPath):
+    """Retrieve a binary file from the given URL and save it to disk."""
+    local_file = open(localPath, 'wb')
+    source = urllib2.urlopen(url)
+    while True:
         chunk = source.read(10240)
         if not chunk: break
-        fout.write(chunk)
-    fout.flush()
-    os.fsync(fout)
-    fout.close()
-
+        local_file.write(chunk)
+    local_file.flush()
+    os.fsync(local_file)
+    local_file.close()
 
 # parse sent objects
 form = cgi.FieldStorage()
@@ -41,22 +38,22 @@ else:
     print "Content-Type: text/plain\n\n"
     callBack = form["callBack"]
     signature = form["signature"]
-    model = form["model"]
-    protocol = form["protocol"]
+    modelUrl = form["model"]
+    protocolUrl = form["protocol"]
 
     # Wrap the rest in a try so we alert the caller properly if an exception occurs
     try:
-        # Save the submitted COMBINE archives to disk in a temporary folder
+        # Download the submitted COMBINE archives to disk in a temporary folder
         temp_dir = tempfile.mkdtemp(dir=temporaryDir)
         model_path = os.path.join(temp_dir, 'model.zip')
         proto_path = os.path.join(temp_dir, 'protocol.zip')
-        WriteFile(model.file, model_path)
-        WriteFile(protocol.file, proto_path)
-        
+        Wget(modelUrl.value, model_path)
+        Wget(protocolUrl.value, proto_path)
+
         # Unpack the model & protocol
         main_model_path = fcws.utils.UnpackArchive(model_path, temp_dir, 'model')
         main_proto_path = fcws.utils.UnpackArchive(proto_path, temp_dir, 'proto')
-        
+
         # Check whether their interfaces are compatible
         missing_terms, missing_optional_terms = fcws.utils.DetermineCompatibility(main_proto_path, main_model_path)
         if missing_terms:

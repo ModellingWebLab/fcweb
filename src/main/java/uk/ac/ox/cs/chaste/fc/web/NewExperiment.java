@@ -151,44 +151,9 @@ public class NewExperiment
 		Notifications notifications, ExperimentManager expMgmt, UserManager userMgmt, User user, ChasteEntityVersion model,
 		ChasteEntityVersion protocol, ModelManager modelMgmt, ProtocolManager protocolMgmt, boolean force) throws Exception
 	{
-		// create archives
-		File modelFile = null;
-		File protocolFile = null;
-		try
-		{
-			ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt);	
-			fileMgmt.getFiles (model, modelMgmt.getEntityFilesTable (), modelMgmt.getEntityColumn ());
-			fileMgmt.getFiles (protocol, protocolMgmt.getEntityFilesTable (), protocolMgmt.getEntityColumn ());
-			modelFile = ChasteFileManager.createArchive (model, modelMgmt.getEntityStorageDir ());
-			protocolFile = ChasteFileManager.createArchive (protocol, protocolMgmt.getEntityStorageDir ());
-
-			modelFile.deleteOnExit ();
-			protocolFile.deleteOnExit ();
-		}
-		catch (Exception e)
-		{
-			LOGGER.error ("couldn't create combine archives to run experiment", e);
-			e.printStackTrace ();
-			throw new IOException ("error collecting model and protocol files");
-		}
-		
-		// create experiment directory file
-		File tmpDir = new File (Tools.getTempDir ());
-		if (!tmpDir.exists ())
-			if (!tmpDir.mkdirs ())
-				throw new IOException ("cannot create temp dir for file upload");
-		String signature = null;
-
-		File tmpFile = null;
-		while (true)
-		{
-			signature = UUID.randomUUID().toString();
-			tmpFile = new File (tmpDir.getAbsolutePath () + Tools.FILESEP + signature);
-			if (!tmpFile.exists ())
-				break;
-		}
-		
-		tmpFile.mkdirs ();
+		// Create temporary folder for uploading experiment results, and hence unique signature for submission
+		File tmpFile = Tools.createUniqueSubDir(Tools.getTempDir());
+		String signature = tmpFile.getName();
 		
 		// insert in db
 		int expID = expMgmt.createVersion (model, protocol, signature, user, force);
@@ -198,12 +163,11 @@ public class NewExperiment
 			throw new IOException ("couldn't register experiment (there may already exist an experiment of this model/protocol combination and you're not allowed to overwrite it)");
 		}
 		
-		
-		// send file for processing
+		// submit for processing
 		FileTransfer.SubmitResult res = null;
 		try
 		{
-			res = FileTransfer.submitExperiment (modelFile, protocolFile, signature);
+			res = FileTransfer.submitExperiment(model.getId(), protocol.getId(), signature);
 		}
 		catch (Exception e)
 		{
@@ -231,7 +195,6 @@ public class NewExperiment
 			exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);
 			expMgmt.updateVersion (exp, "queued", ChasteExperimentVersion.STATUS_QUEUED);
 		}
-		//return true;
 		return exp;
 	}
 	
