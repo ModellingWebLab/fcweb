@@ -11,6 +11,7 @@ import json
 import os
 import re
 import sys
+import urllib2
 import xml.etree.ElementTree as ET
 import zipfile
 
@@ -30,6 +31,19 @@ sys.path[0:0] = [os.path.join(FC_ROOT, 'src/proto/parsing'),
 import CompactSyntaxParser as CSP
 import cellml_metadata
 import pycml
+
+
+def Wget(url, localPath):
+    """Retrieve a binary file from the given URL and save it to disk."""
+    local_file = open(localPath, 'wb')
+    source = urllib2.urlopen(url)
+    while True:
+        chunk = source.read(10240)
+        if not chunk: break
+        local_file.write(chunk)
+    local_file.flush()
+    os.fsync(local_file)
+    local_file.close()
 
 
 def UnpackArchive(archivePath, tempPath, contentType):
@@ -66,6 +80,7 @@ def UnpackArchive(archivePath, tempPath, contentType):
     if not os.path.exists(primary_path):
         raise ValueError('Declared primary file not present in archive')
     return primary_path
+
 
 def GetProtoInterface(protoPath):
     """Get the set of ontology terms used by the given protocol, recursively processing imports."""
@@ -137,6 +152,7 @@ def GetProtoInterface(protoPath):
                     if nsuri:
                         terms.add(nsuri + name)
     return terms - optional_terms, optional_terms
+
 
 def DetermineCompatibility(protoPath, modelPath):
     """Determine whether the given protocol and model are compatible.

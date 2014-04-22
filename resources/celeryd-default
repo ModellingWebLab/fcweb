@@ -17,14 +17,8 @@ CELERYD_LOG_FILE="/var/log/celery/%N.log"
 CELERYD_PID_FILE="/var/run/celery/%N.pid"
 
 # Workers should run as an unprivileged user.
-#   You need to create this user manually (or you can choose a user/group combination that already exists, e.g. nobody).
-#   Note that you must use the same group as the web server, since the experiment running task will try to clean up
-#   temporary folders created by the backend web service when it finishes.  The easiest solution, but not necessarily
-#   the most secure, is to run as the same user as the web server (shown here).  If you use a different user, you'll need
-#   to ensure config.json specifies "temp_dir" as a sub-folder of /tmp, or somewhere else that doesn't have the sticky
-#   bit set.
-CELERYD_USER="www-data"
-CELERYD_GROUP="www-data"
+CELERYD_USER="fcws"
+CELERYD_GROUP="fcws"
 
 # If enabled pid and log directories will be created if missing,
 # and owned by the userid/group configured.

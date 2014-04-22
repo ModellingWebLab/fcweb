@@ -328,6 +328,8 @@ public class FileTransfer extends WebModule
 					exptStatus = ChasteExperimentVersion.STATUS_SUCCESS;
 				else if (returntype.equals ("partial"))
 					exptStatus = ChasteExperimentVersion.STATUS_PARTIAL;
+				else if (returntype.equals ("inappropriate"))
+					exptStatus = ChasteExperimentVersion.STATUS_INAPPRORIATE;
 				
 				LOGGER.debug ("supp: " + returnmsg + " -- " + returntype + " --> " + exptStatus);
 				
@@ -335,6 +337,12 @@ public class FileTransfer extends WebModule
 				{
 					// This was just a ping to let us know it's started
 					exp.updateExperiment (expMgmt, "running", exptStatus);
+					return answer;
+				}
+				else if (exptStatus.equals(ChasteExperimentVersion.STATUS_INAPPRORIATE))
+				{
+					// Again a ping, but to say we can't run this experiment
+					exp.updateExperiment(expMgmt, returnmsg, exptStatus);
 					return answer;
 				}
 				

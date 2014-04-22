@@ -13,7 +13,7 @@ For the backend:
 
 * All the Chaste dependencies
 * python-requests
-* Celery
+* Celery (>= 3.1)
 
 ## Setup backend
 
@@ -32,7 +32,7 @@ sudo pip install python-requests
 In the `resources` folder there is a sample init script and configuration file for running Celery on boot.
 Copy `resources/celeryd-init` as `/etc/init.d/celeryd`, and `resources/celeryd-default` as `/etc/default/celeryd`.
 You'll definitely need to edit the latter file to suit your system.
-The server can then be started with `sudo service start celeryd`,
+The server can then be started with `sudo /etc/init.d/celery restart`,
 but don't do this until you've finished the web service setup below.
 
 For some additional security, you might want to stop the rabbitmq broker listening on external ports,
@@ -42,11 +42,6 @@ A sample `/etc/rabbitmq/rabbitmq.conf.d/fcws.conf` is:
 # Settings for Functional Curation Web Service
 NODE_IP_ADDRESS=127.0.0.1
 ```
-
-Note that at present workers need to be able to access the same filestore as the web server used for the backend web service,
-since the web server will create temporary folders containing the submitted model and protocol.
-Since the experiment running task will try to clean these up when it completes, it's easiest if celery runs as the same user,
-but see comments in `celeryd-default` for more details.
 
 TODO: configuring multiple queues, so admin/internal users get dedicated workers for their experiments:
 -Q arguments, possibly name workers for clarity.
