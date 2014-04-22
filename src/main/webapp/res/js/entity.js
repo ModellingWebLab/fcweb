@@ -146,7 +146,10 @@ function deleteEntity (jsonObject)
                     addNotification(msg, "info");
                     if (resp.entityRemains)
                     {
-                        document.location.href = basicurl; // Go back to version table
+                        // Go back to version table
+                        versions[jsonObject.version] = null;
+                        $("#version-item-" + jsonObject.version).remove();
+                        nextPage(basicurl);
                     }
                     else
                     {

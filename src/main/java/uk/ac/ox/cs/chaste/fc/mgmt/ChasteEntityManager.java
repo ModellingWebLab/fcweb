@@ -413,13 +413,14 @@ public abstract class ChasteEntityManager
 	 */
 	public boolean removeVersion (int versionId) throws ChastePermissionException
 	{
-		
 		ChasteEntityVersion version = getVersionById (versionId);
 		if (version == null || !user.isAllowedToDeleteEntityVersion (version))
 			throw new ChastePermissionException ("you are not allowed to delete an entity version");
 		
-		PreparedStatement st = db.prepareStatement ("DELETE FROM `"
-			+ entityVersionsTable + "` WHERE `id`=?");
+		knownVersions.remove(versionId);
+		knownEntities.remove(version.getEntity().getId()); // Just in case!
+		
+		PreparedStatement st = db.prepareStatement ("DELETE FROM `" + entityVersionsTable + "` WHERE `id`=?");
 		ResultSet rs = null;
 		boolean ok = false;
 		
@@ -456,7 +457,6 @@ public abstract class ChasteEntityManager
 	
 	public void deleteEmptyEntities ()
 	{
-		
 		PreparedStatement st = db.prepareStatement ("DELETE FROM `" + entityTable + "` WHERE id NOT IN (SELECT DISTINCT `"+entityColumn+"` FROM `" + entityVersionsTable + "`)");
 		ResultSet rs = null;
 		try
@@ -479,21 +479,21 @@ public abstract class ChasteEntityManager
 		}
 	}
 	
-	public boolean removeEntity (int versionId) throws ChastePermissionException
+	public boolean removeEntity (int entityId) throws ChastePermissionException
 	{
-		
-		ChasteEntity entity = getEntityById (versionId);
+		ChasteEntity entity = getEntityById (entityId);
 		if (entity == null || !user.isAllowedToDeleteEntity (entity))
 			throw new ChastePermissionException ("you are not allowed to delete an entity");
 		
-		PreparedStatement st = db.prepareStatement ("DELETE FROM `"
-			+ entityTable + "` WHERE `id`=?");
+		knownEntities.remove(entityId);
+		
+		PreparedStatement st = db.prepareStatement ("DELETE FROM `" + entityTable + "` WHERE `id`=?");
 		ResultSet rs = null;
 		boolean ok = false;
 		
 		try
 		{
-			st.setInt (1, versionId);
+			st.setInt (1, entityId);
 			
 			int affectedRows = st.executeUpdate ();
 			if (affectedRows == 0)

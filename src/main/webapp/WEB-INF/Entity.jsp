@@ -50,7 +50,7 @@
 	   			<small>(<a href="${contextPath}/${entity.type}/createnew/?newentityname=${entity.id}">add new version</a>)</small>
 	   		</c:if>
 	   		<c:forEach items="${entity.orderedVersions}" var="version" >
-	    		<p title="${version.value.created} -- Visibility: ${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> -- ${version.value.status}</c:if>" class="entityviz-${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> experiment-${version.value.status}</c:if>">
+	    		<p id="version-item-${version.value.id}" title="${version.value.created} -- Visibility: ${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> -- ${version.value.status}</c:if>" class="entityviz-${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> experiment-${version.value.status}</c:if>">
 					<c:choose>
 						<c:when test="${entity.type == 'experiment' && version.value.numFiles eq 0}">
 							<strong>
