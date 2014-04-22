@@ -345,6 +345,10 @@ public class EntityView extends WebModule
 				entityMgmt.removeVersion (versionId);
 				obj.put ("response", true);
 				obj.put ("responseText", "Successfully deleted version " + vers.getName() + " of " + entityMgmt.getEntityColumn() + " " + vers.getEntity().getName());
+				// Determine if there are other versions of this entity still present, so the web page can show the new list
+				ChasteEntity ent = entityMgmt.getEntityById(vers.getEntity().getId());
+				if (ent != null)
+					obj.put("entityRemains", true);
 			}
 			return obj;
 		}

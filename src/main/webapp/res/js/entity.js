@@ -144,9 +144,17 @@ function deleteEntity (jsonObject)
                 if (resp.response)
                 {
                     addNotification(msg, "info");
-                    doc.entity.details.style.display = "none";
-                    doc.entity.version.style.display = "none";
-                    $(".suppl").hide();
+                    if (resp.entityRemains)
+                    {
+                        document.location.href = basicurl; // Go back to version table
+                    }
+                    else
+                    {
+                        // Entity is gone, so we'd get an error if we tried to display it!
+                        doc.entity.details.style.display = "none";
+                        doc.entity.version.style.display = "none";
+                        $(".suppl").hide();
+                    }
                 }
                 else
                     alert(msg);
