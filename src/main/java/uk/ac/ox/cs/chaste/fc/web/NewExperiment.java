@@ -39,9 +39,6 @@ import de.binfalse.bflog.LOGGER;
 public class NewExperiment
 	extends WebModule
 {
-	public static final String NEWEXP_MODEL = "newExpModel";
-	public static final String NEWEXP_PROTOCOL = "newExpProtocol";
-	
 	public NewExperiment () throws NamingException, SQLException
 	{
 		super ();
@@ -208,29 +205,5 @@ public class NewExperiment
 		Notifications notifications, User user, HttpSession session)
 	{
 		return errorPage (request, response, null);
-	}
-	
-	
-
-	private static ChasteEntityVersion getSchedEntity (HttpServletRequest request, HttpSession session, DatabaseConnector db, Notifications notifications, UserManager userMgmt, ChasteEntityManager entityMgmt, String attrName)
-	{
-		Integer id = (Integer) session.getAttribute (attrName);
-		if (id != null)
-		{
-			ChasteEntityVersion version = entityMgmt.getVersionById (id);
-			if (version != null)
-			{
-				request.setAttribute (attrName + "Name", version.getEntity ().getName () + " @ " + version.getVersion ());
-				return version;
-			}
-		}
-		return null;
-	}
-	
-	public static void checkExprimentCreation (HttpServletRequest request, HttpSession session, DatabaseConnector db, Notifications notifications, UserManager userMgmt, User user)
-	{
-		// is he creating an experiment?
-		getSchedEntity (request, session, db, notifications, userMgmt, new ModelManager (db, notifications, userMgmt, user), NEWEXP_MODEL);
-		getSchedEntity (request, session, db, notifications, userMgmt, new ProtocolManager (db, notifications, userMgmt, user), NEWEXP_PROTOCOL);
 	}
 }

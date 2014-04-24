@@ -275,9 +275,6 @@ public class User
 
 	public void authByRequest (HttpServletRequest request, HttpSession session, UserManager userMgmt)
 	{
-		// is he creating an experiment?
-		NewExperiment.checkExprimentCreation (request, session, db, note, userMgmt, this);
-		
 		String mail = (String) session.getAttribute (SESSION_ATTR);
 		//System.out.println ("mail: " + mail);
 		if (mail != null)

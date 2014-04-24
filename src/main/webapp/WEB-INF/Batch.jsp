@@ -2,7 +2,7 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}Run experiments - " contextPath="${contextPath}" newExpModelName="${newExpModelName}" newExpProtocolName="${newExpProtocolName}">
+<t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}Run experiments - " contextPath="${contextPath}">
     <h1 id="entityname">Run experiments using ${entity.name}</h1>
 
     <c:if test="${User.allowedToForceNewExperiment}">
