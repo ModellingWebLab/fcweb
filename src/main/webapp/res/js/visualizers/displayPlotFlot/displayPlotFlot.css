@@ -4,3 +4,51 @@
     min-width: 0;
     display: table;
 }
+
+#choices
+{
+	clear: both;
+	margin-top: 10px;
+}
+
+#flot-buttons-div input
+{
+	margin-left: 5px;
+}
+#flot-buttons-div
+{
+    float: right;
+    text-align: right;
+}
+
+.flotLegendEntity
+{
+	float: left;
+	min-width: 32.5%;
+	padding-right: 5px;
+	font-size: .8em;
+}
+
+span.flotColour
+{
+	padding:1px;
+	display:inline;
+	display:inline-block;
+	line-height:0.8em;
+	vertical-align:middle;
+}
+
+
+div.flotDiv
+{
+	overflow: hidden;
+}
+.flotTooltip {
+  position: absolute;
+  display: none;
+  border: 1px solid #ccc;
+  padding: 2px;
+  background-color: #ddd;
+  opacity: 0.9;
+}
+

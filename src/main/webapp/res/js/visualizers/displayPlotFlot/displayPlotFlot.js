@@ -1,10 +1,11 @@
 var choicesDivId = 'choices';
-var resetButtonDivId = 'reset-button-div'
+var resetButtonDivId = 'flot-buttons-div';
 var colouredSpanIdPrefix = 'span';
 var legendDivId = 'legend';
 var tooltipId = 'flotTooltip';
 var plottedGraph = {}; // TODO: probably safer if this is an instance property!
 var resetButtonId = 'resetButton';
+var legendHideButtonId = 'hideButton';
 var selectTogglerId = 'selectToggler';
 
 /* create and append the div for showing the plot choices */
@@ -43,6 +44,13 @@ function createAppendResetButton(parentDiv) {
     resetButton.type = 'button';
     resetButton.value = 'reset zoom';
     resetButtonDiv.appendChild (resetButton);
+	
+    var legendHideButton = document.createElement('input');
+    legendHideButton.id = legendHideButtonId;
+    legendHideButton.title = 'Toggle the visibility of the legend.';
+    legendHideButton.type = 'button';
+    legendHideButton.value = 'toggle legend';
+    resetButtonDiv.appendChild (legendHideButton);
 }
 
 /* create and append a select toggler to the div element */
@@ -52,7 +60,7 @@ function createAppendSelectToggler(parentDiv) {
     selectTogglerEl.type = 'checkbox';
     parentDiv.appendChild (selectTogglerEl);
     
-    var label = document.createElement('label')
+    var label = document.createElement('label');
     label.setAttribute('for', selectTogglerId);
     label.innerHTML = 'select all';
     parentDiv.appendChild(label);
@@ -73,7 +81,7 @@ function plotAccordingToChoices(plotProperties, selectedCoords) {
     {
         /// Wait 0.1s for flot to load and try again
         console.log("Waiting for flot to load.");
-        window.setTimeout(function(){plotAccordingToChoices(plotProperties, selectedCoords)}, 100);
+        window.setTimeout(function(){plotAccordingToChoices(plotProperties, selectedCoords);}, 100);
         return;
     }
     
@@ -218,6 +226,10 @@ function setListeners(plotProperties, moreThanOneDataset) {
     /* reset graphical display according to ranges defined by current dataset selection */
     $('#' + resetButtonId).click(function() {
         plotAccordingToChoices(plotProperties);
+    });
+    $('#' + legendHideButtonId).click (function ()
+    {
+    	$('#' + choicesDivId).toggle ();
     });
 
     if (moreThanOneDataset)
@@ -386,12 +398,12 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
             {
                 newInput.attr('disabled', 'disabled');
             }
-            choicesContainer.append(newInput).append(colouredSpan).append('&nbsp;').append(newLabel);
+            choicesContainer.append ($("<div></div>").addClass ("flotLegendEntity").append(newInput).append(colouredSpan).append('&nbsp;').append(newLabel));
             /* if more than one dataset and it's not the last one to be processed.. */
-            if (!onlyOneDataset && (thisDatasetNumber != lastDatasetNumber))
+            /*if (!onlyOneDataset && (thisDatasetNumber != lastDatasetNumber))
             {
                 choicesContainer.append('<br />');
-            }
+            }*/
         });
 
         var plotProperties = {
@@ -551,7 +563,7 @@ contentFlotPlotComparer.prototype.showContents = function ()
                 if (plotLabelStripText)
                     label = label.replace(plotLabelStripText, "");
                 if (keyVals.length == csvData.length)
-                    label += ", " + eachCSVData.file.keyName + " = " + keyVals[i] + " " + eachCSVData.file.keyUnits
+                    label += ", " + eachCSVData.file.keyName + " = " + keyVals[i] + " " + eachCSVData.file.keyUnits;
                 else if (csvData.length > 2)
                     label += " line " + i;
                 datasets[key] = {label: label, data: curData, color: curColor};
@@ -565,12 +577,13 @@ contentFlotPlotComparer.prototype.showContents = function ()
                                                      'name': key,
                                                      'checked': 'checked',
                                                      'id': inputId });
-                choicesContainer.append(newInput).append(colouredSpan).append('&nbsp;').append(newLabel);
+                choicesContainer.append ($("<div></div>").addClass ("flotLegendEntity").append(newInput).append(colouredSpan).append('&nbsp;').append(newLabel));
+                //choicesContainer.append(newInput).append(colouredSpan).append('&nbsp;').append(newLabel);
                 curColor++;
-                if (i!=csvData.length)
+                /*if (i!=csvData.length)
                 {
                     choicesContainer.append('<br/>');
-                }
+                }*/
             }
         }
 

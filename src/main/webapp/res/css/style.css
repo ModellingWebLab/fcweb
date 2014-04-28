@@ -616,32 +616,3 @@ li.entityviz-PRIVATE
 {
 	background-color: #bbd3ff;
 }
-
-span.flotColour
-{
-	padding:1px;
-	display:inline;
-	display:inline-block;
-	line-height:0.8em;
-	vertical-align:middle;
-}
-
-#reset-button-div
-{
-    float: right;
-    text-align: right;
-    width: 150px;
-}
-
-div.flotDiv
-{
-	overflow: hidden;
-}
-.flotTooltip {
-  position: absolute;
-  display: none;
-  border: 1px solid #ccc;
-  padding: 2px;
-  background-color: #ddd;
-  opacity: 0.9;
-}
