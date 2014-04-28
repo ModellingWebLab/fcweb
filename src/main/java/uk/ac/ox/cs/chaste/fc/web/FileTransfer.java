@@ -38,7 +38,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
@@ -67,7 +66,8 @@ import de.unirostock.sems.cbarchive.CombineFormats;
 @MultipartConfig
 public class FileTransfer extends WebModule
 {
-  private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
+	private static final long serialVersionUID = 1916967731892621899L;
+private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 	private static final long CACHE_TIME = 60 * 60 * 24 * 365; // one year
 	public static final SimpleDateFormat dateFormater = new SimpleDateFormat ("EEE, d MMM yyyy HH:mm:ss Z");	
 

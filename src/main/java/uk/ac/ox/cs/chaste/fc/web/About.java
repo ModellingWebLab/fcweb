@@ -16,6 +16,8 @@ import uk.ac.ox.cs.chaste.fc.mgmt.DatabaseConnector;
 
 public class About extends WebModule {
 
+	private static final long serialVersionUID = 2748971863067247230L;
+
 	public About () throws NamingException, SQLException
 	{
 		super ();

@@ -5,9 +5,7 @@ package uk.ac.ox.cs.chaste.fc.web;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.Throwable;
 import java.sql.SQLException;
-import java.util.UUID;
 
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
@@ -21,8 +19,6 @@ import uk.ac.ox.cs.chaste.fc.beans.ChasteExperimentVersion;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeader;
 import uk.ac.ox.cs.chaste.fc.beans.User;
-import uk.ac.ox.cs.chaste.fc.mgmt.ChasteEntityManager;
-import uk.ac.ox.cs.chaste.fc.mgmt.ChasteFileManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.DatabaseConnector;
 import uk.ac.ox.cs.chaste.fc.mgmt.ExperimentManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.ModelManager;
@@ -39,6 +35,9 @@ import de.binfalse.bflog.LOGGER;
 public class NewExperiment
 	extends WebModule
 {
+	private static final long serialVersionUID = 8633946624445531956L;
+
+
 	public NewExperiment () throws NamingException, SQLException
 	{
 		super ();

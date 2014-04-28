@@ -24,6 +24,7 @@ import uk.ac.ox.cs.chaste.fc.mgmt.Tools;
 public class Me
 extends WebModule
 {
+	private static final long serialVersionUID = -1691367745727467868L;
 
 	public Me () throws NamingException, SQLException
 	{

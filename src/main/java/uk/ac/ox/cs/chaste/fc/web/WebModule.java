@@ -31,6 +31,7 @@ import de.binfalse.bflog.LOGGER;
 public abstract class WebModule
 extends HttpServlet
 {
+	private static final long serialVersionUID = 8104554788628864516L;
 	public static final String JSP_PATH = "/WEB-INF/";
 	public static final String JSP_ERR = "Exception.jsp";
 	protected UserManager userMgmt;

@@ -27,6 +27,7 @@ import uk.ac.ox.cs.chaste.fc.mgmt.ProtocolManager;
 
 public class DB extends WebModule
 {
+	private static final long serialVersionUID = -687450967894650274L;
 
 	public DB () throws NamingException, SQLException
 	{

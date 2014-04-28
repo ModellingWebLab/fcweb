@@ -16,6 +16,7 @@ import uk.ac.ox.cs.chaste.fc.mgmt.DatabaseConnector;
 
 public class Logout extends WebModule
 {
+	private static final long serialVersionUID = 5617674691374158303L;
 
 	public Logout () throws NamingException, SQLException
 	{

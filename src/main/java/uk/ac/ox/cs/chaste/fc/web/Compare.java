@@ -12,11 +12,9 @@ import javax.servlet.http.HttpSession;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import de.binfalse.bflog.LOGGER;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntity;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntityVersion;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteExperiment;
-import uk.ac.ox.cs.chaste.fc.beans.ChasteExperimentVersion;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeader;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeaderLink;
@@ -29,9 +27,12 @@ import uk.ac.ox.cs.chaste.fc.mgmt.DatabaseConnector;
 import uk.ac.ox.cs.chaste.fc.mgmt.ExperimentManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.ModelManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.ProtocolManager;
+import de.binfalse.bflog.LOGGER;
 
 public class Compare extends WebModule
 {
+	private static final long serialVersionUID = -8671477576919542565L;
+
 	public Compare () throws NamingException, SQLException
 	{
 		super ();

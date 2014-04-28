@@ -7,9 +7,6 @@ import java.sql.Timestamp;
 
 import org.json.simple.JSONObject;
 
-import uk.ac.ox.cs.chaste.fc.mgmt.ModelManager;
-import uk.ac.ox.cs.chaste.fc.mgmt.ProtocolManager;
-
 
 /**
  * @author martin

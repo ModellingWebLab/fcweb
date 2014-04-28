@@ -31,8 +31,8 @@ import uk.ac.ox.cs.chaste.fc.mgmt.DatabaseConnector;
 public class Index
 	extends WebModule
 {
-	
-	
+	private static final long serialVersionUID = 9156201634024079662L;
+
 	public Index () throws NamingException, SQLException
 	{
 		super ();

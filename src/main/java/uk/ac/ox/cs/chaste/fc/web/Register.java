@@ -28,6 +28,7 @@ import de.binfalse.bflog.LOGGER;
 
 public class Register extends WebModule
 {
+	private static final long serialVersionUID = 6297553500369169314L;
 	private static final Pattern PATTERN_MAIL = Pattern.compile(
 		"^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
 		+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$");

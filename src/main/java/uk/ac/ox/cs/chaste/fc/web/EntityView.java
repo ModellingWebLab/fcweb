@@ -10,7 +10,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.Vector;
 
 import javax.naming.NamingException;
@@ -18,7 +17,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -42,10 +40,10 @@ import uk.ac.ox.cs.chaste.fc.web.FileTransfer.NewFile;
 import de.binfalse.bflog.LOGGER;
 import de.unirostock.sems.cbarchive.ArchiveEntry;
 import de.unirostock.sems.cbarchive.CombineArchive;
-import de.unirostock.sems.cbarchive.CombineFormats;
 
 public class EntityView extends WebModule
 {
+	private static final long serialVersionUID = 501895229328392660L;
 	private final int TYPE_MODEL = 1;
 	private final int TYPE_PROTOCOL = 2;
 	private final int TYPE_EXPERIMENT = 4;

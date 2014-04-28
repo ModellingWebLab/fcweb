@@ -4,13 +4,10 @@
 package uk.ac.ox.cs.chaste.fc.beans;
 
 import java.sql.Timestamp;
-import java.util.Vector;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import uk.ac.ox.cs.chaste.fc.mgmt.ExperimentManager;
-import uk.ac.ox.cs.chaste.fc.mgmt.Tools;
 
 
 /**

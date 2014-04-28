@@ -12,9 +12,9 @@ import java.util.Vector;
 
 import javax.mail.MessagingException;
 
-import de.binfalse.bflog.LOGGER;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.User;
+import de.binfalse.bflog.LOGGER;
 
 
 /**

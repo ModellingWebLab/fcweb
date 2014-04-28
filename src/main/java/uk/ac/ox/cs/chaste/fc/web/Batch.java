@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
+
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,6 +33,7 @@ import de.binfalse.bflog.LOGGER;
 
 public class Batch extends WebModule
 {
+	private static final long serialVersionUID = 8334304634209822184L;
 	private final int TYPE_MODEL = 1;
 	private final int TYPE_PROTOCOL = 2;
 	

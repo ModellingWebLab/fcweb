@@ -17,7 +17,6 @@ import uk.ac.ox.cs.chaste.fc.beans.ChasteFile;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.User;
 import de.binfalse.bflog.LOGGER;
-import de.unirostock.sems.cbarchive.ArchiveEntry;
 import de.unirostock.sems.cbarchive.CombineArchive;
 import de.unirostock.sems.cbarchive.CombineFormats;
 import de.unirostock.sems.cbarchive.OmexDescription;

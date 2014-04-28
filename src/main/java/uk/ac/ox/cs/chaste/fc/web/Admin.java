@@ -16,7 +16,6 @@ import uk.ac.ox.cs.chaste.fc.beans.PageHeaderScript;
 import uk.ac.ox.cs.chaste.fc.beans.User;
 import uk.ac.ox.cs.chaste.fc.mgmt.ChastePermissionException;
 import uk.ac.ox.cs.chaste.fc.mgmt.DatabaseConnector;
-import uk.ac.ox.cs.chaste.fc.mgmt.UserManager;
 import de.binfalse.bflog.LOGGER;
 
 public class Admin extends WebModule

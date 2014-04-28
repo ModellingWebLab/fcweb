@@ -7,16 +7,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.TreeSet;
 
-import de.binfalse.bflog.LOGGER;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntity;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntityVersion;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteExperiment;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteExperimentVersion;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.User;
+import de.binfalse.bflog.LOGGER;
 
 
 /**

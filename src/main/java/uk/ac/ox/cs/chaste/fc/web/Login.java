@@ -18,6 +18,7 @@ import uk.ac.ox.cs.chaste.fc.mgmt.DatabaseConnector;
 
 public class Login extends WebModule
 {
+	private static final long serialVersionUID = -6236433031515564451L;
 
 	public Login () throws NamingException, SQLException
 	{

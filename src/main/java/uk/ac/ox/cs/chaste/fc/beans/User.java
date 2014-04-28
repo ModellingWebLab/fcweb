@@ -15,7 +15,6 @@ import uk.ac.ox.cs.chaste.fc.mgmt.CookieManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.DatabaseConnector;
 import uk.ac.ox.cs.chaste.fc.mgmt.Tools;
 import uk.ac.ox.cs.chaste.fc.mgmt.UserManager;
-import uk.ac.ox.cs.chaste.fc.web.NewExperiment;
 import de.binfalse.bflog.LOGGER;
 
 
