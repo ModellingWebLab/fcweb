@@ -616,3 +616,9 @@ li.entityviz-PRIVATE
 {
 	background-color: #bbd3ff;
 }
+
+
+.clearer
+{
+	clear: both;
+}

@@ -259,6 +259,27 @@ function setListeners(plotProperties, moreThanOneDataset) {
           plotAccordingToChoices(plotProperties, retrieveCurrentPlotCoords(plottedGraph));
       });
     }
+    
+    // mouse over for legend
+    var legend = $("#" + choicesDivId);
+    legend.append ($("<div></div>").addClass ("clearer"));
+    if (legend.height () > 100)
+    {
+        legend.append ($("<div></div>").addClass ("fadings").append ($("<small></small>").append ($("<strong></strong>").text ("show all"))));
+        
+    	legend.addClass ("legend-fade");
+    	legend.mouseover (function () 
+    	{
+    		legend.removeClass ("legend-fade");
+    	}).mouseout(function () 
+    	{
+    		legend.addClass ("legend-fade");
+    	});
+    }
+    else
+    {
+    	legend.removeClass ("legend-fade");
+    }
 }
 
 /* provide dataset toggler title */
