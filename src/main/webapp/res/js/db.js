@@ -281,7 +281,7 @@ function addMatrixClickListener (td, link, expId, expName, result)
 	td.addEventListener("click", function () {
 		if (comparisonMode)
 		{
-			if (result != "experiment-SUCCESS")
+			if (result != "SUCCESS")
 				return;
 			
 			var element = $("#listOfExperimentsToCompare-" + expId);
