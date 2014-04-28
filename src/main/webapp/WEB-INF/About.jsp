@@ -10,14 +10,16 @@
         important to check that they behave appropriately in the new situation to which you're applying them.
     </p>
     <p>
-        To achieve this goal, it's a pre-requisite to be able to replicate in-silico precisely the same protocols used in an experiment of interest.
+        To achieve this goal, it's a pre-requisite to be able to replicate <i>in-silico</i> precisely the same protocols used in an experiment of interest.
         We are therefore developing a language for describing rich 'virtual experiment' protocols,
         and software for running these on compatible models.
         This website provides a front-end to a prototype of that language and software.
     </p>
     <p>
         For more background on Functional Curation, our <a href="http://dx.doi.org/10.1016/j.pbiomolbio.2011.06.003">2011 reference publication</a> is a good place to start.
-        Full details about the <a href="https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration">open source software implementing the backend for this system</a> can be found on the Chaste website.
+        We also have a <a href="https://peerj.com/preprints/273/">recent preprint on the underlying concept of <i>virtual experiments</i></a>.
+        Full details about the <a href="https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration">open source software implementing the back-end for this system</a> can be found on the Chaste website.
+        Documentation on the protocol language can also be found there.
     </p>
     <p>
         Please <a href="${contextPath}/db.html">browse around</a> and view the results of protocols encoded so far, run on a range of cell models.
