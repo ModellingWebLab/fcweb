@@ -22,6 +22,9 @@
         The converse comparison (one model, many protocols) is available via viewing a model.
         </p>
         <div id="matrixdiv"></div>
+        <div id="comparisonModeDiv">Comparison Mode: <span id="comparisonModeIndicator"></span> <a id="comparisonLink">compare selected models</a>
+        <div id="listOfExperimentsToCompare"></div>
+        </div>
         <br/>
         Key:
         <table class="matrixTable small">

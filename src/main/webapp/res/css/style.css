@@ -622,3 +622,8 @@ li.entityviz-PRIVATE
 {
 	clear: both;
 }
+
+.patternized
+{
+	background-image: url(../img/pattern.png);
+}

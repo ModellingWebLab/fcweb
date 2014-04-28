@@ -3,6 +3,8 @@ var pages = [ "matrix" ];//, "search" ];
 var modelMapper = {};
 var protocolMapper = {};
 var lock = true;
+var comparisonMode = false;
+var experimentsToCompare = new Array ();
 
 /**
  * Submit a request to create an experiment.
@@ -264,7 +266,7 @@ function setTitleAndClickListener(td, entry)
     {
         var expUrl = contextPath + "/experiment/" + convertForURL(entry.experiment.name) + "/" + entry.experiment.id + "/latest";
         titleText += "E: <a href='" + expUrl + "'>" + entry.experiment.name + "</a>";
-        addMatrixClickListener(td, expUrl);
+        addMatrixClickListener(td, expUrl, entry.experiment.id, entry.experiment.name, entry.experiment.latestResult);
     }
     else
     {
@@ -274,10 +276,51 @@ function setTitleAndClickListener(td, entry)
     td.setAttribute("title", titleText);
 }
 
-function addMatrixClickListener (td, link)
+function addMatrixClickListener (td, link, expId, expName, result)
 {
 	td.addEventListener("click", function () {
-		document.location.href = link;
+		if (comparisonMode)
+		{
+			if (result != "experiment-SUCCESS")
+				return;
+			
+			var element = $("#listOfExperimentsToCompare-" + expId);
+			if (element.length)
+			{
+				// was selected -> unselect
+				element.remove ();
+				
+				var index = experimentsToCompare.indexOf (expId);
+				if (index)
+					experimentsToCompare.splice (index, 1);
+				$(td).removeClass ("patternized");
+			}
+			else
+			{
+				// add a new element to the list
+				var newDiv = $("<div></div>").attr ("id", "listOfExperimentsToCompare-" + expId).text (expName).append ("<br/>");
+				$("#listOfExperimentsToCompare").append (newDiv);
+				experimentsToCompare.push (expId);
+				$(td).addClass ("patternized");
+			}
+			
+			// recompute the link to the comparison web site
+			if (experimentsToCompare.length > 0)
+			{
+				var newHref = contextPath + "/compare/e/";
+				for (var i = 0; i < experimentsToCompare.length; i++)
+					newHref += experimentsToCompare[i] + "/";
+				$("#comparisonLink").attr ("href", newHref);
+				$("#comparisonLink").show ();
+			}
+			else
+				$("#comparisonLink").hide ();
+			
+		}
+		else
+		{
+			document.location.href = link;
+		}
 	}, false);
 }
 
@@ -360,6 +403,18 @@ function prepareMatrix ()
 	getMatrix ({
     	task: "getMatrix"
     }, div);
+	
+	$("#comparisonModeDiv").click (function () 
+	{
+		comparisonMode = !comparisonMode;
+		
+		$("#comparisonModeIndicator").text (comparisonMode ? "enabled" : "disabled");
+		
+		console.log ("toggeled comparison mode");
+	});
+
+	$("#comparisonModeIndicator").text (comparisonMode ? "enabled" : "disabled");
+	$("#comparisonLink").hide ();
 	
 }
 
