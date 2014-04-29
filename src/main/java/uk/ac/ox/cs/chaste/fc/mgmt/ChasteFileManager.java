@@ -94,7 +94,7 @@ public class ChasteFileManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err removing file: " + e.getMessage ());
-			LOGGER.error ("db problem while removing file", e);
+			LOGGER.error (e, "db problem while removing file");
 			ok = false;
 		}
 		finally
@@ -139,7 +139,7 @@ public class ChasteFileManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err adding file: " + e.getMessage ());
-			LOGGER.error ("db problem while adding file", e);
+			LOGGER.error (e, "db problem while adding file");
 		}
 		finally
 		{
@@ -171,7 +171,7 @@ public class ChasteFileManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err associating file to "+entityMgmt.getEntityColumn ()+": " + e.getMessage ());
-			LOGGER.error ("db problem while associating file to "+entityMgmt.getEntityColumn ()+"", e);
+			LOGGER.error (e, "db problem while associating file to ", entityMgmt.getEntityColumn ());
 			ok = false;
 		}
 		finally
@@ -204,7 +204,7 @@ public class ChasteFileManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err associating file to "+columnName+": " + e.getMessage ());
-			LOGGER.error ("db problem while associating file to "+columnName+"", e);
+			LOGGER.error (e, "db problem while associating file to ", columnName);
 			ok = false;
 		}
 		finally
@@ -340,7 +340,7 @@ public class ChasteFileManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err retrieving files: " + e.getMessage ());
-			LOGGER.error ("db problem while retrieving files (" + filesTable + " - " + enityColumn + ")", e);
+			LOGGER.error (e, "db problem while retrieving files (", filesTable, " - ", enityColumn, ")");
 		}
 		finally
 		{
@@ -366,8 +366,8 @@ public class ChasteFileManager
 		File basePath = new File (storageDir + Tools.FILESEP + version.getFilePath ());
 		String entityPath = storageDir + Tools.FILESEP + version.getFilePath () + Tools.FILESEP;
 
-		LOGGER.debug ("base path will be: " + basePath);
-		LOGGER.debug ("entityPath will be: " + entityPath);
+		LOGGER.debug ("base path will be: ", basePath);
+		LOGGER.debug ("entityPath will be: ", entityPath);
 		
 		for (ChasteFile file : files)
 		{
@@ -375,7 +375,7 @@ public class ChasteFileManager
 			VCard vcard = new VCard (u.getFamilyName (), u.getGivenName (), u.getMail (), u.getInstitution ());
 			OmexDescription od = new OmexDescription (vcard, file.getFilecreated ());
 
-			LOGGER.debug ("add: " + file.getName ());
+			LOGGER.debug ("add: ", file.getName ());
 			
 			ca.addEntry (basePath, new File (entityPath + file.getName ()), CombineFormats.getFormatIdentifier (file.getFiletype ().toLowerCase ()), od, file.isMasterFile ());
 		}
