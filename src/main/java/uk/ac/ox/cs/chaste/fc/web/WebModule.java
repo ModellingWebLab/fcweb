@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
+import java.util.Date;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
@@ -144,9 +145,6 @@ extends HttpServlet
 	
 	private String runWebRequest (HttpServletRequest request, HttpServletResponse response, DatabaseConnector db, Notifications notifications, User user, HttpSession session) throws UnsupportedEncodingException
 	{
-		
-		
-
 		PageHeader header = new PageHeader ();
 		request.setAttribute ("PageHeader", header);
 		request.setAttribute ("Notifications", notifications);

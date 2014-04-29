@@ -194,7 +194,6 @@ public class DatabaseConnector
 					LOGGER.info ("updating db to version 3..");
 					// do something that is necessary for db version 3
 				}
-				
 
 				// prepare for version 4
 				if (currentVersion < 4)

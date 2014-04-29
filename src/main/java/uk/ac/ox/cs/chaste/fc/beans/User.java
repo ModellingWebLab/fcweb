@@ -4,6 +4,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -46,11 +48,14 @@ public class User
 	private Notifications note;
 	private CookieManager cookieMgmt;
 	
+	private Map<String, String> preferences;
+	
 	public User (DatabaseConnector db, Notifications note, CookieManager cookieMgmt)
 	{
 		this.db = db;
 		this.note = note;
 		this.cookieMgmt = cookieMgmt;
+		this.preferences = new HashMap <String, String> ();
 	}
 	
 	
@@ -69,6 +74,7 @@ public class User
 		this.created = created;
 		this.role =role;
 		this.sendMails = sendMails;
+		this.preferences = new HashMap <String, String> ();
 	}
 	
 	/**
@@ -90,7 +96,7 @@ public class User
 		{
 			e.printStackTrace();
 			note.addError ("sql err: " + e.getMessage ());
-			LOGGER.error ("db problem during fake auth", e);
+			LOGGER.error (e, "db problem during fake auth");
 		}
 		finally
 		{
@@ -118,6 +124,89 @@ public class User
 			sendMails = rs.getBoolean ("sendMails");
 			id = rs.getInt ("id");
 		}
+		
+		// get the preferences
+		try
+		{
+			PreparedStatement st = db.prepareStatement ("SELECT `key`, `val` FROM `settings` WHERE `user`=?");
+			st.setInt (1, id);
+			
+			ResultSet res = st.executeQuery ();
+
+			while (res != null && res.next())
+				preferences.put (res.getString ("key"), res.getString ("val"));
+
+			db.closeRes (st);
+			db.closeRes (res);
+		}
+		catch (Exception e)
+		{
+			// let's gice a damn if settings failed...
+			LOGGER.error (e, "failed to lookup settings");
+		}
+	}
+	
+	/**
+	 * Gets the preference.
+	 *
+	 * @param key the key
+	 * @param defaultValue the default value if there is no such pref stored in db
+	 * @return the preference associated to this key
+	 */
+	public String getPreference (String key, String defaultValue)
+	{
+		String p = preferences.get (key);
+		if (p == null)
+			return defaultValue;
+		return p;
+	}
+	
+	/**
+	 * Sets the preference.
+	 *
+	 * @param key the key
+	 * @param value the value to be stored for this key
+	 * @return true, if user is authenticated and db was updated successfully
+	 */
+	public boolean setPreference (String key, String value)
+	{
+		if (!this.isAuthorized ())
+			return false;
+		
+		if (preferences.get (key) == null)
+		{
+			// insert to db
+			PreparedStatement st = db.prepareStatement ("INSERT INTO `settings` (`user`, `key`, `val`) VALUES (?, ?, ?);");
+			try
+			{
+				st.setInt (1, id);
+				st.setString (2, key);
+				st.setString (3, value);
+				st.execute ();
+			}
+			catch (SQLException e)
+			{
+				LOGGER.error (e, "failed to insert new preferences to db");
+			}
+		}
+		else
+		{
+			// update db entry
+			PreparedStatement st = db.prepareStatement ("UPDATE SET `val`=? WHERE `user`=? AND `key`=?;");
+			try
+			{
+				st.setString (1, value);
+				st.setInt (2, id);
+				st.setString (3, key);
+				st.execute ();
+			}
+			catch (SQLException e)
+			{
+				LOGGER.error (e, "failed to insert new preferences to db");
+			}
+		}
+		preferences.put (key, value);
+		return true;
 	}
 	
 	public boolean isAuthorized ()
@@ -148,7 +237,7 @@ public class User
 		{
 			e.printStackTrace();
 			note.addError ("sql err: " + e.getMessage ());
-			LOGGER.error ("db problem during session auth", e);
+			LOGGER.error (e, "db problem during session auth");
 		}
 		finally
 		{
@@ -291,7 +380,7 @@ public class User
 			{
 				e.printStackTrace();
 				note.addError ("sql err: " + e.getMessage ());
-				LOGGER.error ("db problem during session auth", e);
+				LOGGER.error (e, "db problem during session auth");
 			}
 			finally
 			{
@@ -320,7 +409,7 @@ public class User
 				{
 					e.printStackTrace();
 					note.addError ("sql err: " + e.getMessage ());
-					LOGGER.error ("db problem during session auth", e);
+					LOGGER.error (e, "db problem during session auth");
 				}
 				finally
 				{
