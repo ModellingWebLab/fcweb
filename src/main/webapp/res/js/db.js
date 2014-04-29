@@ -398,6 +398,9 @@ function prepareMatrix ()
 {
 	var div = document.getElementById("matrixdiv");
 	
+	var loadingImg = document.createElement("img");
+	loadingImg.src = contextPath+"/res/img/loading2-new.gif";
+	div.appendChild(loadingImg);
 	div.appendChild(document.createTextNode("Preparing experiment matrix; please be patient."));
 
 	getMatrix ({
