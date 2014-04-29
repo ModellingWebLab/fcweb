@@ -1,4 +1,7 @@
-function addNotification (err, list)
+/*
+ * list is either `error` or `info`
+ */
+function addNotification (msg, list)
 {
 	console.log ("adding" + list);
 	if (!list)
@@ -6,7 +9,7 @@ function addNotification (err, list)
 	var errsList = document.getElementById(list + "list");
 	var errors = document.getElementById(list);
 	var item = document.createElement("li");
-	item.innerHTML = err;
+	item.innerHTML = msg;
 	errsList.appendChild(item);
 
 	if (errsList.firstChild)

@@ -120,6 +120,22 @@ extends WebModule
 				obj.put ("responseText", "mail settings updated");
 			}
 		}
+		else if (task.equals ("updatePref"))
+		{
+			String prefKey = Tools.validataUserInput (querry.get ("prefKey").toString ());
+			String prefVal = Tools.validataUserInput (querry.get ("prefVal").toString ());
+
+			JSONObject obj = new JSONObject ();
+				obj.put ("response", false);
+				obj.put ("responseText", "updating preferences failed");
+			answer.put ("updatePref", obj);
+			
+			if (user.setPreference (prefKey, prefVal))
+			{
+				obj.put ("response", true);
+				obj.put ("responseText", "preference " + prefKey + " updated");
+			}
+		}
 		
 		return answer;
 	}

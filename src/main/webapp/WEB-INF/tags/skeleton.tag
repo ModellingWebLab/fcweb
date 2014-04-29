@@ -23,6 +23,12 @@
 		<%-- static header fields -> used on every page --%>
 		<script type='text/javascript'>
 			var contextPath = "${contextPath}";
+			var preferences = new Array ();
+			<c:if test="${user != null && user.authorized}">
+				<c:forEach items="${user.preferences}" var="setting" >
+					preferences["${setting.key}"] = "${setting.value}";
+				</c:forEach>
+			</c:if>
 		</script>
 		<meta http-equiv='Content-Type' content='text/html;charset=utf-8' />
 		<link rel='stylesheet' type='text/css' href='${contextPath}/res/css/style.css' />

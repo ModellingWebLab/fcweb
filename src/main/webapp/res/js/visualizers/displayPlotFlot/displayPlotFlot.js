@@ -229,8 +229,32 @@ function setListeners(plotProperties, moreThanOneDataset) {
     });
     $('#' + legendHideButtonId).click (function ()
     {
-    	$('#' + choicesDivId).toggle ();
+    	var div = $('#' + choicesDivId);
+    	div.toggle ();
+    	
+    	var update = {
+    			task: "updatePref",
+    			prefKey: "FlotLegendDisp",
+    			prefVal: "show"
+    		};
+    	
+    	if (!div.is(':visible'))
+    		update.prefVal = "hide";
+    	else
+    		update.prefVal = "show";
+    	
+    	$.post (contextPath + "/myaccount.html", JSON.stringify(update)).done (function ()
+    	{
+    		addNotification ("updated preferences for displaying legend in plot settings", "info");
+    	}).fail (function () 
+    	{
+    		addNotification ("failed to update preferences for displaying legend in plot settings", "error");
+    	});
+    	
     });
+    
+    if (preferences["FlotLegendDisp"] == "hide")
+    	$('#' + choicesDivId).hide ();;
 
     if (moreThanOneDataset)
     {

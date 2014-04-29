@@ -147,6 +147,16 @@ public class User
 	}
 	
 	/**
+	 * Gets the preferences. This is convenient if you want to iterate through preferences, but updates to this object won't be written to the database. Use the `setPreference` method to update preferences.
+	 *
+	 * @return the preferences
+	 */
+	public Map<String, String> getPreferences ()
+	{
+		return preferences;
+	}
+	
+	/**
 	 * Gets the preference.
 	 *
 	 * @param key the key
@@ -170,7 +180,7 @@ public class User
 	 */
 	public boolean setPreference (String key, String value)
 	{
-		if (!this.isAuthorized ())
+		if (!this.isAuthorized () || key.length () > 20 || value.length () > 100)
 			return false;
 		
 		if (preferences.get (key) == null)
@@ -192,7 +202,7 @@ public class User
 		else
 		{
 			// update db entry
-			PreparedStatement st = db.prepareStatement ("UPDATE SET `val`=? WHERE `user`=? AND `key`=?;");
+			PreparedStatement st = db.prepareStatement ("UPDATE `settings` SET `val`=? WHERE `user`=? AND `key`=?;");
 			try
 			{
 				st.setString (1, value);
