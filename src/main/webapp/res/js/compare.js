@@ -13,14 +13,14 @@ var gotInfos = false;
 var plotDescription;
 var plotFiles = new Array ();
 var filesTable = {};
-var shownDefault = false;
-
+// Used for determining what graph (if any) to show by default
+var metadataToParse = 0, metadataParsed = 0, defaultViz = null, defaultVizEntityCount = 0;
 // State for figuring out whether we're comparing multiple protocols on a single model, or multiple models on a single protocol
 var firstModelName = "", firstProtoName = "";
 var singleModel = true, singleProto = true;
-
 // Used for stripping out redundant (repeated) text in plot line labels
 var plotLabelStripText = null;
+
 
 function getFileContent (file, succ)
 {
@@ -98,7 +98,6 @@ function highlightPlots (entity, showDefault)
     // Output contents has fields: Variable id,Variable name,Units,Number of dimensions,File name,Type,Dimensions
     plotDescription = entity.plotDescription;
     outputContents = entity.outputContents;
-    var default_viz = null, default_entity_count = 0;
 	for (var i = 1; i < plotDescription.length; i++)
 	{
 		if (plotDescription[i].length < 2)
@@ -114,15 +113,15 @@ function highlightPlots (entity, showDefault)
     		var row = document.getElementById ("filerow-" + plotDescription[i][2].hashCode ());
     		if (row)
     		{
-    			if (showDefault && !shownDefault)
+    			if (showDefault && (!singleProto || defaultViz === null))
     			{
     				var viz = document.getElementById ("filerow-" + plotDescription[i][2].hashCode () + "-viz-displayPlotFlot");
     				if (viz)
     				{
-    				    if ((i == 1 || !singleProto) && f.entities.length > default_entity_count)
+    				    if ((!singleProto || i == 1) && f.entities.length > defaultVizEntityCount)
 				        {
-    				        default_viz = viz;
-    				        default_entity_count = f.entities.length;
+    				        defaultViz = viz;
+    				        defaultVizEntityCount = f.entities.length;
 				        }
     				}
     			}
@@ -165,16 +164,17 @@ function highlightPlots (entity, showDefault)
 			plotFiles.push (plotDescription[i][2]);
 		}
 	}
-	if (default_viz)
-    {
-        shownDefault = true;
-        nextPage(default_viz.href, true); // 'Invisible' redirect
-    }
 	sortTable (plotFiles);
+	// Show the default visualisation if this is the last experiment to be analysed
+	if (defaultViz && metadataParsed == metadataToParse)
+	{
+	    nextPage(defaultViz.href, true); // 'Invisible' redirect
+	}
 }
 
 function parseOutputContents (entity, file, showDefault)
 {
+    metadataToParse += 1;
     entity.outputContents = null; // Note that there is one to parse
     
 	var goForIt = {
@@ -184,6 +184,7 @@ function parseOutputContents (entity, file, showDefault)
 			{
 				parseCsvRaw(file);
 				entity.outputContents = file.csv;
+				metadataParsed += 1;
 				if (entity.plotDescription)
                     highlightPlots (entity, showDefault);
 			}
@@ -196,6 +197,7 @@ function parseOutputContents (entity, file, showDefault)
 
 function parsePlotDescription (entity, file, showDefault)
 {
+    metadataToParse += 1;
     entity.plotDescription = null; // Note that there is one to parse
 	
 	var goForIt = {
@@ -205,6 +207,7 @@ function parsePlotDescription (entity, file, showDefault)
 			{
 			    parseCsvRaw(file);
 			    entity.plotDescription = file.csv;
+			    metadataParsed += 1;
 				if (entity.outputContents)
 				    highlightPlots (entity, showDefault);
 			}
