@@ -264,6 +264,8 @@ function parseEntities (entityObj)
 	}
 	
 	// Alter heading to reflect type of comparison
+	doc.heading.innerHTML = "Comparison of " + entityType.charAt(0).toUpperCase() + entityType.slice(1) + "s";
+	
 	if (entityType == "experiment")
 	{
 		if (singleModel && !singleProto)
@@ -277,8 +279,6 @@ function parseEntities (entityObj)
 	    plotLabelStripText = " &amp; " + firstProtoName;
     }
 	}
-	else
-		doc.heading.innerHTML = "Comparison of " + entityType.charAt(0).toUpperCase() + entityType.slice(1) + "s";
 	
 	doc.outputFileHeadline.innerHTML = "Output files from all compared " + entityType + "s";
 	
