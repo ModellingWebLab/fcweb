@@ -68,17 +68,21 @@ public class Compare extends WebModule
 		String[] req =  request.getRequestURI().substring(request.getContextPath().length()).split ("/");
 		
 		ChasteEntityManager entityMgmt = null;
+		int type = 0;
 		if (req[2].equals ("m"))
 		{
 			entityMgmt = new ModelManager (db, notifications, userMgmt, user);
+			type = EntityView.TYPE_MODEL;
 		}
 		else if (req[2].equals ("p"))
 		{
 			entityMgmt = new ProtocolManager (db, notifications, userMgmt, user);
+			type = EntityView.TYPE_PROTOCOL;
 		}
 		else if (req[2].equals ("e"))
 		{
 			entityMgmt = new ExperimentManager (db, notifications, userMgmt, user, new ModelManager (db, notifications, userMgmt, user), new ProtocolManager (db, notifications, userMgmt, user));
+			type = EntityView.TYPE_EXPERIMENT;
 		}
 		else
 			throw new IOException ("nothing to do.");
@@ -100,6 +104,12 @@ public class Compare extends WebModule
 			
 			ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt);
 			
+			// comparing experiments -> usual using the latest versions
+			// comparing models/protocols -> use versions by id
+			boolean latestVersion = true;
+			if (querry.get ("getBy") != null && querry.get ("getBy").equals ("versionId"))
+				latestVersion = false;
+			
 			JSONArray ids = (JSONArray) querry.get ("ids");
 			JSONArray entities = new JSONArray ();
 			for (Object id : ids)
@@ -115,23 +125,44 @@ public class Compare extends WebModule
 					continue;
 				}
 				
-				ChasteEntity entity = entityMgmt.getEntityById (curId);
-				if (entity != null)
+				if (latestVersion)
 				{
-					ChasteEntityVersion version = entity.getLatestVersion ();
+					ChasteEntity entity = entityMgmt.getEntityById (curId);
+					if (entity != null)
+					{
+						ChasteEntityVersion version = entity.getLatestVersion ();
+						if (version != null)
+						{
+							fileMgmt.getFiles (version, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ());
+							JSONObject v = version.toJson ();
+							if (type == EntityView.TYPE_EXPERIMENT)
+							{
+								ChasteExperiment expt = (ChasteExperiment) entity;
+								if (expt != null)
+								{
+									v.put ("modelName", expt.getModel().getName());
+									v.put ("protoName", expt.getProtocol().getName());
+								}
+							}
+							entities.add (v);
+						}
+						LOGGER.warn ("couldn't find lates version of entity with id ", curId);
+					}
+					else
+						LOGGER.warn ("user requested entity with id ", curId, " but there is no such entity");
+				}
+				else
+				{
+					ChasteEntityVersion version = entityMgmt.getVersionById (curId);
 					if (version != null)
 					{
 						fileMgmt.getFiles (version, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ());
 						JSONObject v = version.toJson ();
-						ChasteExperiment expt = (ChasteExperiment) entity;
-						if (expt != null)
-						{
-							v.put ("modelName", expt.getModel().getName());
-							v.put ("protoName", expt.getProtocol().getName());
-						}
 						entities.add (v);
 					}
+					LOGGER.warn ("couldn't find version with id ", curId);
 				}
+				
 			}
 			
 			obj.put ("entities", entities);

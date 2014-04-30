@@ -264,16 +264,23 @@ function parseEntities (entityObj)
 	}
 	
 	// Alter heading to reflect type of comparison
-	if (singleModel && !singleProto)
+	if (entityType == "experiment")
 	{
-	    doc.heading.innerHTML = firstModelName + " experiments: comparison of protocols";
-	    plotLabelStripText = firstModelName + " &amp; ";
-	}
-	else if (singleProto && !singleModel)
+		if (singleModel && !singleProto)
+		{
+		    doc.heading.innerHTML = firstModelName + " experiments: comparison of protocols";
+		    plotLabelStripText = firstModelName + " &amp; ";
+		}
+		else if (singleProto && !singleModel)
     {
 	    doc.heading.innerHTML = firstProtoName + " experiments: comparison of models";
 	    plotLabelStripText = " &amp; " + firstProtoName;
     }
+	}
+	else
+		doc.heading.innerHTML = "Comparison of " + entityType.charAt(0).toUpperCase() + entityType.slice(1) + "s";
+	
+	doc.outputFileHeadline.innerHTML = "Output files from all compared " + entityType + "s";
 	
 	// Create a drop-down box that allows display of/navigate to experiments being compared
 	var entitiesToCompare = document.getElementById("entitiesToCompare");
@@ -286,17 +293,17 @@ function parseEntities (entityObj)
 	var default_option = document.createElement("option");
 	default_option.selected = true;
 	default_option.value = document.location.href;
-	default_option.innerHTML = "Click to view, select to show a single experiment";
+	default_option.innerHTML = "Click to view, select to show a single " + entityType;
 	select_box.onchange = function(){sel=document.getElementById("exptSelect"); console.log(sel); document.location.href = sel.options[sel.selectedIndex].value;};
 	select_box.appendChild(default_option);
 	for (var entity in entities)
 	{
 		var option = document.createElement("option");
 		option.value = contextPath + "/"+entityType+"/" + convertForURL (entities[entity].name) + "/" + entities[entity].entityId + "/" + convertForURL (entities[entity].created) + "/" + entities[entity].id;
-		option.innerHTML = entities[entity].name;
+		option.innerHTML = entities[entity].name + (entityType == "experiment" ? "" : " &mdash; " + entities[entity].version);
 		select_box.appendChild(option);
 	}
-	form.innerHTML = "Experiments selected for comparison: ";
+	form.innerHTML = entityType.charAt(0).toUpperCase() + entityType.slice(1) + "s selected for comparison: ";
 	form.appendChild(select_box);
 	
 	buildSite ();
@@ -554,10 +561,17 @@ function parseUrl (event)
 	if (!tableParsed)
 	{
 		tableParsed = true;
-		getInfos ({
-			task: "getEntityInfos",
-			ids: entityIds
-		});
+		if (entityType == "experiment")
+			getInfos ({
+				task: "getEntityInfos",
+				ids: entityIds
+			});
+		else
+			getInfos ({
+				task: "getEntityInfos",
+				getBy: "versionId",
+				ids: entityIds
+			});
 	}
 	else
 		handleReq ();
@@ -571,7 +585,8 @@ function initCompare ()
 		displayClose: document.getElementById("fileclose"),
 		fileName: document.getElementById("filename"),
 		fileDisplay: document.getElementById("filedisplay"),
-		fileDetails: document.getElementById("filedetails")
+		fileDetails: document.getElementById("filedetails"),
+		outputFileHeadline: document.getElementById("outputFileHeadline")
 	};
 	doc.fileDetails.style.display = "none";
 	

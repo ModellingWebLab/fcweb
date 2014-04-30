@@ -44,9 +44,9 @@ import de.unirostock.sems.cbarchive.CombineArchive;
 public class EntityView extends WebModule
 {
 	private static final long serialVersionUID = 501895229328392660L;
-	private final int TYPE_MODEL = 1;
-	private final int TYPE_PROTOCOL = 2;
-	private final int TYPE_EXPERIMENT = 4;
+	public static final int TYPE_MODEL = 1;
+	public static final int TYPE_PROTOCOL = 2;
+	public static final int TYPE_EXPERIMENT = 4;
 	
 	private int type;
 

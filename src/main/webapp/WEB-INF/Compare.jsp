@@ -17,7 +17,7 @@
     
     
     <div id="files">
-	    <h3>Output files from all compared experiments</h3>
+	    <h3 id="outputFileHeadline"></h3>
 	    <table id="filestable">
 		</table>
 	</div>
