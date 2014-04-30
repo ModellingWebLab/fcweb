@@ -281,25 +281,19 @@ function addMatrixClickListener (td, link, expId, expName, result)
 	td.addEventListener("click", function () {
 		if (comparisonMode)
 		{
-			if (result != "SUCCESS")
+			if (result != "SUCCESS" && result != "PARTIAL")
 				return;
 			
-			var element = $("#listOfExperimentsToCompare-" + expId);
-			if (element.length)
+            var index = experimentsToCompare.indexOf (expId);
+            if (index != -1)
 			{
 				// was selected -> unselect
-				element.remove ();
-				
-				var index = experimentsToCompare.indexOf (expId);
-				if (index)
-					experimentsToCompare.splice (index, 1);
+				experimentsToCompare.splice (index, 1);
 				$(td).removeClass ("patternized");
 			}
 			else
 			{
 				// add a new element to the list
-				var newDiv = $("<div></div>").attr ("id", "listOfExperimentsToCompare-" + expId).text (expName).append ("<br/>");
-				$("#listOfExperimentsToCompare").append (newDiv);
 				experimentsToCompare.push (expId);
 				$(td).addClass ("patternized");
 			}
@@ -315,7 +309,6 @@ function addMatrixClickListener (td, link, expId, expName, result)
 			}
 			else
 				$("#comparisonLink").hide ();
-			
 		}
 		else
 		{
@@ -410,10 +403,7 @@ function prepareMatrix ()
 	$("#comparisonModeDiv").click (function () 
 	{
 		comparisonMode = !comparisonMode;
-		
 		$("#comparisonModeIndicator").text (comparisonMode ? "enabled" : "disabled");
-		
-		console.log ("toggeled comparison mode");
 	});
 
 	$("#comparisonModeIndicator").text (comparisonMode ? "enabled" : "disabled");
