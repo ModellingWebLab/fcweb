@@ -227,32 +227,6 @@ function setListeners(plotProperties, moreThanOneDataset) {
     $('#' + resetButtonId).click(function() {
         plotAccordingToChoices(plotProperties);
     });
-    $('#' + legendHideButtonId).click (function ()
-    {
-    	var div = $('#' + choicesDivId);
-    	div.toggle ();
-    	
-    	var update = {
-    			task: "updatePref",
-    			prefKey: "FlotLegendDisp",
-    			prefVal: "show"
-    		};
-    	
-    	if (!div.is(':visible'))
-    		update.prefVal = "hide";
-    	
-    	$.post (contextPath + "/myaccount.html", JSON.stringify(update)).done (function ()
-    	{
-    		addNotification ("updated preferences for displaying legend in plot settings", "info");
-    	}).fail (function () 
-    	{
-    		addNotification ("failed to update preferences for displaying legend in plot settings", "error");
-    	});
-    	
-    });
-    
-    if (preferences["FlotLegendDisp"] == "hide")
-    	$('#' + choicesDivId).hide ();
 
     if (moreThanOneDataset)
     {
@@ -290,17 +264,33 @@ function setListeners(plotProperties, moreThanOneDataset) {
         legend.append ($("<div></div>").addClass ("fadings").append ($("<small></small>").append ($("<strong></strong>").text ("show all"))));
         
     	legend.addClass ("legend-fade");
-    	legend.mouseover (function () 
+    	legend.mouseover (function ()
     	{
     		legend.removeClass ("legend-fade");
-    	}).mouseout(function () 
+    	}).mouseout(function ()
     	{
     		legend.addClass ("legend-fade");
     	});
+        // Toggle button implements persistent expand/collapse
+        $('#' + legendHideButtonId).click (function ()
+            {
+                var legend = $('#' + choicesDivId);
+                if (legend.hasClass("legend-fade"))
+                {
+                    // Show, and disable mouseout behaviour
+                    legend.removeClass("legend-fade").off('mouseout');
+                }
+                else
+                {
+                    // Fade, and enable mouseout behaviour
+                    legend.addClass("legend-fade").mouseout(function(){legend.addClass("legend-fade");});
+                }
+            });
     }
     else
     {
     	legend.removeClass ("legend-fade");
+    	$('#' + legendHideButtonId).hide();
     }
 }
 
