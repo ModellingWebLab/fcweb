@@ -21,10 +21,11 @@
         Note that you can compare models' behaviours under a particular protocol by viewing the protocol (click on a column heading), selecting the 'Compare models' button, and comparing the experiments using models of interest.
         The converse comparison (one model, many protocols) is available via viewing a model.
         </p>
+        <p>
+        Alternatively, enable 'comparison mode' to allow selecting arbitrary experiments from this matrix view to compare.<br/>
+        <span id="comparisonModeDiv">Comparison mode: <span id="comparisonModeIndicator"></span>. <a id="comparisonLink">Compare selected experiments.</a></span>
+        </p>
         <div id="matrixdiv"></div>
-        <div id="comparisonModeDiv">Comparison Mode: <span id="comparisonModeIndicator"></span> <a id="comparisonLink">compare selected models</a>
-        <div id="listOfExperimentsToCompare"></div>
-        </div>
         <br/>
         Key:
         <table class="matrixTable small">

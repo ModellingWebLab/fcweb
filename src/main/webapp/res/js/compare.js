@@ -226,6 +226,9 @@ function parseEntities (entityObj)
     firstModelName = entityObj[0].modelName;
     firstProtoName = entityObj[0].protoName;
     
+    // Sort entityObj list by .name
+    entityObj.sort(function(a,b) {return (a.name.toLocaleLowerCase() > b.name.toLocaleLowerCase()) ? 1 : ((b.name.toLocaleLowerCase() > a.name.toLocaleLowerCase()) ? -1 : 0);});
+    
 	for (var i = 0; i < entityObj.length; i++)
 	{
 	    var entity = entityObj[i];
@@ -513,16 +516,12 @@ function parseUrl (event)
 			basicurl = t.slice (0, i + 3).join ("/") + "/";
 			entityType = "protocol";
 			entityIds = t.slice (i + 3);
-			//entityId = t[i+3];
-			//return t.slice (i + 4);
 		}
 		if ("/" + t[i] == contextPath && t[i+2] == "e")
 		{
 			basicurl = t.slice (0, i + 3).join ("/") + "/";
 			entityType = "experiment";
 			entityIds = t.slice (i + 3);
-			//entityId = t[i+3];
-			//return t.slice (i + 4);
 		}
 	}
 	
