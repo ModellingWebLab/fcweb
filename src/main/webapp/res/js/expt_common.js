@@ -96,7 +96,7 @@ function sortTable (plots)
             // Append the rows for this section, ordered by file name
             for (var i = 0; i < cur.length; i++)
             {
-                $(arr[cur[i]].row).addClass ("filesTable-" + css);
+                $(arr[cur[i]].row).removeClass().addClass ("filesTable-" + css);
                 filesTable.table.removeChild (arr[cur[i]].row);
                 filesTable.table.appendChild (arr[cur[i]].row);
             }
@@ -104,6 +104,11 @@ function sortTable (plots)
             {
                 $(".filesTable-" + css).not(header).hide();
                 $(header).children().removeClass("filesTable-header-shown").addClass("filesTable-header-hidden");
+            }
+            else
+            {
+                // Explicitly show rows in this section, since some of them may have been hidden by a previous call to sortTable
+                $(".filesTable-" + css).not(header).show();
             }
         }
     };
