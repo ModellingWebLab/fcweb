@@ -1,6 +1,8 @@
 package uk.ac.ox.cs.chaste.fc.web;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.Vector;
 
@@ -15,6 +17,7 @@ import org.json.simple.JSONObject;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntity;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntityVersion;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteExperiment;
+import uk.ac.ox.cs.chaste.fc.beans.ChasteFile;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeader;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeaderLink;
@@ -27,6 +30,7 @@ import uk.ac.ox.cs.chaste.fc.mgmt.DatabaseConnector;
 import uk.ac.ox.cs.chaste.fc.mgmt.ExperimentManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.ModelManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.ProtocolManager;
+import uk.ac.ox.cs.chaste.fc.mgmt.Tools;
 import de.binfalse.bflog.LOGGER;
 
 public class Compare extends WebModule
@@ -48,6 +52,7 @@ public class Compare extends WebModule
 		Vector<String> plugins = new Vector<String> ();
 		plugins.add ("displayPlotFlot");
 		plugins.add ("displayPlotHC");
+		plugins.add ("displayUnixDiff");
 
 		for (String s : plugins)
 		{
@@ -169,6 +174,88 @@ public class Compare extends WebModule
 			answer.put ("getEntityInfos", obj);
 		}
 		
+		if (task.equals ("getUnixDiff"))
+		{
+			JSONObject obj = new JSONObject ();
+			answer.put ("getUnixDiff", obj);
+			obj.put ("response", false);
+			obj.put ("responseText", "getUnixDiff");
+			
+			// select files
+			int entity1 = -1,
+				entity2 = -1,
+				file1 = -1,
+				file2 = -1;
+			
+			try
+			{
+				entity1 = Integer.parseInt ("" + querry.get ("entity1"));
+				entity2 = Integer.parseInt ("" + querry.get ("entity2"));
+				file1 = Integer.parseInt ("" + querry.get ("file1"));
+				file2 = Integer.parseInt ("" + querry.get ("file2"));
+			}
+			catch (NullPointerException | NumberFormatException e)
+			{
+				LOGGER.warn ("user supplied invalid ids for unix diffing");
+				obj.put ("responseText", "cannot understand request");
+				return answer;
+			}
+			ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt);
+			
+			ChasteEntityVersion entityVersion1 = entityMgmt.getVersionById (entity1, false),
+				entityVersion2 = entityMgmt.getVersionById (entity2, false);
+			
+			if (entityVersion1 == null || entityVersion2 == null)
+			{
+				LOGGER.warn ("user supplied invalid ids for unix diffing -> versions not found");
+				obj.put ("responseText", "invalid request");
+				return answer;
+			}
+
+			fileMgmt.getFiles (entityVersion1, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ());
+			fileMgmt.getFiles (entityVersion2, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ());
+			
+			ChasteFile version1 = entityVersion1.getFileById (file1), version2 = entityVersion2.getFileById (file2);
+			
+			if (version1 == null || version2 == null)
+			{
+				LOGGER.warn ("user supplied invalid ids for unix diffing -> versions not found");
+				obj.put ("responseText", "invalid request");
+				return answer;
+			}
+			
+			
+			
+			// compute unix diff
+			
+			try
+			{
+				String a = entityMgmt.getEntityStorageDir () + Tools.FILESEP + entityVersion1.getFilePath () + Tools.FILESEP + version1.getName ();
+				String b = entityMgmt.getEntityStorageDir () + Tools.FILESEP + entityVersion2.getFilePath () + Tools.FILESEP + version2.getName ();
+				if (!a.equals (b))
+				{
+					ProcessBuilder pb = new ProcessBuilder("diff", "-a", a, b);
+					Process p = pb.start();
+					BufferedReader br = new BufferedReader (new InputStreamReader(p.getInputStream()));
+					StringBuffer diff = new StringBuffer ();
+					String line;
+					while ((line = br.readLine()) != null)
+						diff.append (line).append (Tools.NEWLINE);
+					br.close ();
+					
+					obj.put ("unixDiff", diff.toString ());
+				}
+				else
+					obj.put ("unixDiff", "same file..");
+				obj.put ("response", true);
+			}
+			catch (Exception e)
+			{
+				LOGGER.error (e, "couldn't compute unix diff of ", version1.getName (), " and ", version2.getName ());
+			}
+		}
+		
 		return answer;
 	}
+	
 }
