@@ -1,0 +1,17 @@
+
+.bivesDiffDisplayer
+{
+	margin-top: 20px;
+	font-size: .8em;
+}
+
+.bivesDiffDel
+{
+	color: #890000;
+}
+
+.bivesDiffIns
+{
+	color: #100089;
+}
+

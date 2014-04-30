@@ -1,5 +1,5 @@
 
-function unixDiffer (file, div)
+function bivesDiffer (file, div)
 {
 	this.file = file;
 	this.div = div;
@@ -17,12 +17,12 @@ function unixDiffer (file, div)
 	var tableBody = $("<tbody></tbody>");
 	table.append (tableBody);
 	
-	this.displayer = $("<div></div>").addClass ("unixDiffDisplayer");
+	this.displayer = $("<div></div>").addClass ("bivesDiffDisplayer");
 	jqDiv.append (table).append (this.displayer);
 
 	for (var i = 0; i < this.file.entities.length; i++)
 	{
-		var tr = $("<tr></tr>").addClass ("unixDiffFileVersionTableRow");
+		var tr = $("<tr></tr>").addClass ("bivesDiffFileVersionTableRow");
 		
 		var name = $("<td></td>").text (this.file.entities[i].entityLink.name + " - " + this.file.entities[i].entityLink.version);
 		var prev = $("<input type='radio' name='former'/>");
@@ -36,33 +36,35 @@ function unixDiffer (file, div)
 	}
 };
 
-unixDiffer.prototype.formerClickListener = function (former, file, tr)
+bivesDiffer.prototype.formerClickListener = function (former, file, tr)
 {
 	var outer = this;
 	former.click (function () 
 	{
-		$(".unixDiffFileVersionTableRow").each (function () {$(this).removeClass ("unixDiffDel");});
+		$(".bivesDiffFileVersionTableRow").each (function () {$(this).removeClass ("bivesDiffDel");});
 		outer.formerFile = file;
-		tr.addClass ("unixDiffDel");
+		tr.addClass ("bivesDiffDel");
 		outer.showDiff ();
 	});
 };
 
-unixDiffer.prototype.laterClickListener = function (later, file, tr)
+bivesDiffer.prototype.laterClickListener = function (later, file, tr)
 {
 	var outer = this;
 	later.click (function () 
 	{
-		$(".unixDiffFileVersionTableRow").each (function () {$(this).removeClass ("unixDiffIns");});
+		$(".bivesDiffFileVersionTableRow").each (function () {$(this).removeClass ("bivesDiffIns");});
 		outer.laterFile = file;
-		tr.addClass ("unixDiffIns");
+		tr.addClass ("bivesDiffIns");
 		outer.showDiff ();
 	});
 };
 
-unixDiffer.prototype.computeDifferences = function (former, later, matrixKey)
+bivesDiffer.prototype.computeDifferences = function (former, later, matrixKey)
 {
-	var request = {
+	/*
+	 * this is to be implemented
+	 * var request = {
 			task: "getUnixDiff",
 			entity1: former.entityLink.id,
 			file1: former.entityFileLink.id,
@@ -99,10 +101,10 @@ unixDiffer.prototype.computeDifferences = function (former, later, matrixKey)
 	}).fail (function () 
 	{
 		diffs[matrixKey].empty ().append ("failed to compute the differences");
-	});
+	});*/
 };
 
-unixDiffer.prototype.showDiff = function ()
+bivesDiffer.prototype.showDiff = function ()
 {
 	if (this.laterFile && this.formerFile)
 	{
@@ -110,7 +112,7 @@ unixDiffer.prototype.showDiff = function ()
 		if (!this.diffs[matrixKey])
 		{
 			// compute the diff and show it afterwards
-			this.diffs[matrixKey] = $("<div></div>").text ("computing differences");
+			this.diffs[matrixKey] = $("<div></div>").text ("calling BiVeS from WHICH BIVES URL?");
 			this.computeDifferences (this.formerFile, this.laterFile, matrixKey);
 		}
 
@@ -119,25 +121,25 @@ unixDiffer.prototype.showDiff = function ()
 	}
 };
 
-unixDiffer.prototype.getContentsCallback = function (succ)
+bivesDiffer.prototype.getContentsCallback = function (succ)
 {
 	
 };
 
-unixDiffer.prototype.show = function ()
+bivesDiffer.prototype.show = function ()
 {
 	
 };
 
 
-function unixDiffContent ()
+function bivesDiffContent ()
 {
-    this.name = "displayUnixDiff";
-    this.icon = "displayUnixDiff.png";
-    this.description = "use unix diff tool to compare versions";
+    this.name = "displayBivesDiff";
+    this.icon = "displayBivesDiff.png";
+    this.description = "use BiVeS to compare versions";
 };
 
-unixDiffContent.prototype.canRead = function (file)
+bivesDiffContent.prototype.canRead = function (file)
 {
 	var allowedExt = [
 	                  "xmlprotocol",
@@ -157,30 +159,30 @@ unixDiffContent.prototype.canRead = function (file)
 	return false;
 };
 
-unixDiffContent.prototype.getName = function ()
+bivesDiffContent.prototype.getName = function ()
 {
     return this.name;
 };
 
-unixDiffContent.prototype.getIcon = function ()
+bivesDiffContent.prototype.getIcon = function ()
 {
     return this.icon;
 };
 
-unixDiffContent.prototype.getDescription = function ()
+bivesDiffContent.prototype.getDescription = function ()
 {
     return this.description;
 };
 
-unixDiffContent.prototype.setUpComparision = function (files, div)
+bivesDiffContent.prototype.setUpComparision = function (files, div)
 {
-    return new unixDiffer (files, div);
+    return new bivesDiffer (files, div);
 };
 
 
-function initUnixDiffContent ()
+function initbivesDiffContent ()
 {
-    visualizers["displayUnixDiff"] = new unixDiffContent ();
+    visualizers["displayBivesDiff"] = new bivesDiffContent ();
 }
 
-document.addEventListener("DOMContentLoaded", initUnixDiffContent, false);
+document.addEventListener("DOMContentLoaded", initbivesDiffContent, false);
