@@ -18,7 +18,7 @@ import de.binfalse.bflog.LOGGER;
 
 public class DatabaseConnector
 {
-	public static final int DB_VERSION = 2;
+	public static final int DB_VERSION = 3;
 	private Connection	connection;
 	private Notifications note;
 	
@@ -191,25 +191,59 @@ public class DatabaseConnector
 				// prepare for version 3
 				if (currentVersion < 3)
 				{
-					LOGGER.info ("updating db to version 3..");
+					LOGGER.info ("upgrading db to version 3..");
 					// do something that is necessary for db version 3
+
+					try
+					{
+						// update model versions
+						st = this.prepareStatement ("ALTER TABLE  `modelversions` ADD  `commitmsg` TEXT NOT NULL");
+						st.execute ();
+						closeRes (st);
+						
+						// update protocol versions
+						st = this.prepareStatement ("ALTER TABLE  `protocolversions` ADD  `commitmsg` TEXT NOT NULL");
+						st.execute ();
+						closeRes (st);
+						
+						// update experiment versions
+						st = this.prepareStatement ("ALTER TABLE  `experimentversions` ADD  `commitmsg` TEXT NOT NULL");
+						st.execute ();
+						closeRes (st);
+
+						st = this.prepareStatement ("UPDATE `settings` SET `val`=3 WHERE `user`='-1' AND `key`='DBVERSION';");
+						st.execute ();
+						closeRes (st);
+					}
+					catch (SQLException e)
+					{
+						LOGGER.error (e, "error upgrading db to version 3");
+						throw new RuntimeException ("failed to upgrade database");
+					}
 				}
 
-				// prepare for version 4
-				if (currentVersion < 4)
+				
+				
+				// prepare for version 99
+				if (currentVersion < -99)
 				{
-					LOGGER.info ("updating db to version 4..");
-					// do something that is necessary for db version 4
+					LOGGER.info ("upgrading db to version -99..");
+					// do something that is necessary for db version -99
+					// ...
+					st = this.prepareStatement ("UPDATE `settings` SET `val`=-99 WHERE `user`='-1' AND `key`='DBVERSION';");
+					st.execute ();
+					closeRes (st);
 				}
 				
 				// and so on..
+				LOGGER.info ("successfully upgraded db");
 			}
 			
 			
 		}
 		catch (Exception e)
 		{
-			LOGGER.error (e, "error looking for settings table");
+			LOGGER.error (e, "error updating database");
 			throw new RuntimeException ("checking for database updates failed.. " + e.getMessage ());
 		}
 	}

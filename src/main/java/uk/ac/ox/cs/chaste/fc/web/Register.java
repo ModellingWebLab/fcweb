@@ -156,14 +156,14 @@ public class Register extends WebModule
 					catch (MessagingException e)
 					{
 						e.printStackTrace();
-						LOGGER.error ("error sending mail after registration.", e);
+						LOGGER.error (e, "error sending mail after registration.");
 						throw new IOException ("cannot send an email.");
 					}
 				}
 				catch (SQLException e)
 				{
 					e.printStackTrace();
-					LOGGER.error ("SQLException: cannot execute statement. not able to register new user", e);
+					LOGGER.error (e, "SQLException: cannot execute statement. not able to register new user");
 					throw new IOException ("sql problem registering new user.");
 				}
 				finally
@@ -193,7 +193,7 @@ public class Register extends WebModule
 				}
 				catch (UnsupportedEncodingException | MessagingException e)
 				{
-					LOGGER.error ("could not notify admins about new user registration", e);
+					LOGGER.error (e, "could not notify admins about new user registration");
 				}
 			}
 		}
@@ -255,7 +255,7 @@ public class Register extends WebModule
 		catch (SQLException e)
 		{
 			e.printStackTrace();
-			LOGGER.error ("SQLException: cannot execute statement", e);
+			LOGGER.error (e, "SQLException: cannot execute statement");
 			throw new IOException ("sql problem");
 		}
 		finally
@@ -318,7 +318,7 @@ public class Register extends WebModule
 		catch (SQLException e)
 		{
 			e.printStackTrace();
-			LOGGER.error ("SQLException: cannot execute statement", e);
+			LOGGER.error (e, "SQLException: cannot execute statement");
 			throw new IOException ("sql problem");
 		}
 		finally

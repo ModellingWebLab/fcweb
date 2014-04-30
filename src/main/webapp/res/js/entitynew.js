@@ -117,6 +117,7 @@ function initNewEntity ()
 {
 	var entityName = document.getElementById("entityname");
 	var versionName = document.getElementById("versionname");
+	var commitMsg = document.getElementById("commitMsg");
 	var visibilityElt = document.getElementById("visibility");
 	var visibilityAction = document.getElementById("visibilityaction");
 	var entityNameAction = document.getElementById("entityaction");
@@ -169,6 +170,7 @@ function initNewEntity ()
 		{
 	    	task: "createNewEntity",
 	    	entityName: entityName.value,
+	    	commitMsg: commitMsg.value,
 	    	versionName: versionName.value,
 	    	visibility: visibilityElt.options[visibilityElt.selectedIndex].value,
 	    	files: uploadedFiles,

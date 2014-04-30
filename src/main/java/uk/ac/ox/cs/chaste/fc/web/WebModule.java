@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-import java.util.Date;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
@@ -236,7 +235,7 @@ extends HttpServlet
 			{
 				e.printStackTrace ();
 				notifications.addError ("Error building site: " + e.getMessage ());
-				LOGGER.error ("error building web site", e);
+				LOGGER.error (e, "error building web site");
 			}
 			db.closeConnection ();
 			if (dispatch != null)
@@ -279,14 +278,14 @@ extends HttpServlet
 		}
 		catch (IOException e)
 		{
-			LOGGER.error ("error reading content of post request", e);
+			LOGGER.error (e, "error reading content of post request");
 			e.printStackTrace ();
 			response.setStatus (HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			throw new IOException ("don't understand post content.");
 		}
 		catch (ClassCastException e)
 		{
-			LOGGER.error ("error reading content of post request. probably bad formated: " + post, e);
+			LOGGER.error (e, "error reading content of post request. probably bad formated: ", post);
 			e.printStackTrace ();
 			response.setStatus (HttpServletResponse.SC_BAD_REQUEST);
 			throw new IOException ("don't understand post content. probably bad formated: " + post);

@@ -135,7 +135,7 @@ public class Batch extends WebModule
 		{
 			e.printStackTrace ();
 			notifications.addError ("cannot find "+entityMgmt.getEntityColumn ());
-			LOGGER.warn ("user requested "+entityMgmt.getEntityColumn ()+" id " + req[4] + " is unparseable.");
+			LOGGER.warn ("user requested ", entityMgmt.getEntityColumn (), " id ", req[4], " is unparseable.");
 			return errorPage (request, response, null);
 		}
 		
@@ -215,7 +215,7 @@ public class Batch extends WebModule
 		{
 			e.printStackTrace ();
 			notifications.addError ("cannot find entity");
-			LOGGER.error ("user requested "+ type + " with id: " + req[4] + " invalid or not found", e);
+			LOGGER.error (e, "user requested ", type, " with id: ", req[4], " invalid or not found");
 			JSONObject obj = new JSONObject ();
 				obj.put ("response", false);
 				obj.put ("responseText", "no entity found");
@@ -249,7 +249,7 @@ public class Batch extends WebModule
 			{
 				e.printStackTrace ();
 				notifications.addError ("cannot find entity");
-				LOGGER.warn ("user requested "+ type + " with id: " + req[4] + " invalid or not found: " + e.getMessage ());
+				LOGGER.warn ("user requested ", type, " with id: ", req[4], " invalid or not found: ", e.getMessage ());
 				expFAIL++;
 				continue;
 			}
@@ -306,7 +306,7 @@ public class Batch extends WebModule
 			}
 			catch (NumberFormatException e)
 			{
-				LOGGER.warn ("user provided model in batch invalid: " + t.get ("model"), e);
+				LOGGER.warn (e, "user provided model in batch invalid: ", t.get ("model"));
 			}
 			
 			try
@@ -316,7 +316,7 @@ public class Batch extends WebModule
 			}
 			catch (NumberFormatException e)
 			{
-				LOGGER.warn ("user provided protocol in batch invalid: " + t.get ("protocol"), e);
+				LOGGER.warn (e, "user provided protocol in batch invalid: ", t.get ("protocol"));
 			}
 			
 			try
@@ -332,7 +332,7 @@ public class Batch extends WebModule
 			}
 			catch (NumberFormatException e)
 			{
-				LOGGER.warn ("user provided experiment in batch invalid: " + t.get ("experiment"), e);
+				LOGGER.warn (e, "user provided experiment in batch invalid: ", t.get ("experiment"));
 			}
 			
 			ExperimentManager expMgmt = new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt);
@@ -373,7 +373,7 @@ public class Batch extends WebModule
 				{
 					e.printStackTrace ();
 					notifications.addError (e.getMessage ());
-					LOGGER.error ("user requested entity invalid or not found", e);
+					LOGGER.error (e, "user requested entity invalid or not found");
 					failed++;
 					continue;
 				}
@@ -414,7 +414,7 @@ public class Batch extends WebModule
 		catch (Exception e)
 		{
 			notifications.addError ("experiment failed to start: " + expName + ": " + e.getLocalizedMessage());
-			LOGGER.warn ("exp failed to start: " + expName, e);
+			LOGGER.warn (e, "exp failed to start: ", expName);
 			return false;
 		}
 		ChasteExperiment exp = expVer.getExperiment();

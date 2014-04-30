@@ -67,7 +67,7 @@ import de.unirostock.sems.cbarchive.CombineFormats;
 public class FileTransfer extends WebModule
 {
 	private static final long serialVersionUID = 1916967731892621899L;
-private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
+	private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 	private static final long CACHE_TIME = 60 * 60 * 24 * 365; // one year
 	public static final SimpleDateFormat dateFormater = new SimpleDateFormat ("EEE, d MMM yyyy HH:mm:ss Z");	
 
@@ -115,10 +115,10 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 		}
 		catch (NullPointerException | NumberFormatException e)
 		{
-			LOGGER.warn ("user provided unparsebale ids. download impossible: " + req[4] + " / " + req[5]);
+			LOGGER.warn ("user provided unparsebale ids. download impossible: ", req[4], " / ", req[5]);
 			return errorPage (request, response, null);
 		}
-		LOGGER.debug ("transfer " + entityId + " " + fileId);
+		LOGGER.debug ("transfer ", entityId, " ", fileId);
 		
 		if (entityId < 0 || (fileId < 0 && !archive))
 			return errorPage (request, response, null);
@@ -147,12 +147,12 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 		
 		// get file from entity
 		ChasteEntityVersion version = entityMgmt.getVersionById (entityId, neglectPermissions);
-		LOGGER.debug ("version: " + version);
+		LOGGER.debug ("version: ", version);
 		if (version == null)
 			return errorPage (request, response, null);
 		ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt);
 		fileMgmt.getFiles (version, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ());
-		LOGGER.debug ("archive: " + archive);
+		LOGGER.debug ("archive: ", archive);
 		if (archive)
 		{
 			try
@@ -163,14 +163,14 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 			catch (Exception e)
 			{
 				e.printStackTrace();
-				LOGGER.error ("cannot create combine archive of entity. (" + entityMgmt.getEntityColumn () + ")", e);
+				LOGGER.error (e, "cannot create combine archive of entity. (", entityMgmt.getEntityColumn (), ")");
 				return errorPage (request, response, "unable to create archive");
 			}
 		}
 		else
 		{
 			ChasteFile f = version.getFileById (fileId);
-			LOGGER.debug ("file: " + f);
+			LOGGER.debug ("file: ", f);
 			if (f == null)
 				return errorPage (request, response, null);
 			
@@ -187,7 +187,7 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 		if (file == null || !file.exists () || !file.canRead () || !file.isFile ())
 		{
 			// whoops, that's our fault. shouldn't happen. hopefully.
-			LOGGER.error ("unable to find file " + fileId + " in " + file + " (at least not in an expected form)");
+			LOGGER.error ("unable to find file ", fileId, " in ", file, " (at least not in an expected form)");
 			return errorPage (request, response, null);
 		}
 		
@@ -196,7 +196,7 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 	    ServletContext context  = getServletConfig().getServletContext();
 	    String mimetype = context.getMimeType(file.getName ());
 	    
-	    LOGGER.debug ("mime: " + mimetype);
+	    LOGGER.debug ("mime: ", mimetype);
 	    
 	    if (mimetype == null)
 	        mimetype = "application/octet-stream";
@@ -235,7 +235,7 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 		{
 			// whoops, that's our fault. shouldn't happen. hopefully.
 			e.printStackTrace ();
-			LOGGER.error ("unable to dump file " + fileId + " in " + file + " (at least not in an expected form)");
+			LOGGER.error ("unable to dump file ", fileId, " in ", file, " (at least not in an expected form)");
 		}
 		return errorPage (request, response, null);
 	}
@@ -276,7 +276,7 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 		
 		String[] req =  request.getRequestURI().substring(request.getContextPath().length()).split ("/");
 		
-		LOGGER.debug ("len " + req.length);
+		LOGGER.debug ("len ", req.length);
 		for (String s : req)
 			LOGGER.debug (s);
 
@@ -291,7 +291,7 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 					return answer;
 				}
 				
-				LOGGER.debug ("signature: " + signature);
+				LOGGER.debug ("signature: ", signature);
 
 				String preRole = user.getRole ();
 				String preMail = user.getRole ();
@@ -312,7 +312,7 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 				}
 				
 				
-				LOGGER.debug ("exp: " + exp);
+				LOGGER.debug ("exp: ", exp);
 				
 				String returnmsg = request.getParameter ("returnmsg");
 				if (returnmsg == null)
@@ -331,7 +331,7 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 				else if (returntype.equals ("inappropriate"))
 					exptStatus = ChasteExperimentVersion.STATUS_INAPPRORIATE;
 				
-				LOGGER.debug ("supp: " + returnmsg + " -- " + returntype + " --> " + exptStatus);
+				LOGGER.debug ("supp: ", returnmsg, " -- ", returntype, " --> ", exptStatus);
 				
 				if (exptStatus.equals (ChasteExperimentVersion.STATUS_RUNNING))
 				{
@@ -357,20 +357,20 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 				}
 				catch (MessagingException e)
 				{
-					LOGGER.error ("couldn't send mail to user (exp finished)", e);
+					LOGGER.error (e, "couldn't send mail to user (exp finished)");
 				}
 				
 				File destination = new File (expMgmt.getEntityStorageDir () + File.separator + signature);
 				destination.mkdirs ();
 				if (!destination.exists () || !destination.isDirectory ())
 				{
-					LOGGER.error ("cannot write returning experiment to " + destination.getAbsolutePath ());
+					LOGGER.error ("cannot write returning experiment to ", destination.getAbsolutePath ());
 					answer.put ("error", "cannot write to " + destination.getAbsolutePath ());
 					exp.updateExperiment (expMgmt, "cannot write to " + destination.getAbsolutePath (), ChasteExperimentVersion.STATUS_FAILED);
 					return answer;
 				}
 
-				LOGGER.debug ("dest: " + destination);
+				LOGGER.debug ("dest: ", destination);
 				
 				Part expPart = null;
 				try
@@ -379,7 +379,7 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 				}
 				catch (IOException | ServletException e)
 				{
-					LOGGER.warn ("wasn't able to find an attachment", e);
+					LOGGER.warn (e, "wasn't able to find an attachment");
 					e.printStackTrace ();
 				}
 				
@@ -388,7 +388,7 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 					File tmp = File.createTempFile ("chasteIncommingExperiment", ".combineArchive");
 					expPart.write (tmp.getAbsolutePath ());
 					
-					LOGGER.debug ("tmp: " + tmp);
+					LOGGER.debug ("tmp: ", tmp);
 					
 					try
 					{
@@ -415,7 +415,7 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 							if (fileId < 0)
 							{
 								// TODO: cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
-								LOGGER.error ("error inserting experiment file to db: " + entry.getRelativeName ());
+								LOGGER.error ("error inserting experiment file to db: ", entry.getRelativeName ());
 								answer.put ("error", "couldn't insert into db");
 								exp.updateExperiment (expMgmt, "error inserting experiment file to db: " + entry.getRelativeName (), ChasteExperimentVersion.STATUS_FAILED);
 								return answer;
@@ -425,7 +425,7 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 							if (!fileMgmt.associateFile (fileId, exp, expMgmt))
 							{
 								// TODO: cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
-								LOGGER.error ("error inserting experiment to db (association failed): " + entry.getRelativeName ());
+								LOGGER.error ("error inserting experiment to db (association failed): ", entry.getRelativeName ());
 								answer.put ("error", "couldn't insert into db");
 								exp.updateExperiment (expMgmt, "error inserting experiment to db (association failed): " + entry.getRelativeName (), ChasteExperimentVersion.STATUS_FAILED);
 								return answer;
@@ -439,7 +439,7 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 							if (fileId < 0)
 							{
 								// TODO: cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
-								LOGGER.error ("error inserting experiment output file to db: " + output.getAbsolutePath ());
+								LOGGER.error ("error inserting experiment output file to db: ", output.getAbsolutePath ());
 								answer.put ("error", "couldn't insert output into db");
 							}
 							
@@ -447,7 +447,7 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 							if (!fileMgmt.associateFile (fileId, exp, expMgmt))
 							{
 								// TODO: cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
-								LOGGER.error ("error inserting experiment output to db (association failed): " + output.getAbsolutePath ());
+								LOGGER.error ("error inserting experiment output to db (association failed): ", output.getAbsolutePath ());
 								answer.put ("error", "couldn't insert output into db");
 							}
 						}
@@ -458,7 +458,7 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 					catch (Exception e)
 					{
 						e.printStackTrace();
-						LOGGER.error ("error returning experiment", e);
+						LOGGER.error (e, "error returning experiment");
 						answer.put ("experiment", "failed");
 						if (returnmsg.equals ("finished"))
 							exp.updateExperiment (expMgmt, "error reading archive", ChasteExperimentVersion.STATUS_FAILED);
@@ -529,7 +529,7 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 		catch (ServletException e)
 		{
 			e.printStackTrace();
-			LOGGER.error ("Error storing uploaded file", e);
+			LOGGER.error (e, "Error storing uploaded file");
 			throw new IOException ("file cannot be uploaded.");
 		}
 		
@@ -647,17 +647,17 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 	    HttpResponse response = client.execute(post);
 	    String res = getContent (response);
 	    // Check whether we know immediately on submission (i.e. before running) that there's an issue
-	    LOGGER.debug ("response: " + res);
+	    LOGGER.debug ("response: ", res);
 	    if (res.trim ().equals (signature + " succ"))
 	    	return new SubmitResult (true, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_QUEUED);
 	    if (res.trim ().startsWith (signature + " inappropriate"))
 	    	return new SubmitResult (false, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_INAPPRORIATE);
 	    if (res.trim ().startsWith (signature))
 	    {
-	    	LOGGER.error ("Chaste backend answered with error: " + res);
+	    	LOGGER.error ("Chaste backend answered with error: ", res);
 	    	return new SubmitResult (false, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_FAILED);
 	    }
-	    LOGGER.error ("chaste backend answered w/ smth unexpected: " + res);
+	    LOGGER.error ("chaste backend answered w/ smth unexpected: ", res);
 	    throw new IOException ("Chaste backend response not expected.");
 	}
 
@@ -686,7 +686,7 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 				}
 				catch (IOException e)
 				{
-					LOGGER.warn ("couldn't schedule cleanup script", e);
+					LOGGER.warn (e, "couldn't schedule cleanup script");
 				}
 			}
 		}.start ();
@@ -726,7 +726,7 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 			for (File f : files)
 				if (curTime - f.lastModified () > maxAgeTmpFiles) // more than 1d
 				{
-					LOGGER.info ("remove tmp file " + f.getAbsolutePath () + " because it's older than " + maxAgeTmpFiles + "ms");
+					LOGGER.info ("remove tmp file ", f.getAbsolutePath (), " because it's older than ", maxAgeTmpFiles, "ms");
 					f.delete ();
 					removedFiles++;
 				}
@@ -741,13 +741,13 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 			if (modelMgmt.getVersionByPath (f.getName ()) == null)
 				try
 				{
-					LOGGER.info ("remove file " + f.getAbsolutePath () + " because it's not in db");
+					LOGGER.info ("remove file ", f.getAbsolutePath (), " because it's not in db");
 					Tools.deleteRecursively (f, false);
 					removedFiles++;
 				}
 				catch (IOException e)
 				{
-					LOGGER.error ("couldn't remove file " + f.getAbsolutePath () + " during clean up!");
+					LOGGER.error ("couldn't remove file ", f.getAbsolutePath (), " during clean up!");
 				}
 		}
 		
@@ -760,13 +760,13 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 			if (protocolMgmt.getVersionByPath (f.getName ()) == null)
 				try
 				{
-					LOGGER.info ("remove file " + f.getAbsolutePath () + " because it's not in db");
+					LOGGER.info ("remove file ", f.getAbsolutePath (), " because it's not in db");
 					Tools.deleteRecursively (f, false);
 					removedFiles++;
 				}
 				catch (IOException e)
 				{
-					LOGGER.error ("couldn't remove file " + f.getAbsolutePath () + " during clean up!");
+					LOGGER.error ("couldn't remove file ", f.getAbsolutePath (), " during clean up!");
 				}
 		}
 		
@@ -779,17 +779,17 @@ private static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
 			if (expMgmt.getVersionByPath (f.getName ()) == null)
 				try
 				{
-					LOGGER.info ("remove file " + f.getAbsolutePath () + " because it's not in db");
+					LOGGER.info ("remove file ", f.getAbsolutePath (), " because it's not in db");
 					Tools.deleteRecursively (f, false);
 					removedFiles++;
 				}
 				catch (IOException e)
 				{
-					LOGGER.error ("couldn't remove file " + f.getAbsolutePath () + " during clean up!");
+					LOGGER.error ("couldn't remove file ", f.getAbsolutePath (), " during clean up!");
 				}
 		}
 
-		LOGGER.info ("cleaning finished, removed " + removedFiles + " files");
+		LOGGER.info ("cleaning finished, removed ", removedFiles, " files");
 
 		user.setRole (preRole);
 		user.setMail (preMail);

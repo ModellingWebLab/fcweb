@@ -66,7 +66,7 @@
 							${version.value.version}</a></strong> by <em>${version.value.author}
 							<c:if test="${entity.author == User.nick || User.admin}">
 						    	<a id='deleteVersion-${version.value.id}' class="deleteVersionLink"><img src="${contextPath}/res/img/delete.png" alt="delete version" title="delete this version of the ${entity.type}" /></a>
-						    </c:if></em><br/>
+						    </c:if></em><c:if test="${not empty version.value.commitMessage}"> &mdash; <small>${version.value.commitMessage}</small></c:if><br/>
 	    					<span class="suppl"><small>created </small> <time>${version.value.created}</time> <small>containing</small> ${version.value.numFiles} File<c:if test="${version.value.numFiles!=1}">s</c:if>.</span>
 						</c:otherwise>
 					</c:choose>

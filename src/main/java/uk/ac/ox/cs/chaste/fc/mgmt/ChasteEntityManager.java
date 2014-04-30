@@ -75,7 +75,8 @@ public abstract class ChasteEntityManager
 			rs.getString ("versionfilepath"),
 			rs.getTimestamp ("versioncreated"),
 			rs.getInt ("numfiles"),
-			rs.getString ("visibility")
+			rs.getString ("visibility"),
+			rs.getString ("commitmsg")
 		);
 	}
 	
@@ -111,7 +112,7 @@ public abstract class ChasteEntityManager
 				knownEntities.put (mid, cur);
 			}
 			
-			LOGGER.debug ("getting version of entity " + res.size() + ": " + cur.getId() + " " + cur.getName());
+			LOGGER.debug ("getting version of entity ", res.size(), ": ", cur.getId(), " ", cur.getName());
 			
 			ChasteEntityVersion ver;
 			if (knownVersions.get (vid) != null)
@@ -123,11 +124,11 @@ public abstract class ChasteEntityManager
 			}
 			if (neglectPermissions || user.isAllowedToSeeEntityVersion (ver))
 			{
-				LOGGER.debug ("user " + user.getNick() + " allowed" + (neglectPermissions ? " (perm ignored)" : "") + ": " + ver.toJson());
+				LOGGER.debug ("user ", user.getNick(), " allowed", (neglectPermissions ? " (perm ignored)" : ""), ": ", ver.toJson());
 				cur.addVersion (ver);
 			}
 			else
-				LOGGER.debug ("user " + user.getNick() + " not allowed: " + ver.toJson ());
+				LOGGER.debug ("user ", user.getNick(), " not allowed: ", ver.toJson ());
 		}
 		if (filterEmptyEntities)
 		{
@@ -167,7 +168,7 @@ public abstract class ChasteEntityManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err creating entity: " + e.getMessage ());
-			LOGGER.error ("db problem while creating entity (" + entityTable + ")", e);
+			LOGGER.error (e, "db problem while creating entity (", entityTable, ")");
 		}
 		finally
 		{
@@ -178,12 +179,12 @@ public abstract class ChasteEntityManager
 		return id;
 	}
 	
-	public int createVersion (int entityid, String versionName, String filePath, User u, String visibility) throws ChastePermissionException
+	public int createVersion (int entityid, String versionName, String commitMsg, String filePath, User u, String visibility) throws ChastePermissionException
 	{
 		if (!user.isAllowedCreateEntityVersion ())
 			throw new ChastePermissionException ("you are not allowed to create a new entity version");
 		
-		PreparedStatement st = db.prepareStatement ("INSERT INTO `" + entityVersionsTable + "`(`author`, `" + entityColumn + "`, `version`, `filepath`, `visibility`) VALUES (?,?,?,?,?)");
+		PreparedStatement st = db.prepareStatement ("INSERT INTO `" + entityVersionsTable + "`(`author`, `" + entityColumn + "`, `version`, `filepath`, `visibility`, `commitmsg`) VALUES (?,?,?,?,?,?)");
     ResultSet rs = null;
     int id = -1;
 		
@@ -194,6 +195,7 @@ public abstract class ChasteEntityManager
 			st.setString (3, versionName);
 			st.setString (4, filePath);
 			st.setString (5, visibility);
+			st.setString (6, commitMsg);
 			
 			int affectedRows = st.executeUpdate();
       if (affectedRows == 0)
@@ -209,7 +211,7 @@ public abstract class ChasteEntityManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err creating entity version: " + e.getMessage ());
-			LOGGER.error ("db problem while creating entity version (" + entityVersionsTable + ")", e);
+			LOGGER.error (e, "db problem while creating entity version (", entityVersionsTable, ")");
 		}
 		finally
 		{
@@ -237,7 +239,7 @@ public abstract class ChasteEntityManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err retrieving entities: " + e.getMessage ());
-			LOGGER.error ("db problem while retrieving entities (" + entityColumn + ")", e);
+			LOGGER.error (e, "db problem while retrieving entities (", entityColumn, ")");
 		}
 		finally
 		{
@@ -265,7 +267,7 @@ public abstract class ChasteEntityManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err retrieving entities: " + e.getMessage ());
-			LOGGER.error ("db problem while retrieving entities (" + entityColumn + ")", e);
+			LOGGER.error (e, "db problem while retrieving entities (", entityColumn, ")");
 		}
 		finally
 		{
@@ -304,7 +306,7 @@ public abstract class ChasteEntityManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err retrieving entity version: " + e.getMessage ());
-			LOGGER.error ("db problem while retrieving entity version (" + entityColumn + ")", e);
+			LOGGER.error (e, "db problem while retrieving entity version (", entityColumn, ")");
 		}
 		finally
 		{
@@ -332,7 +334,7 @@ public abstract class ChasteEntityManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err retrieving entity version: " + e.getMessage ());
-			LOGGER.error ("db problem while retrieving entity version (" + entityColumn + ")", e);
+			LOGGER.error (e, "db problem while retrieving entity version (", entityColumn, ")");
 		}
 		finally
 		{
@@ -361,7 +363,7 @@ public abstract class ChasteEntityManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err retrieving entities: " + e.getMessage ());
-			LOGGER.error ("db problem while retrieving entities (" + entityColumn + ")", e);
+			LOGGER.error (e, "db problem while retrieving entities (", entityColumn, ")");
 		}
 		finally
 		{
@@ -393,7 +395,7 @@ public abstract class ChasteEntityManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err retrieving entities: " + e.getMessage ());
-			LOGGER.error ("db problem while retrieving entities (" + entityColumn + ")", e);
+			LOGGER.error (e, "db problem while retrieving entities (", entityColumn, ")");
 		}
 		finally
 		{
@@ -442,8 +444,7 @@ public abstract class ChasteEntityManager
 		{
 			e.printStackTrace ();
 			note.addError ("sql err deleting entity version: " + e.getMessage ());
-			LOGGER.error ("db problem while deleting entity version (" + entityColumn
-				+ ")", e);
+			LOGGER.error (e, "db problem while deleting entity version (", entityColumn, ")");
 			ok = false;
 		}
 		finally
@@ -470,7 +471,7 @@ public abstract class ChasteEntityManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err retrieving entities: " + e.getMessage ());
-			LOGGER.error ("db problem while retrieving entities (" + entityColumn + ")", e);
+			LOGGER.error (e, "db problem while retrieving entities (", entityColumn, ")");
 		}
 		finally
 		{
@@ -505,8 +506,7 @@ public abstract class ChasteEntityManager
 		{
 			e.printStackTrace ();
 			note.addError ("sql err deleting entity version: " + e.getMessage ());
-			LOGGER.error ("db problem while deleting entity version (" + entityColumn
-				+ ")", e);
+			LOGGER.error (e, "db problem while deleting entity version (", entityColumn, ")");
 			ok = false;
 		}
 		finally
@@ -550,7 +550,7 @@ public abstract class ChasteEntityManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err updating visibility of entity version: " + e.getMessage ());
-			LOGGER.error ("db problem while updating visibility of entity version (" + entityVersionsTable + ")", e);
+			LOGGER.error (e, "db problem while updating visibility of entity version (", entityVersionsTable, ")");
 		}
 		finally
 		{

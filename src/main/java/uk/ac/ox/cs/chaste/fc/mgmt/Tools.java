@@ -128,7 +128,7 @@ public class Tools
 	
 	public static final String validataUserInput (String input)
 	{
-		return StringEscapeUtils.escapeHtml3(input);
+		return StringEscapeUtils.escapeHtml4 (input);
 	}
 	
 	public static final void sendMail (String to, String toName, String subject, String body) throws UnsupportedEncodingException, MessagingException

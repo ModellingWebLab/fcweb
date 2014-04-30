@@ -28,6 +28,7 @@ extends ChasteEntityManager
 		+ " m.created AS versioncreated,"
 		+ " m.filepath AS versionfilepath,"
 		+ " m.visibility AS visibility,"
+		+ " m.commitmsg AS commitmsg,"
 		+ " u2.id AS entityauthor,"
 		+ " mo.id AS entityid,"
 		+ " mo.name AS entityname,"

@@ -118,7 +118,7 @@ public class EntityView extends WebModule
 					{
 						e.printStackTrace ();
 						notifications.addError ("couldn't find desired "+entityMgmt.getEntityColumn ());
-						LOGGER.warn ("user requested "+entityMgmt.getEntityColumn ()+" id " + request.getParameter("newentityname") + " is unparseable.");
+						LOGGER.warn ("user requested ", entityMgmt.getEntityColumn (), " id ", request.getParameter("newentityname"), " is unparseable.");
 					}
 				}
 				return "EntityNew.jsp";
@@ -162,7 +162,7 @@ public class EntityView extends WebModule
 		{
 			e.printStackTrace ();
 			notifications.addError ("cannot find "+entityMgmt.getEntityColumn ());
-			LOGGER.warn ("user requested "+entityMgmt.getEntityColumn ()+" id " + req[3] + " is unparseable.");
+			LOGGER.warn ("user requested ", entityMgmt.getEntityColumn (), " id ", req[3], " is unparseable.");
 			return errorPage (request, response, null);
 		}
 		
@@ -283,7 +283,7 @@ public class EntityView extends WebModule
 		catch (NullPointerException | NumberFormatException e)
 		{
 			e.printStackTrace ();
-			LOGGER.warn ("user provided version id not parseable: " + version + " (type: " + entityMgmt.getEntityColumn () + ")");
+			LOGGER.warn ("user provided version id not parseable: ", version, " (type: ", entityMgmt.getEntityColumn (), ")");
 			throw new IOException ("version not found");
 		}
 	}
@@ -319,7 +319,7 @@ public class EntityView extends WebModule
 		catch (NullPointerException | NumberFormatException e)
 		{
 			e.printStackTrace ();
-			LOGGER.warn ("user provided version id not parseable: " + version + " (type: " + entityMgmt.getEntityColumn () + ")");
+			LOGGER.warn ("user provided version id not parseable: ", version, " (type: ", entityMgmt.getEntityColumn (), ")");
 			throw new IOException ("version not found");
 		}
 	}
@@ -353,7 +353,7 @@ public class EntityView extends WebModule
 		catch (NullPointerException | NumberFormatException e)
 		{
 			e.printStackTrace ();
-			LOGGER.warn ("user provided version id not parseable: " + version + " (type: " + entityMgmt.getEntityColumn () + ")");
+			LOGGER.warn ("user provided version id not parseable: ", version, " (type: ", entityMgmt.getEntityColumn (), ")");
 			throw new IOException ("version not found");
 		}
 	}
@@ -383,7 +383,7 @@ public class EntityView extends WebModule
 		catch (NullPointerException | NumberFormatException e)
 		{
 			e.printStackTrace ();
-			LOGGER.warn ("user provided entity id not parseable: " + entity + " (type: " + entityMgmt.getEntityColumn () + ")");
+			LOGGER.warn ("user provided entity id not parseable: ", entity, " (type: ", entityMgmt.getEntityColumn (), ")");
 			throw new IOException ("version not found");
 		}
 	}
@@ -450,7 +450,7 @@ public class EntityView extends WebModule
 		}
 		catch (Exception e)
 		{
-			LOGGER.error("Error unpacking archive " + archiveFileName, e);
+			LOGGER.error(e, "Error unpacking archive ", archiveFileName);
 			return false;
 		}
 		return true;
@@ -459,9 +459,10 @@ public class EntityView extends WebModule
 	@SuppressWarnings("unchecked")
 	private void createNewEntity (Object task, Notifications notifications, DatabaseConnector db, JSONObject querry, User user, JSONObject answer, ChasteEntityManager entityMgmt, ChasteFileManager fileMgmt) throws IOException, ChastePermissionException
 	{
-		LOGGER.debug ("creating new entity; task=" + task.toString() + ".");
+		LOGGER.debug ("creating new entity; task=", task.toString(), ".");
 		String entityName = null;
 		String versionName = null;
+		String commitMsg = "";
 		String visibility = null;
 		String filePath = null;
 		File entityDir = null;
@@ -475,7 +476,7 @@ public class EntityView extends WebModule
 				&& !userVisibility.equals(ChasteEntityVersion.VISIBILITY_RESTRICTED)
 				&& !userVisibility.equals(ChasteEntityVersion.VISIBILITY_PUBLIC))
 			{
-				LOGGER.warn("Invalid visibility '" + userVisibility + "' sent.");
+				LOGGER.warn("Invalid visibility '", userVisibility, "' sent.");
 				notifications.addError("Invalid visibility '" + userVisibility + "' sent.");
 				createOk = false;
 			}
@@ -491,7 +492,7 @@ public class EntityView extends WebModule
 			obj.put ("responseText", "nice name");
 			answer.put ("entityName", obj);
 			
-			entityName = querry.get ("entityName").toString ().trim ();
+			entityName = Tools.validataUserInput (querry.get ("entityName").toString ().trim ());
 			entity = entityMgmt.getEntityByName (entityName);
 			if (entity == null)
 			{
@@ -545,7 +546,7 @@ public class EntityView extends WebModule
 			obj.put ("responseText", "nice version identifier");
 			answer.put ("versionName", obj);
 			
-			versionName = querry.get ("versionName").toString ().trim ();
+			versionName = Tools.validataUserInput (querry.get ("versionName").toString ().trim ());
 			
 			if (versionName.length () < 2)
 			{
@@ -568,8 +569,15 @@ public class EntityView extends WebModule
 		}
 		else
 			createOk = false;
+
 		
-		LOGGER.debug ("creating entity " + entityName + " version " + versionName);
+		if (querry.get ("commitMsg") != null)
+		{
+			commitMsg = Tools.validataUserInput (querry.get ("commitMsg").toString ().trim ());
+		}
+		
+		
+		LOGGER.debug ("creating entity ", entityName, " version ", versionName, " commit msg ", commitMsg);
 		
 		if (createOk)
 		{
@@ -665,7 +673,7 @@ public class EntityView extends WebModule
 			if (entityId < 0)
 			{
 				cleanUp (null, -1, files, fileMgmt, entityMgmt);
-				LOGGER.error ("error inserting/creating "+entityMgmt.getEntityColumn ()+" to db");
+				LOGGER.error ("error inserting/creating ", entityMgmt.getEntityColumn (), " to db");
 				throw new IOException ("wasn't able to create/insert "+entityMgmt.getEntityColumn ()+" to database.");
 			}
 			ChasteEntityVersion latestVersion = null;
@@ -675,15 +683,15 @@ public class EntityView extends WebModule
 			// Creating the version requires knowledge of the storage folder
 			String storageDir = type == TYPE_MODEL ? Tools.getModelStorageDir () : Tools.getProtocolStorageDir ();
 			entityDir = Tools.createUniqueSubDir(storageDir);
-			LOGGER.debug ("will write files to " + entityDir);
+			LOGGER.debug ("will write files to ", entityDir);
 			filePath = entityDir.getName();
 
 			// create version
-			int versionId = entityMgmt.createVersion (entityId, versionName, filePath, user, visibility);
+			int versionId = entityMgmt.createVersion (entityId, versionName, commitMsg, filePath, user, visibility);
 			if (versionId < 0)
 			{
 				cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
-				LOGGER.error ("error inserting/creating "+entityMgmt.getEntityColumn ()+" version to db");
+				LOGGER.error ("error inserting/creating ", entityMgmt.getEntityColumn (), " version to db");
 				throw new IOException ("wasn't able to create/insert "+entityMgmt.getEntityColumn ()+" version to database.");
 			}
 			
@@ -700,7 +708,7 @@ public class EntityView extends WebModule
 				if (fileId < 0)
 				{
 					cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
-					LOGGER.error ("error inserting file to db: " + f.name + " -> " + f.tmpFile);
+					LOGGER.error ("error inserting file to db: ", f.name, " -> ", f.tmpFile);
 					throw new IOException ("wasn't able to insert file " + f.name + " to database.");
 				}
 				f.dbId = fileId;
@@ -709,7 +717,7 @@ public class EntityView extends WebModule
 				if (!fileMgmt.associateFile (fileId, versionId, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ()))
 				{
 					cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
-					LOGGER.error ("error inserting file to db: " + f.name + " -> " + f.tmpFile);
+					LOGGER.error ("error inserting file to db: ", f.name, " -> ", f.tmpFile);
 					throw new IOException ("wasn't able to insert file " + f.name + " to database.");
 				}
 				
@@ -722,7 +730,7 @@ public class EntityView extends WebModule
 				{
 					e.printStackTrace ();
 					cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
-					LOGGER.error ("error copying file from tmp to "+entityMgmt.getEntityColumn ()+" dir", e);
+					LOGGER.error (e, "error copying file from tmp to ", entityMgmt.getEntityColumn (), " dir");
 					throw new IOException ("wasn't able to copy a file. Sorry, our fault.");
 				}
 				
@@ -790,7 +798,7 @@ public class EntityView extends WebModule
 							}
 							catch (Exception e)
 							{
-								LOGGER.warn ("tried writing extracted readme from protocol", e);
+								LOGGER.warn (e, "tried writing extracted readme from protocol");
 							}
 							finally
 							{
@@ -806,7 +814,7 @@ public class EntityView extends WebModule
 					}
 					catch (Exception e)
 					{
-						LOGGER.warn ("tried extracting readme from protocol", e);
+						LOGGER.warn (e, "tried extracting readme from protocol");
 					}
 					finally
 					{
@@ -921,7 +929,7 @@ public class EntityView extends WebModule
 			{
 				// in general we don't really care about that in this special case. but lets log it...
 				e.printStackTrace();
-				LOGGER.warn ("deleting of " + entityDir + " failed.");
+				LOGGER.warn ("deleting of ", entityDir, " failed.");
 			}
 		
 		// remove entities from db

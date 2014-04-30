@@ -240,8 +240,6 @@ function setListeners(plotProperties, moreThanOneDataset) {
     	
     	if (!div.is(':visible'))
     		update.prefVal = "hide";
-    	else
-    		update.prefVal = "show";
     	
     	$.post (contextPath + "/myaccount.html", JSON.stringify(update)).done (function ()
     	{
@@ -254,7 +252,7 @@ function setListeners(plotProperties, moreThanOneDataset) {
     });
     
     if (preferences["FlotLegendDisp"] == "hide")
-    	$('#' + choicesDivId).hide ();;
+    	$('#' + choicesDivId).hide ();
 
     if (moreThanOneDataset)
     {

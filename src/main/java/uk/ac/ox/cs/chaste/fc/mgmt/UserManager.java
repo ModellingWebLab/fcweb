@@ -68,7 +68,7 @@ public class UserManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err retrieving files: " + e.getMessage ());
-			LOGGER.error ("db problem while retrieving files", e);
+			LOGGER.error (e, "db problem while retrieving files");
 		}
 		finally
 		{
@@ -112,7 +112,7 @@ public class UserManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err retrieving files: " + e.getMessage ());
-			LOGGER.error ("db problem while retrieving files", e);
+			LOGGER.error (e, "db problem while retrieving files");
 		}
 		finally
 		{
@@ -140,7 +140,7 @@ public class UserManager
 			}
 			catch (MessagingException | UnsupportedEncodingException e)
 			{
-				LOGGER.error ("couldn't send mail to user (role changed)", e);
+				LOGGER.error (e, "couldn't send mail to user (role changed)");
 			}
 		}
 		
@@ -163,7 +163,7 @@ public class UserManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err updating user: " + e.getMessage ());
-			LOGGER.error ("db problem while updating user", e);
+			LOGGER.error (e, "db problem while updating user");
 		}
 		finally
 		{
@@ -194,7 +194,7 @@ public class UserManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err updating password of user: " + e.getMessage ());
-			LOGGER.error ("db problem while updating password of user", e);
+			LOGGER.error (e, "db problem while updating password of user");
       return false;
 		}
 		finally
@@ -225,7 +225,7 @@ public class UserManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err updating institution of user: " + e.getMessage ());
-			LOGGER.error ("db problem while updating institution of user", e);
+			LOGGER.error (e, "db problem while updating institution of user");
       return false;
 		}
 		finally
@@ -256,7 +256,7 @@ public class UserManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err updating sendMails of user: " + e.getMessage ());
-			LOGGER.error ("db problem while updating sendMails of user", e);
+			LOGGER.error (e, "db problem while updating sendMails of user");
       return false;
 		}
 		finally

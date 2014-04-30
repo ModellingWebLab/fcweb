@@ -34,8 +34,9 @@ public class ChasteEntityVersion
 	private int numFiles;
 	private Vector<ChasteFile> files;
 	private Vector<ChasteExperiment> experiments;
+	private String commitMsg;
 	
-	public ChasteEntityVersion (ChasteEntity entity, int id, String version, User author, String filePath, Timestamp created, int numFiles, String visibility)
+	public ChasteEntityVersion (ChasteEntity entity, int id, String version, User author, String filePath, Timestamp created, int numFiles, String visibility, String commitMsg)
 	{
 		this.entity = entity;
 		this.id = id;
@@ -48,6 +49,7 @@ public class ChasteEntityVersion
 		this.visibility = visibility;
 		files = new Vector<ChasteFile> ();
 		experiments = new Vector<ChasteExperiment> ();
+		this.commitMsg = commitMsg;
 	}
 	
 	public ChasteFile getFileById (int id)
@@ -62,6 +64,12 @@ public class ChasteEntityVersion
 	public String getUrl ()
 	{
 		return url;
+	}
+	
+	
+	public String getCommitMessage ()
+	{
+		return commitMsg;
 	}
 	
 	

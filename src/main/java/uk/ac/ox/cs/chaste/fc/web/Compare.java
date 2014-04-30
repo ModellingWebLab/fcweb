@@ -111,7 +111,7 @@ public class Compare extends WebModule
 				}
 				catch (NumberFormatException e)
 				{
-					LOGGER.warn ("user provided number which isn't an int: " + id, e);
+					LOGGER.warn (e, "user provided number which isn't an int: ", id);
 					continue;
 				}
 				

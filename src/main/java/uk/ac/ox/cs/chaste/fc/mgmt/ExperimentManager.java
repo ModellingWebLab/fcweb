@@ -38,6 +38,7 @@ extends ChasteEntityManager
 		+ " m.status AS versionstatus,"
 		+ " m.returnmsg AS versionreturnmsg,"
 		+ " m.visibility AS visibility,"
+		+ " m.commitmsg AS commitmsg,"
 		
 		+ " u2.id AS entityauthor,"
 		+ " mo.id AS entityid,"
@@ -81,9 +82,9 @@ extends ChasteEntityManager
 		if (model == null || protocol == null)
 		{
 			if (model != null)
-				LOGGER.info ("model is: " + model.toJson () + " but protocol missing");
+				LOGGER.info ("model is: ", model.toJson (), " but protocol missing");
 			if (protocol != null)
-				LOGGER.info ("protocol is: " + protocol.toJson () + " but model missing");
+				LOGGER.info ("protocol is: ", protocol.toJson (), " but model missing");
 			return null;
 		}
 		
@@ -109,7 +110,8 @@ extends ChasteEntityManager
 			rs.getTimestamp ("versionfinished"),
 			rs.getString ("versionstatus"),
 			rs.getString ("versionreturnmsg"),
-			rs.getString ("visibility")
+			rs.getString ("visibility"),
+			rs.getString ("commitmsg")
 		);
 	}
 	
@@ -177,7 +179,7 @@ extends ChasteEntityManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err creating entity: " + e.getMessage ());
-			LOGGER.error ("db problem while creating entity (" + entityTable + ")", e);
+			LOGGER.error (e, "db problem while creating entity (", entityTable, ")");
 		}
 		finally
 		{
@@ -224,7 +226,7 @@ extends ChasteEntityManager
 			return entityid;
 		
 		PreparedStatement st = db.prepareStatement ("INSERT INTO `" + entityVersionsTable + 
-			"`(`author`, `" + entityColumn + "`, `filepath`, `returnmsg`, `visibility`) VALUES (?,?,?,?,?)");
+			"`(`author`, `" + entityColumn + "`, `filepath`, `returnmsg`, `visibility`, `commitmsg`) VALUES (?,?,?,?,?,?)");
 		ResultSet rs = null;
 		int id = -1;
 		
@@ -235,6 +237,7 @@ extends ChasteEntityManager
 			st.setString (3, filePath);
 			st.setString (4, "");
 			st.setString (5, visibility);
+			st.setString (6, "");
 			
 			int affectedRows = st.executeUpdate();
 			if (affectedRows == 0)
@@ -250,7 +253,7 @@ extends ChasteEntityManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err creating entity version: " + e.getMessage ());
-			LOGGER.error ("db problem while creating entity version (" + entityVersionsTable + ")", e);
+			LOGGER.error (e, "db problem while creating entity version (", entityVersionsTable, ")");
 		}
 		finally
 		{
@@ -279,7 +282,7 @@ extends ChasteEntityManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err retrieving entities: " + e.getMessage ());
-			LOGGER.error ("db problem while retrieving entities (" + entityColumn + ")", e);
+			LOGGER.error (e, "db problem while retrieving entities (", entityColumn, ")");
 		}
 		finally
 		{
@@ -302,30 +305,6 @@ extends ChasteEntityManager
 	
 	public ChasteExperimentVersion getRunningExperiment (String signature)
 	{
-		/*String SQL_SELECT_BEGIN =  
-			"SELECT u.id AS versionauthor,"
-			+ " m.id AS versionid,"
-			+ " m.created AS versioncreated,"
-			+ " m.filepath AS versionfilepath,"
-			+ " m.finished AS versionfinished,"
-			+ " m.status AS versionstatus,"
-			+ " m.returnmsg AS versionreturnmsg,"
-			
-			+ " u2.id AS entityauthor,"
-			+ " mo.id AS entityid,"
-			+ " mo.created AS entitycreated,"
-			+ " mo.model AS entitymodel,"
-			+ " mo.protocol AS entityprotocol,"
-			
-			+ " COUNT(mf.file) AS numfiles"
-			+ " FROM       `experimentversions` m"
-			+ " INNER JOIN `user` u on m.author = u.id"
-			+ " LEFT JOIN `experiment_files` mf on mf.experiment = m.id"
-			+ " INNER JOIN `experiments` mo on m.experiment=mo.id"
-			+ " INNER JOIN `user` u2 on mo.author = u2.id";*/
-		
-		
-		
 		PreparedStatement st = db.prepareStatement (SQL_SELECT_BEGIN + " WHERE m.filepath=?" + SQL_SELECT_END);
 		ResultSet rs = null;
 		try
@@ -341,7 +320,7 @@ extends ChasteEntityManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err retrieving entity version: " + e.getMessage ());
-			LOGGER.error ("db problem while retrieving entity version (" + entityColumn + ")", e);
+			LOGGER.error (e, "db problem while retrieving entity version (", entityColumn, ")");
 		}
 		finally
 		{
@@ -380,7 +359,7 @@ extends ChasteEntityManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err updating experiment version: " + e.getMessage ());
-			LOGGER.error ("db problem while updating experiment version (" + entityVersionsTable + ")", e);
+			LOGGER.error (e, "db problem while updating experiment version (", entityVersionsTable, ")");
 		}
 		finally
 		{
@@ -412,7 +391,7 @@ extends ChasteEntityManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err retrieving entities: " + e.getMessage ());
-			LOGGER.error ("db problem while retrieving entities (" + entityColumn + ")", e);
+			LOGGER.error (e, "db problem while retrieving entities (", entityColumn, ")");
 		}
 		finally
 		{
@@ -444,7 +423,7 @@ extends ChasteEntityManager
 		{
 			e.printStackTrace();
 			note.addError ("sql err retrieving entities: " + e.getMessage ());
-			LOGGER.error ("db problem while retrieving entities (" + entityColumn + ")", e);
+			LOGGER.error (e, "db problem while retrieving entities (", entityColumn, ")");
 		}
 		finally
 		{

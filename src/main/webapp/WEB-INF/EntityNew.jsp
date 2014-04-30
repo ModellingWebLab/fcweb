@@ -11,10 +11,10 @@
 			<c:choose>
 				<c:when test="${not empty newentityname}">
 					<strong>${newentityname}</strong>
-					<input type="hidden" name="entityname" id="entityname" value="${newentityname}" placeholder="${newentitytype} Name">
+					<input type="hidden" name="entityname" id="entityname" value="${newentityname}" placeholder="${newentitytype} Name"/>
 				</c:when>
 				<c:otherwise>
-			    	<input type="text" name="entityname" id="entityname" placeholder="${newentitytype} Name">
+			    	<input type="text" name="entityname" id="entityname" placeholder="${newentitytype} Name"/>
 			    	<span id="entityaction"></span>
 				</c:otherwise>
 			</c:choose>
@@ -22,9 +22,15 @@
 	    <p>
 	    	<label for="versionname">Version:</label>
 	    	<br/>
-	    	<input type="text" name="versionname" id="versionname" placeholder="Version Identifier">
+	    	<input type="text" name="versionname" id="versionname" placeholder="Version Identifier"/>
 	    	<a class="pointer" id="dateinserter"><small>use current date</small></a>
 	    	<span id="versionaction"></span>
+	    </p>
+	    <p>
+	    	<label for="commitMsg">Commit Message:</label>
+	    	<br/>
+	    	<textarea cols="70" rows="3" name="commitMsg" id="commitMsg" placeholder="optional message to describe this commit"></textarea>
+	    	<span id="commitmsgaction"></span>
 	    </p>
 	    <p>
             <label for="visibility">Visibility:</label>

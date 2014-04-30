@@ -31,9 +31,9 @@ extends ChasteEntityVersion
 	
 	public ChasteExperimentVersion (ChasteEntity entity, int id,
 		User author, String filePath, Timestamp created, int numFiles,
-		Timestamp finished, String status, String returnText, String visibility)
+		Timestamp finished, String status, String returnText, String visibility, String commitMsg)
 	{
-		super (entity, id, created.toString (), author, filePath, created, numFiles, visibility);
+		super (entity, id, created.toString (), author, filePath, created, numFiles, visibility, commitMsg);
 		this.finished = finished;
 		this.status = status;
 		this.returnText = returnText;
