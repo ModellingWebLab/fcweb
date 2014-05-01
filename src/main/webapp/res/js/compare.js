@@ -14,7 +14,7 @@ var plotDescription;
 var plotFiles = new Array ();
 var filesTable = {};
 // Used for determining what graph (if any) to show by default
-var metadataToParse = 0, metadataParsed = 0, defaultViz = null, defaultVizEntityCount = 0;
+var metadataToParse = 0, metadataParsed = 0, defaultViz = null, defaultVizCount = 0;
 // State for figuring out whether we're comparing multiple protocols on a single model, or multiple models on a single protocol
 var firstModelName = "", firstProtoName = "";
 var singleModel = true, singleProto = true;
@@ -108,20 +108,23 @@ function highlightPlots (entity, showDefault)
             var f = files[plotDescription[i][2].hashCode ()];
 
             // See if we should show this as the default plot.
-            // If a single protocol, we choose the first listed in the default-plots file.
+            // If a single protocol, we choose the first listed in the default-plots file
+            // (with the proviso that some experiments might have partial results, hence we need to check all default-plots files).
             // Otherwise, we choose the first one appearing in the most experiments.
     		var row = document.getElementById ("filerow-" + plotDescription[i][2].hashCode ());
     		if (row)
     		{
-    			if (showDefault && (!singleProto || defaultViz === null))
+    			if (showDefault)
     			{
     				var viz = document.getElementById ("filerow-" + plotDescription[i][2].hashCode () + "-viz-displayPlotFlot");
     				if (viz)
     				{
-    				    if ((!singleProto || i == 1) && f.entities.length > defaultVizEntityCount)
+    				    var thisCount = singleProto ? plotDescription.length : f.entities.length;
+    				    if ((!singleProto || i == 1) && thisCount > defaultVizCount)
 				        {
+//    				        console.log("Set default viz to " + plotDescription[i][0]);
     				        defaultViz = viz;
-    				        defaultVizEntityCount = f.entities.length;
+    				        defaultVizCount = thisCount;
 				        }
     				}
     			}
