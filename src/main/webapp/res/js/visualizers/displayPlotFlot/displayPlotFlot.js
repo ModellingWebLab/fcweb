@@ -261,7 +261,7 @@ function setListeners(plotProperties, moreThanOneDataset) {
     legend.append ($("<div></div>").addClass ("clearer"));
     if (legend.height () > 100)
     {
-        legend.append ($("<div></div>").addClass ("fadings").append ($("<small></small>").append ($("<strong></strong>").text ("show all"))));
+        legend.append ($("<div></div>").addClass ("fadings").append ($("<small></small>").append ($("<strong></strong>").text ("hover or click 'toggle legend' to show all"))));
         
     	legend.addClass ("legend-fade");
     	legend.mouseover (function ()
