@@ -52,7 +52,7 @@
     </p>
 
     <h2>Acknowledgements</h2>
-    <img style="float:left;" src="${contextPath}/res/img/chaste.jpg" alt="Chaste project logo"/>
+    <img style="float:left;margin:0 5px 10px 0;" src="${contextPath}/res/img/chaste.jpg" alt="Chaste project logo"/>
     <p>
         We would like to thank Steve Niederer and the Noble modelling group for discussions on ways to test cell model behaviour.
         We gratefully acknowledge funding from the <a href="http://www.2020science.net/research/functional-curation">2020 Science Programme</a>.
