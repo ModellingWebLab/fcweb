@@ -51,4 +51,8 @@
         name="mailSenderName"
         value="Functional Curation Website"
         override="false" />
+    <Parameter description="What's the URL to the BiVeS web service? (defaults to http://bives.sems.uni-rostock.de/)"
+        name="bivesWebService"
+        value="http://bives.sems.uni-rostock.de/"
+        override="false" />
 </Context>

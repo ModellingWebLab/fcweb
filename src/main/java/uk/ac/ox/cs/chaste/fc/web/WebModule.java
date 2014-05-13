@@ -196,6 +196,10 @@ extends HttpServlet
 		tmp = context.getInitParameter ("storageDir");
 		if (tmp != null)
 			Tools.setStorageDir (tmp);
+		
+		tmp = context.getInitParameter ("bivesWebService");
+		if (tmp != null)
+			Tools.setBivesWebServiceUrl (tmp);
 	}
 	
 	private void doAction (HttpServletRequest request, HttpServletResponse response, boolean post) throws ServletException, IOException

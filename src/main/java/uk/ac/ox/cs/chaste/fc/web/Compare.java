@@ -32,6 +32,12 @@ import uk.ac.ox.cs.chaste.fc.mgmt.ModelManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.ProtocolManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.Tools;
 import de.binfalse.bflog.LOGGER;
+import de.unirostock.sems.bives.webservice.client.BivesComparisonRequest;
+import de.unirostock.sems.bives.webservice.client.BivesComparisonResponse;
+import de.unirostock.sems.bives.webservice.client.BivesWs;
+import de.unirostock.sems.bives.webservice.client.exception.BivesClientException;
+import de.unirostock.sems.bives.webservice.client.exception.BivesException;
+import de.unirostock.sems.bives.webservice.client.impl.HttpBivesClient;
 
 public class Compare extends WebModule
 {
@@ -53,6 +59,7 @@ public class Compare extends WebModule
 		plugins.add ("displayPlotFlot");
 		plugins.add ("displayPlotHC");
 		plugins.add ("displayUnixDiff");
+		plugins.add ("displayBivesDiff");
 
 		for (String s : plugins)
 		{
@@ -173,13 +180,12 @@ public class Compare extends WebModule
 			obj.put ("entities", entities);
 			answer.put ("getEntityInfos", obj);
 		}
-		
-		if (task.equals ("getUnixDiff"))
+		else if (task.equals ("getUnixDiff") || task.equals ("getBivesDiff"))
 		{
 			JSONObject obj = new JSONObject ();
-			answer.put ("getUnixDiff", obj);
+			answer.put (task, obj);
 			obj.put ("response", false);
-			obj.put ("responseText", "getUnixDiff");
+			obj.put ("responseText", task);
 			
 			// select files
 			int entity1 = -1,
@@ -196,7 +202,7 @@ public class Compare extends WebModule
 			}
 			catch (NullPointerException | NumberFormatException e)
 			{
-				LOGGER.warn ("user supplied invalid ids for unix diffing");
+				LOGGER.warn ("user supplied invalid ids for diffing");
 				obj.put ("responseText", "cannot understand request");
 				return answer;
 			}
@@ -207,7 +213,7 @@ public class Compare extends WebModule
 			
 			if (entityVersion1 == null || entityVersion2 == null)
 			{
-				LOGGER.warn ("user supplied invalid ids for unix diffing -> versions not found");
+				LOGGER.warn ("user supplied invalid ids for diffing -> versions not found");
 				obj.put ("responseText", "invalid request");
 				return answer;
 			}
@@ -219,7 +225,7 @@ public class Compare extends WebModule
 			
 			if (version1 == null || version2 == null)
 			{
-				LOGGER.warn ("user supplied invalid ids for unix diffing -> versions not found");
+				LOGGER.warn ("user supplied invalid ids for diffing -> versions not found");
 				obj.put ("responseText", "invalid request");
 				return answer;
 			}
@@ -227,31 +233,82 @@ public class Compare extends WebModule
 			
 			
 			// compute unix diff
-			
-			try
+			if (task.equals ("getBivesDiff"))
 			{
-				String a = entityMgmt.getEntityStorageDir () + Tools.FILESEP + entityVersion1.getFilePath () + Tools.FILESEP + version1.getName ();
-				String b = entityMgmt.getEntityStorageDir () + Tools.FILESEP + entityVersion2.getFilePath () + Tools.FILESEP + version2.getName ();
-				if (!a.equals (b))
+				BivesComparisonRequest bivesRequest = new BivesComparisonRequest (
+	         "http://budhat.sems.uni-rostock.de/download?downloadModel=24",
+	         "http://budhat.sems.uni-rostock.de/download?downloadModel=25");
+
+				bivesRequest.addCommand (BivesComparisonRequest.COMMAND_COMPONENT_HIERARCHY_JSON);
+				bivesRequest.addCommand (BivesComparisonRequest.COMMAND_CRN_JSON);
+				bivesRequest.addCommand (BivesComparisonRequest.COMMAND_REPORT_HTML);
+				bivesRequest.addCommand (BivesComparisonRequest.COMMAND_XML_DIFF);
+				
+				BivesWs bives = new HttpBivesClient("http://bives.sems.uni-rostock.de/");
+	      BivesComparisonResponse result;
+				try
 				{
-					ProcessBuilder pb = new ProcessBuilder("diff", "-a", a, b);
-					Process p = pb.start();
-					BufferedReader br = new BufferedReader (new InputStreamReader(p.getInputStream()));
-					StringBuffer diff = new StringBuffer ();
-					String line;
-					while ((line = br.readLine()) != null)
-						diff.append (line).append (Tools.NEWLINE);
-					br.close ();
-					
-					obj.put ("unixDiff", diff.toString ());
+					result = bives.performRequest(bivesRequest);
 				}
-				else
-					obj.put ("unixDiff", "same file..");
+				catch (BivesClientException | BivesException e)
+				{
+					LOGGER.error (e, "error executing bives request");
+	 				obj.put ("responseText", "bives request failed: " + e.getMessage ());
+					return answer;
+				}
+				
+	      if (result.hasError ())
+	      {
+	      	String errors = "";
+	         for (String err : result.getErrors ())
+	         {
+	            LOGGER.error ("error from bives comparison request: " + err);
+	            errors += " [" + err + "] ";
+	         }
+	 				obj.put ("responseText", errors);
+					return answer;
+	      }
+	      
+				
+				JSONObject bivesResult = new JSONObject ();
+				
+				bivesResult.put (BivesComparisonRequest.COMMAND_COMPONENT_HIERARCHY_JSON, result.getResult (BivesComparisonRequest.COMMAND_COMPONENT_HIERARCHY_JSON));
+				bivesResult.put (BivesComparisonRequest.COMMAND_CRN_JSON, result.getResult (BivesComparisonRequest.COMMAND_CRN_JSON));
+				bivesResult.put (BivesComparisonRequest.COMMAND_REPORT_HTML, result.getResult (BivesComparisonRequest.COMMAND_REPORT_HTML));
+				bivesResult.put (BivesComparisonRequest.COMMAND_XML_DIFF, result.getResult (BivesComparisonRequest.COMMAND_XML_DIFF));
+				
+				obj.put ("bivesDiff", bivesResult);
 				obj.put ("response", true);
+				
 			}
-			catch (Exception e)
+			else
 			{
-				LOGGER.error (e, "couldn't compute unix diff of ", version1.getName (), " and ", version2.getName ());
+				try
+				{
+					String a = entityMgmt.getEntityStorageDir () + Tools.FILESEP + entityVersion1.getFilePath () + Tools.FILESEP + version1.getName ();
+					String b = entityMgmt.getEntityStorageDir () + Tools.FILESEP + entityVersion2.getFilePath () + Tools.FILESEP + version2.getName ();
+					if (!a.equals (b))
+					{
+						ProcessBuilder pb = new ProcessBuilder("diff", "-a", a, b);
+						Process p = pb.start();
+						BufferedReader br = new BufferedReader (new InputStreamReader(p.getInputStream()));
+						StringBuffer diff = new StringBuffer ();
+						String line;
+						while ((line = br.readLine()) != null)
+							diff.append (line).append (Tools.NEWLINE);
+						br.close ();
+						
+						obj.put ("unixDiff", diff.toString ());
+					}
+					else
+						obj.put ("unixDiff", "same file..");
+					
+					obj.put ("response", true);
+				}
+				catch (Exception e)
+				{
+					LOGGER.error (e, "couldn't compute unix diff of ", version1.getName (), " and ", version2.getName ());
+				}
 			}
 		}
 		

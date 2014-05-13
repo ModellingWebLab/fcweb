@@ -62,10 +62,8 @@ bivesDiffer.prototype.laterClickListener = function (later, file, tr)
 
 bivesDiffer.prototype.computeDifferences = function (former, later, matrixKey)
 {
-	/*
-	 * this is to be implemented
-	 * var request = {
-			task: "getUnixDiff",
+	var request = {
+			task: "getBivesDiff",
 			entity1: former.entityLink.id,
 			file1: former.entityFileLink.id,
 			entity2: later.entityLink.id,
@@ -77,31 +75,178 @@ bivesDiffer.prototype.computeDifferences = function (former, later, matrixKey)
 	$.post (document.location.href, JSON.stringify(request)).done (function (data)
 	{
 		console.log (data);
-		if (data && data.getUnixDiff && data.getUnixDiff.response)
+		if (data && data.getBivesDiff && data.getBivesDiff.response)
 		{
-			var diff = data.getUnixDiff.unixDiff;
-			
-			diff = diff
-			// stop thinking these are tags
-			.replace (/</g, "&lt;")
-			.replace (/>/g, "&gt;")
-			// highlight line numbers
-			.replace (/^(\d.*)$/gm, "<strong>$1</strong>")
-			// highlight inserted/deleted stuff
-			.replace (/^(&lt;.*)$/gm, "<span class='unixDiffDel'>$1</span>")
-			.replace (/^(&gt;.*)$/gm, "<span class='unixDiffIns'>$1</span>")
-			;
+			var diff = data.getBivesDiff.bivesDiff;
+
+			var diffDiv = $("<div></div>");
+			var legendDiv = $("<div></div>").addClass ("bivesLegend");
 
 			diffs[matrixKey].empty ().append (
 					"<strong>Differences</strong> between <strong>" + former.entityLink.name + "</strong> - <strong>" + former.entityLink.version + "</strong> and <strong>" + later.entityLink.name + "</strong> - <strong>" + later.entityLink.version + "</strong>")
-					.append ("<pre>"+diff+"</pre>");
+					.append (diffDiv).append (legendDiv);
+			
+			legendDiv.append ("<span class='bivesDiffIns bivesLegendItem'>inserted</span> &mdash; " +
+					"<span class='bivesDiffDel bivesLegendItem'>deleted</span> &mdash; " +
+					"<span class='bivesDiffMove bivesLegendItem'>moved</span> &mdash; " +
+					"<span class='bivesDiffUpdate bivesLegendItem'>updated</span>");
+			
+			var head = $("<div></div>").addClass ("bivesTabLine");
+			var reportDiv = $("<div></div>").hide ();
+			var chDiv = $("<div></div>").hide ();
+			var crnDiv = $("<div></div>").hide ();
+			var xmlDiv = $("<div></div>").hide ();
+			diffDiv.append (head);
+			
+			var shown = false;
+			
+			if (diff.crnJson)
+			{
+				var crnLink = $("<span></span>").addClass ("bivesTab").text ("Chemical Reaction Network");
+				// TODO
+				crnDiv.append ("<div id='myApp' ng-controller='MainCtrl'><sg-graphene imports='exports' template='"+contextPath + "/res/js/visualizers/displayBivesDiff/graphene-sems/template.html'></sg-graphene></div>");
+				head.append (crnLink);
+				diffDiv.append (crnDiv);
+				crnLink.click (function ()
+				{
+					reportDiv.hide ();
+					chDiv.hide ();
+					crnDiv.show ();
+					xmlDiv.hide ();
+					
+					$(".bivesTab").each (function () {$(this).removeClass ("bivesTabSelected");});
+					crnLink.addClass ("bivesTabSelected");
+				});
+				if (!shown)
+					crnLink.click ();
+				shown = true;
+				
+				// add stanley's graphene library
+				angular.element(document).ready(function() {
+					angular.bootstrap(document.querySelector('div#myApp'),
+							['grapheneSemsApp']);
+				  var scope = angular.element(document.querySelector('div#myApp')).scope();
+				  scope.data = angular.fromJson(diff.crnJson);
+				  scope.zoom = true; // enables scroll to zoom
+				  scope.width = 780;  // this is the width of the node force layout system, which is independent of the SVG size, which is defined in the template, but you can and probably make them the same.
+				  scope.height = 500; // this is the height, I suggest you probably change both of these to match the width and height in the template file.
+				  scope.charge = -2500; // I think you can make this more negative, maybe -1500, I noticed the nodes are very close.
+				  // Alternatively you could also play with increasing scope.linkDistance
+				  scope.gravity = 0.0; // set gravity to 0.1 or 0.2, so the outer disconnected nodes aren't quite so far away.
+				  scope.linkDistance = 5;
+				  scope.renderFps = 20; // makes the layout more choppy, but saves CPU
+				  scope.$apply();
+				});
+				
+			}
+			
+			if (diff.reportHtml)
+			{
+				var reportLink = $("<span></span>").addClass ("bivesTab").text ("Report");
+				reportDiv.append (diff.reportHtml);
+				head.append (reportLink);
+				diffDiv.append (reportDiv);
+				reportLink.click (function ()
+				{
+					reportDiv.show ();
+					chDiv.hide ();
+					crnDiv.hide ();
+					xmlDiv.hide ();
+					
+					$(".bivesTab").each (function () {$(this).removeClass ("bivesTabSelected");});
+					reportLink.addClass ("bivesTabSelected");
+				});
+				if (!shown)
+					reportLink.click ();
+				shown = true;
+			}
+			
+			if (diff.compHierarchyJson)
+			{
+				var chLink = $("<span></span>").addClass ("bivesTab").text ("Component Hierarchy");
+				// TODO
+				chDiv.text (diff.compHierarchyJson);
+				head.append (chLink);
+				diffDiv.append (chDiv);
+				chLink.click (function ()
+				{
+					reportDiv.hide ();
+					chDiv.show ();
+					crnDiv.hide ();
+					xmlDiv.hide ();
+					
+					$(".bivesTab").each (function () {$(this).removeClass ("bivesTabSelected");});
+					chLink.addClass ("bivesTabSelected");
+				});
+				if (!shown)
+					chLink.click ();
+				shown = true;
+			}
+			
+			// fallback if neither sbml/cellml/pharmml etc.
+			if (diff.xmlDiff)
+			{
+				var xmlLink = $("<span></span>").addClass ("bivesTab").text ("XML Patch");
+				var xml = diff.xmlDiff;
+				
+
+				xml = xml
+				// stop assuming these are tags
+				.replace (/</g, "&lt;")
+				.replace (/>/g, "&gt;")
+				// highlight inserted/deleted stuff
+				.replace (/(&lt;delete&gt;((.|[\r\n])*)&lt;\/delete&gt;|&lt;delete \/&gt;)/m, "<span class='bivesDiffDel'>$1</span>")
+				.replace (/(&lt;insert&gt;((.|[\r\n])*)&lt;\/insert&gt;|&lt;insert \/&gt;)/m, "<span class='bivesDiffIns'>$1</span>")
+				.replace (/(&lt;move&gt;((.|[\r\n])*)&lt;\/move&gt;|&lt;move \/&gt;)/m, "<span class='bivesDiffMove'>$1</span>")
+				.replace (/(&lt;update&gt;((.|[\r\n])*)&lt;\/update&gt;|&lt;update \/&gt;)/m, "<span class='bivesDiffUpdate'>$1</span>")
+				// highlight arguments
+				.replace (/(oldParent="[^"]*")/g, "<span class='bivesDiffDel'>$1</span>")
+				.replace (/(oldChildNo="[^"]*")/g, "<span class='bivesDiffDel'>$1</span>")
+				.replace (/(oldPath="[^"]*")/g, "<span class='bivesDiffDel'>$1</span>")
+				/*.replace (/(="[^"]")/m, "<span class='bivesDiffDel'>$1</span>")
+				.replace (/(="[^"]")/m, "<span class='bivesDiffDel'>$1</span>")
+				.replace (/(="[^"]")/m, "<span class='bivesDiffDel'>$1</span>")
+				.replace (/(="[^"]")/m, "<span class='bivesDiffDel'>$1</span>")*/
+				
+				.replace (/(newParent="[^"]*")/g, "<span class='bivesDiffIns'>$1</span>")
+				.replace (/(newChildNo="[^"]*")/g, "<span class='bivesDiffIns'>$1</span>")
+				.replace (/(newPath="[^"]*")/g, "<span class='bivesDiffIns'>$1</span>")
+				/*.replace (/(="[^"]")/m, "<span class='bivesDiffIns'>$1</span>")
+				.replace (/(="[^"]")/m, "<span class='bivesDiffIns'>$1</span>")
+				.replace (/(="[^"]")/m, "<span class='bivesDiffIns'>$1</span>")
+				.replace (/(="[^"]")/m, "<span class='bivesDiffIns'>$1</span>")*/
+				
+				;
+				
+				xmlDiv.append ($("<pre></pre>").append (xml));
+				head.append (xmlLink);
+				diffDiv.append (xmlDiv);
+				xmlLink.click (function ()
+				{
+					reportDiv.hide ();
+					chDiv.hide ();
+					crnDiv.hide ();
+					xmlDiv.show ();
+					
+					$(".bivesTab").each (function () {$(this).removeClass ("bivesTabSelected");});
+					xmlLink.addClass ("bivesTabSelected");
+				});
+				if (!shown)
+					xmlLink.click ();
+				shown = true;
+			}
+			
+			if (!shown)
+				diffDiv.append ("server didn't return any diff");
+			
+			
 		}
 		else
 			diffs[matrixKey].empty ().append ("failed to compute the differences");
 	}).fail (function () 
 	{
 		diffs[matrixKey].empty ().append ("failed to compute the differences");
-	});*/
+	});
 };
 
 bivesDiffer.prototype.showDiff = function ()
@@ -112,7 +257,7 @@ bivesDiffer.prototype.showDiff = function ()
 		if (!this.diffs[matrixKey])
 		{
 			// compute the diff and show it afterwards
-			this.diffs[matrixKey] = $("<div></div>").text ("calling BiVeS from WHICH BIVES URL?");
+			this.diffs[matrixKey] = $("<div></div>").text ("calling BiVeS to compute the differences");
 			this.computeDifferences (this.formerFile, this.laterFile, matrixKey);
 		}
 
@@ -137,18 +282,17 @@ function bivesDiffContent ()
     this.name = "displayBivesDiff";
     this.icon = "displayBivesDiff.png";
     this.description = "use BiVeS to compare versions";
+    
+  	addScript (contextPath + "/res/js/visualizers/displayBivesDiff/graphene-sems/ddca88fc.vendor.js");
+  	addScript (contextPath + "/res/js/visualizers/displayBivesDiff/graphene-sems/d4d3d03e.scripts.js");
 };
 
 bivesDiffContent.prototype.canRead = function (file)
 {
 	var allowedExt = [
-	                  "xmlprotocol",
 	                  "xml",
 	                  "cellml",
-	                  "cpp",
-	                  "hpp",
-	                  "txt",
-	                  "gp"
+	                  "sbml"
 	                  // to be extended?
 	                  ];
 	

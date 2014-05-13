@@ -43,6 +43,11 @@
             <artifactId>CombineArchive</artifactId>
             <version>[0.4,)</version>
         </dependency>
+        <dependency>
+            <groupId>de.unirostock.sems</groupId>
+            <artifactId>BiVeS-WS-Client</artifactId>
+            <version>[1.1.2,)</version>
+        </dependency>
 <dependency>
     <groupId>org.apache.httpcomponents</groupId>
     <artifactId>httpclient</artifactId>

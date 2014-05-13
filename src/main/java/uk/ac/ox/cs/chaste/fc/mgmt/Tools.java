@@ -38,6 +38,8 @@ public class Tools
 	private static String tempDir = "/tmp/chasteTempDir";
 	private static String storageDir = "/tmp/chasteStorageDir";
 	
+	private static String bivesWebService = "http://bives.sems.uni-rostock.de/";
+	
 	public static final String NEWLINE = System.getProperty("line.separator");
 	public static final String FILESEP = System.getProperty("file.separator");
 	public static final SimpleDateFormat dateFormater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -49,7 +51,15 @@ public class Tools
 		return thisUrl;
 	}
 
+	public static String getBivesWebServiceUrl ()
+	{
+		return bivesWebService;
+	}
 
+	public static void setBivesWebServiceUrl (String url)
+	{
+		bivesWebService = url;
+	}
 	
 	public static void setThisUrl (String thisUrl)
 	{
