@@ -174,6 +174,7 @@ public class EntityView extends WebModule
 		plugins.add ("displayPlotFlot");
 		plugins.add ("displayPlotHC");
 		plugins.add ("displayPlotD3");
+		plugins.add("editMetadata");
 		
 		for (String s : plugins)
 		{
