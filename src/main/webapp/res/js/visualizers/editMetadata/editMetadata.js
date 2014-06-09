@@ -1,3 +1,4 @@
+
 /**
  * Create the 'visualiser' portion of the plugin, responsible for displaying content within the div for this file.
  */
@@ -5,9 +6,19 @@ function metadataEditor(file, div)
 {
     this.file = file;
     this.div = div;
-    this.setUp = false;
-    div.appendChild(document.createTextNode("loading..."));
+    this.loadedModel = false;
+    this.loadedOntology = false;
+    this.modelDiv = $('<div></div>', {id: 'editmeta_modelvars_div'}).text('loading model...');
+    this.ontoDiv = $('<div></div>', {id: 'editmeta_ontoterms_div'}).text('loading available annotations...');
+    $(div).append(this.modelDiv).append(this.ontoDiv);
 };
+
+//$( "#result" ).load(contextPath + '/res/visualizers/editMetadata/pageOutline.html',
+//        function(response, status, xhr){if (status == "error") ... });
+//$.ajax(contextPath + '/res/visualizers/editMetadata/pageOutline.html',
+//       {dataType: 'html',
+//        success: function(data, status, jqXHR) {}
+//       });
 
 /**
  * This is called when the file to be edited has been fetched from the server,
@@ -15,62 +26,95 @@ function metadataEditor(file, div)
  */
 metadataEditor.prototype.getContentsCallback = function (succ)
 {
-    removeChildren (this.div); // Remove loading indicator
+    var self = this;
     if (!succ)
-        this.div.appendChild (document.createTextNode ("failed to load the contents"));
+        this.modelDiv.text("failed to load the contents");
     else
     {
         if ($.rdf === undefined)
         {
             /// Wait 0.1s for rdfquery to load and try again
             console.log("Waiting for rdfquery to load.");
-            var editor = this;
-            window.setTimeout(function(){editor.getContentsCallback(true);}, 100);
+            window.setTimeout(function(){self.getContentsCallback(true);}, 100);
             return;
         }
+        this.loadedModel = true;
         this.model = $.parseXML(this.file.contents);
-        var rdf_nodes = this.model.getElementsByTagNameNS("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "RDF");
-        var source_variables = $(this.model).find("component > variable").not("[public_interface='in']").not("[private_interface='in']");
-        this.div.innerHTML = "<p>Found " + rdf_nodes.length + " RDF nodes and " + source_variables.length + " variables.</p>";
-        var table = this.div.appendChild(document.createElement("table")),
-            tr = table.appendChild(document.createElement("tr")),
-            td_vars = tr.appendChild(document.createElement("td")),
-            td_meta = tr.appendChild(document.createElement("td")),
-            vars_ul = td_vars.appendChild(document.createElement("ul"));
-        source_variables.each(function (index) {
-            var li = document.createElement("li");
-            li.innerHTML = "Var " + index + ": " + this.parentNode.getAttribute("name") + ", " + this.getAttribute("name")
-                + " [" + this.getAttributeNS("http://www.cellml.org/metadata/1.0#", "id") + "]";
-            vars_ul.appendChild(li);
+        this.modelBaseUri = $.uri.absolute(window.location.protocol + '//' + window.location.host + this.file.url);
+        console.log(this.modelBaseUri);
+        var $model = $(this.model);
+        this.modelDiv.empty();
+
+        // Find the variables that can be annotated, and display as a nested list in their components
+        var components = $model.find("component"),
+            var_list = document.createElement("ul");
+        this.components = {};
+        this.vars_by_name = {};
+        this.vars_by_uri = {};
+        components.each(function() {
+            // Store component info and create display items
+            var li = document.createElement("li"),
+                clist = document.createElement("ul"),
+                c = {li: li, ul: clist, elt: this, name: this.getAttribute('name'), vars: []};
+            self.components[c.name] = c;
+            li.innerHTML = '<span class="editmeta_cname">' + c.name + '</span>';
+            li.appendChild(clist);
+            var_list.appendChild(li);
+            // Toggle display of this component's variables on click of the component name
+            $('span', li).click(function (ev) {
+                $(clist).toggle();
+            });
+            $(clist).hide();
+            // Find variables in this component
+            $(this).children('variable[public_interface != "in"][private_interface != "in"]').each(function() {
+                var li = document.createElement("li"),
+                    v = {li: li, elt: this, name: this.getAttribute('name'),
+                         metaid: this.getAttributeNS("http://www.cellml.org/metadata/1.0#", "id"),
+                         annotations: []};
+                c.vars.push(v);
+                v.fullname = c.name + ':' + v.name;
+                self.vars_by_name[v.fullname] = v;
+                if (v.metaid)
+                    self.vars_by_uri[self.modelBaseUri.toString() + '#' + v.metaid] = v;
+                li.innerHTML = '<span class="editmeta_vname">' + v.name + '</span>';
+                clist.appendChild(li);
+            });
         });
-        console.log("Our base: " + window.location.protocol + '//' + window.location.host + this.file.url);
-        var rdf_store = $.rdf.databank([]),
-            rdf = $.rdf({//databank: rdf_store,
-                         base: $.uri.absolute(window.location.protocol + '//' + window.location.host + this.file.url)
-                         //base: 'test'
-                        }).prefix('bqbiol' ,'http://biomodels.net/biology-qualifiers/');
-        console.log("Store base: " + rdf.base());
-        console.log("Databank base: " + rdf.databank.base());
+        console.log("Found " + keys(this.vars_by_name).length + " variables");
+        this.modelDiv.append("<h4>Model variables:</h4>", var_list);
+
+        // Find the existing annotations
+        var rdf_nodes = this.model.getElementsByTagNameNS("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "RDF");
+        console.log("Found " + rdf_nodes.length + " RDF nodes");
+        var rdf = $.rdf({base: this.modelBaseUri})
+                   .prefix('bqbiol', 'http://biomodels.net/biology-qualifiers/')
+                   .prefix('rdfs', 'http://www.w3.org/2000/01/rdf-schema#');
         $(rdf_nodes).each(function () {
             var doc_type = document.implementation.createDocumentType("RDF", "", ""),
                 new_doc = document.implementation.createDocument("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "RDF", doc_type);
-            console.log("Frag URI: " + new_doc.documentURI);
-            console.log("New doc node base: " + new_doc.documentElement.baseURI);
             $(this).children().each(function(){
                 var new_elt = new_doc.adoptNode(this);
-                console.log("Will load node with base: " + new_elt.baseURI);
                 new_doc.documentElement.appendChild(new_elt);
                 new_doc.documentElement.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'base', rdf.base());
-                console.log(new XMLSerializer().serializeToString(new_doc));
             });
-            rdf.load(new_doc, {});//, {base: rdf.base()});
-            console.log("Size now " + rdf.databank.size() + " " + rdf.size());
+            rdf.load(new_doc, {});
         });
+        console.log("Found " + rdf.databank.size() + " triples");
         console.log(rdf);
-        var meta_ul = td_meta.appendChild(document.createElement("ul"));
-        rdf.where('?s bqbiol:is ?o').each(function(i, bindings, triples){
-            var li = meta_ul.appendChild(document.createElement("li"));
-            li.appendChild(document.createTextNode(triples[0].toString()));
+        rdf.where('?s bqbiol:is ?o')
+           .optional('?o rdfs:label ?label')
+           .optional('?o rdfs:comment ?comment')
+           .each(function(i, bindings, triples){
+            var v = self.vars_by_uri[this.s.value.toString()];
+            if (v === undefined)
+                console.log("Annotation of non-existent id! " + this.s + " is " + this.o);
+            else
+            {
+                var s = $('<span></span>', {'class': 'editmeta_annotation'});
+                s.text(this.o.value.fragment);
+                v.annotations.push({ann: this.o, span: s});
+                v.li.appendChild(s.get(0));
+            }
         });
 //        td_meta.appendChild(document.createTextNode(rdf_store.dump({format: 'application/rdf+xml', serialize: true})));
     }
@@ -83,7 +127,7 @@ metadataEditor.prototype.getContentsCallback = function (succ)
  */
 metadataEditor.prototype.show = function ()
 {
-    if (!this.setUp)
+    if (!this.loadedModel)
         this.file.getContents(this);
 };
 
