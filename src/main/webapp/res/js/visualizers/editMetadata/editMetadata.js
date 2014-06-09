@@ -8,17 +8,30 @@ function metadataEditor(file, div)
     this.div = div;
     this.loadedModel = false;
     this.loadedOntology = false;
+    this.init();
     this.modelDiv = $('<div></div>', {id: 'editmeta_modelvars_div'}).text('loading model...');
     this.ontoDiv = $('<div></div>', {id: 'editmeta_ontoterms_div'}).text('loading available annotations...');
     $(div).append(this.modelDiv).append(this.ontoDiv);
 };
 
-//$( "#result" ).load(contextPath + '/res/visualizers/editMetadata/pageOutline.html',
-//        function(response, status, xhr){if (status == "error") ... });
-//$.ajax(contextPath + '/res/visualizers/editMetadata/pageOutline.html',
-//       {dataType: 'html',
-//        success: function(data, status, jqXHR) {}
-//       });
+/**
+ * Initialisation that depends on rdfQuery being available; waits until it is before proceeding.
+ */
+metadataEditor.prototype.init = function ()
+{
+    if ($.rdf === undefined)
+    {
+        var self = this;
+        /// Wait 0.05s for rdfquery to load and try again
+        console.log("Waiting for rdfquery to load.");
+        window.setTimeout(function(){self.init();}, 50);
+        return;
+    }
+    this.modelBaseUri = $.uri.absolute(window.location.protocol + '//' + window.location.host + this.file.url);
+    this.rdf = $.rdf({base: this.modelBaseUri})
+                .prefix('bqbiol', 'http://biomodels.net/biology-qualifiers/')
+                .prefix('rdfs', 'http://www.w3.org/2000/01/rdf-schema#');
+}
 
 /**
  * This is called when the file to be edited has been fetched from the server,
@@ -31,17 +44,16 @@ metadataEditor.prototype.getContentsCallback = function (succ)
         this.modelDiv.text("failed to load the contents");
     else
     {
-        if ($.rdf === undefined)
+        if (this.rdf === undefined)
         {
             /// Wait 0.1s for rdfquery to load and try again
             console.log("Waiting for rdfquery to load.");
             window.setTimeout(function(){self.getContentsCallback(true);}, 100);
             return;
         }
+        console.log("Model loaded");
         this.loadedModel = true;
         this.model = $.parseXML(this.file.contents);
-        this.modelBaseUri = $.uri.absolute(window.location.protocol + '//' + window.location.host + this.file.url);
-        console.log(this.modelBaseUri);
         var $model = $(this.model);
         this.modelDiv.empty();
 
@@ -84,11 +96,9 @@ metadataEditor.prototype.getContentsCallback = function (succ)
         this.modelDiv.append("<h4>Model variables:</h4>", var_list);
 
         // Find the existing annotations
-        var rdf_nodes = this.model.getElementsByTagNameNS("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "RDF");
+        var rdf_nodes = this.model.getElementsByTagNameNS("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "RDF"),
+            rdf = this.rdf;
         console.log("Found " + rdf_nodes.length + " RDF nodes");
-        var rdf = $.rdf({base: this.modelBaseUri})
-                   .prefix('bqbiol', 'http://biomodels.net/biology-qualifiers/')
-                   .prefix('rdfs', 'http://www.w3.org/2000/01/rdf-schema#');
         $(rdf_nodes).each(function () {
             var doc_type = document.implementation.createDocumentType("RDF", "", ""),
                 new_doc = document.implementation.createDocument("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "RDF", doc_type);
@@ -101,24 +111,72 @@ metadataEditor.prototype.getContentsCallback = function (succ)
         });
         console.log("Found " + rdf.databank.size() + " triples");
         console.log(rdf);
-        rdf.where('?s bqbiol:is ?o')
-           .optional('?o rdfs:label ?label')
-           .optional('?o rdfs:comment ?comment')
-           .each(function(i, bindings, triples){
-            var v = self.vars_by_uri[this.s.value.toString()];
-            if (v === undefined)
-                console.log("Annotation of non-existent id! " + this.s + " is " + this.o);
-            else
-            {
-                var s = $('<span></span>', {'class': 'editmeta_annotation'});
-                s.text(this.o.value.fragment);
-                v.annotations.push({ann: this.o, span: s});
-                v.li.appendChild(s.get(0));
-            }
-        });
+        
+        // If ontology is available too, set up linking functionality
+        if (this.loadedOntology)
+            this.ready();
+        
 //        td_meta.appendChild(document.createTextNode(rdf_store.dump({format: 'application/rdf+xml', serialize: true})));
     }
 };
+
+/**
+ * Called when both the model and Oxford metadata ontology have been loaded and parsed.
+ */
+metadataEditor.prototype.ready = function ()
+{
+    var self = this;
+    console.log("Ready!");
+    this.rdf.where('?s bqbiol:is ?o')
+            .optional('?o rdfs:label ?label')
+            .optional('?o rdfs:comment ?comment')
+            .each(function(i, bindings, triples) {
+                 var v = self.vars_by_uri[this.s.value.toString()];
+                 if (v === undefined)
+                     console.log("Annotation of non-existent id! " + this.s + " is " + this.o);
+                 else
+                 {
+                     var s = $('<span></span>', {'class': 'editmeta_annotation'}),
+                         del = $('<img>', {src: contextPath + '/res/img/delete.png',
+                                           alt: 'remove this annotation',
+                                           title: 'remove this annotation',
+                                           'class': 'editmeta_spaced'});
+                     s.text(this.label === undefined ? this.o.value.fragment : this.label.value);
+                     s.append(del);
+                     if (this.comment !== undefined)
+                         s.attr('title', this.comment.value);
+                     v.annotations.push({ann: this.o, span: s});
+                     v.li.appendChild(s.get(0));
+                 }
+            });
+}
+
+/**
+ * Callback function for when the Oxford metadata ontology has been fetched from the server.
+ */
+metadataEditor.prototype.ontologyLoaded = function (data, status, jqXHR)
+{
+    var self = this;
+    if (this.rdf === undefined)
+    {
+        /// Wait 0.1s for rdfquery to load and try again
+        console.log("Waiting for rdfquery to load.");
+        window.setTimeout(function(){self.ontologyLoaded(data, status, jqXHR);}, 100);
+        return;
+    }
+    console.log("Ontology loaded");
+    this.loadedOntology = true;
+    this.ontoDiv.empty();
+    
+    // Parse XML
+    this.rdf.load(data, {});
+    
+    // Show available terms
+    
+    // If model is available too, set up linking functionality
+    if (this.loadedModel)
+        this.ready();
+}
 
 /**
  * Called to generate the content for this visualiser plugin.
@@ -127,9 +185,17 @@ metadataEditor.prototype.getContentsCallback = function (succ)
  */
 metadataEditor.prototype.show = function ()
 {
+    var self = this;
     if (!this.loadedModel)
         this.file.getContents(this);
+    if (!this.loadedOntology)
+        $.ajax(contextPath + '/res/js/visualizers/editMetadata/oxford-metadata.rdf',
+               {dataType: 'xml',
+                success: function(d,s,j) {self.ontologyLoaded(d,s,j);}
+               });
+
 };
+
 
 
 /**
