@@ -30,6 +30,7 @@ metadataEditor.prototype.init = function ()
     this.modelBaseUri = $.uri.absolute(window.location.protocol + '//' + window.location.host + this.file.url);
     this.rdf = $.rdf({base: this.modelBaseUri})
                 .prefix('bqbiol', 'http://biomodels.net/biology-qualifiers/')
+                .prefix('oxmeta', 'https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#')
                 .prefix('rdfs', 'http://www.w3.org/2000/01/rdf-schema#');
 }
 
@@ -93,7 +94,7 @@ metadataEditor.prototype.getContentsCallback = function (succ)
             });
         });
         console.log("Found " + keys(this.vars_by_name).length + " variables");
-        this.modelDiv.append("<h4>Model variables:</h4>", var_list);
+        this.modelDiv.append("<h4>Model variables</h4>", var_list);
 
         // Find the existing annotations
         var rdf_nodes = this.model.getElementsByTagNameNS("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "RDF"),
@@ -127,13 +128,13 @@ metadataEditor.prototype.ready = function ()
 {
     var self = this;
     console.log("Ready!");
-    this.rdf.where('?s bqbiol:is ?o')
-            .optional('?o rdfs:label ?label')
-            .optional('?o rdfs:comment ?comment')
+    this.rdf.where('?v bqbiol:is ?ann')
+            .optional('?ann rdfs:label ?label')
+            .optional('?ann rdfs:comment ?comment')
             .each(function(i, bindings, triples) {
-                 var v = self.vars_by_uri[this.s.value.toString()];
+                 var v = self.vars_by_uri[bindings.v.value.toString()];
                  if (v === undefined)
-                     console.log("Annotation of non-existent id! " + this.s + " is " + this.o);
+                     console.log("Annotation of non-existent id! " + bindings.v + " is " + bindings.ann);
                  else
                  {
                      var s = $('<span></span>', {'class': 'editmeta_annotation'}),
@@ -141,11 +142,11 @@ metadataEditor.prototype.ready = function ()
                                            alt: 'remove this annotation',
                                            title: 'remove this annotation',
                                            'class': 'editmeta_spaced'});
-                     s.text(this.label === undefined ? this.o.value.fragment : this.label.value);
+                     s.text(bindings.label === undefined ? bindings.ann.value.fragment : bindings.label.value);
                      s.append(del);
-                     if (this.comment !== undefined)
-                         s.attr('title', this.comment.value);
-                     v.annotations.push({ann: this.o, span: s});
+                     if (bindings.comment !== undefined)
+                         s.attr('title', bindings.comment.value);
+                     v.annotations.push({ann: bindings.ann, span: s});
                      v.li.appendChild(s.get(0));
                  }
             });
@@ -172,7 +173,25 @@ metadataEditor.prototype.ontologyLoaded = function (data, status, jqXHR)
     this.rdf.load(data, {});
     
     // Show available terms
-    
+    this.terms = [];
+    var ul = $('<ul></ul');
+    this.rdf.where('?ann a oxmeta:Annotation')
+            .optional('?ann rdfs:label ?label')
+            .optional('?ann rdfs:comment ?comment')
+            .each(function(i, bindings, triples) {
+                var li = $('<li></li>');
+                li.text(bindings.label === undefined ? bindings.ann.value.fragment : bindings.label.value);
+                if (bindings.comment !== undefined)
+                    li.attr('title', bindings.comment.value);
+                self.terms.push({uri: bindings.ann.value, li: li});
+                ul.append(li);
+            });
+    // Sort the list!
+    var items = $('li', ul).get();
+    items.sort(function(a,b) { return $(a).text().localeCompare($(b).text()); });
+    $.each(items, function(i, li) { ul.append(li); });
+    this.ontoDiv.append("<h4>Available annotations</h4>", ul);
+
     // If model is available too, set up linking functionality
     if (this.loadedModel)
         this.ready();
