@@ -160,7 +160,7 @@ metadataEditor.prototype.addAnnotation = function (v, bindings)
         del = $('<img>', {src: contextPath + '/res/img/delete.png',
                           alt: 'remove this annotation',
                           title: 'remove this annotation',
-                          'class': 'editmeta_spaced'});
+                          'class': 'editmeta_spaced pointer'});
     s.text(bindings.label === undefined ? bindings.ann.value.fragment : bindings.label.value);
     s.append(del);
     if (bindings.comment !== undefined)

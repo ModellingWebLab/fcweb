@@ -23,6 +23,7 @@
 
 /* The name of a component containing variables */
 .editmeta_cname {
+    cursor: pointer;
     font-weight: bold;
 }
 
@@ -38,6 +39,11 @@
     border: 1px solid #ccc;
     border-radius:5px;
     background-color: #ddd;
+}
+
+/* The available annotations */
+li.editmeta_annotation {
+    cursor: pointer;
 }
 
 .editmeta_spaced {
