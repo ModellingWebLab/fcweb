@@ -109,7 +109,7 @@ metadataEditor.prototype.getContentsCallback = function (succ)
                 clist.appendChild(li.get(0));
                 li.droppable({
                     drop: function (event, ui) {
-                        console.log("Dropped annotation " + ui.helper.data('bindings').ann + " on " + v.fullname);
+                        console.log("Adding annotation " + ui.helper.data('bindings').ann + " on " + v.fullname);
                         self.addAnnotation(v, ui.helper.data('bindings'));
                     }
                 });
@@ -146,10 +146,15 @@ metadataEditor.prototype.getContentsCallback = function (succ)
 /**
  * Add a new annotation to a variable.
  * The bindings object should contain at least 'ann', and optionally 'label' and 'comment'.
- * TODO: what if the variable has this annotation already?
+ * Duplicate annotations will be ignored.
  */
 metadataEditor.prototype.addAnnotation = function (v, bindings)
 {
+    if (v.annotations[bindings.ann.value.toString()] !== undefined)
+    {
+        console.log("Ignoring duplicate annotation " + bindings.ann + " on " + v.fullname);
+        return;
+    }
     var self = this,
         s = $('<span></span>', {'class': 'editmeta_annotation editmeta_spaced'}),
         del = $('<img>', {src: contextPath + '/res/img/delete.png',
@@ -173,6 +178,7 @@ metadataEditor.prototype.addAnnotation = function (v, bindings)
 
 /**
  * Called when both the model and Oxford metadata ontology have been loaded and parsed.
+ * Adds details of the existing variable annotations to the UI.
  */
 metadataEditor.prototype.ready = function ()
 {
@@ -186,9 +192,7 @@ metadataEditor.prototype.ready = function ()
                  if (v === undefined)
                      console.log("Annotation of non-existent id! " + bindings.v + " is " + bindings.ann);
                  else
-                 {
                      self.addAnnotation(v, bindings);
-                 }
             });
 }
 
