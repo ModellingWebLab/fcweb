@@ -83,12 +83,15 @@ metadataEditor.prototype.getContentsCallback = function (succ)
                 var li = document.createElement("li"),
                     v = {li: li, elt: this, name: this.getAttribute('name'),
                          metaid: this.getAttributeNS("http://www.cellml.org/metadata/1.0#", "id"),
-                         annotations: []};
+                         annotations: {}};
                 c.vars.push(v);
                 v.fullname = c.name + ':' + v.name;
                 self.vars_by_name[v.fullname] = v;
                 if (v.metaid)
-                    self.vars_by_uri[self.modelBaseUri.toString() + '#' + v.metaid] = v;
+                {
+                    v.uri = self.modelBaseUri.toString() + '#' + v.metaid;
+                    self.vars_by_uri[v.uri] = v;
+                }
                 li.innerHTML = '<span class="editmeta_vname">' + v.name + '</span>';
                 clist.appendChild(li);
             });
@@ -146,8 +149,15 @@ metadataEditor.prototype.ready = function ()
                      s.append(del);
                      if (bindings.comment !== undefined)
                          s.attr('title', bindings.comment.value);
-                     v.annotations.push({ann: bindings.ann, span: s});
+                     v.annotations[bindings.ann.value.toString()] = {ann: bindings.ann, span: s};
                      v.li.appendChild(s.get(0));
+                     // Add the handler for deleting this annotation
+                     del.click(function (ev) {
+                         delete v.annotations[bindings.ann.value.toString()];
+                         console.log("Removing annotation: <" + v.uri + '> bqbiol:is ' + bindings.ann);
+                         self.rdf.remove('<' + v.uri + '> bqbiol:is ' + bindings.ann);
+                         s.remove();
+                     });
                  }
             });
 }
