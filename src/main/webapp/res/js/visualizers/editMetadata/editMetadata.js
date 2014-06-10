@@ -94,7 +94,7 @@ metadataEditor.prototype.getContentsCallback = function (succ)
             // Find variables in this component
             $(this).children('variable[public_interface != "in"][private_interface != "in"]').each(function() {
                 var li = $('<li></li>'),
-                    v = {li: li, elt: this, name: this.getAttribute('name'),
+                    v = {li: li, elt: this, name: this.getAttribute('name'), cname: c.name,
                          metaid: this.getAttributeNS("http://www.cellml.org/metadata/1.0#", "id"),
                          annotations: {}};
                 c.vars.push(v);
@@ -167,6 +167,18 @@ metadataEditor.prototype.addAnnotation = function (v, bindings)
         s.attr('title', bindings.comment.value);
     v.annotations[bindings.ann.value.toString()] = {ann: bindings.ann, span: s};
     v.li.append(s);
+    // Add to the RDF store, creating a unique cmeta:id for the variable if needed
+    if (v.uri === undefined)
+    {
+        v.metaid = v.cname + '_' + v.name;
+        while (self.vars_by_uri[self.modelBaseUri.toString() + '#' + v.metaid] !== undefined)
+            v.metaid += '_';
+        v.elt.setAttributeNS("http://www.cellml.org/metadata/1.0#", "id", v.metaid);
+        v.uri = self.modelBaseUri.toString() + '#' + v.metaid;
+        self.vars_by_uri[v.uri] = v;
+    }
+    var triple = '<' + v.uri + '> bqbiol:is ' + bindings.ann;
+    self.rdf.add(triple);
     // Add the handler for deleting this annotation
     del.click(function (ev) {
         console.log("Removing annotation: <" + v.uri + '> bqbiol:is ' + bindings.ann);
