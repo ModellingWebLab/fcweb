@@ -6,13 +6,31 @@ function metadataEditor(file, div)
 {
     this.file = file;
     this.div = div;
+    div.id = 'editmeta_main_div';
     this.loadedModel = false;
     this.loadedOntology = false;
     this.init();
     this.modelDiv = $('<div></div>', {id: 'editmeta_modelvars_div'}).text('loading model...');
     this.ontoDiv = $('<div></div>', {id: 'editmeta_ontoterms_div'}).text('loading available annotations...');
-    $(div).append(this.modelDiv).append(this.ontoDiv);
+    this.dragDiv = $('<div></div>', {'class': 'editmeta_annotation', 'style': 'position: fixed;'});
+    $(div).append(this.modelDiv, this.ontoDiv, this.dragDiv);
 };
+
+/**
+ * If our required libraries are not yet present, wait until they are then call the callback.
+ * Returns true iff a wait is needed.
+ */
+function waitForLibraries (self, callback, timeout)
+{
+    timeout = timeout || 150;
+    if (self.rdf === undefined || $.ui === undefined)
+    {
+        console.log("Waiting for libraries to load.");
+        window.setTimeout(callback, timeout);
+        return true;
+    }
+    return false;
+}
 
 /**
  * Initialisation that depends on rdfQuery being available; waits until it is before proceeding.
@@ -22,9 +40,9 @@ metadataEditor.prototype.init = function ()
     if ($.rdf === undefined)
     {
         var self = this;
-        /// Wait 0.05s for rdfquery to load and try again
+        /// Wait 0.1s for rdfquery to load and try again
         console.log("Waiting for rdfquery to load.");
-        window.setTimeout(function(){self.init();}, 50);
+        window.setTimeout(function(){self.init();}, 100);
         return;
     }
     this.modelBaseUri = $.uri.absolute(window.location.protocol + '//' + window.location.host + this.file.url);
@@ -45,13 +63,8 @@ metadataEditor.prototype.getContentsCallback = function (succ)
         this.modelDiv.text("failed to load the contents");
     else
     {
-        if (this.rdf === undefined)
-        {
-            /// Wait 0.1s for rdfquery to load and try again
-            console.log("Waiting for rdfquery to load.");
-            window.setTimeout(function(){self.getContentsCallback(true);}, 100);
+        if (waitForLibraries(self, function(){self.getContentsCallback(true);}))
             return;
-        }
         console.log("Model loaded");
         this.loadedModel = true;
         this.model = $.parseXML(this.file.contents);
@@ -80,7 +93,7 @@ metadataEditor.prototype.getContentsCallback = function (succ)
             $(clist).hide();
             // Find variables in this component
             $(this).children('variable[public_interface != "in"][private_interface != "in"]').each(function() {
-                var li = document.createElement("li"),
+                var li = $('<li></li>'),
                     v = {li: li, elt: this, name: this.getAttribute('name'),
                          metaid: this.getAttributeNS("http://www.cellml.org/metadata/1.0#", "id"),
                          annotations: {}};
@@ -92,8 +105,14 @@ metadataEditor.prototype.getContentsCallback = function (succ)
                     v.uri = self.modelBaseUri.toString() + '#' + v.metaid;
                     self.vars_by_uri[v.uri] = v;
                 }
-                li.innerHTML = '<span class="editmeta_vname">' + v.name + '</span>';
-                clist.appendChild(li);
+                li.html('<span class="editmeta_vname">' + v.name + '</span>');
+                clist.appendChild(li.get(0));
+                li.droppable({
+                    drop: function (event, ui) {
+                        console.log("Dropped annotation " + ui.helper.data('bindings').ann + " on " + v.fullname);
+                        self.addAnnotation(v, ui.helper.data('bindings'));
+                    }
+                });
             });
         });
         console.log("Found " + keys(this.vars_by_name).length + " variables");
@@ -125,6 +144,34 @@ metadataEditor.prototype.getContentsCallback = function (succ)
 };
 
 /**
+ * Add a new annotation to a variable.
+ * The bindings object should contain at least 'ann', and optionally 'label' and 'comment'.
+ * TODO: what if the variable has this annotation already?
+ */
+metadataEditor.prototype.addAnnotation = function (v, bindings)
+{
+    var self = this,
+        s = $('<span></span>', {'class': 'editmeta_annotation editmeta_spaced'}),
+        del = $('<img>', {src: contextPath + '/res/img/delete.png',
+                          alt: 'remove this annotation',
+                          title: 'remove this annotation',
+                          'class': 'editmeta_spaced'});
+    s.text(bindings.label === undefined ? bindings.ann.value.fragment : bindings.label.value);
+    s.append(del);
+    if (bindings.comment !== undefined)
+        s.attr('title', bindings.comment.value);
+    v.annotations[bindings.ann.value.toString()] = {ann: bindings.ann, span: s};
+    v.li.append(s);
+    // Add the handler for deleting this annotation
+    del.click(function (ev) {
+        console.log("Removing annotation: <" + v.uri + '> bqbiol:is ' + bindings.ann);
+        delete v.annotations[bindings.ann.value.toString()];
+        self.rdf.remove('<' + v.uri + '> bqbiol:is ' + bindings.ann);
+        s.remove();
+    });
+}
+
+/**
  * Called when both the model and Oxford metadata ontology have been loaded and parsed.
  */
 metadataEditor.prototype.ready = function ()
@@ -140,24 +187,7 @@ metadataEditor.prototype.ready = function ()
                      console.log("Annotation of non-existent id! " + bindings.v + " is " + bindings.ann);
                  else
                  {
-                     var s = $('<span></span>', {'class': 'editmeta_annotation'}),
-                         del = $('<img>', {src: contextPath + '/res/img/delete.png',
-                                           alt: 'remove this annotation',
-                                           title: 'remove this annotation',
-                                           'class': 'editmeta_spaced'});
-                     s.text(bindings.label === undefined ? bindings.ann.value.fragment : bindings.label.value);
-                     s.append(del);
-                     if (bindings.comment !== undefined)
-                         s.attr('title', bindings.comment.value);
-                     v.annotations[bindings.ann.value.toString()] = {ann: bindings.ann, span: s};
-                     v.li.appendChild(s.get(0));
-                     // Add the handler for deleting this annotation
-                     del.click(function (ev) {
-                         delete v.annotations[bindings.ann.value.toString()];
-                         console.log("Removing annotation: <" + v.uri + '> bqbiol:is ' + bindings.ann);
-                         self.rdf.remove('<' + v.uri + '> bqbiol:is ' + bindings.ann);
-                         s.remove();
-                     });
+                     self.addAnnotation(v, bindings);
                  }
             });
 }
@@ -168,13 +198,8 @@ metadataEditor.prototype.ready = function ()
 metadataEditor.prototype.ontologyLoaded = function (data, status, jqXHR)
 {
     var self = this;
-    if (this.rdf === undefined)
-    {
-        /// Wait 0.1s for rdfquery to load and try again
-        console.log("Waiting for rdfquery to load.");
-        window.setTimeout(function(){self.ontologyLoaded(data, status, jqXHR);}, 100);
+    if (waitForLibraries(self, function(){self.ontologyLoaded(data, status, jqXHR);}))
         return;
-    }
     console.log("Ontology loaded");
     this.loadedOntology = true;
     this.ontoDiv.empty();
@@ -185,22 +210,37 @@ metadataEditor.prototype.ontologyLoaded = function (data, status, jqXHR)
     // Show available terms
     this.terms = [];
     var ul = $('<ul></ul');
+    this.ontoDiv.append("<h4>Available annotations</h4>", ul);
     this.rdf.where('?ann a oxmeta:Annotation')
             .optional('?ann rdfs:label ?label')
             .optional('?ann rdfs:comment ?comment')
             .each(function(i, bindings, triples) {
-                var li = $('<li></li>');
+                var li = $('<li></li>', {'class': 'editmeta_annotation'});
                 li.text(bindings.label === undefined ? bindings.ann.value.fragment : bindings.label.value);
                 if (bindings.comment !== undefined)
                     li.attr('title', bindings.comment.value);
                 self.terms.push({uri: bindings.ann.value, li: li});
                 ul.append(li);
+                li.draggable({
+                    containment: self.div,
+                    cursor: 'move',
+                    helper: function (event) {
+                        self.dragDiv.text(li.text())
+                                    .data('bindings', bindings);
+                        return self.dragDiv;
+                    },
+                    scroll: false,
+//                    start: function (event, ui) {
+//                        console.log("Start drag of " + bindings.ann);
+//                        console.log(event);
+//                        console.log(ui);
+//                    }
+                });
             });
     // Sort the list!
     var items = $('li', ul).get();
     items.sort(function(a,b) { return $(a).text().localeCompare($(b).text()); });
     $.each(items, function(i, li) { ul.append(li); });
-    this.ontoDiv.append("<h4>Available annotations</h4>", ul);
 
     // If model is available too, set up linking functionality
     if (this.loadedModel)
