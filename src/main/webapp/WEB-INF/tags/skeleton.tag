@@ -34,7 +34,6 @@
 		<link rel='stylesheet' type='text/css' href='${contextPath}/res/css/style.css' />
 		<script type='text/javascript' src='${contextPath}/res/js/main.js' charset='UTF-8'></script>
 		<script type='text/javascript' src='${contextPath}/res/js/3rd/jquery-2.0.3.min.js' charset='UTF-8'></script>
-		<script type='text/javascript' src='${contextPath}/res/js/3rd/colorbox/jquery.colorbox-min.js' charset='UTF-8'></script>
 		<script type='text/javascript' src='${contextPath}/res/js/3rd/xdate.js' charset='UTF-8'></script>
 		
 		<%-- dynamic header fields -> just import them as needed --%>
