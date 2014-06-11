@@ -108,7 +108,7 @@ function sendFile (uploaded, file, name, types)
         	    array.fileType = "TXTPROTOCOL";
         	else if (name.endsWith(".xml"))
         	    array.fileType = "XMLPROTOCOL";
-            else if (name.endsWith(".zip") || name.endswith(".omex"))
+            else if (name.endsWith(".zip") || name.endsWith(".omex"))
                 array.fileType = "COMBINE archive";
         	
         	var type = document.createElement("select");
