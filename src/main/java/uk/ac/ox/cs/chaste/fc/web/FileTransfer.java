@@ -573,6 +573,9 @@ public class FileTransfer extends WebModule
 		out.close();
 	}
 	
+	/**
+	 * A little utility class for transferring file information when creating new entities.
+	 */
 	static public class NewFile
 	{
 		File tmpFile;
@@ -588,6 +591,10 @@ public class FileTransfer extends WebModule
 		}
 	}
 	
+	/**
+	 * Check whether any of the files submitted as part of an entity have the same name or same
+	 * temporary file on disk.
+	 */
 	public static boolean ambiguous (HashMap<String, NewFile> files)
 	{
 		// the number of files should always be quite small,
