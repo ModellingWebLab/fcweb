@@ -9,12 +9,48 @@ function metadataEditor(file, div)
     div.id = 'editmeta_main_div';
     this.loadedModel = false;
     this.loadedOntology = false;
-    this.init();
     this.modelDiv = $('<div></div>', {id: 'editmeta_modelvars_div'}).text('loading model...');
     this.ontoDiv = $('<div></div>', {id: 'editmeta_ontoterms_div'}).text('loading available annotations...');
+    otherContent = '<div class="clearer">\n'
+        + '<p><label for="versionname">Version:</label>\n'
+        + '<input type="text" name="versionname" id="versionname" placeholder="Version Identifier"/>\n'
+        + '<a class="pointer" id="dateinserter"><small>use current date</small></a>\n'
+        + '<span id="versionaction"></span></p>\n'
+        + '<p><label for="commitMsg">Commit Message:</label><br/>\n'
+        + '<textarea cols="70" rows="3" name="commitMsg" id="commitMsg" placeholder="optional message to describe this commit"></textarea>\n'
+        + '<span id="commitmsgaction"></span></p>\n'
+        + '<p><input type="checkbox" name="reRunExperiments" id="reRunExperiments"/>\n'
+        + '<label for="reRunExperiments">rerun experiments involving previous versions of this model</label>\n'
+        + '<small>(this might take some time)</small></p>\n'
+        + '<p><button id="savebutton">Save model annotations</button><span id="saveaction"></span></p>';
     this.dragDiv = $('<div></div>', {'class': 'editmeta_annotation', 'style': 'position: fixed;'});
-    $(div).append(this.modelDiv, this.ontoDiv, this.dragDiv);
+    $(div).append(this.modelDiv, this.ontoDiv, otherContent, this.dragDiv);
+    this.initRdf();
 };
+
+/**
+ * Check with the server whether properties of the new model version are OK.
+ */
+metadataEditor.prototype.verifyNewEntity = function (jsonObject, actionElem)
+{
+    actionElem.html("<img src='"+contextPath+"/res/img/loading2-new.gif' alt='loading' />");
+    $.post(contextPath + '/model/createnew', JSON.stringify(jsonObject))
+        .done(function (json) {
+            console.log(json);
+            displayNotifications(json);
+            if (json.versionName)
+            {
+                var msg = json.versionName.responseText;
+                if (json.versionName.response)
+                    actionElem.html("<img src='"+contextPath+"/res/img/check.png' alt='valid' /> " + msg);
+                else
+                    actionElem.html("<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + msg);
+            }
+        })
+        .fail (function () {
+            actionElem.html("<img src='"+contextPath+"/res/img/failed.png' alt='error' /> sorry, serverside error occurred.");
+        });
+}
 
 /**
  * If our required libraries are not yet present, wait until they are then call the callback.
@@ -35,21 +71,31 @@ function waitForLibraries (self, callback, timeout)
 /**
  * Initialisation that depends on rdfQuery being available; waits until it is before proceeding.
  */
-metadataEditor.prototype.init = function ()
+metadataEditor.prototype.initRdf = function ()
 {
     if ($.rdf === undefined)
     {
         var self = this;
         /// Wait 0.1s for rdfquery to load and try again
         console.log("Waiting for rdfquery to load.");
-        window.setTimeout(function(){self.init();}, 100);
+        window.setTimeout(function(){self.initRdf();}, 100);
         return;
     }
     this.modelBaseUri = $.uri.absolute(window.location.protocol + '//' + window.location.host + this.file.url);
-    this.rdf = $.rdf({base: this.modelBaseUri})
+    this.modelRdf = $.rdf({base: this.modelBaseUri})
+                     .prefix('bqbiol', 'http://biomodels.net/biology-qualifiers/')
+                     .prefix('oxmeta', 'https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#')
+                     .prefix('rdfs', 'http://www.w3.org/2000/01/rdf-schema#');
+    this.ontoRdf = $.rdf()
+                    .prefix('bqbiol', 'http://biomodels.net/biology-qualifiers/')
+                    .prefix('oxmeta', 'https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#')
+                    .prefix('rdfs', 'http://www.w3.org/2000/01/rdf-schema#');
+    this.rdf = $.rdf()
                 .prefix('bqbiol', 'http://biomodels.net/biology-qualifiers/')
                 .prefix('oxmeta', 'https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#')
-                .prefix('rdfs', 'http://www.w3.org/2000/01/rdf-schema#');
+                .prefix('rdfs', 'http://www.w3.org/2000/01/rdf-schema#')
+                .add(this.modelRdf)
+                .add(this.ontoRdf);
 }
 
 /**
@@ -120,7 +166,7 @@ metadataEditor.prototype.getContentsCallback = function (succ)
 
         // Find the existing annotations
         var rdf_nodes = this.model.getElementsByTagNameNS("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "RDF"),
-            rdf = this.rdf;
+            rdf = this.modelRdf;
         console.log("Found " + rdf_nodes.length + " RDF nodes");
         $(rdf_nodes).each(function () {
             var doc_type = document.implementation.createDocumentType("RDF", "", ""),
@@ -138,8 +184,6 @@ metadataEditor.prototype.getContentsCallback = function (succ)
         // If ontology is available too, set up linking functionality
         if (this.loadedOntology)
             this.ready();
-        
-//        td_meta.appendChild(document.createTextNode(rdf_store.dump({format: 'application/rdf+xml', serialize: true})));
     }
 };
 
@@ -178,12 +222,12 @@ metadataEditor.prototype.addAnnotation = function (v, bindings)
         self.vars_by_uri[v.uri] = v;
     }
     var triple = '<' + v.uri + '> bqbiol:is ' + bindings.ann;
-    self.rdf.add(triple);
+    self.modelRdf.add(triple);
     // Add the handler for deleting this annotation
     del.click(function (ev) {
         console.log("Removing annotation: <" + v.uri + '> bqbiol:is ' + bindings.ann);
         delete v.annotations[bindings.ann.value.toString()];
-        self.rdf.remove('<' + v.uri + '> bqbiol:is ' + bindings.ann);
+        self.modelRdf.remove('<' + v.uri + '> bqbiol:is ' + bindings.ann);
         s.remove();
     });
 }
@@ -221,7 +265,7 @@ metadataEditor.prototype.ontologyLoaded = function (data, status, jqXHR)
     this.ontoDiv.empty();
     
     // Parse XML
-    this.rdf.load(data, {});
+    this.ontoRdf.load(data, {});
     
     // Show available terms
     this.terms = [];
@@ -245,12 +289,7 @@ metadataEditor.prototype.ontologyLoaded = function (data, status, jqXHR)
                                     .data('bindings', bindings);
                         return self.dragDiv;
                     },
-                    scroll: false,
-//                    start: function (event, ui) {
-//                        console.log("Start drag of " + bindings.ann);
-//                        console.log(event);
-//                        console.log(ui);
-//                    }
+                    scroll: false
                 });
             });
     // Sort the list!
@@ -264,9 +303,70 @@ metadataEditor.prototype.ontologyLoaded = function (data, status, jqXHR)
 }
 
 /**
+ * Submit a new version of the model containing the metadata modifications.
+ */
+metadataEditor.prototype.saveNewVersion = function ()
+{
+    console.log('Save new version named "' + $('#versionname').val() + '"');
+    var self = this,
+        $div = $(this.div),
+        actionElem = $('#saveaction');
+    actionElem.html("<img src='"+contextPath+"/res/img/loading2-new.gif' alt='loading' />");
+
+    // Remove original RDF from model
+    $(this.model.getElementsByTagNameNS("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "RDF")).remove();
+    // Dump updated RDF back into the model, and serialize (with base URI omitted)
+    var rdf_doc = this.modelRdf.databank.dump({format: 'application/rdf+xml', serialize: false});
+    this.model.documentElement.appendChild(this.model.adoptNode(rdf_doc.documentElement));
+    var model_str = new XMLSerializer().serializeToString(this.model.documentElement)
+                                       .replace(new RegExp(this.modelBaseUri.toString(), 'g'), '');
+
+    // Post the updated model file to the server; any other files comprising the model will be added
+    // to the new version at that end.
+    var data = {task: "updateEntityFile",
+                entityId: entityId,
+                entityName: $('#entityname span').text(),
+                baseVersionId: curVersion.id,
+                versionName: $('#versionname').val(),
+                commitMsg: document.getElementById('commitMsg').value,
+                rerunExperiments: document.getElementById('reRunExperiments').checked,
+                fileName: this.file.name,
+                fileContents: model_str
+               };
+    console.log(data);
+    $.post(contextPath + '/model/createnew', JSON.stringify(data))
+        .done(function (json) {
+            console.log(json);
+            displayNotifications(json);
+            var resp = json.updateEntityFile,
+                msg = resp.responseText;
+            if (resp.response)
+            {
+                clearNotifications("error"); // Get rid of any leftover errors from failed creation attempts
+                $div.empty();
+                var vers_href = contextPath + "/model/id/" + resp.entityId + "/version/" + resp.versionId,
+                    expt_href = contextPath + "/batch/model/newVersion/" + resp.versionId;
+                $div.append('<h1><img src="' + contextPath + '/res/img/check.png" alt="created version successfully" /> Congratulations</h1>'
+                           +'<p>You\'ve just created a <a href="' + vers_href + '">new version of this model</a>!'
+                           +(resp.expCreation ? '<p>Also, ' + resp.expCreation + '.</p>' : '')
+                           +'<p><a href="' + expt_href + '">Run experiments</a> using this model.</p>'
+                           );
+            }
+            else
+            {
+                actionElem.html("<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + msg);
+            }
+        })
+        .fail (function () {
+            actionElem.html("<img src='"+contextPath+"/res/img/failed.png' alt='error' /> sorry, serverside error occurred.");
+        });
+}
+
+/**
  * Called to generate the content for this visualiser plugin.
- * Actually just triggers a fetch of the file contents, with our getContentsCallback method
+ * Mainly triggers a fetch of the file contents, with our getContentsCallback method
  * doing the work when this completes.
+ * But we also set up event handlers here, since our div's content isn't in the DOM until now.
  */
 metadataEditor.prototype.show = function ()
 {
@@ -279,6 +379,23 @@ metadataEditor.prototype.show = function ()
                 success: function(d,s,j) {self.ontologyLoaded(d,s,j);}
                });
 
+    // Initialise some event handlers
+    $('#versionname').blur(function() {
+        self.verifyNewEntity({
+            task: "verifyNewEntity",
+            entityName: $('#entityname span').text(),
+            versionName: this.value
+        }, $('#versionaction'));
+    });
+    $('#dateinserter').click(function() {
+        $('#versionname').focus().val("Annotated on " + getYMDHMS(new Date())).blur();
+    });
+    $('#savebutton').click(function() {
+        if (!$('#versionname').val())
+            alert("You need to give the new model version a name.");
+        else
+            self.saveNewVersion();
+    });
 };
 
 

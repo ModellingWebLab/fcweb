@@ -581,12 +581,14 @@ public class FileTransfer extends WebModule
 		File tmpFile;
 		String name;
 		String type;
+		boolean isMain;
 		int dbId;
-		public NewFile (File tmpFile, String name, String type)
+		public NewFile (File tmpFile, String name, String type, boolean isMain)
 		{
 			this.tmpFile = tmpFile;
 			this.name = name;
 			this.type = type;
+			this.isMain = isMain;
 			dbId = -1;
 		}
 	}
