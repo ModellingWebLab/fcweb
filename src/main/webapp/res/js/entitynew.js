@@ -40,7 +40,7 @@ function verifyNewEntity (jsonObject, elem, entityNameAction, versionNameAction,
 	        		entityNameAction.innerHTML = "<img src='"+contextPath+"/res/img/check.png' alt='valid' /> " + msg;
 	        	else
 	        		entityNameAction.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + msg;
-	        	// Decide whether to show the 're-run 
+	        	// Decide whether to show the 're-run'
 	        	if (json.isNewVersion)
 	        	    $("#reRunPara").show();
 	        	else

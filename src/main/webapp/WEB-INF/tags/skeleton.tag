@@ -32,9 +32,10 @@
 		</script>
 		<meta http-equiv='Content-Type' content='text/html;charset=utf-8' />
 		<link rel='stylesheet' type='text/css' href='${contextPath}/res/css/style.css' />
+		<link rel='stylesheet' type='text/css' href='${contextPath}/res/css/jquery-ui-1.10.4.custom.min.css' />
 		<script type='text/javascript' src='${contextPath}/res/js/main.js' charset='UTF-8'></script>
 		<script type='text/javascript' src='${contextPath}/res/js/3rd/jquery-2.0.3.min.js' charset='UTF-8'></script>
-		<script type='text/javascript' src='${contextPath}/res/js/3rd/colorbox/jquery.colorbox-min.js' charset='UTF-8'></script>
+		<script type='text/javascript' src='${contextPath}/res/js/3rd/jquery-ui-1.10.4.custom.min.js' charset='UTF-8'></script>
 		<script type='text/javascript' src='${contextPath}/res/js/3rd/xdate.js' charset='UTF-8'></script>
 		
 		<%-- dynamic header fields -> just import them as needed --%>

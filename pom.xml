@@ -41,7 +41,7 @@
         <dependency>
             <groupId>de.unirostock.sems</groupId>
             <artifactId>CombineArchive</artifactId>
-            <version>[0.4,)</version>
+            <version>0.4</version>
         </dependency>
         <dependency>
             <groupId>de.unirostock.sems</groupId>
@@ -76,10 +76,7 @@
                 <version>2.1</version>
                 <configuration>
                     <warSourceExcludes>
-                        res/js/3rd/colorbox/content/**,
-                        res/js/3rd/colorbox/exam*/**,
-                        res/js/3rd/colorbox/.git/**,
-                        res/css/Open_Sans/OpenSans-LightItalic.ttf,
+res/css/Open_Sans/OpenSans-LightItalic.ttf,
 res/css/Open_Sans/OpenSans-SemiboldItalic.ttf,
 res/css/Open_Sans/OpenSans-ExtraBoldItalic.ttf,
 res/css/Open_Sans/OpenSans-ExtraBold.ttf,

@@ -10,7 +10,7 @@
     </c:choose>
     <h1 id="entityname">
         <small>${fn:toUpperCase(fn:substring(entity.type, 0, 1))}${fn:toLowerCase(fn:substring(entity.type, 1,fn:length(entity.type)))}: </small>
-        ${entity.name}
+        <span>${entity.name}</span>
     </h1>
     
 	<div class="suppl">

@@ -59,8 +59,6 @@ function contentDumper (file, div)
 
 contentDumper.prototype.getContentsCallback = function (succ)
 {
-	console.log ("insert content");
-	//console.log (this.div);
 	removeChildren (this.div);
 	if (!succ)
 		this.div.appendChild (document.createTextNode ("failed to load the contents"));
@@ -82,8 +80,6 @@ contentDumper.prototype.getContentsCallback = function (succ)
 
 contentDumper.prototype.show = function ()
 {
-	console.log ("show");
-	console.log (this.div);
 	if (!this.setUp)
 		this.file.getContents (this);
 };
