@@ -74,7 +74,7 @@ bivesDiffer.prototype.computeDifferences = function (former, later, matrixKey)
 	
 	$.post (document.location.href, JSON.stringify(request)).done (function (data)
 	{
-		console.log (data);
+		//console.log (data);
 		if (data && data.getBivesDiff && data.getBivesDiff.response)
 		{
 			var diff = data.getBivesDiff.bivesDiff;
@@ -100,14 +100,14 @@ bivesDiffer.prototype.computeDifferences = function (former, later, matrixKey)
 			
 			var shown = false;
 			
-			if (diff.crnJson)
+			if (diff.reactionsJson)
 			{
-				var crnLink = $("<span></span>").addClass ("bivesTab").text ("Chemical Reaction Network");
-				// TODO
-				crnDiv.append ("<div id='myApp' ng-controller='MainCtrl'><sg-graphene imports='exports' template='"+contextPath + "/res/js/visualizers/displayBivesDiff/graphene-sems/template.html'></sg-graphene></div>");
-				head.append (crnLink);
+				var rnLink = $("<span></span>").addClass ("bivesTab").text ("Reaction Network");
+				var reactionsDiffId = "bivesGrapheneAppRn-" + diff.id;
+				crnDiv.append ("<div id='" + reactionsDiffId + "' ng-controller='MainCtrl'><sg-graphene imports='exports' template='"+contextPath + "/res/js/visualizers/displayBivesDiff/graphene-sems/template.html'></sg-graphene></div>");
+				head.append (rnLink);
 				diffDiv.append (crnDiv);
-				crnLink.click (function ()
+				rnLink.click (function ()
 				{
 					reportDiv.hide ();
 					chDiv.hide ();
@@ -115,18 +115,18 @@ bivesDiffer.prototype.computeDifferences = function (former, later, matrixKey)
 					xmlDiv.hide ();
 					
 					$(".bivesTab").each (function () {$(this).removeClass ("bivesTabSelected");});
-					crnLink.addClass ("bivesTabSelected");
+					rnLink.addClass ("bivesTabSelected");
 				});
 				if (!shown)
-					crnLink.click ();
+					rnLink.click ();
 				shown = true;
 				
 				// add stanley's graphene library
 				angular.element(document).ready(function() {
-					angular.bootstrap(document.querySelector('div#myApp'),
+					angular.bootstrap(document.querySelector("div#" + reactionsDiffId),
 							['grapheneSemsApp']);
-				  var scope = angular.element(document.querySelector('div#myApp')).scope();
-				  scope.data = angular.fromJson(diff.crnJson);
+				  var scope = angular.element(document.querySelector("div#" + reactionsDiffId)).scope();
+				  scope.data = angular.fromJson(diff.reactionsJson);
 				  scope.zoom = true; // enables scroll to zoom
 				  scope.width = 780;  // this is the width of the node force layout system, which is independent of the SVG size, which is defined in the template, but you can and probably make them the same.
 				  scope.height = 500; // this is the height, I suggest you probably change both of these to match the width and height in the template file.
@@ -164,8 +164,8 @@ bivesDiffer.prototype.computeDifferences = function (former, later, matrixKey)
 			if (diff.compHierarchyJson)
 			{
 				var chLink = $("<span></span>").addClass ("bivesTab").text ("Component Hierarchy");
-				// TODO
-				chDiv.text (diff.compHierarchyJson);
+				var hierarchyDiffId = "bivesGrapheneAppCh-" + diff.id;
+				chDiv.append ("<div id='" + hierarchyDiffId+ "' ng-controller='MainCtrl'><sg-graphene imports='exports' template='"+contextPath + "/res/js/visualizers/displayBivesDiff/graphene-sems/template.html'></sg-graphene></div>");
 				head.append (chLink);
 				diffDiv.append (chDiv);
 				chLink.click (function ()
@@ -181,6 +181,23 @@ bivesDiffer.prototype.computeDifferences = function (former, later, matrixKey)
 				if (!shown)
 					chLink.click ();
 				shown = true;
+				
+				// add stanley's graphene library
+				angular.element(document).ready(function() {
+					angular.bootstrap(document.querySelector("div#" + hierarchyDiffId),
+							['grapheneSemsApp']);
+				  var scope = angular.element(document.querySelector("div#" + hierarchyDiffId)).scope();
+				  scope.data = angular.fromJson(diff.compHierarchyJson);
+				  scope.zoom = true; // enables scroll to zoom
+				  scope.width = 1080;  // this is the width of the node force layout system, which is independent of the SVG size, which is defined in the template, but you can and probably make them the same.
+				  scope.height = 1000; // this is the height, I suggest you probably change both of these to match the width and height in the template file.
+				  scope.charge = -15000; // I think you can make this more negative, maybe -1500, I noticed the nodes are very close.
+				  // Alternatively you could also play with increasing scope.linkDistance
+				  scope.gravity = 0.2; // set gravity to 0.1 or 0.2, so the outer disconnected nodes aren't quite so far away.
+				  scope.linkDistance = 5;
+				  scope.renderFps = 50; // makes the layout more choppy, but saves CPU
+				  scope.$apply();
+				});
 			}
 			
 			// fallback if neither sbml/cellml/pharmml etc.
@@ -203,19 +220,10 @@ bivesDiffer.prototype.computeDifferences = function (former, later, matrixKey)
 				.replace (/(oldParent="[^"]*")/g, "<span class='bivesDiffDel'>$1</span>")
 				.replace (/(oldChildNo="[^"]*")/g, "<span class='bivesDiffDel'>$1</span>")
 				.replace (/(oldPath="[^"]*")/g, "<span class='bivesDiffDel'>$1</span>")
-				/*.replace (/(="[^"]")/m, "<span class='bivesDiffDel'>$1</span>")
-				.replace (/(="[^"]")/m, "<span class='bivesDiffDel'>$1</span>")
-				.replace (/(="[^"]")/m, "<span class='bivesDiffDel'>$1</span>")
-				.replace (/(="[^"]")/m, "<span class='bivesDiffDel'>$1</span>")*/
-				
+				//
 				.replace (/(newParent="[^"]*")/g, "<span class='bivesDiffIns'>$1</span>")
 				.replace (/(newChildNo="[^"]*")/g, "<span class='bivesDiffIns'>$1</span>")
 				.replace (/(newPath="[^"]*")/g, "<span class='bivesDiffIns'>$1</span>")
-				/*.replace (/(="[^"]")/m, "<span class='bivesDiffIns'>$1</span>")
-				.replace (/(="[^"]")/m, "<span class='bivesDiffIns'>$1</span>")
-				.replace (/(="[^"]")/m, "<span class='bivesDiffIns'>$1</span>")
-				.replace (/(="[^"]")/m, "<span class='bivesDiffIns'>$1</span>")*/
-				
 				;
 				
 				xmlDiv.append ($("<pre></pre>").append (xml));
@@ -284,7 +292,7 @@ function bivesDiffContent ()
     this.description = "use BiVeS to compare versions";
     
   	addScript (contextPath + "/res/js/visualizers/displayBivesDiff/graphene-sems/ddca88fc.vendor.js");
-  	addScript (contextPath + "/res/js/visualizers/displayBivesDiff/graphene-sems/d4d3d03e.scripts.js");
+  	addScript (contextPath + "/res/js/visualizers/displayBivesDiff/graphene-sems/11726d3b.scripts.js");
 };
 
 bivesDiffContent.prototype.canRead = function (file)

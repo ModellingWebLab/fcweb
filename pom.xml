@@ -11,7 +11,7 @@
         <dependency>
             <groupId>de.binfalse</groupId>
             <artifactId>BFLog</artifactId>
-            <version>[1.3.3,)</version>
+            <version>1.3.3</version>
         </dependency>
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>
@@ -46,7 +46,7 @@
         <dependency>
             <groupId>de.unirostock.sems</groupId>
             <artifactId>BiVeS-WS-Client</artifactId>
-            <version>[1.1.2,)</version>
+            <version>1.1.3</version>
         </dependency>
 <dependency>
     <groupId>org.apache.httpcomponents</groupId>

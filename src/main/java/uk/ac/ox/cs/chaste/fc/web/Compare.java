@@ -1,6 +1,7 @@
 package uk.ac.ox.cs.chaste.fc.web;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
@@ -229,18 +230,53 @@ public class Compare extends WebModule
 				obj.put ("responseText", "invalid request");
 				return answer;
 			}
-			
+
+			String pathToVersionA = entityMgmt.getEntityStorageDir () + Tools.FILESEP + entityVersion1.getFilePath () + Tools.FILESEP + version1.getName ();
+			String pathToVersionB = entityMgmt.getEntityStorageDir () + Tools.FILESEP + entityVersion2.getFilePath () + Tools.FILESEP + version2.getName ();
 			
 			
 			// compute unix diff
 			if (task.equals ("getBivesDiff"))
 			{
+				/*String id = "http://budhat.sems.uni-rostock.de/download?downloadModel=24http://budhat.sems.uni-rostock.de/download?downloadModel=25";
+				id = Tools.hash (id);*/
+				String id = Tools.hash (pathToVersionA + "--  --" + pathToVersionB);
+				
+				// read files and send them to bives
+				StringBuilder sb = new StringBuilder ();
+				String s = null;
+				try
+				{
+				BufferedReader br = new BufferedReader (new FileReader (pathToVersionA));
+				while (br.ready())
+				{
+					sb.append(br.readLine()).append("\n");
+				}
+				br.close ();
+				s = sb.toString();
+				sb = new StringBuilder ();
+				br = new BufferedReader (new FileReader (pathToVersionB));
+				while (br.ready())
+				{
+					sb.append(br.readLine()).append("\n");
+				}
+				br.close ();
+				}
+				catch (Exception e)
+				{
+					LOGGER.error (e, "error comparing with bives: couldn't read files");
+	 				obj.put ("responseText", "bives comparison failed: couldn't read files");
+					return answer;
+				}
+				
 				BivesComparisonRequest bivesRequest = new BivesComparisonRequest (
-	         "http://budhat.sems.uni-rostock.de/download?downloadModel=24",
-	         "http://budhat.sems.uni-rostock.de/download?downloadModel=25");
+	         s,
+	         sb.toString());
+	         /*"http://budhat.sems.uni-rostock.de/download?downloadModel=24",
+	         "http://budhat.sems.uni-rostock.de/download?downloadModel=25");*/
 
 				bivesRequest.addCommand (BivesComparisonRequest.COMMAND_COMPONENT_HIERARCHY_JSON);
-				bivesRequest.addCommand (BivesComparisonRequest.COMMAND_CRN_JSON);
+				bivesRequest.addCommand (BivesComparisonRequest.COMMAND_REACTIONS_JSON);
 				bivesRequest.addCommand (BivesComparisonRequest.COMMAND_REPORT_HTML);
 				bivesRequest.addCommand (BivesComparisonRequest.COMMAND_XML_DIFF);
 				
@@ -273,9 +309,10 @@ public class Compare extends WebModule
 				JSONObject bivesResult = new JSONObject ();
 				
 				bivesResult.put (BivesComparisonRequest.COMMAND_COMPONENT_HIERARCHY_JSON, result.getResult (BivesComparisonRequest.COMMAND_COMPONENT_HIERARCHY_JSON));
-				bivesResult.put (BivesComparisonRequest.COMMAND_CRN_JSON, result.getResult (BivesComparisonRequest.COMMAND_CRN_JSON));
+				bivesResult.put (BivesComparisonRequest.COMMAND_REACTIONS_JSON, result.getResult (BivesComparisonRequest.COMMAND_REACTIONS_JSON));
 				bivesResult.put (BivesComparisonRequest.COMMAND_REPORT_HTML, result.getResult (BivesComparisonRequest.COMMAND_REPORT_HTML));
 				bivesResult.put (BivesComparisonRequest.COMMAND_XML_DIFF, result.getResult (BivesComparisonRequest.COMMAND_XML_DIFF));
+				bivesResult.put ("id", id);
 				
 				obj.put ("bivesDiff", bivesResult);
 				obj.put ("response", true);
@@ -285,11 +322,9 @@ public class Compare extends WebModule
 			{
 				try
 				{
-					String a = entityMgmt.getEntityStorageDir () + Tools.FILESEP + entityVersion1.getFilePath () + Tools.FILESEP + version1.getName ();
-					String b = entityMgmt.getEntityStorageDir () + Tools.FILESEP + entityVersion2.getFilePath () + Tools.FILESEP + version2.getName ();
-					if (!a.equals (b))
+					if (!pathToVersionA.equals (pathToVersionB))
 					{
-						ProcessBuilder pb = new ProcessBuilder("diff", "-a", a, b);
+						ProcessBuilder pb = new ProcessBuilder("diff", "-a", pathToVersionA, pathToVersionB);
 						Process p = pb.start();
 						BufferedReader br = new BufferedReader (new InputStreamReader(p.getInputStream()));
 						StringBuffer diff = new StringBuffer ();
