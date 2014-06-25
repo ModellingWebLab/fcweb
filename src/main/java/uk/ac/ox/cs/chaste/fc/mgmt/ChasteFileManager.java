@@ -17,10 +17,12 @@ import uk.ac.ox.cs.chaste.fc.beans.ChasteFile;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.User;
 import de.binfalse.bflog.LOGGER;
+import de.unirostock.sems.cbarchive.ArchiveEntry;
 import de.unirostock.sems.cbarchive.CombineArchive;
 import de.unirostock.sems.cbarchive.CombineFormats;
-import de.unirostock.sems.cbarchive.OmexDescription;
-import de.unirostock.sems.cbarchive.VCard;
+import de.unirostock.sems.cbarchive.meta.OmexMetaDataObject;
+import de.unirostock.sems.cbarchive.meta.omex.OmexDescription;
+import de.unirostock.sems.cbarchive.meta.omex.VCard;
 
 
 /**
@@ -360,7 +362,16 @@ public class ChasteFileManager
 
 	public static File createArchive (ChasteEntityVersion version, String storageDir) throws Exception
 	{
-		CombineArchive ca = new CombineArchive ();
+		File tmpDir = new File (Tools.getTempDir ());
+		if (!tmpDir.exists ())
+			if (!tmpDir.mkdirs ())
+				throw new IOException ("cannot create temp dir for file upload");
+		
+		File tmpFile = new File (tmpDir.getAbsolutePath () + Tools.FILESEP + UUID.randomUUID().toString());
+		while (tmpFile.exists ())
+			tmpFile = new File (tmpDir.getAbsolutePath () + Tools.FILESEP + UUID.randomUUID().toString());
+		
+		CombineArchive ca = new CombineArchive (tmpFile);
 		Vector<ChasteFile> files = version.getFiles ();
 		
 		File basePath = new File (storageDir + Tools.FILESEP + version.getFilePath ());
@@ -377,18 +388,22 @@ public class ChasteFileManager
 
 			LOGGER.debug ("add: ", file.getName ());
 			
-			ca.addEntry (basePath, new File (entityPath + file.getName ()), CombineFormats.getFormatIdentifier (file.getFiletype ().toLowerCase ()), od, file.isMasterFile ());
+			
+			/*ca.addEntry (basePath,
+					new File (entityPath + file.getName ()),
+					CombineFormats.getFormatIdentifier (file.getFiletype ().toLowerCase ()),
+					od,
+					file.isMasterFile ());*/
+			
+			ArchiveEntry entry = ca.addEntry(basePath, new File (entityPath + file.getName ()), CombineFormats.getFormatIdentifier (file.getFiletype ().toLowerCase ()), file.isMasterFile ());
+			entry.addDescription(new OmexMetaDataObject (od));
+			
+			
 		}
 		
-		File tmpDir = new File (Tools.getTempDir ());
-		if (!tmpDir.exists ())
-			if (!tmpDir.mkdirs ())
-				throw new IOException ("cannot create temp dir for file upload");
 		
-		File tmpFile = new File (tmpDir.getAbsolutePath () + Tools.FILESEP + UUID.randomUUID().toString());
-		while (tmpFile.exists ())
-			tmpFile = new File (tmpDir.getAbsolutePath () + Tools.FILESEP + UUID.randomUUID().toString());
-		ca.exportArchive (tmpFile);
+		ca.pack();
+		ca.close();
 		
 		return tmpFile;
 	}

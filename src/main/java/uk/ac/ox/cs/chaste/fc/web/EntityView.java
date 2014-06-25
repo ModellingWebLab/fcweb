@@ -429,27 +429,40 @@ public class EntityView extends WebModule
 		try
 		{
 			// Unpack archive
-			CombineArchive ca = CombineArchive.readArchive(archiveFile);
+			CombineArchive ca = new CombineArchive (archiveFile);
 			ArchiveEntry main_entry = ca.getMainEntry();
 			
 			// Record each entry as a file for this entity
 			for (ArchiveEntry entry : ca.getEntries())
 			{
-				String leaf_name = new File(entry.getRelativeName()).getName();
+				//String leaf_name = entry.getFileName();
+				String leaf_name = entry.getFilePath ();
+				if (leaf_name.startsWith ("./"))
+					leaf_name = leaf_name.substring (2);
+				while (leaf_name.startsWith ("/"))
+					leaf_name = leaf_name.substring (1);
+				
 				String file_type = "unknown";
 				if (leaf_name.endsWith(".cellml") || entry.getFormat().startsWith("http://identifiers.org/combine.specifications/cellml"))
 					file_type = "CellML";
 				else if (!entry.getFormat().startsWith("http"))
 					file_type = entry.getFormat();
-				files.put(leaf_name, new NewFile (entry.getFile(), leaf_name, file_type, entry.equals(main_entry)));
+				File tmp = File.createTempFile("ChasteFCWEB", "unpackarchive");
+				entry.extractFile(tmp).deleteOnExit();
+				files.put(leaf_name, new NewFile (tmp, leaf_name, file_type, entry.equals(main_entry)));
 			}
 			
 			// Use the archive's main entry, if present, as the main file for this entity, if not already specified
 			if (query.get("mainFile") == null && main_entry != null)
 			{
-				String leaf_name = new File(main_entry.getRelativeName()).getName();
-				query.put("mainFile", leaf_name);
+				String relativeName = main_entry.getFilePath ();
+				if (relativeName.startsWith ("./"))
+					relativeName = relativeName.substring (2);
+				while (relativeName.startsWith ("/"))
+					relativeName = relativeName.substring (1);
+				query.put("mainFile", relativeName);
 			}
+			ca.close();
 		}
 		catch (Exception e)
 		{

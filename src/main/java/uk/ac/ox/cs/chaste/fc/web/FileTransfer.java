@@ -392,7 +392,8 @@ public class FileTransfer extends WebModule
 					
 					try
 					{
-						CombineArchive ca = CombineArchive.readArchive (tmp, destination);
+						CombineArchive ca = new CombineArchive (tmp);
+						ca.extractTo (destination);
 						Collection<ArchiveEntry> entries = ca.getEntries ();
 						
 						ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt);
@@ -407,17 +408,23 @@ public class FileTransfer extends WebModule
 							if (format.equals (CombineFormats.getFormatIdentifier ("omex")) || format.equals (CombineFormats.getFormatIdentifier ("manifest")))
 								continue;
 							
-							if (entry.getRelativeName().equals("stdout.txt"))
+							if (entry.getFileName ().endsWith ("stdout.txt"))
 								found_stdout = true;
 							
+							String relativeName = entry.getFilePath ();
+							if (relativeName.startsWith ("./"))
+								relativeName = relativeName.substring (2);
+							while (relativeName.startsWith ("/"))
+								relativeName = relativeName.substring (1);
+							
 							// add the remaining to db
-							int fileId = fileMgmt.addFile (entry.getRelativeName (), CombineFormats.getFormatFromIdentifier (format), exp.getAuthor (), entry.getFile ().length (), false);
+							int fileId = fileMgmt.addFile (relativeName, CombineFormats.getFormatFromIdentifier (format), exp.getAuthor (), new File (destination.getAbsolutePath() + File.separatorChar + relativeName).length (), false);
 							if (fileId < 0)
 							{
 								// TODO: cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
-								LOGGER.error ("error inserting experiment file to db: ", entry.getRelativeName ());
+								LOGGER.error ("error inserting experiment file to db: ", relativeName);
 								answer.put ("error", "couldn't insert into db");
-								exp.updateExperiment (expMgmt, "error inserting experiment file to db: " + entry.getRelativeName (), ChasteExperimentVersion.STATUS_FAILED);
+								exp.updateExperiment (expMgmt, "error inserting experiment file to db: " + relativeName, ChasteExperimentVersion.STATUS_FAILED);
 								return answer;
 							}
 							
@@ -425,12 +432,13 @@ public class FileTransfer extends WebModule
 							if (!fileMgmt.associateFile (fileId, exp, expMgmt))
 							{
 								// TODO: cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
-								LOGGER.error ("error inserting experiment to db (association failed): ", entry.getRelativeName ());
+								LOGGER.error ("error inserting experiment to db (association failed): ", relativeName);
 								answer.put ("error", "couldn't insert into db");
-								exp.updateExperiment (expMgmt, "error inserting experiment to db (association failed): " + entry.getRelativeName (), ChasteExperimentVersion.STATUS_FAILED);
+								exp.updateExperiment (expMgmt, "error inserting experiment to db (association failed): " + relativeName, ChasteExperimentVersion.STATUS_FAILED);
 								return answer;
 							}
 						}
+						ca.close();
 						
 						File output = new File (destination.getAbsolutePath () + File.separator + "stdout.txt");
 						if (!found_stdout && output.exists () && output.canRead ())
