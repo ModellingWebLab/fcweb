@@ -197,6 +197,7 @@ public class User
 			catch (SQLException e)
 			{
 				LOGGER.error (e, "failed to insert new preferences to db");
+				return false;
 			}
 		}
 		else
@@ -213,6 +214,7 @@ public class User
 			catch (SQLException e)
 			{
 				LOGGER.error (e, "failed to insert new preferences to db");
+				return false;
 			}
 		}
 		preferences.put (key, value);
