@@ -1028,6 +1028,24 @@ function initModel ()
 		}
 	});
     
+
+	$("#compareVersionsSelectorsAll").click (function () {
+		$(".comparisonCheckBox").prop('checked', true);
+	});
+	$("#compareVersionsSelectorsNone").click (function () {
+		$(".comparisonCheckBox").prop('checked', false);
+	});
+	$("#compareVersions").click (function () {
+		var url = "";
+		$(".comparisonCheckBox").each (function () {
+			if ($(this).prop('checked'))
+				url += $(this).val () + "/";
+		});
+		if (url)
+		    document.location = (contextPath + "/compare/" + entityType.charAt(0) + "/" + url);
+		else
+		    window.alert("You need to select some " + compareType + "s to compare.");
+	});
 }
 
 document.addEventListener("DOMContentLoaded", initModel, false);

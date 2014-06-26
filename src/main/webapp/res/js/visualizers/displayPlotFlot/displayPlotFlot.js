@@ -657,7 +657,7 @@ function flotContent ()
     this.icon = "displayPlotFlot.png";
     this.description = "display graphs using flot library";
     
-    addScript (contextPath + "/res/js/visualizers/displayPlotFlot/flot/jquery.flot.js");
+    addScript (contextPath + "/res/js/visualizers/displayPlotFlot/flot/jquery.flot.min.js");
     addScript (contextPath + "/res/js/visualizers/displayPlotFlot/flot/jquery.flot.navigate.min.js");
     addScript (contextPath + "/res/js/visualizers/displayPlotFlot/flot/jquery.flot.axislabels.js");
     addScript (contextPath + "/res/js/visualizers/displayPlotFlot/flot/jquery.flot.selection.js");
