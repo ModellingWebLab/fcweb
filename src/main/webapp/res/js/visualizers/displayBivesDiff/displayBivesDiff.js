@@ -100,7 +100,7 @@ bivesDiffer.prototype.computeDifferences = function (former, later, matrixKey)
 			
 			var shown = false;
 			
-			/*if (diff.reactionsJson)
+			if (diff.reactionsJson)
 			{
 				var rnLink = $("<span></span>").addClass ("bivesTab").text ("Reaction Network");
 				var reactionsDiffId = "bivesGrapheneAppRn-" + diff.id;
@@ -138,7 +138,7 @@ bivesDiffer.prototype.computeDifferences = function (former, later, matrixKey)
 				  scope.$apply();
 				});
 				
-			}*/
+			}
 			
 			if (diff.reportHtml)
 			{
@@ -161,7 +161,7 @@ bivesDiffer.prototype.computeDifferences = function (former, later, matrixKey)
 				shown = true;
 			}
 			
-			/*if (diff.compHierarchyJson)
+			if (diff.compHierarchyJson)
 			{
 				var chLink = $("<span></span>").addClass ("bivesTab").text ("Component Hierarchy");
 				var hierarchyDiffId = "bivesGrapheneAppCh-" + diff.id;
@@ -198,7 +198,7 @@ bivesDiffer.prototype.computeDifferences = function (former, later, matrixKey)
 				  scope.renderFps = 50; // makes the layout more choppy, but saves CPU
 				  scope.$apply();
 				});
-			}*/
+			}
 			
 			// fallback if neither sbml/cellml/pharmml etc.
 			if (diff.xmlDiff)
@@ -291,9 +291,11 @@ function bivesDiffContent ()
     this.icon = "displayBivesDiff.png";
     this.description = "use BiVeS to compare versions";
     
-  	/* some conflicts with flot!?
-  	addScript (contextPath + "/res/js/visualizers/displayBivesDiff/graphene-sems/ddca88fc.vendor.js");
-  	addScript (contextPath + "/res/js/visualizers/displayBivesDiff/graphene-sems/11726d3b.scripts.js");*/
+  	// some conflicts with flot!?
+    console.log ("injecting scripts");
+  	addScript (contextPath + "/res/js/visualizers/displayBivesDiff/graphene-sems/fda44d5a.vendor.js");
+  	addScript (contextPath + "/res/js/visualizers/displayBivesDiff/graphene-sems/11726d3b.scripts.js");
+    console.log ("injected scripts");
 };
 
 bivesDiffContent.prototype.canRead = function (file)
