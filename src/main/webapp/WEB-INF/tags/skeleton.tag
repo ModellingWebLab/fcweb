@@ -37,6 +37,15 @@
 		<script type='text/javascript' src='${contextPath}/res/js/3rd/jquery-2.0.3.min.js' charset='UTF-8'></script>
 		<script type='text/javascript' src='${contextPath}/res/js/3rd/jquery-ui-1.10.4.custom.min.js' charset='UTF-8'></script>
 		<script type='text/javascript' src='${contextPath}/res/js/3rd/xdate.js' charset='UTF-8'></script>
+		<script type="text/x-mathjax-config">
+			MathJax.Hub.Config({
+				"HTML-CSS": {
+					imageFont:null
+  				}
+			});
+		</script>
+		<script type='text/javascript' src='${contextPath}/res/js/3rd/MathJax-2.4-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' charset='UTF-8'></script>
+		
 		
 		<%-- dynamic header fields -> just import them as needed --%>
 		<c:if test="${headerImports != null}">
