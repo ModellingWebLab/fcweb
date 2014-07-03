@@ -159,6 +159,17 @@ bivesDiffer.prototype.computeDifferences = function (former, later, matrixKey)
 				if (!shown)
 					reportLink.click ();
 				shown = true;
+				
+				// uff, these equations are quite long...
+				// lets append some line breaks..
+				reportDiv.find ("mo").each (function () { 
+                    if ($(this).html ().match (/\s*=\s*/))
+					{
+						var neu = $("<mo></mo>").attr ("linebreak", "newline");
+						$(this).parent ().append (neu);
+					}
+                });
+				MathJax.Hub.Queue(["Typeset",MathJax.Hub])
 			}
 			
 			if (diff.compHierarchyJson)
@@ -189,13 +200,13 @@ bivesDiffer.prototype.computeDifferences = function (former, later, matrixKey)
 				  var scope = angular.element(document.querySelector("div#" + hierarchyDiffId)).scope();
 				  scope.data = angular.fromJson(diff.compHierarchyJson);
 				  scope.zoom = true; // enables scroll to zoom
-				  scope.width = 1080;  // this is the width of the node force layout system, which is independent of the SVG size, which is defined in the template, but you can and probably make them the same.
+				  scope.width = 1560;  // this is the width of the node force layout system, which is independent of the SVG size, which is defined in the template, but you can and probably make them the same.
 				  scope.height = 1000; // this is the height, I suggest you probably change both of these to match the width and height in the template file.
-				  scope.charge = -15000; // I think you can make this more negative, maybe -1500, I noticed the nodes are very close.
+				  scope.charge = -400; // I think you can make this more negative, maybe -1500, I noticed the nodes are very close.
 				  // Alternatively you could also play with increasing scope.linkDistance
 				  scope.gravity = 0.2; // set gravity to 0.1 or 0.2, so the outer disconnected nodes aren't quite so far away.
 				  scope.linkDistance = 5;
-				  scope.renderFps = 50; // makes the layout more choppy, but saves CPU
+				  scope.renderFps = 10; // makes the layout more choppy, but saves CPU
 				  scope.$apply();
 				});
 			}
@@ -290,12 +301,10 @@ function bivesDiffContent ()
     this.name = "displayBivesDiff";
     this.icon = "displayBivesDiff.png";
     this.description = "use BiVeS to compare versions";
-    
-  	// some conflicts with flot!?
-    console.log ("injecting scripts");
+
+	addLink (contextPath + "/res/js/visualizers/displayBivesDiff/graphene-sems/graphene.css");
   	addScript (contextPath + "/res/js/visualizers/displayBivesDiff/graphene-sems/fda44d5a.vendor.js");
   	addScript (contextPath + "/res/js/visualizers/displayBivesDiff/graphene-sems/11726d3b.scripts.js");
-    console.log ("injected scripts");
 };
 
 bivesDiffContent.prototype.canRead = function (file)
