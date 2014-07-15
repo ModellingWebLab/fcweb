@@ -50,6 +50,12 @@
     <p>
         Please <a href="${contextPath}/contact.html">get in touch</a> if you would like to join forces to help with any of these.
     </p>
+    <p>
+        As well as the <a href="https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration">back-end simulation tool</a> being open source,
+        the <a href="https://bitbucket.org/joncooper/fcweb">code for this website</a> is also available under the same open source licence.
+        We would welcome collaborations with any who would be interested in producing a similar resource for a different scientific domain.
+        Equally, anyone interested in contributing new plugins for displaying or comparing results is encouraged to <a href="${contextPath}/contact.html">contact us</a>.
+    </p>
 
     <h2>Acknowledgements</h2>
     <img style="float:left;margin:0 5px 10px 0;" src="${contextPath}/res/img/chaste.jpg" alt="Chaste project logo"/>
