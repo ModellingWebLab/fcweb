@@ -12,7 +12,7 @@ function unixDiffer (file, div)
 	var jqDiv = $(div);
 
 	var table = $("<table></table>").append ("<thead>" +
-			"<tr><th>Available Versions</th><th>select as predecessor</th><th>select as successor</th>" +
+			"<tr><th>Available versions</th><th>Select as predecessor</th><th>Select as successor</th>" +
 			"</thead>");
 	var tableBody = $("<tbody></tbody>");
 	table.append (tableBody);
@@ -20,26 +20,35 @@ function unixDiffer (file, div)
 	this.displayer = $("<div></div>").addClass ("unixDiffDisplayer");
 	jqDiv.append (table).append (this.displayer);
 
-	for (var i = 0; i < this.file.entities.length; i++)
+	var autoDiff = (file.entities.length == 2); // If there are only 2 versions available, diff them automatically
+	for (var i = 0; i < file.entities.length; i++)
 	{
 		var tr = $("<tr></tr>").addClass ("unixDiffFileVersionTableRow");
 		
-		var name = $("<td></td>").text (this.file.entities[i].entityLink.name + " - " + this.file.entities[i].entityLink.version);
+		var name = $("<td></td>").text (file.entities[i].entityLink.name + " - " + file.entities[i].entityLink.version);
 		var prev = $("<input type='radio' name='former'/>");
 		var succ = $("<input type='radio' name='later'/>");
 		
 		tr.append (name).append ($("<td></td>").append (prev)).append ($("<td></td>").append (succ));
 		tableBody.append (tr);
 		
-		this.formerClickListener (prev, this.file.entities[i], tr);
-		this.laterClickListener (succ, this.file.entities[i], tr);
+		this.formerClickListener (prev, file.entities[i], tr);
+		this.laterClickListener (succ, file.entities[i], tr);
+		
+        if (autoDiff)
+        {
+            if (i == 0)
+                succ.prop('checked', true).click();
+            else
+                prev.prop('checked', true).click();
+        }
 	}
 };
 
 unixDiffer.prototype.formerClickListener = function (former, file, tr)
 {
 	var outer = this;
-	former.click (function () 
+	former.click (function ()
 	{
 		$(".unixDiffFileVersionTableRow").each (function () {$(this).removeClass ("unixDiffDel");});
 		outer.formerFile = file;
