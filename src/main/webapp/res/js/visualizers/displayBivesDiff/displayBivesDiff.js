@@ -12,7 +12,7 @@ function bivesDiffer (file, div)
 	var jqDiv = $(div);
 
 	var table = $("<table></table>").append ("<thead>" +
-			"<tr><th>Available Versions</th><th>select as predecessor</th><th>select as successor</th>" +
+			"<tr><th>Available versions</th><th>Select as predecessor</th><th>Select as successor</th>" +
 			"</thead>");
 	var tableBody = $("<tbody></tbody>");
 	table.append (tableBody);
@@ -172,7 +172,7 @@ bivesDiffer.prototype.computeDifferences = function (former, later, matrixKey)
 				MathJax.Hub.Queue(["Typeset",MathJax.Hub])
 			}
 			
-			if (diff.compHierarchyJson)
+			if (false) //diff.compHierarchyJson)
 			{
 				var chLink = $("<span></span>").addClass ("bivesTab").text ("Component Hierarchy");
 				var hierarchyDiffId = "bivesGrapheneAppCh-" + diff.id;
