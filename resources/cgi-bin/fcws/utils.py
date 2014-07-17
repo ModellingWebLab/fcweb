@@ -67,6 +67,9 @@ def UnpackArchive(archivePath, tempPath, contentType):
         for item in manifest.iter('{http://identifiers.org/combine.specifications/omex-manifest}content'):
             if item.get('master', 'false') == 'true':
                 primary_file = item.get('location')
+                if primary_file[0] == '/':
+                    # There's some debate over the preferred form of location URIs...
+                    primary_file = primary_file[1:]
                 break
     if not primary_file:
         # No manifest or no master listed, so try to figure it out ourselves: find the first item with expected extension
