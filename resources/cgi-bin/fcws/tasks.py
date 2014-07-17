@@ -43,6 +43,10 @@ def CheckExperiment(callbackUrl, signature, modelUrl, protocolUrl):
     """
     try:
         # Download the submitted COMBINE archives to disk in a temporary folder
+        try:
+            os.makedirs(config['temp_dir'], 0775)
+        except os.error:
+            pass
         temp_dir = tempfile.mkdtemp(dir=config['temp_dir'])
         model_path = os.path.join(temp_dir, 'model.zip')
         proto_path = os.path.join(temp_dir, 'protocol.zip')
