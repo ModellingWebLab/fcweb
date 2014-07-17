@@ -473,21 +473,11 @@ public class FileTransfer extends WebModule
 						else
 							exp.updateExperiment (expMgmt, "error reading archive: " + returnmsg, ChasteExperimentVersion.STATUS_FAILED);
 					}
-					
-					
-					
-					
-					
-					
-					// inform the user
 				}
 				else
 				{
-					// delete from db
 					// inform the user -> failed/succeeded
 					exp.updateExperiment (expMgmt, returnmsg + " (backend returned no archive)", exptStatus);
-					
-					//TODO write to db
 					answer.put ("error", "no archive found");
 				}
 				return answer;

@@ -184,12 +184,13 @@ public class NewExperiment
 		if (!res.result)
 		{
 			exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);
-			expMgmt.updateVersion (exp, res.response, res.status);
+			if (exp.getStatus().equals(ChasteExperimentVersion.STATUS_QUEUED))
+				expMgmt.updateVersion (exp, res.response, res.status);
 		}
 		else
 		{
 			exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);
-			expMgmt.updateVersion (exp, "queued", ChasteExperimentVersion.STATUS_QUEUED);
+			// status is QUEUED by default so no need to update
 		}
 		return exp;
 	}
