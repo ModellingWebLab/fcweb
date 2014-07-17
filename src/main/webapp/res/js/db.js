@@ -304,11 +304,11 @@ function addMatrixClickListener (td, link, expId, expName, result)
 				var newHref = contextPath + "/compare/e/";
 				for (var i = 0; i < experimentsToCompare.length; i++)
 					newHref += experimentsToCompare[i] + "/";
-				$("#comparisonLink").attr ("href", newHref);
-				$("#comparisonLink").show ();
+				$("#comparisonLink").data("href", newHref);
+				$("#comparisonLink").show();
 			}
 			else
-				$("#comparisonLink").hide ();
+				$("#comparisonLink").hide();
 		}
 		else
 		{
@@ -400,14 +400,14 @@ function prepareMatrix ()
     	task: "getMatrix"
     }, div);
 	
-	$("#comparisonModeDiv").click (function () 
-	{
+	$("#comparisonModeButton").text(comparisonMode ? "Disable" : "Enable")
+	                          .click(function () {
 		comparisonMode = !comparisonMode;
-		$("#comparisonModeIndicator").text (comparisonMode ? "enabled" : "disabled");
+		$("#comparisonModeButton").text(comparisonMode ? "Disable" : "Enable");
 	});
-
-	$("#comparisonModeIndicator").text (comparisonMode ? "enabled" : "disabled");
-	$("#comparisonLink").hide ();
+	$("#comparisonLink").hide().click(function () {
+	    document.location = $(this).data("href");
+	});
 	
 }
 
