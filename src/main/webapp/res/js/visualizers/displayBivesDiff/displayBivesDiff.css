@@ -89,3 +89,8 @@
 {
 	padding: 5px;
 }
+
+/* Add some extra spacing between MathML identifiers to avoid confusion */
+.mi:not([style*="padding"]) {
+    padding-left: 0.1em;
+}
