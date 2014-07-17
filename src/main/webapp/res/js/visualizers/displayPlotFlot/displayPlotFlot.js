@@ -576,7 +576,7 @@ contentFlotPlotComparer.prototype.showContents = function ()
         for (var j = 0; j < csvDatas.length; j++)
         {
             var eachCSVData = csvDatas[j];
-            var entityName = eachCSVData.entity.name;
+            var entityName = eachCSVData.entity.plotName ? eachCSVData.entity.plotName : eachCSVData.entity.name;
             var entityId = eachCSVData.entity.id;
             var fileSig = eachCSVData.file.sig;
             var csvData = eachCSVData.data;

@@ -16,7 +16,7 @@ var filesTable = {};
 // Used for determining what graph (if any) to show by default
 var metadataToParse = 0, metadataParsed = 0, defaultViz = null, defaultVizCount = 0;
 // State for figuring out whether we're comparing multiple protocols on a single model, or multiple models on a single protocol
-var firstModelName = "", firstProtoName = "";
+var firstModelName = "", firstModelVersion = "", firstProtoName = "", firstProtoVersion = "";
 var singleModel = true, singleProto = true;
 // Used for stripping out redundant (repeated) text in plot line labels
 var plotLabelStripText = null;
@@ -225,9 +225,13 @@ function parseEntities (entityObj)
 {
 	//console.log (entityObj);
     
-    // State for figuring out whether we're comparing multiple protocols on a single model, or multiple models on a single protocol
+    // State for figuring out whether we're comparing multiple protocols on a single model, or multiple models on a single protocol,
+	// or indeed multiple versions of the same model / protocol, etc.
     firstModelName = entityObj[0].modelName;
+    firstModelVersion = entityObj[0].modelVersion;
     firstProtoName = entityObj[0].protoName;
+    firstProtoVersion = entityObj[0].protoVersion;
+    needsVersionInfo = {};
     
     // Sort entityObj list by .name
     entityObj.sort(function(a,b) {return (a.name.toLocaleLowerCase() > b.name.toLocaleLowerCase()) ? 1 : ((b.name.toLocaleLowerCase() > a.name.toLocaleLowerCase()) ? -1 : 0);});
@@ -235,12 +239,16 @@ function parseEntities (entityObj)
 	for (var i = 0; i < entityObj.length; i++)
 	{
 	    var entity = entityObj[i];
-	    
-	    if (singleModel && entity.modelName != firstModelName)
+
+	    if (singleModel && (entity.modelName != firstModelName || entity.modelVersion != firstModelVersion))
 	        singleModel = false;
-	    if (singleProto && entity.protoName != firstProtoName)
+	    if (singleProto && (entity.protoName != firstProtoName || entity.protoVersion != firstProtoVersion))
             singleProto = false;
-	    
+	    if (needsVersionInfo[entity.modelName + "/" + entity.protoName] === false)
+	    	needsVersionInfo[entity.modelName + "/" + entity.protoName] = true;
+	    else
+	    	needsVersionInfo[entity.modelName + "/" + entity.protoName] = false;
+	
 		entities[entity.id] = entity;
 		if (entity.files)
 			for (var j = 0; j < entity.files.length; j++)
@@ -260,8 +268,6 @@ function parseEntities (entityObj)
 					files[sig].viz = {};
 					files[sig].hasContents = false;
 					setupDownloadFileContents (files[sig]);
-					
-					/*files[sig]*/
 				}
 				if (file.name.toLowerCase () == "outputs-default-plots.csv")
 					parsePlotDescription (entity, file, !(fileName && pluginName));
@@ -271,6 +277,23 @@ function parseEntities (entityObj)
 				files[sig].entities.push ({entityLink: entity, entityFileLink: file});
 			}
 	}
+	
+	// Add version info to plot labels where needed
+	//console.log(needsVersionInfo);
+	for (var i = 0; i < entityObj.length; i++)
+	{
+		var entity = entityObj[i];
+		if (needsVersionInfo[entity.modelName + "/" + entity.protoName])
+		{
+			if (singleModel)
+				entity.plotName = entity.protoName + "@" + entity.protoVersion;
+			else if (singleProto)
+				entity.plotName = entity.modelName + "@" + entity.modelVersion;
+			else
+				entity.plotName = entity.modelName + "@" + entity.modelVersion + " &amp; " + entity.protoName + "@" + entity.protoVersion;
+		}
+	}
+	
 	
 	// Alter heading to reflect type of comparison
 	doc.heading.innerHTML = "Comparison of " + entityType.charAt(0).toUpperCase() + entityType.slice(1) + "s";
@@ -283,10 +306,10 @@ function parseEntities (entityObj)
 		    plotLabelStripText = firstModelName + " &amp; ";
 		}
 		else if (singleProto && !singleModel)
-    {
-	    doc.heading.innerHTML = firstProtoName + " experiments: comparison of models";
-	    plotLabelStripText = " &amp; " + firstProtoName;
-    }
+		{
+		    doc.heading.innerHTML = firstProtoName + " experiments: comparison of models";
+		    plotLabelStripText = " &amp; " + firstProtoName;
+		}
 	}
 	
 	doc.outputFileHeadline.innerHTML = "Output files from all compared " + entityType + "s";

@@ -155,11 +155,13 @@ public class Compare extends WebModule
 								{
 									v.put ("modelName", expt.getModel().getName());
 									v.put ("protoName", expt.getProtocol().getName());
+									v.put ("modelVersion", expt.getModel().getVersion());
+									v.put ("protoVersion", expt.getProtocol().getVersion());
 								}
 							}
 							entities.add (v);
 						}
-						LOGGER.warn ("couldn't find lates version of entity with id ", curId);
+						LOGGER.warn ("couldn't find latest version of entity with id ", curId);
 					}
 					else
 						LOGGER.warn ("user requested entity with id ", curId, " but there is no such entity");

@@ -242,8 +242,10 @@ HCPlotterComparer.prototype.showContents = function ()
 
         for (var j = 0; j < csvDatas.length; j++)
         {
-        	var csvData = csvDatas[j].data;
-        	var csvFile = csvDatas[j].file;
+            var eachCSVData = csvDatas[j];
+            var entityName = eachCSVData.entity.plotName ? eachCSVData.entity.plotName : eachCSVData.entity.name;
+        	var csvData = eachCSVData.data;
+        	var csvFile = eachCSVData.file;
             var keyVals = getKeyValues(csvFile);
         	for (var i = 1; i < csvData.length; i++)
         	{
@@ -251,7 +253,7 @@ HCPlotterComparer.prototype.showContents = function ()
 	            for (var k = 0; k < csvData[i].length; k++)
 	                curData.push ([csvData[i][k].x, csvData[i][k].y]);
 
-                var label = csvDatas[j].entity.name;
+                var label = entityName;
                 if (plotLabelStripText)
                     label = label.replace(plotLabelStripText, "");
                 if (keyVals.length == csvData.length)
