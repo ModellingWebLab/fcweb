@@ -497,11 +497,11 @@ li.entityviz-PRIVATE
 
 .filesTable-header-shown:before
 {
-    content: "\002a53  ";
+    content: "[-]  ";
 }
 .filesTable-header-hidden:before
 {
-    content: "\002a54  ";
+    content: "[+]  ";
 }
 .filesTable-plots
 {
