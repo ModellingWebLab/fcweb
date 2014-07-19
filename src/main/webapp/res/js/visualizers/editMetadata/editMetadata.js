@@ -96,6 +96,10 @@ metadataEditor.prototype.initRdf = function ()
                 .prefix('rdfs', 'http://www.w3.org/2000/01/rdf-schema#')
                 .add(this.modelRdf)
                 .add(this.ontoRdf);
+    this.rules = $.rdf.ruleset()
+                  .prefix('bqbiol', 'http://biomodels.net/biology-qualifiers/')
+                  .prefix('oxmeta', 'https://chaste.comlab.ox.ac.uk/cellml/ns/oxford-metadata#')
+                  .prefix('rdfs', 'http://www.w3.org/2000/01/rdf-schema#');
 }
 
 /**
@@ -266,6 +270,10 @@ metadataEditor.prototype.ontologyLoaded = function (data, status, jqXHR)
     
     // Parse XML
     this.ontoRdf.load(data, {});
+    
+    // Set up rules for reasoning over the ontology
+    this.rules.add(['?i a ?c1', '?c1 rdfs:subClassOf ?c2'], '?i a ?c2');
+    this.ontoRdf.reason(this.rules);
     
     // Show available terms
     this.terms = [];
