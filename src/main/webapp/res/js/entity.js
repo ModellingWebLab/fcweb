@@ -518,6 +518,11 @@ function displayVersion (id, showDefault)
 			li.appendChild (a);
 			ul.appendChild (li);
 		}
+		
+		// TODO #44: We'll need to add a click listener on the 'show all versions' link, which if selected
+		// requests the versions from the server (with a loading indicator), and recreates the list above when
+		// the data is available.  To make it easier to implement, we'll use jQuery to get the checkboxes rather
+		// than storing a separate Array locally.
 
 		dv.experimentSelAll = removeListeners (dv.experimentSelAll);
 		dv.experimentSelNone = removeListeners (dv.experimentSelNone);
