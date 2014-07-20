@@ -533,6 +533,11 @@ li.entityviz-PRIVATE
 {
 	font-size:.8em;
 }
+/* Highlight row & column labels when the mouse is over the related cell. */
+.matrixHover
+{
+    font-weight: bold;
+}
 
 /*.matrixTableCol
 {

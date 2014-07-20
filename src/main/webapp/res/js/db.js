@@ -62,8 +62,7 @@ function submitNewExperiment (jsonObject, linkElement, td, entry)
         			if (td)
         			{
 	    				td.addClass ("experiment-QUEUED");
-	    				setTitleAndClickListener(td.get(0), entry);
-	    				createClueTip(td, entry);
+	    				setTitleAndListeners(td.get(0), entry);
         			}
 	        	}
 	        	else
@@ -187,7 +186,8 @@ function drawMatrix (matrix)
 		for (var col = -1; col < mat[0].length; col++)
 		{
 			var td = document.createElement("td");
-			tr.appendChild (td);
+			tr.appendChild(td);
+			td.setAttribute("id", "matrix-entry-" + row + "-" + col);
 			
 			//console.log ("row " + row + " col " + col);
 			
@@ -200,14 +200,14 @@ function drawMatrix (matrix)
 				var d1 = document.createElement("div");
 				var d2 = document.createElement("div");
 				var a = document.createElement("a");
-				a.href = contextPath + "/protocol/" + convertForURL (mat[0][col].protocol.name) + "/" + mat[0][col].protocol.entityId
-				+ "/" + convertForURL (mat[0][col].protocol.version) + "/" + mat[0][col].protocol.id;
+				a.href = contextPath + "/protocol/" + convertForURL(mat[0][col].protocol.name) + "/" + mat[0][col].protocol.entityId
+					+ "/" + convertForURL(mat[0][col].protocol.version) + "/" + mat[0][col].protocol.id;
 				d2.setAttribute("class", "vertical-text");
 				d1.setAttribute("class", "vertical-text__inner");
-				d2.appendChild (d1);
-				a.appendChild (document.createTextNode (mat[0][col].protocol.name));
+				d2.appendChild(d1);
+				a.appendChild(document.createTextNode(mat[0][col].protocol.name));
 				d1.appendChild(a);
-				td.appendChild (d2);//document.createTextNode ("<div class='vertical-text'><div class='vertical-text__inner'>" + mat[row][col].protocol.name + "</div></div>"));
+				td.appendChild(d2);
 				td.setAttribute("class", "matrixTableCol");
 				continue;
 			}
@@ -216,10 +216,10 @@ function drawMatrix (matrix)
 			if (col == -1)
 			{
 				var a = document.createElement("a");
-				a.href = contextPath + "/model/" + convertForURL (mat[row][0].model.name) + "/" + mat[row][0].model.entityId
-				+ "/" + convertForURL (mat[row][0].model.version) + "/" + mat[row][0].model.id;
-				a.appendChild (document.createTextNode (mat[row][0].model.name));
-				td.appendChild (a);
+				a.href = contextPath + "/model/" + convertForURL(mat[row][0].model.name) + "/" + mat[row][0].model.entityId
+					+ "/" + convertForURL(mat[row][0].model.version) + "/" + mat[row][0].model.id;
+				a.appendChild(document.createTextNode(mat[row][0].model.name));
+				td.appendChild(a);
 				td.setAttribute("class", "matrixTableRow");
 				continue;
 			}
@@ -233,20 +233,20 @@ function drawMatrix (matrix)
 			else
 				td.setAttribute("class", "experiment experiment-NONE");
 			
-			setTitleAndClickListener(td, entry);
-		    createClueTip($(td), entry);
+			setTitleAndListeners(td, entry);
 		}
 	}
 }
 
 /**
- * Set up the title text and click listener for the given matrix entry
+ * Set up the title text and click/hover listeners for the given matrix entry
  * @param td  the table cell
  * @param entry  mat[row][col] for this table cell
  */
-function setTitleAndClickListener(td, entry)
+function setTitleAndListeners(td, entry)
 {
-    var titleText = "";
+    var $td = $(td),
+    	titleText = "";
 
     if (entry.model)
     {
@@ -274,6 +274,16 @@ function setTitleAndClickListener(td, entry)
     }
 
     td.setAttribute("title", titleText);
+    createClueTip($td, entry);
+
+	// Highlight the relevant row & column labels when the mouse is over this cell
+	$td.mouseenter(function (ev) {
+		$("#matrix-entry--1-" + entry.col).addClass("matrixHover");
+		$("#matrix-entry-" + entry.row + "--1").addClass("matrixHover");
+	}).mouseleave(function (ev) {
+		$("#matrix-entry--1-" + entry.col).removeClass("matrixHover");
+		$("#matrix-entry-" + entry.row + "--1").removeClass("matrixHover");
+	});
 }
 
 function addMatrixClickListener (td, link, expId, expName, result)
