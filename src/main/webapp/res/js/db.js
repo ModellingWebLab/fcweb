@@ -1,8 +1,5 @@
 
 var pages = [ "matrix" ];//, "search" ];
-var modelMapper = {};
-var protocolMapper = {};
-var lock = true;
 var comparisonMode = false;
 var experimentsToCompare = new Array ();
 
@@ -90,12 +87,13 @@ function submitNewExperiment (jsonObject, linkElement, td, entry)
 
 function drawMatrix (matrix)
 {
-	/*var minBoxWidth = 10px;
-	var minBoxHeight = 10px;*/
-	
 	//console.log (matrix);
+	var models = [],
+		protocols = [],
+		modelMapper = {},
+		protocolMapper = {},
+		mat = [];
 	
-	var models = [];
 	for (var key in matrix.models)
 		if (matrix.models.hasOwnProperty (key))
 		{
@@ -106,7 +104,6 @@ function drawMatrix (matrix)
 			
 		}
 
-	var protocols = [];
 	for (var key in matrix.protocols)
 		if (matrix.protocols.hasOwnProperty (key))
 		{
@@ -125,7 +122,6 @@ function drawMatrix (matrix)
 	console.log ("protocols");
 	console.log (protocolMapper);*/
 	
-	var mat = [];
 	for (var i = 0; i < models.length; i++)
 	{
 		mat[i] = [];
@@ -150,24 +146,13 @@ function drawMatrix (matrix)
 	{
 		if (matrix.experiments.hasOwnProperty (key))
 		{
-			var exp = matrix.experiments[key];
-			
+			var exp = matrix.experiments[key],
+				row = modelMapper[exp.model.id].row,
+				col = protocolMapper[exp.protocol.id].col;
 			exp.name = exp.model.name + " @ " + exp.model.version + " & " + exp.protocol.name + " @ " + exp.protocol.version;
-			
-			//if (!modelMapper[exp.model.id] || !protocolMapper[exp.protocol.id])
-			//	continue;
-			
-			var row = modelMapper[exp.model.id].row;
-
-			/*console.log(exp);
-			console.log(exp.protocol.id);
-			console.log(exp.protocol);*/
-			var col = protocolMapper[exp.protocol.id].col;
 			mat[row][col].experiment = exp;
 		}
 	}
-	
-	
 	
 	var tableDiv = document.createElement("div");
 	tableDiv.id = "matrixContainer";
@@ -177,7 +162,6 @@ function drawMatrix (matrix)
 	
 	div.appendChild (tableDiv);
 	tableDiv.appendChild (table);
-
 
 	for (var row = -1; row < mat.length; row++)
 	{
