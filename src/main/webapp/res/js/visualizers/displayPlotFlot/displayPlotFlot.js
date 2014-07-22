@@ -346,6 +346,18 @@ function getKeyValues(file)
     return keyVals;
 }
 
+/**
+ * Transform from flot formatted datasets to highcharts formatted, which is more convenient for exporting as CSV.
+ * That is, an object whose values are {label:, data:} gets converted to an array with values {name:, data:}.
+ * In both cases data is an array of [x,y] pairs.
+ */
+function transformForExport(datasets)
+{
+	return $.map(datasets, function (value, key) {
+		return {'name': value.label, 'data': value.data};
+	});
+}
+
 function contentFlotPlot (file, div)
 {
     this.file = file;
@@ -374,8 +386,7 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
             return;
         }
 
-        var lineStyle = thisFile.linestyle;
-        var styleLinespointsOrPoints = isStyleLinespointsOrPoints(lineStyle);
+        var styleLinespointsOrPoints = isStyleLinespointsOrPoints(thisFile.linestyle);
         var csvData = styleLinespointsOrPoints ? getCSVColumnsNonDownsampled (thisFile) :
                                                  getCSVColumnsDownsampled (thisFile);
         var keyVals = getKeyValues(thisFile);
@@ -452,6 +463,9 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
         /* legend generated when graph plotted, so this must follow the plot creation! */
         transferLegendColours(datasets);
         setListeners(plotProperties, (datasetNumber > 1));
+        
+        // Save data for export if user requests it
+        allowPlotExport(thisFile.name, transformForExport(datasets), {'x': x_label, 'y': y_label});
     }
 };
 
@@ -542,8 +556,7 @@ contentFlotPlotComparer.prototype.showContents = function ()
 
         this.setUp = true;
 
-        var lineStyle = thisFile.linestyle;
-        var styleLinespointsOrPoints = isStyleLinespointsOrPoints(lineStyle);
+        var styleLinespointsOrPoints = isStyleLinespointsOrPoints(thisFile.linestyle);
 
         var csvDatas = new Array ();
         for (var i = 0; i < thisFile.entities.length; i++)
@@ -633,6 +646,9 @@ contentFlotPlotComparer.prototype.showContents = function ()
         /* legend generated when graph plotted, so this must follow the plot creation! */
         transferLegendColours(datasets);
         setListeners(plotProperties, true);
+        
+        // Save data for export if user requests it
+        allowPlotExport(thisFile.name, transformForExport(datasets), {'x': x_label, 'y': y_label});
     }
 };
 

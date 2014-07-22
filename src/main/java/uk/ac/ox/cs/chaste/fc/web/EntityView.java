@@ -154,6 +154,8 @@ public class EntityView extends WebModule
 				ChasteExperiment exp = (ChasteExperiment) entity;
 				request.setAttribute ("correspondingModel", exp.getModel ());
 				request.setAttribute ("correspondingProtocol", exp.getProtocol ());
+				header.addScript(new PageHeaderScript("res/js/3rd/FileSaver/Blob.js", "text/javascript", "UTF-8", null));
+				header.addScript(new PageHeaderScript("res/js/3rd/FileSaver/FileSaver.js", "text/javascript", "UTF-8", null));
 			}
 			header.addScript (new PageHeaderScript ("res/js/3rd/showdown.js", "text/javascript", "UTF-8", null));
 			header.addScript (new PageHeaderScript ("res/js/entity.js", "text/javascript", "UTF-8", null));

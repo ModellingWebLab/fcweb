@@ -53,6 +53,8 @@ public class Compare extends WebModule
 	protected String answerWebRequest (HttpServletRequest request, HttpServletResponse response, PageHeader header, DatabaseConnector db,
 		Notifications notifications, User user, HttpSession session)
 	{
+		header.addScript(new PageHeaderScript("res/js/3rd/FileSaver/Blob.js", "text/javascript", "UTF-8", null));
+		header.addScript(new PageHeaderScript("res/js/3rd/FileSaver/FileSaver.js", "text/javascript", "UTF-8", null));
 		header.addScript (new PageHeaderScript ("res/js/compare.js", "text/javascript", "UTF-8", null));
 		header.addScript (new PageHeaderScript ("res/js/expt_common.js", "text/javascript", "UTF-8", null));
 
@@ -67,7 +69,6 @@ public class Compare extends WebModule
 			header.addScript (new PageHeaderScript ("res/js/visualizers/" + s + "/" + s + ".js", "text/javascript", "UTF-8", null));
 			header.addLink (new PageHeaderLink ("res/js/visualizers/" + s + "/" + s + ".css", "text/css", "stylesheet"));
 		}
-		
 		
 		return "Compare.jsp";
 	}

@@ -70,6 +70,9 @@ function doHcPlot(id, datasets, thisFile)
         options.title = {text : thisFile.title};
     
     $("#"+id).highcharts(options);
+    
+    // Save data for export if user requests it
+    allowPlotExport(thisFile.name, datasets, {'x': thisFile.xAxes || '', 'y': thisFile.yAxes || ''});
 }
 
 

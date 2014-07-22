@@ -254,3 +254,36 @@ function getCSV (file)
     }
     return file.csv;
 }
+
+
+/**
+ * Set up a link to allow users to export the raw data behind a plot, in CSV column-oriented format.
+ * @param filename  the file name to suggest saving as
+ * @param datasets  an array of {name: String, data: [[x1,y1], ...]} objects
+ * @param axisLabels  an object {x: String, y: String} giving the labels for the axes, if any
+ */
+function allowPlotExport(filename, datasets, axisLabels)
+{
+	$("#exportPlot").off().click(function () {
+		// Determine the greatest number of points in a dataset, and hence the number of rows in the CSV
+		var numRows = Math.max.apply(null, $.map(datasets, function (dataset, index) { return dataset.data.length; })),
+			rows = new Array(numRows+2);
+		// Header line
+		rows[0] = $.map(datasets, function (dataset, index) { return axisLabels.x + "," + dataset.name; }).join() + "\n";
+		// The data
+		for (var i=0; i<numRows; i++)
+		{
+			rows[i+1] = $.map(datasets, function (dataset, index) {
+				if (i < dataset.data.length)
+					return dataset.data[i].join();
+				else
+					return ",";
+			}).join() + "\n";
+		}
+		// Footer line
+		rows[numRows+1] = "# x axis: " + axisLabels.x + "; y axis: " + axisLabels.y + "\n";
+		// Construct file in memory and trigger save dialog
+		var blob = new Blob(rows, {type: "text/csv;charset=utf-8", endings: "native"});
+		saveAs(blob, filename);
+	}).show();
+}

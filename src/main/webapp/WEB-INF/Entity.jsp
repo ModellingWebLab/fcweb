@@ -119,14 +119,17 @@
 	    	<button style="float:left;" id="experiment-files-switcher-files" title="View files associated with this ${entity.type}">Files</button>
             <button style="margin-left:5px; float:left;" id="experiment-files-switcher-exp" title="View &amp; compare experiments using this ${entity.type}">Compare ${otherType}s</button>
 	    	<c:if test="${entity.type == 'protocol'}">
-    	    	    <button style="margin-left:5px; float:left;" id="compare-all-models" title="Compare all available models under this protocol">Compare all</button>
-   	    	</c:if>
+	    	    <button style="margin-left:5px; float:left;" id="compare-all-models" title="Compare all available models under this protocol">Compare all</button>
+	    	</c:if>
 		<br/>
 	    </div>
 	    
 	    <div id="entityversiondetails">
 			<div id="entityversionfiledetails">
-	    		<div class="closebtn"><small><a id="entityversionfileclose">&otimes; close</a></small></div>
+	    		<div class="closebtn"><small>
+	    		    <a id="exportPlot" style="display: none;">export plot data</a>
+	    		    <a id="entityversionfileclose">&otimes; close</a>
+	    		</small></div>
 		    	<h3 id="entityversionfilename"></h3>
 			    <div class="suppl"><small>Created <time id="entityversionfiletime"></time> by <em id="entityversionfileauthor"></em>.</small></div>
 			    <div id="entityversionfiledisplay"></div>

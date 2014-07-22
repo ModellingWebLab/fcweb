@@ -10,7 +10,10 @@
     </div>
     
 	<div id="filedetails">
-   		<div class="closebtn"><small><a id="fileclose">&otimes; close</a></small></div>
+		<div class="closebtn"><small>
+		    <a id="exportPlot" style="display: none;">export plot data</a>
+		    <a id="fileclose">&otimes; close</a>
+		</small></div>
     	<h3 id="filename"></h3>
 	    <div id="filedisplay"></div>
 	</div>
