@@ -36,7 +36,6 @@ metadataEditor.prototype.verifyNewEntity = function (jsonObject, actionElem)
     actionElem.html("<img src='"+contextPath+"/res/img/loading2-new.gif' alt='loading' />");
     $.post(contextPath + '/model/createnew', JSON.stringify(jsonObject))
         .done(function (json) {
-            console.log(json);
             displayNotifications(json);
             if (json.versionName)
             {
@@ -179,7 +178,7 @@ metadataEditor.prototype.getContentsCallback = function (succ)
             rdf.load(new_doc, {});
         });
         console.log("Found " + rdf.databank.size() + " triples");
-        console.log(rdf);
+//        console.log(rdf);
         
         // If ontology is available too, set up linking functionality
         if (this.loadedOntology)
@@ -225,7 +224,7 @@ metadataEditor.prototype.addAnnotation = function (v, bindings)
     self.modelRdf.add(triple);
     // Add the handler for deleting this annotation
     del.click(function (ev) {
-        console.log("Removing annotation: <" + v.uri + '> bqbiol:is ' + bindings.ann);
+//        console.log("Removing annotation: <" + v.uri + '> bqbiol:is ' + bindings.ann);
         delete v.annotations[bindings.ann.value.toString()];
         self.modelRdf.remove('<' + v.uri + '> bqbiol:is ' + bindings.ann);
         s.remove();
@@ -333,10 +332,9 @@ metadataEditor.prototype.saveNewVersion = function ()
                 fileName: this.file.name,
                 fileContents: model_str
                };
-    console.log(data);
+//    console.log(data);
     $.post(contextPath + '/model/createnew', JSON.stringify(data))
         .done(function (json) {
-            console.log(json);
             displayNotifications(json);
             var resp = json.updateEntityFile,
                 msg = resp.responseText;

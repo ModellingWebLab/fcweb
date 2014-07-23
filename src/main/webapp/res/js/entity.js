@@ -1,5 +1,5 @@
-var versions = new Array ();
-var files = new Array ();
+var versions = {};
+var files = {};
 var doc;
 var basicurl;
 var entityType;
@@ -634,7 +634,7 @@ function updateVersion (rv)
 	v.id = rv.id;
 	v.status = rv.status;
 	v.readme = null;
-	v.files = new Array ();
+	v.files = [];
 	if (rv.files)
     {
 	    for (var i = 0; i < rv.files.length; i++)
@@ -643,7 +643,7 @@ function updateVersion (rv)
 	        v.files.push (rv.files[i].id);
 	    }
     }
-	v.experiments = new Array ();
+	v.experiments = [];
 	if (rv.experiments)
 		for (var i = 0; i < rv.experiments.length; i++)
 		{
@@ -695,7 +695,7 @@ function updateFile (rf, v)
 	var f = files[rf.id];
 	if (!f)
 	{
-		f = new Array ();
+		f = {};
 		files[rf.id] = f;
 	}
 	
@@ -1000,7 +1000,6 @@ function initModel ()
         
     }
     
-
 	if (doc.entity.deleteBtn)
 	{
 		doc.entity.deleteBtn.addEventListener("click", function () {
