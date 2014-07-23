@@ -1,12 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}Create ${newentitytype} - " contextPath="${contextPath}">
 	<div id='newentityform'>
 	    <h1>Create ${newentitytype}</h1>
 	    <p>
-	    	<label for="entityname">Name of the ${newentitytype}:</label>
+	    	<label for="entityname">Name of the ${fn:toLowerCase(newentitytype)}:</label>
 	    	<br/>
 			<c:choose>
 				<c:when test="${not empty newentityname}">
@@ -27,7 +28,7 @@
 	    	<span id="versionaction"></span>
 	    </p>
 	    <p>
-	    	<label for="commitMsg">Commit Message:</label>
+	    	<label for="commitMsg">Commit message:</label>
 	    	<br/>
 	    	<textarea cols="70" rows="3" name="commitMsg" id="commitMsg" placeholder="optional message to describe this commit"></textarea>
 	    	<span id="commitmsgaction"></span>
@@ -44,7 +45,7 @@
 	    <t:upload/>
 	    <p id="reRunPara" style="display: none;">
 	    	<input type="checkbox" name="reRunExperiments" id="reRunExperiments"/>
-	    	<label for="reRunExperiments">rerun experiments involving previous versions of this ${newentitytype}</label>
+	    	<label for="reRunExperiments">rerun experiments involving previous versions of this ${fn:toLowerCase(newentitytype)}</label>
 	    	<small>(this might take some time)</small>
 	    </p>
 	    <p>
