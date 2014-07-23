@@ -349,6 +349,26 @@ metadataEditor.prototype.saveNewVersion = function ()
                            +(resp.expCreation ? '<p>Also, ' + resp.expCreation + '.</p>' : '')
                            +'<p><a href="' + expt_href + '">Run experiments</a> using this model.</p>'
                            );
+                // Update the list of available versions with the newly created one, but don't change the display
+                requestInformation ({
+    		    	task: "getInfo",
+    		    	version: resp.versionId
+    			}, function () {
+    				console.log("New info got"); console.log(versions); console.log(resp.versionId);
+    				var v = versions[resp.versionId],
+    					deleteLink = ' <a id="deleteVersion-' + v.id + '" class="deleteVersionLink"><img src="' + contextPath + '/res/img/delete.png" alt="delete version" title="delete this version of the model" /></a>';
+    				$("#entityversionlist_content").prepend(
+			    		'<p id="version-item-' + v.id + '" title="' + v.created + ' -- Visibility: ' + v.visibility + '" class="entityviz-' + v.visibility + '">\n'
+			    		+ '<input type="checkbox" value="' + v.id + '" class="comparisonCheckBox"/>\n'
+			    		+ '<strong><a class="entityversionlink" href="' + vers_href + '">' + v.name + '</a></strong>\n'
+			    		+ ' by <em>' + v.author + deleteLink + '</em>'
+			    		+ (v.commitMessage ? ' &mdash; <small>' + v.commitMessage + '</small>' : '')
+			    		+ '<br/>\n'
+			    		+ '<span class="suppl"><small>created </small> <time>' + v.created + '</time> '
+			    		+ '<small>containing</small> ' + v.files.length + 'File' + (v.files.length != 1 ? 's': '') + '.</span>\n'
+			    		+ '</p>\n').find('.deleteVersionLink').click(deleteVersionCallback);
+    				beautifyTimeStamps();
+    			});
             }
             else
             {

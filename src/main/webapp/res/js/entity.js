@@ -633,6 +633,7 @@ function updateVersion (rv)
 	v.visibility = rv.visibility;
 	v.id = rv.id;
 	v.status = rv.status;
+	v.commitMessage = rv.commitMessage;
 	v.readme = null;
 	v.files = [];
 	if (rv.files)

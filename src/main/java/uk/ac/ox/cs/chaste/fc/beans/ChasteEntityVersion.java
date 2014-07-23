@@ -182,6 +182,7 @@ public class ChasteEntityVersion
 		json.put ("id", id);
 		json.put ("entityId", entity.getId ());
 		json.put ("name", entity.getName ());
+		json.put ("commitMessage", getCommitMessage ());
 
 		if (files != null && files.size () > 0)
 		{
