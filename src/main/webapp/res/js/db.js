@@ -1,7 +1,7 @@
 
 var pages = [ "matrix" ],//, "search" ],
 	comparisonMode = false,
-	experimentsToCompare = new Array (),
+	experimentsToCompare = [],
 	linesToCompare = {'row': [], 'col': []};
 
 /**
@@ -523,6 +523,15 @@ function prepareMatrix ()
 	                          .click(function () {
 		comparisonMode = !comparisonMode;
 		$("#comparisonModeButton").text(comparisonMode ? "Disable" : "Enable");
+		if (!comparisonMode)
+		{
+			// Clear all selections
+			experimentsToCompare.splice(0, experimentsToCompare.length);
+			linesToCompare.row.splice(0, linesToCompare.row.length);
+			linesToCompare.col.splice(0, linesToCompare.col.length);
+			$(".patternized").removeClass("patternized");
+			$("#comparisonLink").hide();
+		}
 	});
 	$("#comparisonLink").hide().click(function () {
 	    document.location = $(this).data("href");
