@@ -39,9 +39,6 @@ public class DB extends WebModule
 		Notifications notifications, User user, HttpSession session)
 	{
 		header.addScript (new PageHeaderScript ("res/js/db.js", "text/javascript", "UTF-8", null));
-		header.addScript (new PageHeaderScript ("res/js/3rd/jquery-cluetip-master/jquery.cluetip.js", "text/javascript", "UTF-8", null));
-		header.addScript (new PageHeaderScript ("res/js/3rd/jquery.hoverIntent.js", "text/javascript", "UTF-8", null));
-		header.addLink (new PageHeaderLink ("res/js/3rd/jquery-cluetip-master/jquery.cluetip.css", "text/css", "stylesheet"));
 		return "Db.jsp";
 	}
 
