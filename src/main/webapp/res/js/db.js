@@ -233,6 +233,23 @@ function drawMatrix (matrix)
 			setTitleAndListeners($td, entry);
 		}
 	}
+	
+	// Fix the matrix layout, so it doesn't jump on hovers
+	var rowWidth = 0, rowHeight = 0, colWidth = 0, colHeight = 0;
+	$(table).find("td.matrixTableRow").addClass("matrixHover").each(function () {
+		rowWidth = Math.max(rowWidth, this.offsetWidth);
+		rowHeight = Math.max(rowHeight, this.offsetHeight);
+	});
+	$(table).find("td.matrixTableCol").addClass("matrixHover").each(function () {
+		colWidth = Math.max(colWidth, this.offsetWidth);
+		colHeight = Math.max(colHeight, this.offsetHeight);
+	});
+	$(table).find("td.matrixTableRow").removeClass("matrixHover").each(function () {
+		$(this).height(rowHeight).width(rowWidth);
+	});
+	$(table).find("td.matrixTableCol").removeClass("matrixHover").each(function () {
+		$(this).height(colHeight).width(colWidth);
+	});
 }
 
 

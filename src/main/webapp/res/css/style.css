@@ -378,10 +378,6 @@ tr:nth-child(1)
 {
     background-color:#f7be81;
 }
-#matrixTable .experiment-SUCCESS
-{
-	background-color:#05db00;
-}
 
 #experiment-files-switcher,
 #entityexperimentlist
@@ -538,16 +534,6 @@ li.entityviz-PRIVATE
 {
     font-weight: bold;
 }
-
-/*.matrixTableCol
-{
-	transform:rotate(-90deg);
-	-webkit-transform: rotate(-90deg); 
-	-moz-transform: rotate(-90deg);	
-	-ms-transform:rotate(-90deg);
-	-o-transform: rotate(-90deg);
-	width: 1.2em;
-}*/
 
 .vertical-text {
 	display: inline-block;
