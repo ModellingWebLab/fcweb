@@ -190,6 +190,18 @@ function beautifyTimeStamp (datestring)
 	return datestring;
 }
 
+function beautifyTimeStamps()
+{
+	$("time").each(function () {
+		var tm = this.innerHTML;
+		if (tm)
+		{
+			this.setAttribute("datetime", tm);
+			this.innerHTML = beautifyTimeStamp(tm);
+		}
+	});
+}
+
 function getYMDHMS (datestring)
 {
 	var date = new XDate(datestring, true);
@@ -297,34 +309,7 @@ function initPage ()
 	        }, 
 	        false);
 	
-	var times = document.getElementsByTagName("time");
-	for (var i = 0; i < times.length; i++)
-	{
-		//console.log (times[i].innerHTML);
-		/*var date = new XDate(times[i].innerHTML, true);
-		if (date && date.valid ())
-		{
-			times[i].setAttribute ("datetime", times[i].innerHTML);
-			times[i].innerHTML = date.toString ("MMM dS, yyyy 'at' h:mm tt");
-		}*/
-		var tm = times[i].innerHTML;
-		if (tm)
-		{
-			times[i].setAttribute ("datetime", tm);
-			times[i].innerHTML = beautifyTimeStamp (tm);
-		}
-	}
-	
-	
-	/*var as = document.getElementsByTagName("a");
-	for (var i = 0; i < times.length; i++)
-	{
-		var a = as[i].innerHTML;
-		if (!a.href)
-		{
-			a.className = (a.className ? a.className + " " : "") + "pointer";
-		}
-	}*/
+	beautifyTimeStamps();
 }
 
 document.addEventListener("DOMContentLoaded", initPage, false);

@@ -868,6 +868,17 @@ function render ()
 	}
 }
 
+function deleteVersionCallback()
+{
+	if (confirm("Are you sure to delete this version? (including all files and experiments associated to it)"))
+	{
+		deleteEntity({
+			task: "deleteVersion",
+	    	version: $(this).attr("id").replace("deleteVersion-", "")
+		});
+	}
+}
+
 function initModel ()
 {
 	
@@ -1016,17 +1027,7 @@ function initModel ()
 		});
 	}
 	
-
-	$(".deleteVersionLink").click (function () {
-		if (confirm("Are you sure to delete this version? (including all files and experiments associated to it)"))
-		{
-			deleteEntity ({
-				task: "deleteVersion",
-		    	version: $(this).attr("id").replace("deleteVersion-", "")
-			});
-		}
-	});
-    
+	$(".deleteVersionLink").click(deleteVersionCallback);
 
 	$("#compareVersionsSelectorsAll").click (function () {
 		$(".comparisonCheckBox").prop('checked', true);
