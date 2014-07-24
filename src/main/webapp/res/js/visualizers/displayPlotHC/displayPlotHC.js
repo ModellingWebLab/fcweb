@@ -1,18 +1,4 @@
 
-/** Extract key data for a file if available. */
-function getKeyValues(file)
-{
-    var keyVals = [];
-    if (file.keyId)
-    {
-        var keyData = getCSVColumns(file.keyFile);
-        if (keyData.length > 0)
-            for (var i=0; i<keyData[0].length; i++)
-                keyVals.push(keyData[0][i]);
-    }
-    return keyVals;
-}
-
 /**
  * Actually create a plot using the HighCharts library.
  * 
@@ -102,7 +88,7 @@ HCPlotter.prototype.getContentsCallback = function (succ)
         }
 
 		var csvData = (thisFile.linestyle == "linespoints" || thisFile.linestyle == "points") ? getCSVColumnsNonDownsampled (thisFile) : getCSVColumnsDownsampled (thisFile);
-		var keyVals = getKeyValues(thisFile);
+		var keyVals = getKeyValues(thisFile, csvData.length);
 		
 		var div = document.createElement("div");
 		var id = "hcplot-" + thisFile.id;
@@ -249,7 +235,7 @@ HCPlotterComparer.prototype.showContents = function ()
             var entityName = eachCSVData.entity.plotName ? eachCSVData.entity.plotName : eachCSVData.entity.name;
         	var csvData = eachCSVData.data;
         	var csvFile = eachCSVData.file;
-            var keyVals = getKeyValues(csvFile);
+            var keyVals = getKeyValues(csvFile, csvData.length);
         	for (var i = 1; i < csvData.length; i++)
         	{
         		var curData = [];

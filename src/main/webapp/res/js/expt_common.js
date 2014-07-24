@@ -257,6 +257,28 @@ function getCSV (file)
 
 
 /**
+ * Extract key data for a file if available.
+ *
+ * @param file  the file to get key data for
+ * @param numTraces  the number of values to expect in a key vector
+ */
+function getKeyValues(file, numTraces)
+{
+    var keyVals = [];
+    if (file.keyId)
+    {
+        var keyData = getCSVColumns(file.keyFile);
+        if (keyData.length > 0)
+            for (var i=0; i<keyData[0].length; i++)
+                keyVals.push(keyData[0][i]);
+        if (keyVals.length != numTraces)
+        	console.log("Ignoring key data of wrong length (key length=" + keyVals.length + "; number of traces=" + numTraces + ")");
+    }
+    return keyVals;
+}
+
+
+/**
  * Set up a link to allow users to export the raw data behind a plot, in CSV column-oriented format.
  * @param filename  the file name to suggest saving as
  * @param datasets  an array of {name: String, data: [[x1,y1], ...]} objects

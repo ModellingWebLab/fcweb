@@ -332,20 +332,6 @@ function transferLegendColours(datasets) {
  $('#' + legendDivId).remove();
 }
 
-/* Extract key data for a file if available. */
-function getKeyValues(file)
-{
-    var keyVals = [];
-    if (file.keyId)
-    {
-        var keyData = getCSVColumns(file.keyFile);
-        if (keyData.length > 0)
-            for (var i=0; i<keyData[0].length; i++)
-                keyVals.push(keyData[0][i]);
-    }
-    return keyVals;
-}
-
 /**
  * Transform from flot formatted datasets to highcharts formatted, which is more convenient for exporting as CSV.
  * That is, an object whose values are {label:, data:} gets converted to an array with values {name:, data:}.
@@ -389,7 +375,7 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
         var styleLinespointsOrPoints = isStyleLinespointsOrPoints(thisFile.linestyle);
         var csvData = styleLinespointsOrPoints ? getCSVColumnsNonDownsampled (thisFile) :
                                                  getCSVColumnsDownsampled (thisFile);
-        var keyVals = getKeyValues(thisFile);
+        var keyVals = getKeyValues(thisFile, csvData.length);
 
         var datasets = {};
         for (var i = 1; i < csvData.length; i++)
@@ -593,7 +579,7 @@ contentFlotPlotComparer.prototype.showContents = function ()
             var entityId = eachCSVData.entity.id;
             var fileSig = eachCSVData.file.sig;
             var csvData = eachCSVData.data;
-            var keyVals = getKeyValues(eachCSVData.file);
+            var keyVals = getKeyValues(eachCSVData.file, csvData.length);
 
             //var paragraph = $('<p />').html(eachCSVData.entity.name).css('font-weight', 'bold');
             //choicesContainer.append(paragraph);
