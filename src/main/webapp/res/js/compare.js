@@ -246,7 +246,7 @@ function parseEntities (entityObj)
             singleProto = false;
 	    if (needsVersionInfo[entity.modelName + "/" + entity.protoName] === false)
 	    	needsVersionInfo[entity.modelName + "/" + entity.protoName] = true;
-	    else
+	    else if (needsVersionInfo[entity.modelName + "/" + entity.protoName] === undefined)
 	    	needsVersionInfo[entity.modelName + "/" + entity.protoName] = false;
 	
 		entities[entity.id] = entity;
