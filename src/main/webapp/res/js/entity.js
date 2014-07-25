@@ -2,7 +2,7 @@ var versions = {};
 var files = {};
 var doc;
 var basicurl;
-var entityType;
+var entityType, compareType;
 var entityId;
 var curVersion = null;
 var converter = new Showdown.converter();
@@ -19,6 +19,7 @@ function parseUrl (href)
 		{
 			basicurl = t.slice (0, i + 4).join ("/") + "/";
 			entityType = "model";
+			compareType = "protocol";
 			entityId = t[i+3];
 			return t.slice (i + 4);
 		}
@@ -26,6 +27,7 @@ function parseUrl (href)
 		{
 			basicurl = t.slice (0, i + 4).join ("/") + "/";
 			entityType = "protocol";
+			compareType = "model";
 			entityId = t[i+3];
 			return t.slice (i + 4);
 		}
@@ -481,95 +483,52 @@ function displayVersion (id, showDefault)
 		dv.archivelink.href = contextPath + "/download/" + entityType.charAt(0) + "/" + convertForURL (v.name) + "/" + v.id + "/a/archive";
 		
 	}
-		
-		
-
+	
+	
 	if (v.experiments.length > 0)
 	{
-		removeChildren (dv.experimentpartners);
-		
-		var compares = new Array();
-		var compareType = "";
-		
-		var ul = document.createElement ("ul");
+		var isProtocol = (entityType == "protocol"),
+			$base_list = $(dv.experimentpartners).children("ul"),
+			$parent_list = $base_list,
+			$li = null;
+		$base_list.contents().remove();
 		for (var i = 0; i < v.experiments.length; i++)
 		{
-			
-			var li = document.createElement ("li");
-			var chk = document.createElement ("input");
-			chk.type = "checkbox";
-			chk.value = v.experiments[i].id;
-			compares.push (chk);
-			var a = document.createElement ("a");
-			if (entityType == "protocol")
+			var exp = v.experiments[i],
+				href = contextPath + "/experiment/" + exp.model.id + exp.protocol.id + "/" + exp.id + "/latest",
+				other = (isProtocol ? exp.model : exp.protocol),
+				name = other.name + " @ " + other.version;
+			// Figure out which list to add the next experiment to
+			if ($li)
 			{
-			    compareType = "model";
-				//console.log ("protoc");
-				//console.log (v.experiments[i].model);
-				a.appendChild(document.createTextNode(v.experiments[i].model.name + " @ " + v.experiments[i].model.version));
+				var lastOther = (isProtocol ? v.experiments[i-1].model : v.experiments[i-1].protocol)
+				if (other.name == lastOther.name)
+				{
+					if ($parent_list == $base_list) // Nest a new sub-list within the last li
+						$parent_list = $("<ul></ul>").appendTo($li);
+				}
+				else
+					$parent_list = $base_list;
 			}
-			else
-			{
-			    compareType = "protocol";
-				a.appendChild(document.createTextNode(v.experiments[i].protocol.name + " @ " + v.experiments[i].protocol.version));
-			}
-			a.href = contextPath + "/experiment/" + v.experiments[i].model.id + v.experiments[i].protocol.id + "/" + v.experiments[i].id + "/latest";
-			li.appendChild (chk);
-			li.appendChild (a);
-			ul.appendChild (li);
+			// Add a list item with checkbox & link for this experiment
+			$li = $('<li><input type="checkbox" value="' + exp.id + '" /><a href="' + href + '">' + name + '</a></li>');
+			$parent_list.append($li);
 		}
-
-		dv.experimentSelAll = removeListeners (dv.experimentSelAll);
-		dv.experimentSelNone = removeListeners (dv.experimentSelNone);
-		dv.experimentcompare = removeListeners (dv.experimentcompare);
+		// Show only latest versions by default
+		$base_list.find("ul").hide();
+		$("#entityexperimentlist_span_latest").hide();
+		$("#entityexperimentlist_showallversions").removeClass("selected");
 		
-		dv.experimentSelAll.addEventListener("click", function () {
-			for (var i = 0; i < compares.length; i++)
-				compares[i].checked = true;
-		});
-		dv.experimentSelNone.addEventListener("click", function () {
-			for (var i = 0; i < compares.length; i++)
-				compares[i].checked = false;
-		});
-		dv.experimentcompare.addEventListener("click", function () {
-			var url = "";
-			for (var i = 0; i < compares.length; i++)
-				if (compares[i].checked)
-					url += compares[i].value + "/";
-			if (url)
-			    document.location = contextPath + "/compare/e/" + url;
-			else
-			    window.alert("You need to select some " + compareType + "s to compare.");
-		});
-		
-		if (dv.compareAll)
-		{
-			dv.compareAll = removeListeners(dv.compareAll);
-			if (compares.length > 0)
-			{
-				dv.compareAll.addEventListener("click", function () {
-					var url = "";
-					for (var i = 0; i < compares.length; i++)
-						url += compares[i].value + "/";
-				    document.location = contextPath + "/compare/e/" + url;
-				});
-				dv.compareAll.style.display = "block";
-			}
-			else
-			{
-				dv.compareAll.style.display = "none";
-			}
-		}
-		
-		dv.experimentpartners.appendChild (ul);
-		//dv.experimentlist.style.display = "block";
 		dv.switcher.style.display = "block";
-		//dv.details.style.display = "none";
+		if (dv.compareAll)
+			dv.compareAll.style.display = "block";
 	}
 	else
 	{
 		dv.switcher.style.display = "none";
 		dv.experimentpartners.style.display = "none";
+		if (dv.compareAll)
+			dv.compareAll.style.display = "none";
 		dv.details.style.display = "block";
 	}
 	
@@ -591,9 +550,6 @@ function displayVersion (id, showDefault)
 	doc.version.files.style.display = "block";
 	$("#experiment-files-switcher-files").addClass("selected");
 	$("#experiment-files-switcher-exp").removeClass("selected");
-	//doc.version.filedetails.style.display = "none";
-	// update address bar
-	
 }
 
 function registerFileDisplayer (elem)
@@ -902,9 +858,6 @@ function initModel ()
 				filedetails : document.getElementById("entityversionfiledetails"),
 				experimentlist: document.getElementById("entityexperimentlist"),
 				experimentpartners: document.getElementById("entityexperimentlistpartners"),
-				experimentSelAll: document.getElementById("entityexperimentlistpartnersactall"),
-				experimentSelNone: document.getElementById("entityexperimentlistpartnersactnone"),
-				experimentcompare: document.getElementById("entityexperimentlistpartnersactcompare"),
 				compareAll: document.getElementById("compare-all-models"),
 				switcher: document.getElementById("experiment-files-switcher"),
 				visibility: document.getElementById("versionVisibility"),
@@ -989,27 +942,13 @@ function initModel ()
         if(classes.indexOf(' entityversionlink ') > -1)
         {
         	// links to see the model details
-        	//var link = elems[i].href;
         	registerVersionDisplayer (elems[i]);
-        	/*elems[i].addEventListener("click", function (ev) {
-        		if (ev.which == 1)
-        		{
-        			ev.preventDefault();
-        			// set new url
-        			// call action
-        			//nextPage (elems[i].href);
-        		}
-        	}, true);
-        	*/
-            //elems[i].href = "";
-            //console.log ("test");
         }
 
         if(classes.indexOf(' entityversionfilelink ') > -1)
         {
         	// links to see the file details
         }
-        
     }
     
 	if (doc.entity.deleteBtn)
@@ -1022,14 +961,12 @@ function initModel ()
 			    	entity: entityId
 				});
 			}
-				//console.log ("deleting " + v.id);
-			/*else
-				console.log ("not deleting " + v.id);*/
 		});
 	}
 	
 	$(".deleteVersionLink").click(deleteVersionCallback);
 
+	// Comparing entity versions click events
 	$("#compareVersionsSelectorsAll").click (function () {
 		$(".comparisonCheckBox").prop('checked', true);
 	});
@@ -1046,6 +983,41 @@ function initModel ()
 		    document.location = (contextPath + "/compare/" + entityType.charAt(0) + "/" + url);
 		else
 		    window.alert("You need to select some " + compareType + "s to compare.");
+	});
+	
+	
+	// Comparing experiments click events
+	var $exp_list = $(doc.version.experimentpartners).children("ul");
+	$("#entityexperimentlistpartnersactall").click(function () {
+		$exp_list.find("input").filter(":visible").prop('checked', true);
+	});
+	$("#entityexperimentlistpartnersactnone").click(function () {
+		$exp_list.find("input").prop('checked', false);
+	});
+	$("#entityexperimentlistpartnersactlatest").click(function () {
+		$exp_list.children("li").children("input").prop('checked', true);
+	});
+	$("#entityexperimentlist_showallversions").click(function () {
+		$(this).toggleClass("selected");
+		$exp_list.find("ul").toggle();
+		$("#entityexperimentlist_span_latest").toggle();
+	});
+	$("#entityexperimentlistpartnersactcompare").click(function () {
+		var url = "";
+		$exp_list.find("input:checked").filter(":visible").each(function () {
+			url += this.value + "/";
+		});
+		if (url)
+		    document.location = contextPath + "/compare/e/" + url;
+		else
+		    window.alert("You need to select some " + compareType + "s to compare.");
+	});
+	$(doc.version.compareAll).click(function () {
+		var url = "";
+		$exp_list.find("input").filter(":visible").each(function () {
+			url += this.value + "/";
+		});
+		document.location = contextPath + "/compare/e/" + url;
 	});
 }
 

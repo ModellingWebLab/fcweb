@@ -47,10 +47,10 @@
     			</p>
     		</c:if>
     		<c:if test="${User.allowedCreateEntityVersion and entity.type ne 'experiment'}">
-	   			<small>(<a href="${contextPath}/${entity.type}/createnew/?newentityname=${entity.id}">add new version</a>)</small>
-	   		</c:if>
-	   		<div id="entityversionlist_content">
-		   		<c:forEach items="${entity.orderedVersions}" var="version" >
+				<small>(<a href="${contextPath}/${entity.type}/createnew/?newentityname=${entity.id}">add new version</a>)</small>
+			</c:if>
+			<div id="entityversionlist_content">
+				<c:forEach items="${entity.orderedVersions}" var="version" >
 		    		<p id="version-item-${version.value.id}" title="${version.value.created} -- Visibility: ${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> -- ${version.value.status}</c:if>" class="entityviz-${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> experiment-${version.value.status}</c:if>">
 	    				<input type="checkbox" value="${version.value.id}" class="comparisonCheckBox"/>
 						<c:choose>
@@ -72,12 +72,15 @@
 		    					<span class="suppl"><small>created </small> <time>${version.value.created}</time> <small>containing</small> ${version.value.numFiles} File<c:if test="${version.value.numFiles!=1}">s</c:if>.</span>
 							</c:otherwise>
 						</c:choose>
-		    		</p>
-		   		</c:forEach>
-	   		</div>
-	   		<div id="compareVersionsSelectors">[<small><a id="compareVersionsSelectorsAll">select all</a></small>] [<small><a id="compareVersionsSelectorsNone">select none</a></small>]</div>
-	   		<button id="compareVersions">compare selected versions</button>
-   		</div>
+				    </p>
+		        </c:forEach>
+			</div>
+			<div id="compareVersionsSelectors">
+			    [<small><a id="compareVersionsSelectorsAll">select all</a></small>]
+			    [<small><a id="compareVersionsSelectorsNone">select none</a></small>]
+			</div>
+			<button id="compareVersions">compare selected versions</button>
+		</div>
     </div>
     
     <div id="entityversion">
@@ -156,10 +159,13 @@
                     You may also <a class='runExpts' title="Run experiments using this ${entity.type}">run new experiments using this ${entity.type}</a> and your own ${otherType}s.
                 </c:if>
 		    </p>
-			<div id="entityexperimentlistpartners"></div>
+			<div id="entityexperimentlistpartners"><ul></ul></div>
 			<div id="entityexperimentlistpartnersact">
 				[<a id="entityexperimentlistpartnersactall">select all</a>]
-				[<a id="entityexperimentlistpartnersactnone">select none</a>]<br/>
+				<span id="entityexperimentlist_span_latest">[<a id="entityexperimentlistpartnersactlatest">select latest</a>]</span>
+				[<a id="entityexperimentlistpartnersactnone">select none</a>]
+				<br/>
+				<button id="entityexperimentlist_showallversions">show all versions</button>
 				<button id="entityexperimentlistpartnersactcompare">compare selected experiments</button>
 			</div>
 		</div>

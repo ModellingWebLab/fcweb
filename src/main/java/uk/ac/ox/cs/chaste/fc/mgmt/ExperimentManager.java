@@ -274,7 +274,7 @@ extends ChasteEntityManager
 			st.setInt (2, protocolId);
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> res = evaluateResult (rs, false, filterEmptyEntities);
+			TreeSet<ChasteEntity> res = evaluateResult (rs, false, filterEmptyEntities, false);
 			if (!res.isEmpty())
 				return res.first ();
 		}
@@ -312,7 +312,7 @@ extends ChasteEntityManager
 			st.setString (1, signature);
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> entity = evaluateResult (rs, true, false);
+			TreeSet<ChasteEntity> entity = evaluateResult (rs, true, false, false);
 			if (entity != null && !entity.isEmpty())
 				return (ChasteExperimentVersion) entity.first ().getVersionByFilePath (signature);
 		}
@@ -373,8 +373,10 @@ extends ChasteEntityManager
 	/**
 	 * Get all experiments involving the given protocol.
 	 * @param filterEmptyEntities  whether to filter out experiments that don't have any visible versions
+	 * @param includeAllEntities  whether to disambiguate entities based on id, not just name
+	 *     (different experiments may have the same name, as this is based just on model & protocol name, not version)
 	 */
-	public TreeSet<ChasteEntity> getExperimentsByProtocol (int protocolId, boolean filterEmptyEntities)
+	public TreeSet<ChasteEntity> getExperimentsByProtocol (int protocolId, boolean filterEmptyEntities, boolean includeAllEntities)
 	{
 		PreparedStatement st = db.prepareStatement (buildSelectQuery (" WHERE mo.protocol=?"));
 		ResultSet rs = null;
@@ -383,7 +385,7 @@ extends ChasteEntityManager
 			st.setInt (1, protocolId);
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> res = evaluateResult (rs, false, filterEmptyEntities);
+			TreeSet<ChasteEntity> res = evaluateResult (rs, false, filterEmptyEntities, includeAllEntities);
 			if (!res.isEmpty())
 				return res;
 		}
@@ -405,8 +407,10 @@ extends ChasteEntityManager
 	/**
 	 * Get all experiments involving the given model.
 	 * @param filterEmptyEntities  whether to filter out experiments that don't have any visible versions
+	 * @param includeAllEntities  whether to disambiguate entities based on id, not just name
+	 *     (different experiments may have the same name, as this is based just on model & protocol name, not version)
 	 */
-	public TreeSet<ChasteEntity> getExperimentsByModel (int modelId, boolean filterEmptyEntities)
+	public TreeSet<ChasteEntity> getExperimentsByModel (int modelId, boolean filterEmptyEntities, boolean includeAllEntities)
 	{
 		PreparedStatement st = db.prepareStatement (buildSelectQuery (" WHERE mo.model=?"));
 		ResultSet rs = null;
@@ -415,7 +419,7 @@ extends ChasteEntityManager
 			st.setInt (1, modelId);
 			st.execute ();
 			rs = st.getResultSet ();
-			TreeSet<ChasteEntity> res = evaluateResult (rs, false, filterEmptyEntities);
+			TreeSet<ChasteEntity> res = evaluateResult (rs, false, filterEmptyEntities, includeAllEntities);
 			if (!res.isEmpty())
 				return res;
 		}
@@ -435,15 +439,41 @@ extends ChasteEntityManager
 	}
 
 	/**
-	 * Get all experiments involving the given entity version for which we are able to see at least one version.
+	 * Get "all" experiments involving the given entity version for which we are able to see at least one version.
+	 *
+	 * Note that since the underlying evaluateResult method sorts the result set by entity name, and an experiment
+	 * name is formed from the corresponding model and protocol names, we only get experiments involving the latest
+	 * version of each model/protocol by default.  If you want experiments including previous versions, use
+	 * getAllExperiments.
 	 */
 	public void getExperiments (ChasteEntityVersion vers, String entityColumn)
 	{
 		TreeSet<ChasteEntity> exp = null;
 		if (entityColumn.equals ("model"))
-			 exp = getExperimentsByModel (vers.getId (), true);
+			 exp = getExperimentsByModel (vers.getId (), true, false);
 		else if (entityColumn.equals ("protocol"))
-			 exp = getExperimentsByProtocol (vers.getId (), true);
+			 exp = getExperimentsByProtocol (vers.getId (), true, false);
+		
+		if (exp != null)
+		{
+			for (ChasteEntity e : exp)
+			{
+				vers.addExperiment ((ChasteExperiment) e);
+			}
+		}
+	}
+	
+	/**
+	 * Get "all" experiments involving the given entity version for which we are able to see at least one version.
+	 * If the t
+	 */
+	public void getAllExperiments (ChasteEntityVersion vers, String entityColumn)
+	{
+		TreeSet<ChasteEntity> exp = null;
+		if (entityColumn.equals ("model"))
+			 exp = getExperimentsByModel (vers.getId (), true, true);
+		else if (entityColumn.equals ("protocol"))
+			 exp = getExperimentsByProtocol (vers.getId (), true, true);
 		
 		if (exp != null)
 		{

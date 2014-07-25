@@ -280,9 +280,8 @@ public class EntityView extends WebModule
 			else
 			{
 				fileMgmt.getFiles (vers, entityMgmt.getEntityFilesTable (), entityMgmt.getEntityColumn ());
-				expMgmt.getExperiments (vers, entityMgmt.getEntityColumn ());
+				expMgmt.getAllExperiments (vers, entityMgmt.getEntityColumn ());
 				answer.put ("version", vers.toJson ());
-				System.out.println (answer.toString ());
 			}
 		}
 		catch (NullPointerException | NumberFormatException e)
@@ -892,7 +891,7 @@ public class EntityView extends WebModule
 					TreeSet<ChasteEntity> exps = null;
 					if (entityMgmt.getEntityColumn ().equals ("model"))
 					{
-						exps = expMgmt.getExperimentsByModel (baseVersion.getId (), false);
+						exps = expMgmt.getExperimentsByModel (baseVersion.getId (), false, false);
 						if (exps != null)
 						{
 							for (ChasteEntity ex : exps)
@@ -914,7 +913,7 @@ public class EntityView extends WebModule
 					}
 					else if (entityMgmt.getEntityColumn ().equals ("protocol"))
 					{
-						exps = expMgmt.getExperimentsByProtocol (baseVersion.getId (), false);
+						exps = expMgmt.getExperimentsByProtocol (baseVersion.getId (), false, false);
 						if (exps != null)
 						{
 							for (ChasteEntity ex : exps)
