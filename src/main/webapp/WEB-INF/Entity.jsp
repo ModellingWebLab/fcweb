@@ -156,12 +156,13 @@
                     You may also <a class='runExpts' title="Run experiments using this ${entity.type}">run new experiments using this ${entity.type}</a> and your own ${otherType}s.
                 </c:if>
 		    </p>
-			<div id="entityexperimentlistpartners"></div>
+			<div id="entityexperimentlistpartners"><ul></ul></div>
 			<div id="entityexperimentlistpartnersact">
 				[<a id="entityexperimentlistpartnersactall">select all</a>]
+				<span id="entityexperimentlist_span_latest">[<a id="entityexperimentlistpartnersactlatest">select latest</a>]</span>
 				[<a id="entityexperimentlistpartnersactnone">select none</a>]
-				[<a id="entityexperimentlistpartnersactversions">show all versions</a>]
-				<span id="entityexperimentlistpartnersactversionsindicator"></span><br/>
+				<br/>
+				<button id="entityexperimentlist_showallversions">show all versions</button>
 				<button id="entityexperimentlistpartnersactcompare">compare selected experiments</button>
 			</div>
 		</div>

@@ -39,7 +39,22 @@ public class ChasteEntity
 			return a.name.compareTo (b.name);
 		}
 	}
-		
+
+	/**
+	 * Order entities first by name, and then by id, newest (i.e. highest id) first.
+	 */
+	public static class SortByNameAndId implements Comparator<ChasteEntity>
+	{
+		@Override
+		public int compare (ChasteEntity a, ChasteEntity b)
+		{
+			if (a.name.equals(b.name))
+				return b.id - a.id; // a < b, i.e. prior in order, iff it has a higher id
+			else
+				return a.name.compareTo(b.name);
+		}
+	}
+
 	public ChasteEntity (int id, String name, User author, Timestamp created, String type)
 	{
 		this.id = id;
