@@ -71,10 +71,9 @@ function sortTable (plots)
         if (cur.length > 0)
         {
             // Create/find the header row for this section
-            var header;
-            if (filesTable.beenSorted)
+            var header = $("#filesTable-header-" + css).get(0);
+            if (filesTable.beenSorted && header !== undefined)
             {
-                header = $("#filesTable-header-" + css).get(0);
                 filesTable.table.removeChild(header);
             }
             else
@@ -86,10 +85,7 @@ function sortTable (plots)
                 // Make a click on the header toggle visibility of the rest of the section
                 $(header).click(function() {
                     $(".filesTable-" + css).not(header).toggle("fast");
-                    if ($(header).children().hasClass("filesTable-header-shown"))
-                        $(header).children().removeClass("filesTable-header-shown").addClass("filesTable-header-hidden");
-                    else
-                        $(header).children().removeClass("filesTable-header-hidden").addClass("filesTable-header-shown");
+                    $(header).children().toggleClass("filesTable-header-shown filesTable-header-hidden");
                 });
             }
             filesTable.table.appendChild(header);
