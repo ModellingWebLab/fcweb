@@ -11,36 +11,33 @@ var versions = {},
 
 var visualizers = {};
 
-function parseUrl (href)
+function parseUrl (location)
 {
-	var t = href.split ("/");
-	for (var i = 0; i < t.length; i++)
+	var contextLen = contextPath.length;
+	if (location.pathname.substr(0, contextLen) != contextPath)
+		return null;
+	var t = location.pathname.substr(contextLen+1).split("/");
+	if (t.length < 3)
+		return null;
+	if (t[0] == "model")
 	{
-		if ("/" + t[i] == contextPath && i + 3 < t.length && t[i+1] == "model")
-		{
-			basicurl = t.slice (0, i + 4).join ("/") + "/";
-			entityType = "model";
-			compareType = "protocol";
-			entityId = t[i+3];
-			return t.slice (i + 4);
-		}
-		if ("/" + t[i] == contextPath && i + 3 < t.length && t[i+1] == "protocol")
-		{
-			basicurl = t.slice (0, i + 4).join ("/") + "/";
-			entityType = "protocol";
-			compareType = "model";
-			entityId = t[i+3];
-			return t.slice (i + 4);
-		}
-		if ("/" + t[i] == contextPath && i + 3 < t.length && t[i+1] == "experiment")
-		{
-			basicurl = t.slice (0, i + 4).join ("/") + "/";
-			entityType = "experiment";
-			entityId = t[i+3];
-			return t.slice (i + 4);
-		}
+		entityType = "model";
+		compareType = "protocol";
 	}
-	return null;
+	else if (t[0] == "protocol")
+	{
+		entityType = "protocol";
+		compareType = "model";
+	}
+	else if (t[0] == "experiment")
+	{
+		entityType = "experiment";
+	}
+	else
+		return null;
+	basicurl = location.href.substr(0, location.href.length-location.pathname.length+contextLen) + "/" + t.slice(0,3).join("/") + "/";
+	entityId = t[2];
+	return t.slice(3);
 }
 
 function getCurVersionId (url)
@@ -778,7 +775,7 @@ function nextPage (url, replace)
 
 function render ()
 {
-	var url = parseUrl (document.location.href);
+	var url = parseUrl (document.location);
 	var curVersionId = getCurVersionId (url);
 	
 	//console.log ("curVersionId " + curVersionId);
