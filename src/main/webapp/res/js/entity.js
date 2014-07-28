@@ -1,12 +1,13 @@
-var versions = {};
-var files = {};
-var doc;
-var basicurl;
-var entityType, compareType;
-var entityId;
-var curVersion = null;
-var converter = new Showdown.converter();
-var filesTable = {};
+var versions = {},
+	files = {},
+	doc,
+	basicurl,
+	entityType,
+	compareType, allComparisonsUrl,
+	entityId,
+	curVersion = null,
+	converter = new Showdown.converter(),
+	filesTable = {};
 
 var visualizers = {};
 
@@ -492,6 +493,7 @@ function displayVersion (id, showDefault)
 			$parent_list = $base_list,
 			$li = null;
 		$base_list.contents().remove();
+		allComparisonsUrl = "";
 		for (var i = 0; i < v.experiments.length; i++)
 		{
 			var exp = v.experiments[i],
@@ -513,6 +515,8 @@ function displayVersion (id, showDefault)
 			// Add a list item with checkbox & link for this experiment
 			$li = $('<li><input type="checkbox" value="' + exp.id + '" /><a href="' + href + '">' + name + '</a></li>');
 			$parent_list.append($li);
+			if ($parent_list == $base_list)
+				allComparisonsUrl += exp.id + "/";
 		}
 		// Show only latest versions by default
 		$base_list.find("ul").hide();
@@ -1017,7 +1021,12 @@ function initModel ()
 		$exp_list.find("input").filter(":visible").each(function () {
 			url += this.value + "/";
 		});
-		document.location = contextPath + "/compare/e/" + url;
+		if (url == "")
+			url = allComparisonsUrl;
+		if (url)
+			document.location = contextPath + "/compare/e/" + url;
+		else
+			window.alert("No experiments available to compare!");
 	});
 }
 
