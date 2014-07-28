@@ -23,8 +23,11 @@
         </p>
         <p>
         Alternatively, enable 'comparison mode' to allow selecting arbitrary experiments from this matrix view to compare.<br/>
-        <span id="comparisonModeDiv">Comparison mode: <button id="comparisonModeButton"></button>
-        <button id="comparisonLink">Compare selected experiments.</button></span>
+        Comparison mode: <button id="comparisonModeButton"></button>
+        <span id="comparisonModeActions">
+            <button id="comparisonLink">Compare selected experiments</button>
+            <button id="comparisonMatrix" title="Show matrix featuring only selected models and/or protocols">Show sub-matrix</button>
+        </span>
         </p>
         <div id="matrixdiv"></div>
         <br/>

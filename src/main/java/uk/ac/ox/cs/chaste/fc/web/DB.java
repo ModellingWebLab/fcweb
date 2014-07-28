@@ -2,6 +2,7 @@ package uk.ac.ox.cs.chaste.fc.web;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.TreeSet;
 import java.util.Vector;
 
@@ -10,7 +11,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+
+import de.binfalse.bflog.LOGGER;
 
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntity;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntityVersion;
@@ -46,11 +50,11 @@ public class DB extends WebModule
 	@Override
 	protected JSONObject answerApiRequest (HttpServletRequest request, 
 		HttpServletResponse response, DatabaseConnector db,
-		Notifications notifications, JSONObject querry, User user, HttpSession session) throws IOException
+		Notifications notifications, JSONObject query, User user, HttpSession session) throws IOException
 	{
 		JSONObject answer = new JSONObject();
 		
-		Object task = querry.get ("task");
+		Object task = query.get ("task");
 		if (task == null)
 		{
 			response.setStatus (HttpServletResponse.SC_BAD_REQUEST);
@@ -63,8 +67,8 @@ public class DB extends WebModule
 			ProtocolManager protocolMgmt = new ProtocolManager (db, notifications, userMgmt, user);
 			JSONObject obj = new JSONObject ();
 
-			Vector<ChasteEntityVersion> modelVersions = getEntityVersions (modelMgmt);
-			Vector<ChasteEntityVersion> protocolVersions = getEntityVersions (protocolMgmt);
+			Vector<ChasteEntityVersion> modelVersions = getEntityVersions (modelMgmt, getIds(query, "modelIds"));
+			Vector<ChasteEntityVersion> protocolVersions = getEntityVersions (protocolMgmt, getIds(query, "protoIds"));
 			
 			Vector<ChasteEntity> experiments = getExperimentVersions (modelVersions, protocolVersions, new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt));
 			
@@ -79,16 +83,47 @@ public class DB extends WebModule
 	}
 	
 	/**
+	 * Get a list of numeric ids from a JSON object.  Returns an empty list if the requested attribute is not present.
+	 * @param obj  the object to get ids from
+	 * @param attrName  the name of the object attribute that holds the array of ids
+	 * @return  the parsed ids
+	 */
+	private ArrayList<Integer> getIds(JSONObject obj, String attrName)
+	{
+		ArrayList<Integer> ids = new ArrayList<Integer>();
+		JSONArray idSrcs = (JSONArray) obj.get(attrName);
+		if (idSrcs != null)
+		{
+			for (Object id : idSrcs)
+			{
+				try
+				{
+					ids.add(Integer.parseInt(id.toString()));
+				}
+				catch (NumberFormatException e)
+				{
+					LOGGER.warn (e, "user provided number which isn't an int: ", id);
+					continue;
+				}
+			}
+		}
+		return ids;
+	}
+	
+	/**
 	 * Get the latest visible version of all visible entities from the given manager.
 	 * The list will be sorted by name by the manager.
+	 * @param entityIds  if given, only retrieve entities with these ids
+	 *     TODO: Implement this by only retrieving desired entities from the DB, rather than filtering afterwards
 	 */
-	private Vector<ChasteEntityVersion> getEntityVersions (ChasteEntityManager entityMgmt)
+	private Vector<ChasteEntityVersion> getEntityVersions (ChasteEntityManager entityMgmt, ArrayList<Integer> entityIds)
 	{
 		Vector<ChasteEntityVersion> entities = new Vector<ChasteEntityVersion> ();
 
 		TreeSet<ChasteEntity> entity = entityMgmt.getAll (false, true);
 		for (ChasteEntity e : entity)
-			entities.add (e.getLatestVersion ());
+			if (entityIds.isEmpty() || entityIds.contains(e.getId()))
+				entities.add (e.getLatestVersion ());
 		
 		return entities;
 	}

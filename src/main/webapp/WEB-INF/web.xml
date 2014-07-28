@@ -74,6 +74,7 @@
     <servlet-mapping>
         <servlet-name>Db</servlet-name>
         <url-pattern>/db.html</url-pattern>
+        <url-pattern>/db/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Login</servlet-name>

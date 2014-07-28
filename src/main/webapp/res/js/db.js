@@ -2,7 +2,8 @@
 var pages = [ "matrix" ],//, "search" ],
 	comparisonMode = false,
 	experimentsToCompare = [],
-	linesToCompare = {'row': [], 'col': []};
+	linesToCompare = {row: [], col: []},
+	baseUrls = {row: "", col: ""}; // These are filled in if we are viewing a sub-matrix
 
 /**
  * Submit a request to create an experiment.
@@ -126,9 +127,6 @@ function drawMatrix (matrix)
 	//console.log ("matrix");
 	//console.log (mat);
 	
-	var div = document.getElementById("matrixdiv");
-	removeChildren (div);
-	
 	for (var key in matrix.experiments)
 	{
 		if (matrix.experiments.hasOwnProperty (key))
@@ -141,19 +139,16 @@ function drawMatrix (matrix)
 		}
 	}
 	
-	var tableDiv = document.createElement("div");
-	tableDiv.id = "matrixContainer";
-
-	var table = document.createElement("table");
+	var div = document.getElementById("matrixdiv"),
+		table = document.createElement("table");
+	removeChildren(div);
 	table.setAttribute("class", "matrixTable");
-	
-	div.appendChild (tableDiv);
-	tableDiv.appendChild (table);
+	div.appendChild(table);
 
 	for (var row = -1; row < mat.length; row++)
 	{
 		var tr = document.createElement("tr");
-		table.appendChild (tr);
+		table.appendChild(tr);
 		for (var col = -1; col < mat[0].length; col++)
 		{
 			var td = document.createElement("td"),
@@ -169,40 +164,46 @@ function drawMatrix (matrix)
 			// Top row: protocol names
 			if (row == -1)
 			{
-				var d1 = document.createElement("div");
-				var d2 = document.createElement("div");
-				var a = document.createElement("a");
-				a.href = contextPath + "/protocol/" + convertForURL(mat[0][col].protocol.name) + "/" + mat[0][col].protocol.entityId
-					+ "/" + convertForURL(mat[0][col].protocol.version) + "/" + mat[0][col].protocol.id;
+				var d1 = document.createElement("div"),
+					d2 = document.createElement("div"),
+					a = document.createElement("a"),
+					proto = mat[0][col].protocol;
+				a.href = contextPath + "/protocol/" + convertForURL(proto.name) + "/" + proto.entityId
+					+ "/" + convertForURL(proto.version) + "/" + proto.id;
 				d2.setAttribute("class", "vertical-text");
 				d1.setAttribute("class", "vertical-text__inner");
 				d2.appendChild(d1);
-				a.appendChild(document.createTextNode(mat[0][col].protocol.name));
+				a.appendChild(document.createTextNode(proto.name));
 				d1.appendChild(a);
 				td.appendChild(d2);
-				$td.addClass("matrixTableCol").data("col", col).click(function (ev) {
-					if (comparisonMode) {
-						ev.preventDefault();
-						addToComparison($(this), 'col');
-					}
-				});
+				$td.addClass("matrixTableCol")
+					.data({col: col, protoId: proto.entityId})
+					.click(function (ev) {
+						if (comparisonMode) {
+							ev.preventDefault();
+							addToComparison($(this), 'col');
+						}
+					});
 				continue;
 			}
 			
 			// Left column: model names
 			if (col == -1)
 			{
-				var a = document.createElement("a");
-				a.href = contextPath + "/model/" + convertForURL(mat[row][0].model.name) + "/" + mat[row][0].model.entityId
-					+ "/" + convertForURL(mat[row][0].model.version) + "/" + mat[row][0].model.id;
-				a.appendChild(document.createTextNode(mat[row][0].model.name));
+				var a = document.createElement("a"),
+					model = mat[row][0].model;
+				a.href = contextPath + "/model/" + convertForURL(model.name) + "/" + model.entityId
+					+ "/" + convertForURL(model.version) + "/" + model.id;
+				a.appendChild(document.createTextNode(model.name));
 				td.appendChild(a);
-				$td.addClass("matrixTableRow").data("row", row).click(function (ev) {
-					if (comparisonMode) {
-						ev.preventDefault();
-						addToComparison($(this), 'row');
-					}
-				});
+				$td.addClass("matrixTableRow")
+					.data({row: row, modelId: model.entityId})
+					.click(function (ev) {
+						if (comparisonMode) {
+							ev.preventDefault();
+							addToComparison($(this), 'row');
+						}
+					});
 				continue;
 			}
 			
@@ -330,6 +331,7 @@ function addToComparison($td, rowOrCol)
 		// Select this row/col
 		linesToCompare[rowOrCol].push(index);
 		$td.addClass("patternized");
+		$("#comparisonMatrix").show();
 		// If this is the first line of this type, clear lines of the other type
 		if (linesToCompare[rowOrCol].length == 1)
 		{
@@ -393,16 +395,17 @@ function computeComparisonLink()
 		var newHref = contextPath + "/compare/e/";
 		for (var i = 0; i < experimentsToCompare.length; i++)
 			newHref += experimentsToCompare[i] + "/";
-		$("#comparisonLink").data("href", newHref).show();
+		$("#comparisonLink").show().data("href", newHref);
 	}
 	else
+	{
+		$("#comparisonMatrix").hide();
 		$("#comparisonLink").hide();
+	}
 }
 
 /**
  * Determine whether an experiment with the given result status can be selected for comparison.
- * @param result
- * @returns {Boolean}
  */
 function isSelectableResult(result)
 {
@@ -468,6 +471,39 @@ function getMatrix (jsonObject, actionIndicator)
     xmlhttp.send(JSON.stringify(jsonObject));
 }
 
+/**
+ * Parse the current location URL to determine what part of the matrix to show.
+ * The URL pathname should look like: {contextPath}/db/models/id1/id2/protocols/id3/id4
+ * If no models or protocols are given, we show everything.
+ * Returns a JSON object to be passed to getMatrix();
+ */
+function parseLocation ()
+{
+	var base = contextPath + "/db/",
+		rest = "",
+		ret = { task: "getMatrix" };
+	if (document.location.pathname.substr(0, base.length) == base)
+		rest = document.location.pathname.substr(base.length);
+	if (rest.length > 0)
+	{
+		var items = rest.split("/"),
+			modelIndex = items.indexOf("models"),
+			protoIndex = items.indexOf("protocols");
+		if (protoIndex != -1)
+		{
+			ret.modelIds = items.slice(modelIndex + 1, protoIndex);
+			ret.protoIds = items.slice(protoIndex + 1);
+		}
+		else if (modelIndex != -1)
+			ret.modelIds = items.slice(modelIndex + 1);
+		if (modelIndex != -1)
+			baseUrls.row = "/models/" + ret.modelIds.join("/");
+		if (protoIndex != -1)
+			baseUrls.col = "/protocols/" + ret.protoIds.join("/");
+	}
+	return ret;
+}
+
 function prepareMatrix ()
 {
 	var div = document.getElementById("matrixdiv");
@@ -477,9 +513,7 @@ function prepareMatrix ()
 	div.appendChild(loadingImg);
 	div.appendChild(document.createTextNode("Preparing experiment matrix; please be patient."));
 
-	getMatrix ({
-    	task: "getMatrix"
-    }, div);
+	getMatrix(parseLocation(), div);
 	
 	$("#comparisonModeButton").text(comparisonMode ? "Disable" : "Enable")
 	                          .click(function () {
@@ -493,12 +527,34 @@ function prepareMatrix ()
 			linesToCompare.col.splice(0, linesToCompare.col.length);
 			$(".patternized").removeClass("patternized");
 			$("#comparisonLink").hide();
+			$("#comparisonMatrix").hide();
 		}
 	});
-	$("#comparisonLink").hide().click(function () {
+	$("#comparisonLink").click(function () {
 	    document.location = $(this).data("href");
 	});
-	
+	$("#comparisonMatrix").click(function () {
+		var url = contextPath + "/db";
+		if (linesToCompare.row.length > 0)
+		{
+			url += "/models";
+			for (var i=0; i<linesToCompare.row.length; i++)
+				url += "/" + $("#matrix-entry-" + linesToCompare.row[i] + "--1").data("modelId");
+		}
+		else
+			url += baseUrls.row;
+		if (linesToCompare.col.length > 0)
+		{
+			url += "/protocols";
+			for (var i=0; i<linesToCompare.col.length; i++)
+				url += "/" + $("#matrix-entry--1-" + linesToCompare.col[i]).data("protoId");
+		}
+		else
+			url += baseUrls.col;
+		document.location.href = url; // TODO: use history API instead?
+	});
+	$("#comparisonLink").hide();
+	$("#comparisonMatrix").hide();
 }
 
 function switchPage (page)
