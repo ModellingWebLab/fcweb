@@ -6,3 +6,7 @@ Our prototype installation is publicly visible at [https://chaste.cs.ox.ac.uk/Fu
 ## Installation
 
 See [INSTALL.md](src/master/INSTALL.md).
+
+## Documentation for developers
+
+A few pointers are available at [Developing.md](src/master/Developing.md).

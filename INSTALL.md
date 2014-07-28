@@ -34,6 +34,7 @@ Copy `resources/celeryd-init` as `/etc/init.d/celeryd`, and `resources/celeryd-d
 You'll definitely need to edit the latter file to suit your system.
 The server can then be started with `sudo /etc/init.d/celery restart`,
 but don't do this until you've finished the web service setup below.
+To ensure it is restarted when the machine reboots, use `sudo update-rc.d celery defaults`.
 
 For some additional security, you might want to stop the rabbitmq broker listening on external ports,
 although the default account only accepts logins from localhost anyway.
@@ -106,9 +107,12 @@ The server configuration is in `/etc/tomcat7/server.xml`. Modify this file, so t
 
 Then, context files are stored in `/var/lib/tomcat7/context` and your apps are expected to be in `/var/lib/tomcat7/webapps`.
 
-Copy `resources/FunctionalCuration.xml` to `/var/lib/tomcat7/context` and configure the file properly, including database credentials and link to the backend.
+Copy `resources/FunctionalCuration.xml` to `/var/lib/tomcat7/context` and configure the file properly,
+including database credentials and link to the backend.
+You may also wish to change the `bivesWebService` parameter if you are running this model comparison service locally;
+by default it uses the author's endpoint at `http://bives.sems.uni-rostock.de/`.
 
-Add jdbc mysql driver to /var/lib/tomcat7/lib. (http://dev.mysql.com/downloads/connector/j/)
+Add jdbc mysql driver to `/var/lib/tomcat7/lib`. (http://dev.mysql.com/downloads/connector/j/)
 
 ### Build project
 
