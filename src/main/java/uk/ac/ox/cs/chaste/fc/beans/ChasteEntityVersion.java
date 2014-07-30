@@ -130,9 +130,9 @@ public class ChasteEntityVersion
 	public String getJointVisibility(ChasteEntityVersion other)
 	{
 		String result = this.visibility;
-		if ((other.visibility == ChasteEntityVersion.VISIBILITY_PRIVATE) ||
-				(other.visibility == ChasteEntityVersion.VISIBILITY_RESTRICTED
-				 && this.visibility == ChasteEntityVersion.VISIBILITY_PUBLIC))
+		if ((other.visibility.equals(ChasteEntityVersion.VISIBILITY_PRIVATE)) ||
+				(other.visibility.equals(ChasteEntityVersion.VISIBILITY_RESTRICTED)
+				 && this.visibility.equals(ChasteEntityVersion.VISIBILITY_PUBLIC)))
 		{
 			result = other.visibility;
 		}
