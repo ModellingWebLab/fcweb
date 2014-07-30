@@ -97,6 +97,14 @@ function updateVisibility (jsonObject, actionIndicator)
 	        	if (json.updateVisibility.response)
 	        	{
 	        		actionIndicator.innerHTML = "<img src='"+contextPath+"/res/img/check.png' alt='valid' /> " + msg;
+	        		var v = versions[jsonObject.version];
+	        		$("#version-item-" + v.id)
+	        			.removeClass("entityviz-" + v.visibility)
+	        			.addClass("entityviz-" + jsonObject.visibility)
+	        			.attr("title", function (index, oldTitle) {
+	        				return oldTitle.replace(/Visibility: (\w+)/, "Visibility: " + jsonObject.visibility);
+	        			});
+	        		v.visibility = jsonObject.visibility;
 	        	}
 	        	else
 	        		actionIndicator.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + msg;
@@ -902,6 +910,7 @@ function initModel ()
 			curVersion = null;
 			doc.entity.version.style.display = "none";
 			doc.entity.details.style.display = "block";
+			removeChildren(doc.version.visibilityAction);
 			nextPage (doc.version.close.href);
 		}
     }, true);
@@ -912,6 +921,7 @@ function initModel ()
 			ev.preventDefault();
 			doc.version.filedetails.style.display = "none";
 			doc.version.files.style.display = "block";
+			removeChildren(doc.version.visibilityAction);
 			nextPage (doc.file.close.href);
 		}
     }, true);
