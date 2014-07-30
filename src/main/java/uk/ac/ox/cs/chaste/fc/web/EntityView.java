@@ -873,72 +873,75 @@ public class EntityView extends WebModule
 	{
 		if (baseVersion != null && query.get ("rerunExperiments") != null)
 		{
+			boolean rerunExperiments = false;
 			try
 			{
-				boolean rerunExperiments = Boolean.parseBoolean (query.get ("rerunExperiments").toString ());
-				
-				if (rerunExperiments)
-				{
-					ModelManager modelMgmt = new ModelManager (db, notifications, userMgmt, user);
-					ProtocolManager protocolMgmt = new ProtocolManager (db, notifications, userMgmt, user);
-					
-					ExperimentManager expMgmt = new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt);
-					
-					int ok = 0, failed = 0;
-					
-					ChasteEntityVersion newVersion = entityMgmt.getVersionById (newVersionId);
-					
-					TreeSet<ChasteEntity> exps = null;
-					if (entityMgmt.getEntityColumn ().equals ("model"))
-					{
-						exps = expMgmt.getExperimentsByModel (baseVersion.getId (), false, false);
-						if (exps != null)
-						{
-							for (ChasteEntity ex : exps)
-							{
-								ChasteExperiment e = (ChasteExperiment) ex;
-								try
-								{
-									if (NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, newVersion, e.getProtocol (), modelMgmt, protocolMgmt, true) != null)
-										ok++;
-									else
-										failed++;
-								}
-								catch (Exception e1)
-								{
-									failed++;
-								}
-							}
-						}
-					}
-					else if (entityMgmt.getEntityColumn ().equals ("protocol"))
-					{
-						exps = expMgmt.getExperimentsByProtocol (baseVersion.getId (), false, false);
-						if (exps != null)
-						{
-							for (ChasteEntity ex : exps)
-							{
-								ChasteExperiment e = (ChasteExperiment) ex;
-								try
-								{
-									if (NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, e.getModel (), newVersion, modelMgmt, protocolMgmt, true) != null)
-										ok++;
-									else
-										failed++;
-								}
-								catch (Exception e1)
-								{
-									failed++;
-								}
-							}
-						}
-					}
-					
-					res.put ("expCreation", "created " + ok + " experiments; " + failed + " failed");
-				}
+				rerunExperiments = Boolean.parseBoolean (query.get ("rerunExperiments").toString ());
 			}
 			catch (NumberFormatException e)
-			{}
+			{
+				return;
+			}
+				
+			if (rerunExperiments)
+			{
+				ModelManager modelMgmt = new ModelManager (db, notifications, userMgmt, user);
+				ProtocolManager protocolMgmt = new ProtocolManager (db, notifications, userMgmt, user);
+				
+				ExperimentManager expMgmt = new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt);
+				
+				int ok = 0, failed = 0;
+				
+				ChasteEntityVersion newVersion = entityMgmt.getVersionById (newVersionId);
+				
+				TreeSet<ChasteEntity> exps = null;
+				if (entityMgmt.getEntityColumn ().equals ("model"))
+				{
+					exps = expMgmt.getExperimentsByModel (baseVersion.getId (), true, false);
+					if (exps != null)
+					{
+						for (ChasteEntity ex : exps)
+						{
+							ChasteExperiment e = (ChasteExperiment) ex;
+							try
+							{
+								if (NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, newVersion, e.getProtocol (), modelMgmt, protocolMgmt, true) != null)
+									ok++;
+								else
+									failed++;
+							}
+							catch (Exception e1)
+							{
+								failed++;
+							}
+						}
+					}
+				}
+				else if (entityMgmt.getEntityColumn ().equals ("protocol"))
+				{
+					exps = expMgmt.getExperimentsByProtocol (baseVersion.getId (), true, false);
+					if (exps != null)
+					{
+						for (ChasteEntity ex : exps)
+						{
+							ChasteExperiment e = (ChasteExperiment) ex;
+							try
+							{
+								if (NewExperiment.createExperiment (db, notifications, expMgmt, userMgmt, user, e.getModel (), newVersion, modelMgmt, protocolMgmt, true) != null)
+									ok++;
+								else
+									failed++;
+							}
+							catch (Exception e1)
+							{
+								failed++;
+							}
+						}
+					}
+				}
+				
+				res.put ("expCreation", "created " + ok + " experiments; " + failed + " failed");
+			}
 		}
 	}
 
