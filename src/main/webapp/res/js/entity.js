@@ -622,6 +622,35 @@ function updateVersion (rv)
 	versions[v.id] = v;
 }
 
+/**
+ * Get the full information about a newly created entity version, and add it to the local list.
+ * @param id  version id
+ * @param url  url to page for this version
+ */
+function addNewVersion(id, url)
+{
+    requestInformation ({
+    	task: "getInfo",
+    	version: id
+	}, function () {
+		console.log("New info got"); console.log(versions); console.log(id);
+		var v = versions[id],
+			deleteLink = ' <a id="deleteVersion-' + v.id + '" class="deleteVersionLink"><img src="' + contextPath + '/res/img/delete.png" alt="delete version" title="delete this version of the ' + entityType + '" /></a>',
+			classes = 'entityviz-' + v.visibility + (v.status ? ' experiment-' + v.status : '');
+		$("#entityversionlist_content").prepend(
+    		'<p id="version-item-' + v.id + '" title="' + v.created + ' -- Visibility: ' + v.visibility + '" class="' + classes + '">\n'
+    		+ '<input type="checkbox" value="' + v.id + '" class="comparisonCheckBox"/>\n'
+    		+ '<strong><a class="entityversionlink" href="' + url + '">' + v.name + '</a></strong>\n'
+    		+ ' by <em>' + v.author + deleteLink + '</em>'
+    		+ (v.commitMessage ? ' &mdash; <small>' + v.commitMessage + '</small>' : '')
+    		+ '<br/>\n'
+    		+ '<span class="suppl"><small>created </small> <time>' + v.created + '</time> '
+    		+ '<small>containing</small> ' + v.files.length + ' file' + (v.files.length != 1 ? 's': '') + '.</span>\n'
+    		+ '</p>\n').find('.deleteVersionLink').click(deleteVersionCallback);
+		beautifyTimeStamps();
+	});
+}
+
 function getFileContent (file, succ)
 {
 	// TODO: loading indicator.. so the user knows that we are doing something
@@ -941,7 +970,7 @@ function initModel ()
 					experiment : entityId
 				}],
 				force: true
-			},resubmitAction);
+			}, resubmitAction, addNewVersion);
 		});
 	}
 	

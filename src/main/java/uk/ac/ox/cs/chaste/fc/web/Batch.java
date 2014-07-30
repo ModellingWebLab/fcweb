@@ -227,6 +227,7 @@ public class Batch extends WebModule
 		int expFAIL = 0;
 		ExperimentManager expMgmt = new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt);
 		JSONArray ids = (JSONArray) querry.get ("entities");
+		JSONArray createdExps = new JSONArray();
 		for (int i = 0; i < ids.size (); i++)
 		{
 			try
@@ -254,7 +255,7 @@ public class Batch extends WebModule
 				continue;
 			}
 			
-			if (tryCreateExperiment(model, protocol, db, notifications, expMgmt, userMgmt, user, modelMgmt, protocolMgmt, force))
+			if (tryCreateExperiment(model, protocol, db, notifications, expMgmt, userMgmt, user, modelMgmt, protocolMgmt, force, createdExps))
 				expOK++;
 			else
 				expFAIL++;
@@ -263,6 +264,7 @@ public class Batch extends WebModule
 		JSONObject obj = new JSONObject ();
 			obj.put ("response", expFAIL == 0);
 			obj.put ("responseText", expOK + " experiments started; " + expFAIL + " experiments failed to start");
+			obj.put ("createdExps", createdExps);
 		answer.put ("batchSubmit", obj);
 		return answer;
 	}
@@ -290,6 +292,11 @@ public class Batch extends WebModule
 		}
 		force &= user.isAllowedToForceNewExperiment ();
 		
+		JSONObject batchResp = new JSONObject();
+		answer.put("batchTasks", batchResp);
+		JSONArray createdExps = new JSONArray();
+		batchResp.put("createdExps", createdExps);
+
 		JSONArray array = (JSONArray) querry.get ("batchTasks");
 		for (Object task : array)
 		{
@@ -343,7 +350,7 @@ public class Batch extends WebModule
 				TreeSet<ChasteEntity> experiments = expMgmt.getAll (false, false);
 				for (ChasteEntity exp : experiments)
 				{
-					if (reRunExperiment ((ChasteExperiment) exp, db, notifications, expMgmt, userMgmt, user, modelMgmt, protocolMgmt, force))
+					if (reRunExperiment ((ChasteExperiment) exp, db, notifications, expMgmt, userMgmt, user, modelMgmt, protocolMgmt, force, createdExps))
 						ok++;
 					else
 						failed++;
@@ -352,7 +359,7 @@ public class Batch extends WebModule
 			else if (experiment >= 0)
 			{
 				ChasteExperiment exp = (ChasteExperiment) expMgmt.getEntityById (experiment);
-				if (reRunExperiment ((ChasteExperiment) exp, db, notifications, expMgmt, userMgmt, user, modelMgmt, protocolMgmt, force))
+				if (reRunExperiment ((ChasteExperiment) exp, db, notifications, expMgmt, userMgmt, user, modelMgmt, protocolMgmt, force, createdExps))
 					ok++;
 				else
 					failed++;
@@ -378,7 +385,7 @@ public class Batch extends WebModule
 					continue;
 				}
 				
-				if (tryCreateExperiment(modelVersion, protocolVersion, db, notifications, expMgmt, userMgmt, user, modelMgmt, protocolMgmt, force))
+				if (tryCreateExperiment(modelVersion, protocolVersion, db, notifications, expMgmt, userMgmt, user, modelMgmt, protocolMgmt, force, createdExps))
 					ok++;
 				else
 					failed++;
@@ -391,10 +398,8 @@ public class Batch extends WebModule
 			}
 		}
 
-		JSONObject obj = new JSONObject ();
-			obj.put ("response", failed == 0);
-			obj.put ("responseText", ok + " experiments started; " + failed + " experiments failed to start");
-		answer.put ("batchTasks", obj);
+		batchResp.put ("response", failed == 0);
+		batchResp.put ("responseText", ok + " experiments started; " + failed + " experiments failed to start");
 		return answer;
 	}
 	
@@ -402,8 +407,10 @@ public class Batch extends WebModule
 	 * Try to create a new experiment with the given model & protocol versions, and return whether it was queued for execution.
 	 * As a side effect, set error/info notifications indicating success or failure.
 	 */
+	@SuppressWarnings("unchecked")
 	public static boolean tryCreateExperiment(ChasteEntityVersion model, ChasteEntityVersion protocol,
-			DatabaseConnector db, Notifications notifications, ExperimentManager expMgmt, UserManager userMgmt, User user, ModelManager modelMgmt, ProtocolManager protocolMgmt, boolean force)
+			DatabaseConnector db, Notifications notifications, ExperimentManager expMgmt, UserManager userMgmt, User user, ModelManager modelMgmt, ProtocolManager protocolMgmt, boolean force,
+			JSONArray createdExps)
 	{
 		String expName = "[" + model.getName() + "@" + model.getVersion() + "] -- [" + protocol.getName() + "@" + protocol.getVersion() + "]";
 		ChasteExperimentVersion expVer = null;
@@ -420,6 +427,10 @@ public class Batch extends WebModule
 		ChasteExperiment exp = expVer.getExperiment();
 		String expUrl = Tools.getThisUrl() + "experiment/" + Tools.convertForURL(expVer.getName()) + "/" + exp.getId() + "/" + Tools.convertForURL(expVer.getVersion()) + "/" + expVer.getId() + "/";
 		notifications.addInfo ("experiment queued: <a href='" + expUrl + "'>" + expName + "</a>");
+		JSONObject obj = new JSONObject();
+		obj.put("versId", expVer.getId());
+		obj.put("url", expUrl);
+		createdExps.add(obj);
 		return true;
 	}
 	
@@ -427,7 +438,7 @@ public class Batch extends WebModule
 	 * Try to run a new version of the given experiment, and return whether it was queued for execution.
 	 * As a side effect, set error/info notifications indicating success or failure.
 	 */
-	public static boolean reRunExperiment (ChasteExperiment exp, DatabaseConnector db, Notifications notifications, ExperimentManager expMgmt, UserManager userMgmt, User user, ModelManager modelMgmt, ProtocolManager protocolMgmt, boolean force)
+	public static boolean reRunExperiment (ChasteExperiment exp, DatabaseConnector db, Notifications notifications, ExperimentManager expMgmt, UserManager userMgmt, User user, ModelManager modelMgmt, ProtocolManager protocolMgmt, boolean force, JSONArray createdExps)
 	{
 		if (exp == null)
 		{
@@ -438,6 +449,6 @@ public class Batch extends WebModule
 		
 		ChasteEntityVersion modelVersion = exp.getModel ();
 		ChasteEntityVersion protocolVersion = exp.getProtocol ();
-		return tryCreateExperiment(modelVersion, protocolVersion, db, notifications, expMgmt, userMgmt, user, modelMgmt, protocolMgmt, force);
+		return tryCreateExperiment(modelVersion, protocolVersion, db, notifications, expMgmt, userMgmt, user, modelMgmt, protocolMgmt, force, createdExps);
 	}
 }

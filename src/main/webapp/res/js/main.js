@@ -105,7 +105,7 @@ function getPos (ele)
     return {xPos:x, yPos:y};
 }
 
-function batchProcessing (jsonObject, actionIndicator)
+function batchProcessing (jsonObject, actionIndicator, callback)
 {
 	actionIndicator.innerHTML = "<img src='"+contextPath+"/res/img/loading2-new.gif' alt='loading' />";
     
@@ -142,6 +142,12 @@ function batchProcessing (jsonObject, actionIndicator)
 	        	if (json.batchTasks.response)
 	        	{
 	        		actionIndicator.innerHTML = "<img src='"+contextPath+"/res/img/check.png' alt='valid' /> " + msg;
+	        		if (callback && json.batchTasks.createdExps)
+	        		{
+	        			var exps = json.batchTasks.createdExps;
+	        			for (var i=0; i<exps.length; i++)
+	        				callback(exps[i].versId, exps[i].url);
+	        		}
 	        	}
 	        	else
 	        		actionIndicator.innerHTML = "<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + msg;

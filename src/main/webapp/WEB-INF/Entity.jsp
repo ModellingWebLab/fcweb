@@ -51,27 +51,16 @@
 			</c:if>
 			<div id="entityversionlist_content">
 				<c:forEach items="${entity.orderedVersions}" var="version" >
-		    		<p id="version-item-${version.value.id}" title="${version.value.created} -- Visibility: ${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> -- ${version.value.status}</c:if>" class="entityviz-${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> experiment-${version.value.status}</c:if>">
+		    		<p id="version-item-${version.value.id}"
+		    		   title="${version.value.created} -- Visibility: ${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> -- ${version.value.status}</c:if>"
+		    		   class="entityviz-${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> experiment-${version.value.status}</c:if>">
 	    				<input type="checkbox" value="${version.value.id}" class="comparisonCheckBox"/>
-						<c:choose>
-							<c:when test="${entity.type == 'experiment' && version.value.numFiles eq 0}">
-								<strong>
-								${version.value.version}</strong> by <em>${version.value.author}</em> - ${version.value.returnText}
-								<c:if test="${entity.author == User.nick || User.admin}">
-							    	<a id='deleteVersion-${version.value.id}' class="deleteVersionLink"><img src="${contextPath}/res/img/delete.png" alt="delete version" title="delete version" /></a>
-							    </c:if><br/>
-		    					<span class="suppl"><small>created </small> <time>${version.value.created}</time> <small>containing</small> ${version.value.numFiles} File<c:if test="${version.value.numFiles!=1}">s</c:if>.</span>
-							</c:when>
-							<c:otherwise>
-								<strong>
-								<a class="entityversionlink" href="${contextPath}/${entity.type}/${entity.url}/${entity.id}/${version.value.url}/${version.value.id}/">
-								${version.value.version}</a></strong> by <em>${version.value.author}
-								<c:if test="${entity.author == User.nick || User.admin}">
-							    	<a id='deleteVersion-${version.value.id}' class="deleteVersionLink"><img src="${contextPath}/res/img/delete.png" alt="delete version" title="delete this version of the ${entity.type}" /></a>
-							    </c:if></em><c:if test="${not empty version.value.commitMessage}"> &mdash; <small>${version.value.commitMessage}</small></c:if><br/>
-		    					<span class="suppl"><small>created </small> <time>${version.value.created}</time> <small>containing</small> ${version.value.numFiles} File<c:if test="${version.value.numFiles!=1}">s</c:if>.</span>
-							</c:otherwise>
-						</c:choose>
+						<strong><a class="entityversionlink" href="${contextPath}/${entity.type}/${entity.url}/${entity.id}/${version.value.url}/${version.value.id}/">${version.value.version}</a></strong>
+						 by <em>${version.value.author}
+						<c:if test="${entity.author == User.nick || User.admin}">
+					    	<a id='deleteVersion-${version.value.id}' class="deleteVersionLink"><img src="${contextPath}/res/img/delete.png" alt="delete version" title="delete this version of the ${entity.type}" /></a>
+					    </c:if></em><c:if test="${not empty version.value.commitMessage}"> &mdash; <small>${version.value.commitMessage}</small></c:if><br/>
+    					<span class="suppl"><small>created </small> <time>${version.value.created}</time> <small>containing</small> ${version.value.numFiles} file<c:if test="${version.value.numFiles!=1}">s</c:if>.</span>
 				    </p>
 		        </c:forEach>
 			</div>
