@@ -526,8 +526,15 @@ public class User
 			return true;
 		if (vis.equals (ChasteEntityVersion.VISIBILITY_RESTRICTED))
 			return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_PROTO_AUTHOR) || role.equals (ROLE_ADMIN));
-		
-		return isAuthorized () && version.getAuthor ().getId () == id;
+		// Private case is specialised for experiments - we check authorship of model & protocol instead
+		if (!isAuthorized())
+			return false;
+		if (version instanceof ChasteExperimentVersion)
+		{
+			ChasteExperiment exp = ((ChasteExperimentVersion) version).getExperiment();
+			return isAllowedToSeeEntityVersion(exp.getModel()) && isAllowedToSeeEntityVersion(exp.getProtocol());
+		}
+		return version.getAuthor().getId() == id;
 	}
 	
 	
