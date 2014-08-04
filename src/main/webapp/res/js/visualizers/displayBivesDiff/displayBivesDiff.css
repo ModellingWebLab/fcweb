@@ -91,6 +91,8 @@
 }
 
 /* Add some extra spacing between MathML identifiers to avoid confusion */
-.mi:not([style*="padding"]) {
+.mi:not([style*="padding"]),
+.mn
+{
     padding-left: 0.1em;
 }
