@@ -11,7 +11,7 @@
     
 	<div id="filedetails">
 		<div class="closebtn"><small>
-		    <a id="exportPlot" style="display: none;">export plot data</a>
+		    <a id="exportPlot" style="display: none;">export plot data</a> | 
 		    <a id="fileclose">&otimes; close</a>
 		</small></div>
     	<h3 id="filename"></h3>
