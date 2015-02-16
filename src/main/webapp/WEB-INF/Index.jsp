@@ -3,7 +3,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}" contextPath="${contextPath}">
-    <h1>Functional Curation for Cardiac Electrophysiology</h1>
+    <h1>Cardiac Electrophysiology Web Lab</h1>
     
     <h2>Quick start links</h2>
     <ul>
