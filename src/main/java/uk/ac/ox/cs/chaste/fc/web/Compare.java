@@ -162,7 +162,8 @@ public class Compare extends WebModule
 							}
 							entities.add (v);
 						}
-						LOGGER.warn ("couldn't find latest version of entity with id ", curId);
+						else
+							LOGGER.warn ("couldn't find latest version of entity with id ", curId);
 					}
 					else
 						LOGGER.warn ("user requested entity with id ", curId, " but there is no such entity");
@@ -176,7 +177,8 @@ public class Compare extends WebModule
 						JSONObject v = version.toJson ();
 						entities.add (v);
 					}
-					LOGGER.warn ("couldn't find version with id ", curId);
+					else
+						LOGGER.warn ("couldn't find version with id ", curId);
 				}
 				
 			}
@@ -238,11 +240,9 @@ public class Compare extends WebModule
 			String pathToVersionB = entityMgmt.getEntityStorageDir () + Tools.FILESEP + entityVersion2.getFilePath () + Tools.FILESEP + version2.getName ();
 			
 			
-			// compute unix diff
+			// compute model structure diff
 			if (task.equals ("getBivesDiff"))
 			{
-				/*String id = "http://budhat.sems.uni-rostock.de/download?downloadModel=24http://budhat.sems.uni-rostock.de/download?downloadModel=25";
-				id = Tools.hash (id);*/
 				String id = Tools.hash (pathToVersionA + "--  --" + pathToVersionB);
 				
 				// read files and send them to bives
@@ -273,10 +273,8 @@ public class Compare extends WebModule
 				}
 				
 				BivesComparisonRequest bivesRequest = new BivesComparisonRequest (
-	         s,
-	         sb.toString());
-	         /*"http://budhat.sems.uni-rostock.de/download?downloadModel=24",
-	         "http://budhat.sems.uni-rostock.de/download?downloadModel=25");*/
+						s,
+						sb.toString());
 
 				bivesRequest.addCommand (BivesComparisonRequest.COMMAND_COMPONENT_HIERARCHY_JSON);
 				bivesRequest.addCommand (BivesComparisonRequest.COMMAND_REACTIONS_JSON);
@@ -284,7 +282,8 @@ public class Compare extends WebModule
 				bivesRequest.addCommand (BivesComparisonRequest.COMMAND_XML_DIFF);
 				
 				BivesWs bives = new HttpBivesClient("http://bives.sems.uni-rostock.de/");
-	      BivesComparisonResponse result;
+				LOGGER.debug ("Calling BiVeS at http://bives.sems.uni-rostock.de/");
+				BivesComparisonResponse result;
 				try
 				{
 					result = bives.performRequest(bivesRequest);
@@ -296,18 +295,18 @@ public class Compare extends WebModule
 					return answer;
 				}
 				
-	      if (result.hasError ())
-	      {
-	      	String errors = "";
-	         for (String err : result.getErrors ())
-	         {
-	            LOGGER.error ("error from bives comparison request: " + err);
-	            errors += " [" + err + "] ";
-	         }
-	 				obj.put ("responseText", errors);
+				if (result.hasError ())
+				{
+					String errors = "";
+					for (String err : result.getErrors ())
+					{
+						LOGGER.error ("error from bives comparison request: " + err);
+						errors += " [" + err + "] ";
+					}
+					obj.put ("responseText", errors);
 					return answer;
-	      }
-	      
+				}
+				
 				
 				JSONObject bivesResult = new JSONObject ();
 				
