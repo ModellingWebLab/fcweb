@@ -154,7 +154,7 @@
 		
 		<%-- finish the site --%>
 		<footer>
-			Functional Curation for Cardiac Cellular Electrophysiology &copy; 2014 University of Oxford
+			Cardiac Electrophysiology Web Lab &copy; 2014 University of Oxford
 		</footer>
 		
 		
