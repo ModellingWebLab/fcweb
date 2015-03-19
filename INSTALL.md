@@ -9,6 +9,11 @@ The following instructions assume a Debian-based system (we use Ubuntu) using to
 * java based webserver (e.g. tomcat)
 * mail server on localhost (e.g. postfix)
 
+On Ubuntu 14.04 we used:
+```
+sudo apt-get install tomcat7 postfix maven libapache2-mod-jk mysql-server apache2 libmysql-java
+```
+
 For the backend:
 
 * All the Chaste dependencies
@@ -25,8 +30,8 @@ For the cardiac domain, the experiment execution program is an extension project
 Install the dependencies:
 ```
 sudo apt-get install rabbitmq-server
-sudo pip install celery
-sudo pip install python-requests
+sudo -H pip install celery
+sudo -H pip install requests
 ```
 
 In the `resources` folder there is a sample init script and configuration file for running Celery on boot.
@@ -34,7 +39,7 @@ Copy `resources/celeryd-init` as `/etc/init.d/celeryd`, and `resources/celeryd-d
 You'll definitely need to edit the latter file to suit your system.
 The server can then be started with `sudo /etc/init.d/celery restart`,
 but don't do this until you've finished the web service setup below.
-To ensure it is restarted when the machine reboots, use `sudo update-rc.d celery defaults`.
+To ensure it is restarted when the machine reboots, use `sudo update-rc.d celeryd defaults`.
 
 For some additional security, you might want to stop the rabbitmq broker listening on external ports,
 although the default account only accepts logins from localhost anyway.
@@ -78,10 +83,10 @@ For instance, to build using 4 cores:
 
 ```
 svn co https://chaste.cs.ox.ac.uk/svn/chaste/trunk Chaste
-cd projects
+cd Chaste/projects
 svn co https://chaste.cs.ox.ac.uk/svn/chaste/projects/FunctionalCuration
 cd ..
-scons -j4 b=GccOptNative cl=1 exe=1 projects/FunctionalCuration/apps
+scons -j4 b=GccOpt cl=1 exe=1 projects/FunctionalCuration/apps
 ```
 
 ## Setup front-end
@@ -95,6 +100,11 @@ create database chaste;
 create user chaste identified by 'password';
 grant all on chaste.* to 'chaste'@'localhost' identified by 'password';
 flush privileges;
+```
+
+Then:
+```
+mysql -u chaste chaste -p < resources/chaste.sql
 ```
 
 ### Tomcat configuration
@@ -192,7 +202,7 @@ Now you can start uploading models and protocols.
 
 Follow for example http://www.dreamchain.com/apache-server-tomcat-mod_jk-on-debian-6-0-squeeze/
 
-A sample vhost configuration might look like:
+A sample vhost configuration for Apache 2.2 might look like:
 
 	<VirtualHost *:80>
 		ServerAdmin youradmin@your.company
@@ -218,6 +228,9 @@ A sample vhost configuration might look like:
 		# send requests to /FunctionalCuration* to tomcat
 		JkMount /FunctionalCuration* ajp13_worker
 	</VirtualHost>
+
+Note that for Apache 2.4 you need to replace the 'Order' and 'Allow' directives with 'Require' directives.
+`Require all granted` allows access (replacing the first pair above) and `Require all denied` replaces the second pair to deny access to the config file.
 
 Try to access http://your.company/FunctionalCuration
 

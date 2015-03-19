@@ -29,7 +29,7 @@
         override="false" />
     <Parameter description="Where to put files?"
         name="storageDir"
-        value="/tmp/chaste-storage"
+        value="/var/lib/chaste-storage"
         override="false" />
     <Parameter description="Where's the backend webservice located?"
         name="chasteURL"
