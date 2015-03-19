@@ -30,7 +30,9 @@
         The converse comparison (one model, many protocols) is available via viewing a model.
         </p>
         <p>
-        Alternatively, enable 'comparison mode' to allow selecting arbitrary experiments from this matrix view to compare.<br/>
+        Alternatively, enable 'comparison mode' to allow selecting arbitrary experiments from this matrix view to compare.
+	Click on a column or row heading to select the entire column or row.
+	<br/>
         Comparison mode: <button id="comparisonModeButton"></button>
         <span id="comparisonModeActions">
             <button id="comparisonLink">Compare selected experiments</button>
@@ -45,12 +47,17 @@
                 <td class="center">not run</td>
                 <td class="experiment-QUEUED center">queued</td>
                 <td class="experiment-RUNNING center">running</td>
-                <td class="experiment-SUCCESS center">ran successfully</td>
+                <td class="experiment-SUCCESS center">ran to completion</td>
                 <td class="experiment-PARTIAL center">partially ran</td>
-                <td class="experiment-FAILED center">failed to complete</td>
+                <td class="experiment-FAILED center">did not complete</td>
                 <td class="experiment-INAPPRORIATE center">inappropriate</td>
             </tr>
         </table>
+	<p>
+	An 'inappropriate' experiment is one where the model does not contain some biological feature probed by the protocol.
+	Experiments show as red if no graphs are available, green if all those expected from the protocol description are generated.
+	Note that no comparison is done against experimental data, and so the colours do <strong>not</strong> indicate model 'correctness' in any sense.
+	</p>
     </section>
 </t:skeleton>
 
