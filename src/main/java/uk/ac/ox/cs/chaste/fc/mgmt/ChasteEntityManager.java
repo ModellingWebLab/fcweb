@@ -119,7 +119,7 @@ public abstract class ChasteEntityManager
 				knownEntities.put (mid, cur);
 			}
 			
-			LOGGER.debug ("getting version of entity ", res.size(), ": ", cur.getId(), " ", cur.getName());
+//			LOGGER.debug ("getting version of entity ", res.size(), ": ", cur.getId(), " ", cur.getName());
 			
 			ChasteEntityVersion ver;
 			if (knownVersions.get (vid) != null)
@@ -131,11 +131,11 @@ public abstract class ChasteEntityManager
 			}
 			if (neglectPermissions || user.isAllowedToSeeEntityVersion (ver))
 			{
-				LOGGER.debug ("user ", user.getNick(), " allowed", (neglectPermissions ? " (perm ignored)" : ""), ": ", ver.toJson());
+//				LOGGER.debug ("user ", user.getNick(), " allowed", (neglectPermissions ? " (perm ignored)" : ""), ": ", ver.toJson());
 				cur.addVersion (ver);
 			}
-			else
-				LOGGER.debug ("user ", user.getNick(), " not allowed: ", ver.toJson ());
+//			else
+//				LOGGER.debug ("user ", user.getNick(), " not allowed: ", ver.toJson ());
 		}
 		if (filterEmptyEntities)
 		{
