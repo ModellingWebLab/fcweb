@@ -6,9 +6,13 @@ CELERY_TIMEZONE = 'Europe/London'
 CELERY_ENABLE_UTC = True
 
 # We expect to have few tasks, but long running, so don't reserve more than you're working on
+# (this works well combined with the -Ofair option to the workers)
 CELERYD_PREFETCH_MULTIPLIER = 1
 # Since tasks are long-running, we want to know if they are actually running
 CELERY_TRACK_STARTED = True
+
+# Just in case, restart workers once they've run this many jobs
+CELERYD_MAX_TASKS_PER_CHILD = 50
 
 CELERYD_TASK_SOFT_TIME_LIMIT = 60 * 60 * 15  # 15 hours
 
