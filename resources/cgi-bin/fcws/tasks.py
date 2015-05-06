@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+import time
 import zipfile
 
 import celery
@@ -98,7 +99,15 @@ def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir):
         args = [config['exe_path'], modelPath, protoPath, os.path.join(tempDir, 'output')]
         child_stdout_name = os.path.join(tempDir, 'stdout.txt')
         output_file = open(child_stdout_name, 'w')
-        subprocess.call(args, stdout=output_file, stderr=subprocess.STDOUT)
+        try:
+            child = subprocess.Popen(args, stdout=output_file, stderr=subprocess.STDOUT)
+            child.wait()
+        except:
+            # The job may time out, in which case we want to make sure we kill off the child process too
+            child.terminate()
+            time.sleep(5)
+            child.kill()
+            raise
         output_file.close()
     
         # Zip up the outputs and post them to the callback
