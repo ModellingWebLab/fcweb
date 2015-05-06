@@ -60,6 +60,9 @@
 						<c:if test="${entity.author == User.nick || User.admin}">
 					    	<a id='deleteVersion-${version.value.id}' class="deleteVersionLink"><img src="${contextPath}/res/img/delete.png" alt="delete version" title="delete this version of the ${entity.type}" /></a>
 					    </c:if></em><c:if test="${not empty version.value.commitMessage}"> &mdash; <small>${version.value.commitMessage}</small></c:if><br/>
+					    <c:if test="${entity.type == 'experiment' and version.value.returnText.startsWith('failed ')}">
+					        <span class="suppl"><small>${version.value.returnText}</small></span><br/>
+					    </c:if>
     					<span class="suppl"><small>created </small> <time>${version.value.created}</time> <small>containing</small> ${version.value.numFiles} file<c:if test="${version.value.numFiles!=1}">s</c:if>.</span>
 				    </p>
 		        </c:forEach>
