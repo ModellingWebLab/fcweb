@@ -487,9 +487,14 @@ function displayVersion (id, showDefault)
 		tr.appendChild(td);
 		dv.filestable.appendChild(tr);
 		dv.archivelink.href = contextPath + "/download/" + entityType.charAt(0) + "/" + convertForURL (v.name) + "/" + v.id + "/a/archive";
-		
 	}
 	
+	if (!v.hasOwnProperty('outputContents') && !v.hasOwnProperty('plotDescription') && showDefault && v.errorsLink)
+	{
+		// If there are no output meta files, but there is an errors file, then we still want to display it.
+		// So set an invisible redirect to happen once we're done here.
+		window.setTimeout(function(){nextPage(v.errorsLink, true);}, 0);
+	}
 	
 	if (v.experiments.length > 0)
 	{

@@ -9,6 +9,7 @@ import time
 import zipfile
 
 import celery
+from celery.exceptions import SoftTimeLimitExceeded
 import requests
 
 
@@ -99,11 +100,18 @@ def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir):
         args = [config['exe_path'], modelPath, protoPath, os.path.join(tempDir, 'output')]
         child_stdout_name = os.path.join(tempDir, 'stdout.txt')
         output_file = open(child_stdout_name, 'w')
+        timeout = False
         try:
             child = subprocess.Popen(args, stdout=output_file, stderr=subprocess.STDOUT)
             child.wait()
+        except SoftTimeLimitExceeded:
+            # If we're timed out, kill off the child process, but send back any partial output - don't re-raise
+            child.terminate()
+            time.sleep(5)
+            child.kill()
+            timeout = True
         except:
-            # The job may time out, in which case we want to make sure we kill off the child process too
+            # If any other error happens, just make sure the child is dead then report it
             child.terminate()
             time.sleep(5)
             child.kill()
@@ -115,6 +123,23 @@ def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir):
         output_files = glob.glob(os.path.join(tempDir, 'output', '*', '*', '*')) # Yuck!
         output_zip = zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED)
         output_zip.write(child_stdout_name, 'stdout.txt')
+        if timeout:
+            # Add a message about the timeout to the errors.txt file (which is created if not present)
+            for ofile in output_files:
+                if os.path.isfile(ofile) and os.path.basename(ofile) == "errors.txt":
+                    error_file_path = ofile
+                    break
+            else:
+                error_file_path = os.path.join(tempDir, 'errors.txt')
+                output_files.append(error_file_path)
+                # Remove any manifest file since we'll need to create a new one with errors.txt in
+                for ofile in output_files:
+                    if os.path.basename(ofile) == 'manifest.xml':
+                        output_files.remove(ofile)
+                        break
+            error_file = open(error_file_path, 'a+')
+            error_file.write("\nExperiment terminated due to exceeding time limit\n")
+            error_file.close()
         for ofile in output_files:
             if os.path.isfile(ofile):
                 output_zip.write(ofile, os.path.basename(ofile))
