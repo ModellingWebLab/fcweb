@@ -24,7 +24,7 @@ def ReportError(callbackUrl, signature):
     import sys, traceback
     message = "failed due to unexpected error: " + str(sys.exc_info()[1]) + "<br/>Full internal details follow:<br/>"
     message += traceback.format_exc().replace('\n', '<br/>')
-    r = requests.post(callbackUrl, data={'signature': signature, 'returntype': 'failed', 'returnmsg': message}, verify=False))
+    r = requests.post(callbackUrl, data={'signature': signature, 'returntype': 'failed', 'returnmsg': message}, verify=False)
     raise
 
 
@@ -68,7 +68,7 @@ def CheckExperiment(callbackUrl, signature, modelUrl, protocolUrl):
                 for term in missing_optional_terms:
                     message +="&nbsp;" * 4 + term + "<br/>"
             # Report & clean up temporary files
-            r = requests.post(callbackUrl, data={'signature': signature, 'returntype': 'inappropriate', 'returnmsg': message}, verify=False))
+            r = requests.post(callbackUrl, data={'signature': signature, 'returntype': 'inappropriate', 'returnmsg': message}, verify=False)
             shutil.rmtree(temp_dir)
         else:
             RunExperiment.delay(callbackUrl, signature, main_model_path, main_proto_path, temp_dir)
@@ -88,7 +88,7 @@ def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir):
     """
     try:
         # Tell the website we've started running
-        r = requests.post(callbackUrl, data={'signature': signature, 'returntype': 'running'}, verify=False))
+        r = requests.post(callbackUrl, data={'signature': signature, 'returntype': 'running'}, verify=False)
     
         # Call FunctionalCuration exe, writing output to the temporary folder containing inputs
         # (or rather, a subfolder thereof).
@@ -145,7 +145,7 @@ def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir):
     
         files = {'experiment': open(output_path, 'rb')}
         payload = {'signature': signature, 'returntype': outcome}
-        r = requests.post(callbackUrl, files=files, data=payload, verify=False))
+        r = requests.post(callbackUrl, files=files, data=payload, verify=False)
     
         # Remove the temporary folder
         shutil.rmtree(tempDir)
