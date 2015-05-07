@@ -15,6 +15,7 @@ import uk.ac.ox.cs.chaste.fc.beans.ChasteExperiment;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteExperimentVersion;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.User;
+import uk.ac.ox.cs.chaste.fc.web.FileTransfer;
 import de.binfalse.bflog.LOGGER;
 
 
@@ -39,6 +40,7 @@ extends ChasteEntityManager
 		+ " m.returnmsg AS versionreturnmsg,"
 		+ " m.visibility AS visibility,"
 		+ " m.commitmsg AS commitmsg,"
+		+ " m.task_id AS task_id,"
 		
 		+ " u2.id AS entityauthor,"
 		+ " mo.id AS entityid,"
@@ -111,7 +113,8 @@ extends ChasteEntityManager
 			rs.getString ("versionstatus"),
 			rs.getString ("versionreturnmsg"),
 			rs.getString ("visibility"),
-			rs.getString ("commitmsg")
+			rs.getString ("commitmsg"),
+			rs.getString ("task_id")
 		);
 	}
 	
@@ -401,6 +404,61 @@ extends ChasteEntityManager
 		return false;
 	}
 
+	/**
+	 * As well as removing the experiment, cancel its execution if it is still queued or running.
+	 *
+	 * @param versionId the version id
+	 * @return true, if successful
+	 * @throws ChastePermissionException 
+	 */
+	public boolean removeVersion (int versionId) throws ChastePermissionException
+	{
+		ChasteExperimentVersion version = (ChasteExperimentVersion) getVersionById(versionId);
+		if (version == null || !user.isAllowedToDeleteEntityVersion(version))
+			throw new ChastePermissionException ("you are not allowed to delete an entity version");
+		
+		if (version.isInProgress())
+		{
+			try
+			{
+				FileTransfer.cancelExperiment(version.getTaskId());
+			}
+			catch (Exception e)
+			{
+				LOGGER.warn(e, "error while cancelling experiment ", version.getTaskId());
+			}
+		}
+		
+		return super.removeVersion(versionId);
+	}
+	
+	/**
+	 * As well as removing the experiment, cancel the execution of any versions still queued or running.
+	 */
+	public boolean removeEntity (int entityId) throws ChastePermissionException
+	{
+		ChasteEntity entity = getEntityById (entityId);
+		if (entity == null || !user.isAllowedToDeleteEntity (entity))
+			throw new ChastePermissionException ("you are not allowed to delete an entity");
+		
+		for (ChasteEntityVersion v : entity.getVersions().values())
+		{
+			ChasteExperimentVersion version = (ChasteExperimentVersion) v;
+			if (version.isInProgress())
+			{
+				try
+				{
+					FileTransfer.cancelExperiment(version.getTaskId());
+				}
+				catch (Exception e)
+				{
+					LOGGER.warn(e, "error while cancelling experiment ", version.getTaskId());
+				}
+			}
+		}
+		
+		return super.removeEntity(entityId);
+	}
 	
 	/**
 	 * Get all experiments involving the given protocol.

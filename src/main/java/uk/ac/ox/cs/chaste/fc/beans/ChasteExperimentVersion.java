@@ -28,15 +28,17 @@ extends ChasteEntityVersion
 	private Timestamp finished;
 	private String status;
 	private String returnText;
+	private String taskId;
 	
 	public ChasteExperimentVersion (ChasteEntity entity, int id,
 		User author, String filePath, Timestamp created, int numFiles,
-		Timestamp finished, String status, String returnText, String visibility, String commitMsg)
+		Timestamp finished, String status, String returnText, String visibility, String commitMsg, String taskId)
 	{
 		super (entity, id, created.toString (), author, filePath, created, numFiles, visibility, commitMsg);
 		this.finished = finished;
 		this.status = status;
 		this.returnText = returnText;
+		this.taskId = taskId;
 	}
 
 	
@@ -57,6 +59,11 @@ extends ChasteEntityVersion
 		return returnText;
 	}
 	
+	public String getTaskId()
+	{
+		return taskId;
+	}
+	
 	public ChasteExperiment getExperiment ()
 	{
 		return (ChasteExperiment) getEntity ();
@@ -69,7 +76,13 @@ extends ChasteEntityVersion
 	
 	public boolean setTaskId(ExperimentManager expMgmt, String taskId)
 	{
+		this.taskId = taskId;
 		return expMgmt.updateTaskId(this, taskId);
+	}
+	
+	public boolean isInProgress()
+	{
+		return status.equals(STATUS_QUEUED) || status.equals(STATUS_RUNNING);
 	}
 
 	/*

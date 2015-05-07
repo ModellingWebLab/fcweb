@@ -495,6 +495,7 @@ public abstract class ChasteEntityManager
 		
 		knownEntities.remove(entityId);
 		
+		// Note: cascading settings in the database ensure that all versions are deleted too.
 		PreparedStatement st = db.prepareStatement ("DELETE FROM `" + entityTable + "` WHERE `id`=?");
 		ResultSet rs = null;
 		boolean ok = false;

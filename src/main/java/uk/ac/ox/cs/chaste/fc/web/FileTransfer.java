@@ -296,8 +296,6 @@ public class FileTransfer extends WebModule
 				
 				ExperimentManager expMgmt = new ExperimentManager (db, notifications, userMgmt, user, new ModelManager (db, notifications, userMgmt, user), new ProtocolManager (db, notifications, userMgmt, user));
 				
-
-				LOGGER.debug ("searching for experiment");
 				ChasteExperimentVersion exp = expMgmt.getRunningExperiment (signature.trim ());
 				if (exp == null || (!exp.getStatus ().equals (ChasteExperimentVersion.STATUS_QUEUED)
 									&& !exp.getStatus ().equals (ChasteExperimentVersion.STATUS_RUNNING)))
@@ -671,6 +669,20 @@ public class FileTransfer extends WebModule
 	    throw new IOException ("Chaste backend response not expected.");
 	}
 
+	public static void cancelExperiment(String taskId) throws Exception
+	{
+	    HttpClient client = new DefaultHttpClient();
+	    HttpPost post = new HttpPost(Tools.getChasteUrl ());
+	    MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+	    builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+	    builder.addTextBody("password", Tools.getChastePassword());
+	    builder.addTextBody("cancelTask", taskId);
+	    HttpEntity entity = builder.build();
+	    ProgressiveEntity myEntity = new ProgressiveEntity(entity);
+	    post.setEntity(myEntity);
+	    client.execute(post);
+	}
+	
 	private static String getContent(HttpResponse response) throws IOException
 	{
 	    BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
@@ -711,6 +723,9 @@ public class FileTransfer extends WebModule
 		String preMail = user.getRole ();
 		user.setRole (User.ROLE_ADMIN);
 		user.setMail ("somemail");
+		
+		try
+		{
 		
 		ModelManager modelMgmt = new ModelManager (db, notifications, userMgmt, user);
 		ProtocolManager protocolMgmt = new ProtocolManager (db, notifications, userMgmt, user);
@@ -801,8 +816,12 @@ public class FileTransfer extends WebModule
 
 		LOGGER.info ("cleaning finished, removed ", removedFiles, " files");
 
-		user.setRole (preRole);
-		user.setMail (preMail);
+		}
+		finally
+		{
+			user.setRole (preRole);
+			user.setMail (preMail);
+		}
 	}
 	
 	static class ProgressiveEntity implements HttpEntity {
