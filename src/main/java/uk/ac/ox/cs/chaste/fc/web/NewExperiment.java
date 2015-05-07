@@ -189,8 +189,9 @@ public class NewExperiment
 		}
 		else
 		{
+			// Experiment was queued successfully. Status is QUEUED by default so no need to update, but do need to store task id.
 			exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);
-			// status is QUEUED by default so no need to update
+			exp.setTaskId(expMgmt, res.response);
 		}
 		return exp;
 	}

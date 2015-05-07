@@ -18,7 +18,7 @@ import de.binfalse.bflog.LOGGER;
 
 public class DatabaseConnector
 {
-	public static final int DB_VERSION = 3;
+	public static final int DB_VERSION = 4;
 	private Connection	connection;
 	private Notifications note;
 	
@@ -182,12 +182,11 @@ public class DatabaseConnector
 				LOGGER.error ("version number doesn't seem to be an integer");
 				throw new RuntimeException ("failed to parse the current database verions number");
 			}
-
-			LOGGER.info ("this db is version ", currentVersion, " -- latest db version is ", DB_VERSION);
 			
 			// if we're not up-to-date we'll do a step-by-step upgrade of the system
 			if (currentVersion < DB_VERSION)
 			{
+				LOGGER.info ("this db is version ", currentVersion, " -- latest db version is ", DB_VERSION);
 				// prepare for version 3
 				if (currentVersion < 3)
 				{
@@ -221,8 +220,26 @@ public class DatabaseConnector
 						throw new RuntimeException ("failed to upgrade database");
 					}
 				}
-
 				
+				if (currentVersion < 4)
+				{
+					LOGGER.info("upgrading DB to version 4...");
+					try
+					{
+						st = this.prepareStatement("ALTER TABLE `experimentversions` ADD `task_id` varchar(50)");
+						st.execute();
+						closeRes(st);
+
+						st = this.prepareStatement ("UPDATE `settings` SET `val`=4 WHERE `user`='-1' AND `key`='DBVERSION';");
+						st.execute ();
+						closeRes (st);
+					}
+					catch (SQLException e)
+					{
+						LOGGER.error(e, "error upgrading DB to version 4");
+						throw new RuntimeException("failed to upgrade database");
+					}
+				}
 				
 				// prepare for version 99
 				if (currentVersion < -99)

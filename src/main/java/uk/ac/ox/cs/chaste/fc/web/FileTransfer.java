@@ -81,10 +81,6 @@ public class FileTransfer extends WebModule
 	protected String answerWebRequest (HttpServletRequest request, HttpServletResponse response, PageHeader header, DatabaseConnector db,
 		Notifications notifications, User user, HttpSession session)
 	{
-		// TODO unauthed users can see some file. and authed users cannot see all files -> better rights management
-		//if (!user.isAuthorized ())
-			//return errorPage (request, response, null);
-		
 			// req[2] = m=model p=protocol e=experiment
 			// req[3] = entity name
 			// req[4] = entity id
@@ -311,8 +307,15 @@ public class FileTransfer extends WebModule
 					return answer;
 				}
 				
-				
 				LOGGER.debug ("exp: ", exp);
+				
+				String taskId = request.getParameter("taskid");
+				if (taskId != null && !taskId.isEmpty())
+				{
+					// This was just a ping to let us know the id of the RunExperiment task, in case we want to cancel it
+					exp.setTaskId(expMgmt, taskId);
+					return answer;
+				}
 				
 				String returnmsg = request.getParameter ("returnmsg");
 				if (returnmsg == null)
@@ -655,8 +658,8 @@ public class FileTransfer extends WebModule
 	    String res = getContent (response);
 	    // Check whether we know immediately on submission (i.e. before running) that there's an issue
 	    LOGGER.debug ("response: ", res);
-	    if (res.trim ().equals (signature + " succ"))
-	    	return new SubmitResult (true, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_QUEUED);
+	    if (res.trim().startsWith(signature + " succ"))
+	    	return new SubmitResult(true, res.substring(signature.length() + 5).trim(), ChasteExperimentVersion.STATUS_QUEUED);
 	    if (res.trim ().startsWith (signature + " inappropriate"))
 	    	return new SubmitResult (false, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_INAPPRORIATE);
 	    if (res.trim ().startsWith (signature))

@@ -21,12 +21,18 @@ app = celery.Celery('fcws.tasks')
 app.config_from_object(celeryconfig)
 
 
+def Callback(callbackUrl, signature, data, **kwargs):
+    """Make a callback to the front-end server."""
+    data['signature'] = signature
+    return requests.post(callbackUrl, data=data, verify=False, **kwargs)
+
+
 def ReportError(callbackUrl, signature):
     """Report an unexpected error, with details, to the front-end, then re-raise."""
     import sys, traceback
     message = "failed due to unexpected error: " + str(sys.exc_info()[1]) + "<br/>Full internal details follow:<br/>"
     message += traceback.format_exc().replace('\n', '<br/>')
-    r = requests.post(callbackUrl, data={'signature': signature, 'returntype': 'failed', 'returnmsg': message}, verify=False)
+    Callback(callbackUrl, signature, {'returntype': 'failed', 'returnmsg': message})
     raise
 
 
@@ -70,10 +76,11 @@ def CheckExperiment(callbackUrl, signature, modelUrl, protocolUrl):
                 for term in missing_optional_terms:
                     message +="&nbsp;" * 4 + term + "<br/>"
             # Report & clean up temporary files
-            r = requests.post(callbackUrl, data={'signature': signature, 'returntype': 'inappropriate', 'returnmsg': message}, verify=False)
+            Callback(callbackUrl, signature, {'returntype': 'inappropriate', 'returnmsg': message})
             shutil.rmtree(temp_dir)
         else:
-            RunExperiment.delay(callbackUrl, signature, main_model_path, main_proto_path, temp_dir)
+            result = RunExperiment.delay(callbackUrl, signature, main_model_path, main_proto_path, temp_dir)
+            Callback(callbackUrl, signature, {'taskid': result.task_id})
     except:
         ReportError(callbackUrl, signature)
 
@@ -90,7 +97,7 @@ def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir):
     """
     try:
         # Tell the website we've started running
-        r = requests.post(callbackUrl, data={'signature': signature, 'returntype': 'running'}, verify=False)
+        Callback(callbackUrl, signature, {'returntype': 'running'})
     
         # Call FunctionalCuration exe, writing output to the temporary folder containing inputs
         # (or rather, a subfolder thereof).
@@ -178,8 +185,7 @@ def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir):
         output_zip.close()
     
         files = {'experiment': open(output_path, 'rb')}
-        payload = {'signature': signature, 'returntype': outcome}
-        r = requests.post(callbackUrl, files=files, data=payload, verify=False)
+        r = Callback(callbackUrl, signature, {'returntype': outcome}, files=files)
     
         # Remove the temporary folder
         shutil.rmtree(tempDir)

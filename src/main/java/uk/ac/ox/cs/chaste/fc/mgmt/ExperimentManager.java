@@ -330,6 +330,38 @@ extends ChasteEntityManager
 		
 		return null;
 	}
+	
+	
+	public boolean updateTaskId(ChasteExperimentVersion exp, String taskId)
+	{
+		if (exp == null)
+			return false;
+		PreparedStatement st = db.prepareStatement("UPDATE `" + entityVersionsTable + "` SET `task_id`=? WHERE id=?");
+		ResultSet rs = null;
+		try
+		{
+			st.setString(1, taskId);
+			st.setInt(2, exp.getId());
+			int affectedRows = st.executeUpdate();
+			if (affectedRows == 0)
+			{
+				throw new SQLException("Updating experiment version failed, no rows affected. (" + entityVersionsTable + ")");
+			}
+			return true;
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+			note.addError("sql err updating experiment version: " + e.getMessage());
+			LOGGER.error(e, "db problem while updating experiment version (", entityVersionsTable, ")");
+		}
+		finally
+		{
+			db.closeRes(st);
+			db.closeRes(rs);
+		}
+		return false;
+	}
 
 
 	public boolean updateVersion (ChasteExperimentVersion exp, String returnMsg, String status)

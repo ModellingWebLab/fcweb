@@ -66,6 +66,11 @@ extends ChasteEntityVersion
 	{
 		return expMgmt.updateVersion (this, returnMsg, status);
 	}
+	
+	public boolean setTaskId(ExperimentManager expMgmt, String taskId)
+	{
+		return expMgmt.updateTaskId(this, taskId);
+	}
 
 	/*
 	 * Override the base method to instead return the more restrictive of the visibilities of the model & protocol involved.
