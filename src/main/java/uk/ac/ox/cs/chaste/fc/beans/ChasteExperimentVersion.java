@@ -82,6 +82,11 @@ extends ChasteEntityVersion
 	
 	public boolean isInProgress()
 	{
+		return isInProgressStatus(status);
+	}
+	
+	public boolean isInProgressStatus(String status)
+	{
 		return status.equals(STATUS_QUEUED) || status.equals(STATUS_RUNNING);
 	}
 

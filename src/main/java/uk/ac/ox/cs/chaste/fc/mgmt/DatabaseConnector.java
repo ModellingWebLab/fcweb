@@ -18,8 +18,8 @@ import de.binfalse.bflog.LOGGER;
 
 public class DatabaseConnector
 {
-	public static final int DB_VERSION = 4;
-	private Connection	connection;
+	public static final int DB_VERSION = 5;
+	private Connection connection;
 	private Notifications note;
 	
 	
@@ -187,25 +187,21 @@ public class DatabaseConnector
 			if (currentVersion < DB_VERSION)
 			{
 				LOGGER.info ("this db is version ", currentVersion, " -- latest db version is ", DB_VERSION);
-				// prepare for version 3
+				
 				if (currentVersion < 3)
 				{
+					// Add commitmsg field for model/protocol/experiment versions
 					LOGGER.info ("upgrading db to version 3..");
-					// do something that is necessary for db version 3
-
 					try
 					{
-						// update model versions
 						st = this.prepareStatement ("ALTER TABLE  `modelversions` ADD  `commitmsg` TEXT NOT NULL");
 						st.execute ();
 						closeRes (st);
 						
-						// update protocol versions
 						st = this.prepareStatement ("ALTER TABLE  `protocolversions` ADD  `commitmsg` TEXT NOT NULL");
 						st.execute ();
 						closeRes (st);
 						
-						// update experiment versions
 						st = this.prepareStatement ("ALTER TABLE  `experimentversions` ADD  `commitmsg` TEXT NOT NULL");
 						st.execute ();
 						closeRes (st);
@@ -223,6 +219,7 @@ public class DatabaseConnector
 				
 				if (currentVersion < 4)
 				{
+					// Add task_id field for experiment versions
 					LOGGER.info("upgrading DB to version 4...");
 					try
 					{
@@ -237,6 +234,45 @@ public class DatabaseConnector
 					catch (SQLException e)
 					{
 						LOGGER.error(e, "error upgrading DB to version 4");
+						throw new RuntimeException("failed to upgrade database");
+					}
+				}
+				
+				if (currentVersion < 5)
+				{
+					// Add runningexperiments table to track back-end tasks which may need cancelling if entities are deleted
+					LOGGER.info("upgrading DB to version 5...");
+					try
+					{
+						st = this.prepareStatement ("CREATE TABLE IF NOT EXISTS `runningexperiments` ("
+							+ "  `models` int(11) NOT NULL,"
+							+ "  `modelversions` int(11) NOT NULL,"
+							+ "  `protocols` int(11) NOT NULL,"
+							+ "  `protocolversions` int(11) NOT NULL,"
+							+ "  `experiments` int(11) NOT NULL,"
+							+ "  `experimentversions` int(11) NOT NULL,"
+							+ "  `task_id` varchar(50) NOT NULL,"
+							+ "  FOREIGN KEY (`models`) REFERENCES `models` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,"
+							+ "  FOREIGN KEY (`modelversions`) REFERENCES `modelversions` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,"
+							+ "  FOREIGN KEY (`protocols`) REFERENCES `protocols` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,"
+							+ "  FOREIGN KEY (`protocolversions`) REFERENCES `protocolversions` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,"
+							+ "  FOREIGN KEY (`experiments`) REFERENCES `experiments` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,"
+							+ "  UNIQUE INDEX `experimentversions` (`experimentversions`),"
+							+ "  FOREIGN KEY `experimentversions` (`experimentversions`) REFERENCES `experimentversions` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,"
+							+ "  UNIQUE KEY `task_id` (`task_id`)"
+							+ ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+						st.execute();
+//						st = this.prepareStatement("ALTER TABLE `runningexperiments` ADD CONSTRAINT experimentversions FOREIGN KEY (`experimentversions`) REFERENCES `experimentversions` (`id`) ON UPDATE CASCADE ON DELETE CASCADE;");
+//						st.execute();
+						closeRes(st);
+
+						st = this.prepareStatement("UPDATE `settings` SET `val`=5 WHERE `user`='-1' AND `key`='DBVERSION';");
+						st.execute();
+						closeRes(st);
+					}
+					catch (SQLException e)
+					{
+						LOGGER.error(e, "error upgrading DB to version 5");
 						throw new RuntimeException("failed to upgrade database");
 					}
 				}

@@ -15,6 +15,7 @@ import uk.ac.ox.cs.chaste.fc.beans.ChasteEntity;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntityVersion;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.User;
+import uk.ac.ox.cs.chaste.fc.web.FileTransfer;
 import de.binfalse.bflog.LOGGER;
 
 
@@ -426,6 +427,8 @@ public abstract class ChasteEntityManager
 		if (version == null || !user.isAllowedToDeleteEntityVersion (version))
 			throw new ChastePermissionException ("you are not allowed to delete an entity version");
 		
+		cancelExperiments(entityVersionsTable, versionId);
+		
 		knownVersions.remove(versionId);
 		knownEntities.remove(version.getEntity().getId()); // Just in case!
 		
@@ -463,6 +466,47 @@ public abstract class ChasteEntityManager
 		return ok;
 	}
 	
+	/**
+	 * If a deleted entity or version references a queued or running experiment (even indirectly) cancel its execution.
+	 * 
+	 * @param columnName  the table containing the deleted entity/version, which is also the column name in the runningexperiments table to query
+	 * @param id  the id of the deleted entity/version
+	 */
+	private void cancelExperiments(String columnName, int id)
+	{
+		PreparedStatement st = db.prepareStatement("SELECT task_id FROM `runningexperiments` WHERE `" + columnName + "`=?");
+		ResultSet rs = null;
+		try
+		{
+			st.setInt(1, id);
+			rs = st.executeQuery();
+			while (rs != null && rs.next())
+			{
+				String taskId = rs.getString("task_id");
+				LOGGER.debug("cancelling expt ", taskId, " due to ", columnName, " ", id);
+				try
+				{
+					FileTransfer.cancelExperiment(taskId);
+				}
+				catch (Exception e)
+				{
+					LOGGER.warn(e, "error while cancelling experiment ", taskId, " from ", columnName, " ", id);
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+			note.addError("SQL error cancelling experiment(s): " + e.getMessage ());
+			LOGGER.error(e, "db problem while cancelling experiments");
+		}
+		finally
+		{
+			db.closeRes (st);
+			db.closeRes (rs);
+		}
+	}
+	
 	public void deleteEmptyEntities ()
 	{
 		PreparedStatement st = db.prepareStatement ("DELETE FROM `" + entityTable + "` WHERE id NOT IN (SELECT DISTINCT `"+entityColumn+"` FROM `" + entityVersionsTable + "`)");
@@ -492,6 +536,8 @@ public abstract class ChasteEntityManager
 		ChasteEntity entity = getEntityById (entityId);
 		if (entity == null || !user.isAllowedToDeleteEntity (entity))
 			throw new ChastePermissionException ("you are not allowed to delete an entity");
+		
+		cancelExperiments(entityTable, entityId);
 		
 		knownEntities.remove(entityId);
 		

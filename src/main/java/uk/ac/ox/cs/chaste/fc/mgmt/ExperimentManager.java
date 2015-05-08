@@ -15,7 +15,6 @@ import uk.ac.ox.cs.chaste.fc.beans.ChasteExperiment;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteExperimentVersion;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.User;
-import uk.ac.ox.cs.chaste.fc.web.FileTransfer;
 import de.binfalse.bflog.LOGGER;
 
 
@@ -335,21 +334,42 @@ extends ChasteEntityManager
 	}
 	
 	
-	public boolean updateTaskId(ChasteExperimentVersion exp, String taskId)
+	/**
+	 * Change the backend task id associated with a particular experiment version, updating our record of running tasks too.
+	 * @param exp  the experiment version
+	 * @param taskId  the new id
+	 * @return  true iff successful
+	 */
+	public boolean updateTaskId(ChasteExperimentVersion ver, String taskId)
 	{
-		if (exp == null)
+		if (ver == null)
 			return false;
 		PreparedStatement st = db.prepareStatement("UPDATE `" + entityVersionsTable + "` SET `task_id`=? WHERE id=?");
 		ResultSet rs = null;
 		try
 		{
 			st.setString(1, taskId);
-			st.setInt(2, exp.getId());
+			st.setInt(2, ver.getId());
 			int affectedRows = st.executeUpdate();
 			if (affectedRows == 0)
 			{
 				throw new SQLException("Updating experiment version failed, no rows affected. (" + entityVersionsTable + ")");
 			}
+			st = db.prepareStatement("INSERT INTO `runningexperiments` (`models`, `modelversions`, `protocols`, `protocolversions`, `experiments`, `experimentversions`, `task_id`)"
+					+ " VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `task_id`=?");
+			ChasteExperiment exp = ver.getExperiment();
+			ChasteEntityVersion model_ver = exp.getModel();
+			ChasteEntityVersion proto_ver = exp.getProtocol();
+			st.setInt(1, model_ver.getEntity().getId());
+			st.setInt(2, model_ver.getId());
+			st.setInt(3, proto_ver.getEntity().getId());
+			st.setInt(4, proto_ver.getId());
+			st.setInt(5, exp.getId());
+			st.setInt(6, ver.getId());
+			st.setString(7, taskId);
+			st.setString(8, taskId);
+			affectedRows = st.executeUpdate();
+			LOGGER.debug("Updated task_id for ", ver, " to ", taskId, " changing ", affectedRows, " rows");
 			return true;
 		}
 		catch (SQLException e)
@@ -366,11 +386,21 @@ extends ChasteEntityManager
 		return false;
 	}
 
-
+	/**
+	 * Update the status (and associated message) of an experiment.
+	 * If the new status is not an 'in progress' status (i.e. the experiment has finished or was deemed inappropriate)
+	 * then also remove it from the record of running experiments.
+	 * @param exp  the experiment version
+	 * @param returnMsg  the latest message received from the backend
+	 * @param status  the new status code
+	 * @return  true iff successful
+	 */
 	public boolean updateVersion (ChasteExperimentVersion exp, String returnMsg, String status)
 	{
 		if (exp == null)
 			return false;
+		
+		boolean wasRunning = exp.isInProgress();
 		
 		PreparedStatement st = db.prepareStatement ("UPDATE `" + entityVersionsTable +
 			"` SET `returnmsg`=?, `status`=?, `finished`=? WHERE id=?");
@@ -388,6 +418,15 @@ extends ChasteEntityManager
 			{
 				throw new SQLException("Updating experiment version failed, no rows affected. (" + entityVersionsTable + ")");
 			}
+			
+			if (wasRunning && !exp.isInProgressStatus(status))
+			{
+				st = db.prepareStatement("DELETE FROM `runningexperiments` WHERE `experimentversions`=?");
+				st.setInt(1, exp.getId());
+				affectedRows = st.executeUpdate();
+				LOGGER.debug("Deleted running record for ", exp, " affecting ", affectedRows, " rows");
+			}
+			
 			return true;
 		}
 		catch (SQLException e)
@@ -402,62 +441,6 @@ extends ChasteEntityManager
 			db.closeRes (rs);
 		}
 		return false;
-	}
-
-	/**
-	 * As well as removing the experiment, cancel its execution if it is still queued or running.
-	 *
-	 * @param versionId the version id
-	 * @return true, if successful
-	 * @throws ChastePermissionException 
-	 */
-	public boolean removeVersion (int versionId) throws ChastePermissionException
-	{
-		ChasteExperimentVersion version = (ChasteExperimentVersion) getVersionById(versionId);
-		if (version == null || !user.isAllowedToDeleteEntityVersion(version))
-			throw new ChastePermissionException ("you are not allowed to delete an entity version");
-		
-		if (version.isInProgress())
-		{
-			try
-			{
-				FileTransfer.cancelExperiment(version.getTaskId());
-			}
-			catch (Exception e)
-			{
-				LOGGER.warn(e, "error while cancelling experiment ", version.getTaskId());
-			}
-		}
-		
-		return super.removeVersion(versionId);
-	}
-	
-	/**
-	 * As well as removing the experiment, cancel the execution of any versions still queued or running.
-	 */
-	public boolean removeEntity (int entityId) throws ChastePermissionException
-	{
-		ChasteEntity entity = getEntityById (entityId);
-		if (entity == null || !user.isAllowedToDeleteEntity (entity))
-			throw new ChastePermissionException ("you are not allowed to delete an entity");
-		
-		for (ChasteEntityVersion v : entity.getVersions().values())
-		{
-			ChasteExperimentVersion version = (ChasteExperimentVersion) v;
-			if (version.isInProgress())
-			{
-				try
-				{
-					FileTransfer.cancelExperiment(version.getTaskId());
-				}
-				catch (Exception e)
-				{
-					LOGGER.warn(e, "error while cancelling experiment ", version.getTaskId());
-				}
-			}
-		}
-		
-		return super.removeEntity(entityId);
 	}
 	
 	/**
