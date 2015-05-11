@@ -6,6 +6,7 @@ package uk.ac.ox.cs.chaste.fc.mgmt;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -480,19 +481,14 @@ public abstract class ChasteEntityManager
 		{
 			st.setInt(1, id);
 			rs = st.executeQuery();
+			ArrayList<String> taskIds = new ArrayList<String>();
 			while (rs != null && rs.next())
 			{
 				String taskId = rs.getString("task_id");
 				LOGGER.debug("cancelling expt ", taskId, " due to ", columnName, " ", id);
-				try
-				{
-					FileTransfer.cancelExperiment(taskId);
-				}
-				catch (Exception e)
-				{
-					LOGGER.warn(e, "error while cancelling experiment ", taskId, " from ", columnName, " ", id);
-				}
+				taskIds.add(taskId);
 			}
+			FileTransfer.cancelExperiments(taskIds);
 		}
 		catch (SQLException e)
 		{

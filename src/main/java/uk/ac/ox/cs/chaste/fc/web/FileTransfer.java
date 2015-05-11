@@ -669,18 +669,39 @@ public class FileTransfer extends WebModule
 	    throw new IOException ("Chaste backend response not expected.");
 	}
 
-	public static void cancelExperiment(String taskId) throws Exception
+	/**
+	 * Asynchronously submit a (series of) request(s) to the backend to cancel the given experiment execution(s).
+	 * @param taskIds  the backend task ids of the experiments to cancel
+	 */
+	public static void cancelExperiments(ArrayList<String> taskIds)
 	{
-	    HttpClient client = new DefaultHttpClient();
-	    HttpPost post = new HttpPost(Tools.getChasteUrl ());
-	    MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-	    builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-	    builder.addTextBody("password", Tools.getChastePassword());
-	    builder.addTextBody("cancelTask", taskId);
-	    HttpEntity entity = builder.build();
-	    ProgressiveEntity myEntity = new ProgressiveEntity(entity);
-	    post.setEntity(myEntity);
-	    client.execute(post);
+		final ArrayList<String> threadsTaskIds = taskIds;
+		new Thread () {
+			public void run ()
+			{
+				for (String taskId : threadsTaskIds)
+				{
+					LOGGER.debug("Sending cancel request for ", taskId);
+					try
+					{
+					    HttpClient client = new DefaultHttpClient();
+					    HttpPost post = new HttpPost(Tools.getChasteUrl ());
+					    MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+					    builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+					    builder.addTextBody("password", Tools.getChastePassword());
+					    builder.addTextBody("cancelTask", taskId);
+					    HttpEntity entity = builder.build();
+					    ProgressiveEntity myEntity = new ProgressiveEntity(entity);
+					    post.setEntity(myEntity);
+					    client.execute(post);
+					}
+					catch (Exception e)
+					{
+						LOGGER.warn(e, "error cancelling experiment ", taskId);
+					}
+				}
+			}
+		}.start ();
 	}
 	
 	private static String getContent(HttpResponse response) throws IOException

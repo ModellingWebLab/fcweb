@@ -148,10 +148,6 @@ public class Batch extends WebModule
 		HttpServletResponse response, DatabaseConnector db,
 		Notifications notifications, JSONObject querry, User user, HttpSession session) throws IOException
 	{
-		// TODO: regularly clean up:
-		// uploaded files that were not used
-		// created entity dirs that don't exist in entities in db
-		
 		String[] req =  request.getRequestURI().substring(request.getContextPath().length()).split ("/");
 		
 		ModelManager modelMgmt = new ModelManager (db, notifications, userMgmt, user);
