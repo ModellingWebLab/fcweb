@@ -149,50 +149,57 @@ public class NewExperiment
 	{
 		// Create temporary folder for uploading experiment results, and hence unique signature for submission
 		File tmpFile = Tools.createUniqueSubDir(Tools.getTempDir());
-		String signature = tmpFile.getName();
+		final String signature = tmpFile.getName();
 		
-		// insert in db
+		// Insert in db
 		int expID = expMgmt.createVersion (model, protocol, signature, user, force);
 		if (expID < 0)
 		{
 			LOGGER.error ("couldn't create new DB entry for experiment");
 			throw new IOException ("couldn't register experiment (there may already exist an experiment of this model/protocol combination and you're not allowed to overwrite it)");
 		}
+		final ChasteExperimentVersion exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);
 		
-		// submit for processing
-		FileTransfer.SubmitResult res = null;
-		try
-		{
-			res = FileTransfer.submitExperiment(model.getId(), protocol.getId(), signature);
-		}
-		catch (Exception e)
-		{
-			String msg = e.toString();
-			Throwable cause = e.getCause();
-			while (cause != null)
+		// Asynchronously submit for processing, so we return a notification to the user quicker
+		final ChasteEntityVersion threadModel = model;
+		final ChasteEntityVersion threadProtocol = protocol;
+		// TODO: We can't (safely) pass a database connection to a new thread, so need to refactor such that no database operations
+		// are needed within the thread. I.e. any database operations need instead to be triggered by the backend calling back to us.
+		// Issue with how to report that calling the backend failed for some unexpected reason, though.
+//		final ExperimentManager threadExpMgmt = expMgmt;
+		new Thread () {
+			public void run ()
 			{
-				msg += "\n" + cause.toString();
-				cause = cause.getCause();
+				FileTransfer.SubmitResult res = null;
+				try
+				{
+					res = FileTransfer.submitExperiment(threadModel.getId(), threadProtocol.getId(), signature);
+				}
+				catch (Exception e)
+				{
+					String msg = e.toString();
+					Throwable cause = e.getCause();
+					while (cause != null)
+					{
+						msg += "\n" + cause.toString();
+						cause = cause.getCause();
+					}
+					threadExpMgmt.updateVersion(exp, msg, ChasteExperimentVersion.STATUS_FAILED);
+					LOGGER.error(e, "error submitting experiment ", exp);
+				}
+				
+				if (!res.result)
+				{
+					if (exp.getStatus().equals(ChasteExperimentVersion.STATUS_QUEUED))
+						threadExpMgmt.updateVersion(exp, res.response, res.status);
+				}
+				else
+				{
+					// Experiment was queued successfully. Status is QUEUED by default so no need to update, but do need to store task id.
+					exp.setTaskId(threadExpMgmt, res.response);
+				}
 			}
-			ChasteExperimentVersion exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);
-			expMgmt.updateVersion (exp, msg, ChasteExperimentVersion.STATUS_FAILED);
-			
-			throw e;
-		}
-		
-		ChasteExperimentVersion exp;
-		if (!res.result)
-		{
-			exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);
-			if (exp.getStatus().equals(ChasteExperimentVersion.STATUS_QUEUED))
-				expMgmt.updateVersion (exp, res.response, res.status);
-		}
-		else
-		{
-			// Experiment was queued successfully. Status is QUEUED by default so no need to update, but do need to store task id.
-			exp = (ChasteExperimentVersion) expMgmt.getVersionById (expID);
-			exp.setTaskId(expMgmt, res.response);
-		}
+		}.start ();
 		return exp;
 	}
 	

@@ -97,7 +97,12 @@ def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir):
     """
     try:
         # Tell the website we've started running
-        Callback(callbackUrl, signature, {'returntype': 'running'})
+        r = Callback(callbackUrl, signature, {'returntype': 'running'})
+        # TODO: Implement server support for this:
+#         if r.status_code == 404:
+#             # The experiment has been cancelled, so just clean up and stop
+#             shutil.rmtree(tempDir)
+#             return
     
         # Call FunctionalCuration exe, writing output to the temporary folder containing inputs
         # (or rather, a subfolder thereof).
