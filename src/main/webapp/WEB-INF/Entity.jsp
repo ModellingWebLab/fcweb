@@ -55,8 +55,11 @@
 		    		   title="${version.value.created} -- Visibility: ${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> -- ${version.value.status}</c:if>"
 		    		   class="entityviz-${version.value.visibility}<c:if test="${entity.type == 'experiment'}"> experiment-${version.value.status}</c:if>">
 	    				<input type="checkbox" value="${version.value.id}" class="comparisonCheckBox"/>
-						<strong><a class="entityversionlink" href="${contextPath}/${entity.type}/${entity.url}/${entity.id}/${version.value.url}/${version.value.id}/">${version.value.version}</a></strong>
-						 by <em>${version.value.author}
+						<strong><c:choose>
+						  <c:when test="${entity.type == 'experiment' and version.value.status == 'INAPPRORIATE'}">${version.value.version}</c:when>
+						  <c:otherwise><a class="entityversionlink" href="${contextPath}/${entity.type}/${entity.url}/${entity.id}/${version.value.url}/${version.value.id}/">${version.value.version}</a></c:otherwise>
+						</c:choose></strong>
+						by <em>${version.value.author}
 						<c:if test="${entity.author == User.nick || User.admin}">
 					    	<a id='deleteVersion-${version.value.id}' class="deleteVersionLink"><img src="${contextPath}/res/img/delete.png" alt="delete version" title="delete this version of the ${entity.type}" /></a>
 					    </c:if></em><c:if test="${not empty version.value.commitMessage}"> &mdash; <small>${version.value.commitMessage}</small></c:if><br/>
