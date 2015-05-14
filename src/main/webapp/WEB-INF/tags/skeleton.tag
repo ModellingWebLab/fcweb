@@ -154,7 +154,7 @@
 		
 		<%-- finish the site --%>
 		<footer>
-			Cardiac Electrophysiology Web Lab &copy; 2015 University of Oxford
+			Cardiac Electrophysiology Web Lab &copy; 2013-2015 University of Oxford
 		</footer>
 		
 		
