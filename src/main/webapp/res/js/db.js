@@ -38,7 +38,7 @@ function submitNewExperiment(jsonObject, $td, entry)
     	var json = JSON.parse(xmlhttp.responseText);
     	displayNotifications(json);
 
-    	$td.removeClass("experiment-QUEUED experiment-RUNNING experiment-INAPPRORIATE experiment-FAILED experiment-PARTIAL experiment-SUCCESS");
+    	$td.removeClass("experiment-QUEUED experiment-RUNNING experiment-INAPPLICABLE experiment-FAILED experiment-PARTIAL experiment-SUCCESS");
 		$td.unbind("click");
 		$td.contents().remove();
 
@@ -60,14 +60,14 @@ function submitNewExperiment(jsonObject, $td, entry)
     			else
     			{
     				addNotification(msg, "error");
-    				$td.addClass("experiment-INAPPRORIATE");
+    				$td.addClass("experiment-INAPPLICABLE");
     			}
         	}
         }
         else
         {
         	addNotification("Server-side error occurred submitting experiment.", "error");
-        	$td.addClass("experiment-INAPPRORIATE");
+        	$td.addClass("experiment-INAPPLICABLE");
         }
     };
     xmlhttp.send(JSON.stringify(jsonObject));

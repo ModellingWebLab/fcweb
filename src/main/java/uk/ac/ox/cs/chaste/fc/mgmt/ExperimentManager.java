@@ -388,7 +388,7 @@ extends ChasteEntityManager
 
 	/**
 	 * Update the status (and associated message) of an experiment.
-	 * If the new status is not an 'in progress' status (i.e. the experiment has finished or was deemed inappropriate)
+	 * If the new status is not an 'in progress' status (i.e. the experiment has finished or was deemed inapplicable)
 	 * then also remove it from the record of running experiments.
 	 * @param exp  the experiment version
 	 * @param returnMsg  the latest message received from the backend

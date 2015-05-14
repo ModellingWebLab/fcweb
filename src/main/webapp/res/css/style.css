@@ -360,9 +360,9 @@ tr:nth-child(1)
 	background-color:#93b4f6;
 }
 
-#experimentlist li.experiment-INAPPRORIATE,
-#entitydetails p.experiment-INAPPRORIATE,
-.experiment-INAPPRORIATE
+#experimentlist li.experiment-INAPPLICABLE,
+#entitydetails p.experiment-INAPPLICABLE,
+.experiment-INAPPLICABLE
 {
 	background-color:#bdbdbd;
 }
@@ -569,7 +569,7 @@ li.entityviz-PRIVATE
 {
 	background-color:#4996f3;
 }
-.matrixTable .experiment-INAPPRORIATE
+.matrixTable .experiment-INAPPLICABLE
 {
 	background-color:#bdbdbd;
 }

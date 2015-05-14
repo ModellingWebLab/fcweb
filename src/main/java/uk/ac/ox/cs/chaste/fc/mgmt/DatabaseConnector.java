@@ -18,7 +18,7 @@ import de.binfalse.bflog.LOGGER;
 
 public class DatabaseConnector
 {
-	public static final int DB_VERSION = 5;
+	public static final int DB_VERSION = 6;
 	private Connection connection;
 	private Notifications note;
 	
@@ -276,7 +276,34 @@ public class DatabaseConnector
 						throw new RuntimeException("failed to upgrade database");
 					}
 				}
-				
+
+				if (currentVersion < 6)
+				{
+					// Change INAPPRORIATE to INAPPLICABLE as an experiment status
+					LOGGER.info("upgrading DB to version 6...");
+					try
+					{
+						st = this.prepareStatement("ALTER TABLE `experimentversions` CHANGE `status` `status` enum('QUEUED','RUNNING','SUCCESS','PARTIAL','FAILED','INAPPRORIATE','INAPPLICABLE') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'QUEUED'");
+						st.execute();
+						closeRes(st);
+						st = this.prepareStatement("UPDATE `experimentversions` SET `status`='INAPPLICABLE' WHERE `status`='INAPPRORIATE'");
+						st.execute();
+						closeRes(st);
+						st = this.prepareStatement("ALTER TABLE `experimentversions` CHANGE `status` `status` enum('QUEUED','RUNNING','SUCCESS','PARTIAL','FAILED','INAPPLICABLE') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'QUEUED'");
+						st.execute();
+						closeRes(st);
+
+						st = this.prepareStatement ("UPDATE `settings` SET `val`=6 WHERE `user`='-1' AND `key`='DBVERSION';");
+						st.execute ();
+						closeRes (st);
+					}
+					catch (SQLException e)
+					{
+						LOGGER.error(e, "error upgrading DB to version 6");
+						throw new RuntimeException("failed to upgrade database");
+					}
+				}
+
 				// prepare for version 99
 				if (currentVersion < -99)
 				{

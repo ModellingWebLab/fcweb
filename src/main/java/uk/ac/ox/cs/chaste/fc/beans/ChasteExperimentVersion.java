@@ -23,7 +23,7 @@ extends ChasteEntityVersion
 	public static final String STATUS_SUCCESS = "SUCCESS";
 	public static final String STATUS_PARTIAL = "PARTIAL";
 	public static final String STATUS_FAILED = "FAILED";
-	public static final String STATUS_INAPPRORIATE = "INAPPRORIATE";
+	public static final String STATUS_INAPPLICABLE = "INAPPLICABLE";
 	
 	private Timestamp finished;
 	private String status;

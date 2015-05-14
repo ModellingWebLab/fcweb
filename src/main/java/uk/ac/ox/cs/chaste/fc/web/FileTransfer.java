@@ -329,8 +329,8 @@ public class FileTransfer extends WebModule
 					exptStatus = ChasteExperimentVersion.STATUS_SUCCESS;
 				else if (returntype.equals ("partial"))
 					exptStatus = ChasteExperimentVersion.STATUS_PARTIAL;
-				else if (returntype.equals ("inappropriate"))
-					exptStatus = ChasteExperimentVersion.STATUS_INAPPRORIATE;
+				else if (returntype.equals ("inapplicable"))
+					exptStatus = ChasteExperimentVersion.STATUS_INAPPLICABLE;
 				
 				LOGGER.debug ("supp: ", returnmsg, " -- ", returntype, " --> ", exptStatus);
 				
@@ -340,7 +340,7 @@ public class FileTransfer extends WebModule
 					exp.updateExperiment (expMgmt, "running", exptStatus);
 					return answer;
 				}
-				else if (exptStatus.equals(ChasteExperimentVersion.STATUS_INAPPRORIATE))
+				else if (exptStatus.equals(ChasteExperimentVersion.STATUS_INAPPLICABLE))
 				{
 					// Again a ping, but to say we can't run this experiment
 					exp.updateExperiment(expMgmt, returnmsg, exptStatus);
@@ -658,8 +658,8 @@ public class FileTransfer extends WebModule
 	    LOGGER.debug ("response: ", res);
 	    if (res.trim().startsWith(signature + " succ"))
 	    	return new SubmitResult(true, res.substring(signature.length() + 5).trim(), ChasteExperimentVersion.STATUS_QUEUED);
-	    if (res.trim ().startsWith (signature + " inappropriate"))
-	    	return new SubmitResult (false, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_INAPPRORIATE);
+	    if (res.trim ().startsWith (signature + " inapplicable"))
+	    	return new SubmitResult (false, res.substring (signature.length ()).trim (), ChasteExperimentVersion.STATUS_INAPPLICABLE);
 	    if (res.trim ().startsWith (signature))
 	    {
 	    	LOGGER.error ("Chaste backend answered with error: ", res);

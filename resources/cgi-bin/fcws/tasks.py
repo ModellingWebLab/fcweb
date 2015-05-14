@@ -68,7 +68,7 @@ def CheckExperiment(callbackUrl, signature, modelUrl, protocolUrl):
         # Check whether their interfaces are compatible
         missing_terms, missing_optional_terms = utils.DetermineCompatibility(main_proto_path, main_model_path)
         if missing_terms:
-            message = "inappropriate - required ontology terms are not present in the model. Missing terms are:<br/>"
+            message = "inapplicable - required ontology terms are not present in the model. Missing terms are:<br/>"
             for term in missing_terms:
                 message += "&nbsp;" * 4 + term + "<br/>"
             if missing_optional_terms:
@@ -76,7 +76,7 @@ def CheckExperiment(callbackUrl, signature, modelUrl, protocolUrl):
                 for term in missing_optional_terms:
                     message +="&nbsp;" * 4 + term + "<br/>"
             # Report & clean up temporary files
-            Callback(callbackUrl, signature, {'returntype': 'inappropriate', 'returnmsg': message})
+            Callback(callbackUrl, signature, {'returntype': 'inapplicable', 'returnmsg': message})
             shutil.rmtree(temp_dir)
         else:
             result = RunExperiment.delay(callbackUrl, signature, main_model_path, main_proto_path, temp_dir)
