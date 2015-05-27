@@ -70,7 +70,7 @@
       <div style="width:770px;text-align:left;">
          A schematic of the way we organise model and protocol descriptions.
          This website provides an interface to a Model/Protocol Simulator, storing and displaying the results.
-         (Adapted from <a href="https://peerj.com/preprints/273/">Cooper, Vik and Waltemath 2014</a>, figure 1.)
+         (Adapted from <a href="http://dx.doi.org/10.1016/j.pbiomolbio.2014.10.001">Cooper, Vik and Waltemath 2014</a>, figure 1.)
       </div>
     </div>
     <p>
