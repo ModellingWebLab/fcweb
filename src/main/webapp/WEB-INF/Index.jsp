@@ -4,6 +4,13 @@
 
 <t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}" contextPath="${contextPath}">
     <h1>Cardiac Electrophysiology Web Lab</h1>
+
+    <h2>Training Workshop on the Web Lab</h2>
+    <p>
+    We will be running a 2-day training workshop on the Web Lab on 10-11 September 2015.
+    See the <a href="https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/Workshop2015">workshop website</a> for details and to register.
+    The registration deadline is August 1st.
+    </p>
     
     <h2>Quick start links</h2>
     <ul>
