@@ -55,7 +55,7 @@ public class NewExperiment
 		HttpSession session) throws Exception
 	{
 		if (!user.isAuthorized ())
-			throw new IOException ("not allowed.");
+			throw new IOException ("You do not have permission to do that. Are you logged in?");
 		
 		
 		JSONObject answer = new JSONObject();
