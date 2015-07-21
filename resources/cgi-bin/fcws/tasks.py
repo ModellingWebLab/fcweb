@@ -79,8 +79,8 @@ def CheckExperiment(callbackUrl, signature, modelUrl, protocolUrl):
             Callback(callbackUrl, signature, {'returntype': 'inapplicable', 'returnmsg': message})
             shutil.rmtree(temp_dir)
         else:
-            result = RunExperiment.delay(callbackUrl, signature, main_model_path, main_proto_path, temp_dir)
-            Callback(callbackUrl, signature, {'taskid': result.task_id})
+            # Run the experiment directly in this task, to ensure it has access to the unpacked model & protocol
+            RunExperiment(callbackUrl, signature, main_model_path, main_proto_path, temp_dir)
     except:
         ReportError(callbackUrl, signature)
 
