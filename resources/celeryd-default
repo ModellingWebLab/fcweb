@@ -9,8 +9,12 @@ CELERY_APP="fcws.tasks:app"
 # And where it's located
 CELERYD_CHDIR="/var/www/cgi-bin"
 
+# Default queue name to use
+CELERY_DEFAULT_QUEUE="default"
+
 # Extra command-line arguments to the workers
-CELERYD_OPTS="--concurrency=2 -l info -Ofair --statedb=/var/run/celery/%n.state"
+CELERYD_OPTS="--concurrency=2 -l info -Ofair --statedb=/var/run/celery/%n.state
+        -Q:1 default,admin -Q:2 admin"
 
 # %N will be replaced with the first part of the nodename.
 CELERYD_LOG_FILE="/var/log/celery/%N.log"

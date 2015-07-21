@@ -628,7 +628,7 @@ public class FileTransfer extends WebModule
 		
 	}
 	
-	public static SubmitResult submitExperiment (int modelId, int protocolId, String signature) throws Exception
+	public static SubmitResult submitExperiment (int modelId, int protocolId, String signature, User user) throws Exception
 	{
 		// the current chaste web service doesn't have a valid SSL cert. thus, the following will fail.
 		// to import a self-signed cert to your keystore run smth like:
@@ -648,6 +648,8 @@ public class FileTransfer extends WebModule
 	    builder.addTextBody("signature", signature);
 	    builder.addTextBody("callBack", Tools.getThisUrl () + "submitExperiment.html");
 	    builder.addTextBody("password", Tools.getChastePassword ());
+	    builder.addTextBody("user", user.getNick());
+	    builder.addTextBody("isAdmin", String.valueOf(user.isAdmin()));
 	    HttpEntity entity = builder.build();
 	    ProgressiveEntity myEntity = new ProgressiveEntity(entity);
 

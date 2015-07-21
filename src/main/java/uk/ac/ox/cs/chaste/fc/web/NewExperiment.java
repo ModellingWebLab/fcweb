@@ -163,7 +163,7 @@ public class NewExperiment
 		FileTransfer.SubmitResult res = null;
 		try
 		{
-			res = FileTransfer.submitExperiment(model.getId(), protocol.getId(), signature);
+			res = FileTransfer.submitExperiment(model.getId(), protocol.getId(), signature, user);
 		}
 		catch (Exception e)
 		{

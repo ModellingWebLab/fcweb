@@ -26,7 +26,7 @@ if 'cancelTask' in form:
     print "Content-Type: text/plain\n\n"
     fcws.CancelExperiment(form['cancelTask'].value)
 else:
-    for field in ['callBack', 'signature', 'model', 'protocol']:
+    for field in ['callBack', 'signature', 'model', 'protocol', 'user', 'isAdmin']:
         if field not in form:
             SendError("Missing required field.")
     
@@ -37,7 +37,8 @@ else:
         callBack = form["callBack"]
         modelUrl = form["model"]
         protocolUrl = form["protocol"]
-        fcws.ScheduleExperiment(callBack.value, signature.value, modelUrl.value, protocolUrl.value)
+        fcws.ScheduleExperiment(callBack.value, signature.value, modelUrl.value, protocolUrl.value,
+                                user=form['user'].value, isAdmin=(form['isAdmin'].value == 'true'))
     except Exception, e:
         print signature.value, "failed due to unexpected error:", e, "<br/>"
         print "Full internal details follow:<br/>"
