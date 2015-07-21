@@ -16,7 +16,7 @@ sudo apt-get install tomcat7 postfix maven libapache2-mod-jk mysql-server apache
 
 For the backend:
 
-* All the Chaste dependencies
+* All the Chaste dependencies (including for [Functional Curation](https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/PythonImplementation))
 * python-requests
 * Celery (>= 3.1)
 
@@ -37,7 +37,7 @@ sudo -H pip install requests
 In the `resources` folder there is a sample init script and configuration file for running Celery on boot.
 Copy `resources/celeryd-init` as `/etc/init.d/celeryd`, and `resources/celeryd-default` as `/etc/default/celeryd`.
 You'll definitely need to edit the latter file to suit your system.
-The server can then be started with `sudo /etc/init.d/celery restart`,
+The server can then be started with `sudo /etc/init.d/celeryd restart`,
 but don't do this until you've finished the web service setup below.
 To ensure it is restarted when the machine reboots, use `sudo update-rc.d celeryd defaults`.
 
@@ -88,6 +88,19 @@ svn co https://chaste.cs.ox.ac.uk/svn/chaste/projects/FunctionalCuration
 cd ..
 scons -j4 b=GccOpt cl=1 exe=1 projects/FunctionalCuration/apps
 ```
+
+### Extra simulation nodes
+
+If you wish to set up multiple machines for running experiments, the RabbitMQ broker will need to be configured to accept connections from the additional workers,
+and you will need to set up parts of the backend on the additional machines.
+
+Note that these additional machines do NOT need a web server installed,
+and the `resources/cgi-bin/fcws` folder may be installed locally to the user running celery (rather than in `/var/www`).
+They will need `celery`, `requests` and the `FunctionalCuration` executable set up as described above.
+However `/etc/default/celeryd` will need modifying in two ways:
+
+* Add `--broker=amqp://guest@MACHINE//` to `CELERYD_OPTS`, where `MACHINE` is the host name of the broker.  If you password-protect the broker connection, this setting will need to be edited accordingly.
+* Change `CELERYD_CHDIR` if you install the `resources/cgi-bin/fcws` folder in a different location.
 
 ## Setup front-end
 
