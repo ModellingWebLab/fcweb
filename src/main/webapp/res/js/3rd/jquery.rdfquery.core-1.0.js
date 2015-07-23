@@ -1913,12 +1913,22 @@
     },
 
     /**
-     * Creates a new {@link jQuery.rdf} object whose databank contains all the triples in this object's databank except for those in the argument's databank.
+     * Creates a new {@link jQuery.rdf} object that is the result of filtering out matches that have the same subject as matches in the given {@link jQuery.rdf}.
+     * Note that this is different from the behaviour of {@link jQuery.rdf.databank#except}, which compares the underlying databanks, and so would give an empty
+     * result when processing two queries on the same databank.
      * @param {jQuery.rdf} query
      * @see jQuery.rdf.databank#except
      */
     except: function (query) {
-      return $.rdf({ databank: this.databank.except(query.databank) });
+    	var sources = query.sources();
+    	return this.filter(function () {
+    		for (i=0; i<sources.length; i++) {
+    			var subject = sources[i][0].subject;
+				if (subject == this.ann)
+					return false;
+    		}
+    		return true;
+		});
     },
 
     /**
@@ -2699,21 +2709,11 @@
      * var removed = old.except(new);
      */
     except: function (data) {
-      var store = data.subjectIndex,
-        diff = [];
-      $.each(this.subjectIndex, function (s, ts) {
-        var ots = store[s];
-        if (ots === undefined) {
-          diff = diff.concat(ts);
-        } else {
-          $.each(ts, function (i, t) {
-            if ($.inArray(t, ots) === -1) {
-              diff.push(t);
-            }
-          });
-        }
-      });
-      return $.rdf.databank(diff);
+    	var myTriples = this.triples(),
+    		theirTriples = data.triples(),
+    		newTriples = myTriples.not(theirTriples);
+    	return $.rdf.databank(newTriples.get(), { namespaces: this.namespaces, base: this.base });
+//    	return $.rdf.databank(this.triples().not(data.triples()).get());
     },
 
     /**
