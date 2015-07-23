@@ -128,12 +128,13 @@ metadataEditor.prototype.getContentsCallback = function (succ)
                 clist = document.createElement("ul"),
                 c = {li: li, ul: clist, elt: this, name: this.getAttribute('name'), vars: []};
             self.components[c.name] = c;
-            li.innerHTML = '<span class="editmeta_cname">' + c.name + '</span>';
+            li.innerHTML = '<span class="editmeta_cname editmeta_sublist_hidden">' + c.name + '</span>';
             li.appendChild(clist);
             var_list.appendChild(li);
             // Toggle display of this component's variables on click of the component name
             $('span', li).click(function (ev) {
                 $(clist).toggle();
+                $(this).toggleClass("editmeta_sublist_shown editmeta_sublist_hidden");
             });
             $(clist).hide();
             // Find variables in this component
@@ -252,6 +253,68 @@ metadataEditor.prototype.ready = function ()
 }
 
 /**
+ * Helper function for ontologyLoaded().
+ * Given a parent HTML element (as a jQuery object) and an rdfQuery collection representing the members of a Category
+ * in our ontology, create an unordered list representation of these members (if there are any) and append it to the parent.
+ * We recurse for any members that are not Annotations, since these represent sub-categories.
+ */
+metadataEditor.prototype.fillCategoryList = function (parent, rdf_)
+{
+	if (rdf_.length > 0)
+	{
+		var self = this,
+			ul = $('<ul></ul>'),
+			rdf = rdf_.optional('?ann rdfs:label ?label').optional('?ann rdfs:comment ?comment'),
+			annotations = rdf.where('?ann a oxmeta:Annotation');
+		parent.append(ul);
+//		console.log("Number of annotations: " + annotations.length);
+//		console.log("Number of categories: " + rdf.except(annotations).length);
+		// First, process sub-categories
+		rdf.except(annotations).each(function (i, bindings, triples) {
+			var li = $('<li></li>').addClass("editmeta_category"),
+				span = $('<span></span>').addClass("editmeta_category_name editmeta_sublist_hidden");
+			span.text(bindings.label === undefined ? bindings.ann.value.fragment : bindings.label.value);
+			if (bindings.comment !== undefined)
+				span.attr('title', bindings.comment.value);
+			li.append(span);
+			ul.append(li);
+			// Process the sub-category's members
+			self.fillCategoryList(li, self.rdf.where('?ann a ' + bindings.ann.toString()));
+			// Toggle display of the sub-category's members on click of the category name
+			span.click(function (ev) {
+				var $this = $(this);
+				$this.toggleClass("editmeta_sublist_shown editmeta_sublist_hidden");
+				$this.next().toggle();
+			});
+			span.next().hide();
+		});
+		// Second, process annotations
+		annotations.each(function (i, bindings, triples) {
+			var li = $('<li></li>').addClass("editmeta_annotation");
+			li.text(bindings.label === undefined ? bindings.ann.value.fragment : bindings.label.value);
+			if (bindings.comment !== undefined)
+				li.attr('title', bindings.comment.value);
+			self.terms.push({uri: bindings.ann.value, li: li});
+			ul.append(li);
+			li.draggable({
+				containment: self.div,
+				cursor: 'move',
+				helper: function (event) {
+					self.dragDiv.text(li.text())
+								.data('bindings', bindings);
+					return self.dragDiv;
+				},
+				scroll: false
+			});
+		});
+		// Finally, sort the list
+		var items = ul.children('li').get();
+		items.sort(function(a,b) { return $(a).text().localeCompare($(b).text()); });
+		$.each(items, function(i, li) { ul.append(li); });
+	}
+}
+
+/**
  * Callback function for when the Oxford metadata ontology has been fetched from the server.
  */
 metadataEditor.prototype.ontologyLoaded = function (data, status, jqXHR)
@@ -268,33 +331,8 @@ metadataEditor.prototype.ontologyLoaded = function (data, status, jqXHR)
     
     // Show available terms
     this.terms = [];
-    var ul = $('<ul></ul');
-    this.ontoDiv.append("<h4>Available annotations</h4>", ul);
-    this.rdf.where('?ann a oxmeta:Annotation')
-            .optional('?ann rdfs:label ?label')
-            .optional('?ann rdfs:comment ?comment')
-            .each(function(i, bindings, triples) {
-                var li = $('<li></li>', {'class': 'editmeta_annotation'});
-                li.text(bindings.label === undefined ? bindings.ann.value.fragment : bindings.label.value);
-                if (bindings.comment !== undefined)
-                    li.attr('title', bindings.comment.value);
-                self.terms.push({uri: bindings.ann.value, li: li});
-                ul.append(li);
-                li.draggable({
-                    containment: self.div,
-                    cursor: 'move',
-                    helper: function (event) {
-                        self.dragDiv.text(li.text())
-                                    .data('bindings', bindings);
-                        return self.dragDiv;
-                    },
-                    scroll: false
-                });
-            });
-    // Sort the list!
-    var items = $('li', ul).get();
-    items.sort(function(a,b) { return $(a).text().localeCompare($(b).text()); });
-    $.each(items, function(i, li) { ul.append(li); });
+    this.ontoDiv.append("<h4>Available annotations</h4>");
+    this.fillCategoryList(this.ontoDiv, this.rdf.where('?ann a oxmeta:Category'));
 
     // If model is available too, set up linking functionality
     if (this.loadedModel)
@@ -409,7 +447,7 @@ function editMetadata()
     this.icon = "editMetadata.png";
     this.description = "edit the metadata annotations in this model";
 
-    addScript(contextPath + "/res/js/3rd/jquery.rdfquery.core-1.0.js");
+    addScript(contextPath + "/res/js/3rd/jquery.rdfquery.core.min-1.0.js");
 };
 
 /**

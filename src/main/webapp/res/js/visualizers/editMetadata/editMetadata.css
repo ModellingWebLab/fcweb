@@ -49,3 +49,21 @@ li.editmeta_annotation {
 .editmeta_spaced {
     margin-left: 5px;
 }
+
+/* Indications of sublists that can be expanded. */
+.editmeta_sublist_shown:before {
+    content: "[-]\00a0";
+}
+
+.editmeta_sublist_hidden:before {
+    content: "[+]\00a0";
+}
+
+#editmeta_modelvars_div ul, #editmeta_ontoterms_div ul {
+    list-style-type: none;
+    padding-left: 25px;
+}
+
+#editmeta_modelvars_div > ul, #editmeta_ontoterms_div > ul {
+    padding-left: 5px;
+}
