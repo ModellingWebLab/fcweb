@@ -50,6 +50,10 @@ li.editmeta_annotation {
     margin-left: 5px;
 }
 
+.editmeta_category_name {
+    cursor: pointer;
+}
+
 /* Indications of sublists that can be expanded. */
 .editmeta_sublist_shown:before {
     content: "[-]\00a0";
@@ -59,6 +63,7 @@ li.editmeta_annotation {
     content: "[+]\00a0";
 }
 
+/* Make the lists more compact, and use our sublist markers above rather than bullets. */
 #editmeta_modelvars_div ul, #editmeta_ontoterms_div ul {
     list-style-type: none;
     padding-left: 25px;
