@@ -64,10 +64,27 @@ contentDumper.prototype.getContentsCallback = function (succ)
 		this.div.appendChild (document.createTextNode ("failed to load the contents"));
 	else
 	{
-		var pre = document.createElement("pre");
-		pre.appendChild(document.createTextNode(this.file.contents));
+		var pre = document.createElement("pre"),
+			content = this.file.contents,
+			type = getHighlightingType(this.file),
+			ext = this.file.name.split('.').pop();
+		if (ext == "csv") {
+			// Change the array shape line to be comprehensible to humans who don't know the format!
+			var lines = content.match(/^.*((\r\n|\n|\r)|$)/gm);
+			for (var i=0; i<lines.length; i++)
+				if (lines[i].charAt(0) != '#') {
+					var dims = lines[i].split(','),
+						ndims = dims.shift().trim();
+					if (dims.length == ndims)
+						lines[i] = lines[i].trim() + ' # This is a ' + ndims + 'd array with shape (' + dims.join().trim() + ')\r\n';
+					else
+						lines[i] = '# This is a 2d array\r\n' + lines[i];
+					break;
+				}
+			content = lines.join('');
+		}
+		pre.appendChild(document.createTextNode(content));
 		this.div.appendChild (pre);
-		var type = getHighlightingType (this.file);
 		if (type != "unknown")
 		{
 			console.log ("setting class: " + type);
