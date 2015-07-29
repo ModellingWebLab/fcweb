@@ -111,10 +111,10 @@ function sortTable (plots)
 
     // Put the categories in order, and sort them
     resortPartially (filesTable.plots, "plots", "Plottable result data", false);
-    resortPartially (filesTable.defaults, "defaults", "Result metadata", false);
-    resortPartially (filesTable.text, "text", "Experiment information", false);
-    resortPartially (filesTable.pngeps, "pngeps", "Pre-generated figures", true);
     resortPartially (filesTable.otherCSV, "otherCSV", "Other result data", true);
+    resortPartially (filesTable.text, "text", "Experiment information", false);
+    resortPartially (filesTable.defaults, "defaults", "Result metadata", false);
+    resortPartially (filesTable.pngeps, "pngeps", "Pre-generated figures", true);
     resortPartially (filesTable.other, "other", "Files mainly of use for debugging", true);
 
     // Remember that we've been called!
