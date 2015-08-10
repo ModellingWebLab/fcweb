@@ -39,7 +39,7 @@ Copy `resources/celeryd-init` as `/etc/init.d/celeryd`, and `resources/celeryd-d
 You'll definitely need to edit the latter file to suit your system.
 The server can then be started with `sudo /etc/init.d/celeryd restart`,
 but don't do this until you've finished the web service setup below.
-To ensure it is restarted when the machine reboots, use `sudo update-rc.d celeryd defaults`.
+To ensure it is restarted when the machine reboots, use `sudo update-rc.d celeryd defaults 25`.
 
 For some additional security, you might want to stop the rabbitmq broker listening on external ports,
 although the default account only accepts logins from localhost anyway.
