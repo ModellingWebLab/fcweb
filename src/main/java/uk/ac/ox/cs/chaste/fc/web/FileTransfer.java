@@ -264,7 +264,7 @@ public class FileTransfer extends WebModule
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected JSONObject answerApiRequest (HttpServletRequest request, 
+	protected JSONObject answerApiRequest (HttpServletRequest request,
 		HttpServletResponse response, DatabaseConnector db,
 		Notifications notifications, JSONObject querry, User user, HttpSession session) throws IOException, ChastePermissionException
 	{
@@ -276,222 +276,214 @@ public class FileTransfer extends WebModule
 		for (String s : req)
 			LOGGER.debug (s);
 
-		if (req != null && req.length == 2 && req[1].equals ("submitExperiment.html"))
+		if (req != null && req.length == 2 && req[1].equals("submitExperiment.html"))
 		{
-			//try
-			//{
-				String signature = request.getParameter ("signature");
-				if (signature == null || signature.length () < 1)
-				{
-					answer.put ("error", "missing signature");
-					return answer;
-				}
-				
-				LOGGER.debug ("signature: ", signature);
-
-				String preRole = user.getRole ();
-				String preMail = user.getRole ();
-				user.setRole (User.ROLE_ADMIN);
-				user.setMail ("somemail");
-				
-				ExperimentManager expMgmt = new ExperimentManager (db, notifications, userMgmt, user, new ModelManager (db, notifications, userMgmt, user), new ProtocolManager (db, notifications, userMgmt, user));
-				
-				ChasteExperimentVersion exp = expMgmt.getRunningExperiment (signature.trim ());
-				if (exp == null || (!exp.getStatus ().equals (ChasteExperimentVersion.STATUS_QUEUED)
-									&& !exp.getStatus ().equals (ChasteExperimentVersion.STATUS_RUNNING)))
-				{
-					LOGGER.debug ("no experiment found");
-					answer.put ("error", "invalid signature");
-					return answer;
-				}
-				
-				LOGGER.debug ("exp: ", exp);
-				
-				String taskId = request.getParameter("taskid");
-				if (taskId != null && !taskId.isEmpty())
-				{
-					// This was just a ping to let us know the id of the RunExperiment task, in case we want to cancel it
-					exp.setTaskId(expMgmt, taskId);
-					return answer;
-				}
-				
-				String returnmsg = request.getParameter ("returnmsg");
-				if (returnmsg == null)
-					returnmsg = "finished";
-				String returntype = request.getParameter ("returntype");
-				if (returntype == null)
-					returntype = "success";
-				returntype = returntype.trim ();
-				String exptStatus = ChasteExperimentVersion.STATUS_FAILED;
-				if (returntype.equals ("running"))
-					exptStatus = ChasteExperimentVersion.STATUS_RUNNING;
-				else if (returntype.equals ("success"))
-					exptStatus = ChasteExperimentVersion.STATUS_SUCCESS;
-				else if (returntype.equals ("partial"))
-					exptStatus = ChasteExperimentVersion.STATUS_PARTIAL;
-				else if (returntype.equals ("inapplicable"))
-					exptStatus = ChasteExperimentVersion.STATUS_INAPPLICABLE;
-				
-				LOGGER.debug ("supp: ", returnmsg, " -- ", returntype, " --> ", exptStatus);
-				
-				if (exptStatus.equals (ChasteExperimentVersion.STATUS_RUNNING))
-				{
-					// This was just a ping to let us know it's started
-					exp.updateExperiment (expMgmt, "running", exptStatus);
-					return answer;
-				}
-				else if (exptStatus.equals(ChasteExperimentVersion.STATUS_INAPPLICABLE))
-				{
-					// Again a ping, but to say we can't run this experiment
-					exp.updateExperiment(expMgmt, returnmsg, exptStatus);
-					return answer;
-				}
-				
-				user.setRole (preRole);
-				user.setMail (preMail);
-				User u = exp.getAuthor ();
-				try
-				{
-					if (u.isSendMails ())
-						Tools.sendMail (u.getMail (), u.getNick (), "Functional curation experiment finished",
-								buildMailBody (u.getNick (), returntype, exp));
-				}
-				catch (MessagingException e)
-				{
-					LOGGER.error (e, "couldn't send mail to user (exp finished)");
-				}
-				
-				File destination = new File (expMgmt.getEntityStorageDir () + File.separator + signature);
-				destination.mkdirs ();
-				if (!destination.exists () || !destination.isDirectory ())
-				{
-					LOGGER.error ("cannot write returning experiment to ", destination.getAbsolutePath ());
-					answer.put ("error", "cannot write to " + destination.getAbsolutePath ());
-					exp.updateExperiment (expMgmt, "cannot write to " + destination.getAbsolutePath (), ChasteExperimentVersion.STATUS_FAILED);
-					return answer;
-				}
-
-				LOGGER.debug ("dest: ", destination);
-				
-				Part expPart = null;
-				try
-				{
-					expPart = request.getPart("experiment");
-				}
-				catch (IOException | ServletException e)
-				{
-					LOGGER.warn (e, "wasn't able to find an attachment");
-					e.printStackTrace ();
-				}
-				
-				if (expPart != null)
-				{
-					File tmp = File.createTempFile ("chasteIncommingExperiment", ".combineArchive");
-					expPart.write (tmp.getAbsolutePath ());
-					
-					LOGGER.debug ("tmp: ", tmp);
-					
-					try
-					{
-						CombineArchive ca = new CombineArchive (tmp);
-						ca.extractTo (destination);
-						Collection<ArchiveEntry> entries = ca.getEntries ();
-						
-						ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt);
-						boolean found_stdout = false;
-						
-						for (ArchiveEntry entry : entries)
-						{
-							String format = entry.getFormat ();
-							
-							// lets drop the meta crap.
-							// TODO: formats werden noch nicht aufgeloest....
-							if (format.equals (CombineFormats.getFormatIdentifier ("omex")) || format.equals (CombineFormats.getFormatIdentifier ("manifest")))
-								continue;
-							
-							if (entry.getFileName ().endsWith ("stdout.txt"))
-								found_stdout = true;
-							
-							String relativeName = entry.getFilePath ();
-							if (relativeName.startsWith ("./"))
-								relativeName = relativeName.substring (2);
-							while (relativeName.startsWith ("/"))
-								relativeName = relativeName.substring (1);
-							
-							// add the remaining to db
-							int fileId = fileMgmt.addFile (relativeName, CombineFormats.getFormatFromIdentifier (format), exp.getAuthor (), new File (destination.getAbsolutePath() + File.separatorChar + relativeName).length (), false);
-							if (fileId < 0)
-							{
-								// TODO: cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
-								LOGGER.error ("error inserting experiment file to db: ", relativeName);
-								answer.put ("error", "couldn't insert into db");
-								exp.updateExperiment (expMgmt, "error inserting experiment file to db: " + relativeName, ChasteExperimentVersion.STATUS_FAILED);
-								return answer;
-							}
-							
-							// associate files+exp
-							if (!fileMgmt.associateFile (fileId, exp, expMgmt))
-							{
-								// TODO: cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
-								LOGGER.error ("error inserting experiment to db (association failed): ", relativeName);
-								answer.put ("error", "couldn't insert into db");
-								exp.updateExperiment (expMgmt, "error inserting experiment to db (association failed): " + relativeName, ChasteExperimentVersion.STATUS_FAILED);
-								return answer;
-							}
-						}
-						ca.close();
-						
-						File output = new File (destination.getAbsolutePath () + File.separator + "stdout.txt");
-						if (!found_stdout && output.exists () && output.canRead ())
-						{
-							int fileId = fileMgmt.addFile ("stdout.txt", "text/plain", exp.getAuthor (), output.length (), false);
-							if (fileId < 0)
-							{
-								// TODO: cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
-								LOGGER.error ("error inserting experiment output file to db: ", output.getAbsolutePath ());
-								answer.put ("error", "couldn't insert output into db");
-							}
-							
-							// associate files+exp
-							if (!fileMgmt.associateFile (fileId, exp, expMgmt))
-							{
-								// TODO: cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
-								LOGGER.error ("error inserting experiment output to db (association failed): ", output.getAbsolutePath ());
-								answer.put ("error", "couldn't insert output into db");
-							}
-						}
-						
-						exp.updateExperiment (expMgmt, returnmsg, exptStatus);
-						answer.put ("experiment", "ok");
-					}
-					catch (Exception e)
-					{
-						e.printStackTrace();
-						LOGGER.error (e, "error returning experiment");
-						answer.put ("experiment", "failed");
-						if (returnmsg.equals ("finished"))
-							exp.updateExperiment (expMgmt, "error reading archive", ChasteExperimentVersion.STATUS_FAILED);
-						else
-							exp.updateExperiment (expMgmt, "error reading archive: " + returnmsg, ChasteExperimentVersion.STATUS_FAILED);
-					}
-				}
-				else
-				{
-					// inform the user -> failed/succeeded
-					exp.updateExperiment (expMgmt, returnmsg + " (backend returned no archive)", exptStatus);
-					answer.put ("error", "no archive found");
-				}
-				return answer;
-			/*}
-			catch (ServletException e1)
+			String signature = request.getParameter("signature");
+			if (signature == null || signature.length () < 1)
 			{
-				e1.printStackTrace();
-				answer.put ("error", "servlet error");
+				answer.put("error", "missing signature");
 				return answer;
-			}*/
+			}
+			LOGGER.debug("signature: ", signature);
+
+			// Gain admin privileges
+			String preRole = user.getRole ();
+			String preMail = user.getRole ();
+			user.setRole (User.ROLE_ADMIN);
+			user.setMail ("somemail");
+
+			// Response from the RunExperiment web service
+			ExperimentManager expMgmt = new ExperimentManager (db, notifications, userMgmt, user, new ModelManager (db, notifications, userMgmt, user), new ProtocolManager (db, notifications, userMgmt, user));
+			
+			ChasteExperimentVersion exp = expMgmt.getRunningExperiment (signature.trim ());
+			if (exp == null || (!exp.getStatus ().equals (ChasteExperimentVersion.STATUS_QUEUED)
+								&& !exp.getStatus ().equals (ChasteExperimentVersion.STATUS_RUNNING)))
+			{
+				LOGGER.debug ("no experiment found");
+				answer.put ("error", "invalid signature");
+				return answer;
+			}
+			
+			LOGGER.debug ("exp: ", exp);
+			
+			String taskId = request.getParameter("taskid");
+			if (taskId != null && !taskId.isEmpty())
+			{
+				// This was just a ping to let us know the id of the RunExperiment task, in case we want to cancel it
+				exp.setTaskId(expMgmt, taskId);
+				return answer;
+			}
+			
+			String returnmsg = request.getParameter ("returnmsg");
+			if (returnmsg == null)
+				returnmsg = "finished";
+			String returntype = request.getParameter ("returntype");
+			if (returntype == null)
+				returntype = "success";
+			returntype = returntype.trim ();
+			String exptStatus = ChasteExperimentVersion.STATUS_FAILED;
+			if (returntype.equals ("running"))
+				exptStatus = ChasteExperimentVersion.STATUS_RUNNING;
+			else if (returntype.equals ("success"))
+				exptStatus = ChasteExperimentVersion.STATUS_SUCCESS;
+			else if (returntype.equals ("partial"))
+				exptStatus = ChasteExperimentVersion.STATUS_PARTIAL;
+			else if (returntype.equals ("inapplicable"))
+				exptStatus = ChasteExperimentVersion.STATUS_INAPPLICABLE;
+			
+			LOGGER.debug ("supp: ", returnmsg, " -- ", returntype, " --> ", exptStatus);
+			
+			if (exptStatus.equals (ChasteExperimentVersion.STATUS_RUNNING))
+			{
+				// This was just a ping to let us know it's started
+				exp.updateExperiment (expMgmt, "running", exptStatus);
+				return answer;
+			}
+			else if (exptStatus.equals(ChasteExperimentVersion.STATUS_INAPPLICABLE))
+			{
+				// Again a ping, but to say we can't run this experiment
+				exp.updateExperiment(expMgmt, returnmsg, exptStatus);
+				return answer;
+			}
+			
+			user.setRole (preRole);
+			user.setMail (preMail);
+			User u = exp.getAuthor ();
+			try
+			{
+				if (u.isSendMails ())
+					Tools.sendMail (u.getMail (), u.getNick (), "Functional curation experiment finished",
+							buildMailBody (u.getNick (), returntype, exp));
+			}
+			catch (MessagingException e)
+			{
+				LOGGER.error (e, "couldn't send mail to user (exp finished)");
+			}
+			
+			File destination = new File (expMgmt.getEntityStorageDir () + File.separator + signature);
+			destination.mkdirs ();
+			if (!destination.exists () || !destination.isDirectory ())
+			{
+				LOGGER.error ("cannot write returning experiment to ", destination.getAbsolutePath ());
+				answer.put ("error", "cannot write to " + destination.getAbsolutePath ());
+				exp.updateExperiment (expMgmt, "cannot write to " + destination.getAbsolutePath (), ChasteExperimentVersion.STATUS_FAILED);
+				return answer;
+			}
+
+			LOGGER.debug ("dest: ", destination);
+			
+			Part expPart = null;
+			try
+			{
+				expPart = request.getPart("experiment");
+			}
+			catch (IOException | ServletException e)
+			{
+				LOGGER.warn (e, "wasn't able to find an attachment");
+				e.printStackTrace ();
+			}
+			
+			if (expPart != null)
+			{
+				File tmp = File.createTempFile ("chasteIncommingExperiment", ".combineArchive");
+				expPart.write (tmp.getAbsolutePath ());
+				
+				LOGGER.debug ("tmp: ", tmp);
+				
+				try
+				{
+					CombineArchive ca = new CombineArchive (tmp);
+					ca.extractTo (destination);
+					Collection<ArchiveEntry> entries = ca.getEntries ();
+					
+					ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt);
+					boolean found_stdout = false;
+					
+					for (ArchiveEntry entry : entries)
+					{
+						String format = entry.getFormat ();
+						
+						// lets drop the meta crap.
+						// TODO: formats werden noch nicht aufgeloest....
+						if (format.equals (CombineFormats.getFormatIdentifier ("omex")) || format.equals (CombineFormats.getFormatIdentifier ("manifest")))
+							continue;
+						
+						if (entry.getFileName ().endsWith ("stdout.txt"))
+							found_stdout = true;
+						
+						String relativeName = entry.getFilePath ();
+						if (relativeName.startsWith ("./"))
+							relativeName = relativeName.substring (2);
+						while (relativeName.startsWith ("/"))
+							relativeName = relativeName.substring (1);
+						
+						// add the remaining to db
+						int fileId = fileMgmt.addFile (relativeName, CombineFormats.getFormatFromIdentifier (format), exp.getAuthor (), new File (destination.getAbsolutePath() + File.separatorChar + relativeName).length (), false);
+						if (fileId < 0)
+						{
+							// TODO: cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
+							LOGGER.error ("error inserting experiment file to db: ", relativeName);
+							answer.put ("error", "couldn't insert into db");
+							exp.updateExperiment (expMgmt, "error inserting experiment file to db: " + relativeName, ChasteExperimentVersion.STATUS_FAILED);
+							return answer;
+						}
+						
+						// associate files+exp
+						if (!fileMgmt.associateFile (fileId, exp, expMgmt))
+						{
+							// TODO: cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
+							LOGGER.error ("error inserting experiment to db (association failed): ", relativeName);
+							answer.put ("error", "couldn't insert into db");
+							exp.updateExperiment (expMgmt, "error inserting experiment to db (association failed): " + relativeName, ChasteExperimentVersion.STATUS_FAILED);
+							return answer;
+						}
+					}
+					ca.close();
+					
+					File output = new File (destination.getAbsolutePath () + File.separator + "stdout.txt");
+					if (!found_stdout && output.exists () && output.canRead ())
+					{
+						int fileId = fileMgmt.addFile ("stdout.txt", "text/plain", exp.getAuthor (), output.length (), false);
+						if (fileId < 0)
+						{
+							// TODO: cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
+							LOGGER.error ("error inserting experiment output file to db: ", output.getAbsolutePath ());
+							answer.put ("error", "couldn't insert output into db");
+						}
+						
+						// associate files+exp
+						if (!fileMgmt.associateFile (fileId, exp, expMgmt))
+						{
+							// TODO: cleanUp (entityDir, versionId, files, fileMgmt, entityMgmt);
+							LOGGER.error ("error inserting experiment output to db (association failed): ", output.getAbsolutePath ());
+							answer.put ("error", "couldn't insert output into db");
+						}
+					}
+					
+					exp.updateExperiment (expMgmt, returnmsg, exptStatus);
+					answer.put ("experiment", "ok");
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					LOGGER.error (e, "error returning experiment");
+					answer.put ("experiment", "failed");
+					if (returnmsg.equals ("finished"))
+						exp.updateExperiment (expMgmt, "error reading archive", ChasteExperimentVersion.STATUS_FAILED);
+					else
+						exp.updateExperiment (expMgmt, "error reading archive: " + returnmsg, ChasteExperimentVersion.STATUS_FAILED);
+				}
+			}
+			else
+			{
+				// inform the user -> failed/succeeded
+				exp.updateExperiment (expMgmt, returnmsg + " (backend returned no archive)", exptStatus);
+				answer.put ("error", "no archive found");
+			}
+			return answer;
 		}
 		
-		
+		// Not an experiment submission => normal file upload
 		
 		if (!user.isAuthorized () || !user.isAllowedToUpload ())
 			throw new ChastePermissionException ("not allowed.");
@@ -865,7 +857,7 @@ public class FileTransfer extends WebModule
         return entity.getContent();
     }
     @Override
-    public Header getContentEncoding() {             
+    public Header getContentEncoding() {
         return entity.getContentEncoding();
     }
     @Override
@@ -877,7 +869,7 @@ public class FileTransfer extends WebModule
         return entity.getContentType();
     }
     @Override
-    public boolean isChunked() {             
+    public boolean isChunked() {
         return entity.isChunked();
     }
     @Override
@@ -885,7 +877,7 @@ public class FileTransfer extends WebModule
         return entity.isRepeatable();
     }
     @Override
-    public boolean isStreaming() {             
+    public boolean isStreaming() {
         return entity.isStreaming();
     } // CONSIDER put a _real_ delegator into here!
 
@@ -898,7 +890,7 @@ public class FileTransfer extends WebModule
              */
 
             public ProxyOutputStream(OutputStream proxy) {
-                super(proxy);    
+                super(proxy);
             }
             public void write(int idx) throws IOException {
                 out.write(idx);

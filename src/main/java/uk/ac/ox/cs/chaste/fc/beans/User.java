@@ -72,7 +72,7 @@ public class User
 		this.nick = nick;
 		this.institution = institution;
 		this.created = created;
-		this.role =role;
+		this.role = role;
 		this.sendMails = sendMails;
 		this.preferences = new HashMap <String, String> ();
 	}

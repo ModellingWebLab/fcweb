@@ -103,9 +103,9 @@ public class Tools
 	public static void deleteRecursively (File f, boolean breakable) throws IOException
 	{
 		if (f.isDirectory()) {
-	    for (File c : f.listFiles())
-	      deleteRecursively(c, breakable);
-	  }
+			for (File c : f.listFiles())
+				deleteRecursively(c, breakable);
+		}
 		if (!f.delete ())
 		{
 			if (breakable)
@@ -145,11 +145,11 @@ public class Tools
 	{
 		Session session = Session.getDefaultInstance(new Properties(), null);
 		Message msg = new MimeMessage(session);
-    msg.setFrom(new InternetAddress(mailFrom, mailFromName));
-    msg.addRecipient(Message.RecipientType.TO, new InternetAddress(to, toName));
-    msg.setSubject(subject);
-    msg.setText(body);
-    Transport.send(msg);
+		msg.setFrom(new InternetAddress(mailFrom, mailFromName));
+		msg.addRecipient(Message.RecipientType.TO, new InternetAddress(to, toName));
+		msg.setSubject(subject);
+		msg.setText(body);
+		Transport.send(msg);
 	}
 	
 	public static final String hash (String msg)
@@ -158,13 +158,13 @@ public class Tools
 		try
 		{
 			md = MessageDigest.getInstance("MD5");
-	    md.update(msg.getBytes());
-	
-	    byte byteData[] = md.digest();
-	
-	    StringBuffer sb = new StringBuffer();
-	    for (int i = 0; i < byteData.length; i++)
-	        sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
+			md.update(msg.getBytes());
+			
+			byte byteData[] = md.digest();
+			
+			StringBuffer sb = new StringBuffer();
+			for (int i = 0; i < byteData.length; i++)
+				sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
 			return sb.toString ();
 		}
 		catch (NoSuchAlgorithmException e)

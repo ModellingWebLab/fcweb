@@ -155,8 +155,8 @@ public abstract class ChasteEntityManager
 			throw new ChastePermissionException ("you are not allowed to create a new entity");
 		
 		PreparedStatement st = db.prepareStatement ("INSERT INTO `" + entityTable + "`(`name`, `author`) VALUES (?,?)");
-    ResultSet rs = null;
-    int id = -1;
+		ResultSet rs = null;
+		int id = -1;
 		
 		try
 		{
@@ -164,14 +164,14 @@ public abstract class ChasteEntityManager
 			st.setInt (2, u.getId ());
 			
 			int affectedRows = st.executeUpdate();
-      if (affectedRows == 0)
-      {
-          throw new SQLException("Creating entity failed, no rows affected. (" + entityTable + ")");
-      }
+			if (affectedRows == 0)
+			{
+				throw new SQLException("Creating entity failed, no rows affected. (" + entityTable + ")");
+			}
 
-      rs = st.getGeneratedKeys();
-      if (rs.next())
-      	id = rs.getInt (1);
+			rs = st.getGeneratedKeys();
+			if (rs.next())
+				id = rs.getInt (1);
 		}
 		catch (SQLException e)
 		{
@@ -194,8 +194,8 @@ public abstract class ChasteEntityManager
 			throw new ChastePermissionException ("you are not allowed to create a new entity version");
 		
 		PreparedStatement st = db.prepareStatement ("INSERT INTO `" + entityVersionsTable + "`(`author`, `" + entityColumn + "`, `version`, `filepath`, `visibility`, `commitmsg`) VALUES (?,?,?,?,?,?)");
-    ResultSet rs = null;
-    int id = -1;
+		ResultSet rs = null;
+		int id = -1;
 		
 		try
 		{
@@ -207,14 +207,14 @@ public abstract class ChasteEntityManager
 			st.setString (6, commitMsg);
 			
 			int affectedRows = st.executeUpdate();
-      if (affectedRows == 0)
-      {
-          throw new SQLException("Creating entity version failed, no rows affected. (" + entityVersionsTable + ")");
-      }
+			if (affectedRows == 0)
+			{
+				throw new SQLException("Creating entity version failed, no rows affected. (" + entityVersionsTable + ")");
+			}
 
-      rs = st.getGeneratedKeys();
-      if (rs.next())
-      	id = rs.getInt (1);
+			rs = st.getGeneratedKeys();
+			if (rs.next())
+				id = rs.getInt (1);
 		}
 		catch (SQLException e)
 		{

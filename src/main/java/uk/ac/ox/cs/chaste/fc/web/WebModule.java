@@ -85,12 +85,6 @@ extends HttpServlet
 			return;
 		}
 		
-		
-		
-		
-		
-		
-		
 		JSONObject obj = null;
 		try
 		{
@@ -215,8 +209,8 @@ extends HttpServlet
 			if (Math.random () < .02) // on avg every 50th click
 				FileTransfer.scheduleCleanUp ();
 		
-	  HttpSession session = request.getSession (true);
-	  CookieManager cookieMgmt = new CookieManager (request, response);
+		HttpSession session = request.getSession (true);
+		CookieManager cookieMgmt = new CookieManager (request, response);
 		Notifications notifications = new Notifications ();
 		DatabaseConnector db = new DatabaseConnector (notifications);
 		userMgmt = new UserManager (db, notifications);
@@ -253,8 +247,7 @@ extends HttpServlet
 	 *      response)
 	 */
 	protected void doGet (HttpServletRequest request, HttpServletResponse response)
-		throws ServletException,
-			IOException
+		throws ServletException, IOException
 	{
 		doAction (request, response, false);
 	}

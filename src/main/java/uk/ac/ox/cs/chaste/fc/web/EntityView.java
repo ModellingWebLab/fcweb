@@ -244,13 +244,8 @@ public class EntityView extends WebModule
 		}
 		else if (task.equals ("getInfo"))
 		{
-
 			if (querry.get ("version") != null)
 				getVersion (querry.get ("version"), notifications, answer, entityMgmt, fileMgmt, new ExperimentManager (db, notifications, userMgmt, user, new ModelManager (db, notifications, userMgmt, user), new ProtocolManager (db, notifications, userMgmt, user)));
-			if (querry.get ("versionfile") != null)
-				throw new IOException ("unsupported yet");
-			
-				//getFile (querry.get ("versionfile"), task, notifications, querry, user, answer, entityMgmt, fileMgmt);
 		}
 		else if (task.equals ("updateVisibility"))
 		{
@@ -391,29 +386,6 @@ public class EntityView extends WebModule
 			throw new IOException ("version not found");
 		}
 	}
-	
-	
-	/*@SuppressWarnings("unchecked")
-	private void getFile (Object versionFile, Object task, Notifications notifications, JSONObject querry, User user, JSONObject answer, ModelManager modelMgmt, ChasteFileManager fileMgmt) throws IOException
-	{
-		try
-		{
-			int fileId = Integer.parseInt (versionFile.toString ());
-			ChasteFile file = fileMgmt.getFileById (fileId);
-			if (file == null)
-				notifications.addError ("no file found");
-			else
-			{
-				answer.put ("modelversionfile", file.toJson ());
-			}
-		}
-		catch (NullPointerException | NumberFormatException e)
-		{
-			e.printStackTrace ();
-			LOGGER.warn ("user provided file id not parseable: " + versionFile);
-			throw new IOException ("file not found");
-		}
-	}*/
 	
 	/**
 	 * Unpack a COMBINE archive uploaded as part of a new entity, and use the contents as (potentially only some of) the

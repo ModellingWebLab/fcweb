@@ -262,8 +262,6 @@ public class DatabaseConnector
 							+ "  UNIQUE KEY `task_id` (`task_id`)"
 							+ ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
 						st.execute();
-//						st = this.prepareStatement("ALTER TABLE `runningexperiments` ADD CONSTRAINT experimentversions FOREIGN KEY (`experimentversions`) REFERENCES `experimentversions` (`id`) ON UPDATE CASCADE ON DELETE CASCADE;");
-//						st.execute();
 						closeRes(st);
 
 						st = this.prepareStatement("UPDATE `settings` SET `val`=5 WHERE `user`='-1' AND `key`='DBVERSION';");
