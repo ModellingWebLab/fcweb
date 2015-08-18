@@ -17,7 +17,7 @@ sudo apt-get install tomcat7 postfix maven libapache2-mod-jk mysql-server apache
 For the backend:
 
 * All the Chaste dependencies (including for [Functional Curation](https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/PythonImplementation))
-* python-requests
+* python-requests (>= 2.4.2)
 * Celery (>= 3.1)
 
 ## Setup backend

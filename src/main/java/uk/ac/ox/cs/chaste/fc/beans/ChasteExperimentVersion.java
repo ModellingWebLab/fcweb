@@ -34,7 +34,7 @@ extends ChasteEntityVersion
 		User author, String filePath, Timestamp created, int numFiles,
 		Timestamp finished, String status, String returnText, String visibility, String commitMsg, String taskId)
 	{
-		super (entity, id, created.toString (), author, filePath, created, numFiles, visibility, commitMsg);
+		super (entity, id, created.toString (), author, filePath, created, numFiles, visibility, commitMsg, 0);
 		this.finished = finished;
 		this.status = status;
 		this.returnText = returnText;

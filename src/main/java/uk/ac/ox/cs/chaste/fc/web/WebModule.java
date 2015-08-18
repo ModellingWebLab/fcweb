@@ -205,7 +205,7 @@ extends HttpServlet
 		
 		configure ();
 		
-		if (!fileTransfer)
+		if (!fileTransfer && !post)
 			if (Math.random () < .02) // on avg every 50th click
 				FileTransfer.scheduleCleanUp ();
 		

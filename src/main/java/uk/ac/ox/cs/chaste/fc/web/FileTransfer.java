@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.mail.MessagingException;
@@ -40,6 +41,7 @@ import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntity;
@@ -574,6 +576,13 @@ public class FileTransfer extends WebModule
 		String type;
 		boolean isMain;
 		int dbId;
+		/**
+		 * Create a new file info object.
+		 * @param tmpFile  the actual file currently on disk
+		 * @param name  the name the file has from a user's perspective
+		 * @param type  which of our limited set of file types this is
+		 * @param isMain  whether this is the main file for an entity version
+		 */
 		public NewFile (File tmpFile, String name, String type, boolean isMain)
 		{
 			this.tmpFile = tmpFile;
@@ -661,6 +670,37 @@ public class FileTransfer extends WebModule
 	    }
 	    LOGGER.error ("chaste backend answered w/ smth unexpected: ", res);
 	    throw new IOException ("Chaste backend response not expected.");
+	}
+	
+	/**
+	 * Submit a request to the backend web service to determine the ontology terms forming the interface of a protocol.
+	 * @param protoId  the protocol version to analyse
+	 * @param signature  used to verify callback responses from the web service
+	 */
+	public static void getProtocolInterface(Integer protoId, String signature)
+	{
+		try
+		{
+			HttpClient client = new DefaultHttpClient();
+			HttpPost post = new HttpPost(Tools.getChasteUrl());
+			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+			builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+			builder.addTextBody("password", Tools.getChastePassword());
+			builder.addTextBody("getProtoInterface", Tools.getThisUrl() + "download/p/name/" + protoId + "/a/" + signature);
+			builder.addTextBody("signature", signature);
+			builder.addTextBody("callBack", Tools.getThisUrl() + "protocol/submitInterface.html");
+			HttpEntity entity = builder.build();
+			ProgressiveEntity myEntity = new ProgressiveEntity(entity);
+			post.setEntity(myEntity);
+			HttpResponse response = client.execute(post);
+		    String res = getContent(response);
+		    LOGGER.debug("getProtocolInterface: response: " + res);
+		}
+		catch (Exception e)
+		{
+			LOGGER.error(e, "error getting protocol interface from web service for protocol id ", protoId);
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -830,6 +870,14 @@ public class FileTransfer extends WebModule
 		}
 
 		LOGGER.info ("cleaning finished, removed ", removedFiles, " files");
+		
+		// Check for protocol versions that haven't had their required ontology terms extracted (c.f. DB version 7 upgrade)
+		Map<Integer, String> proto_vers = protocolMgmt.getVersionsWithUnknownInterface();
+		LOGGER.info("Found ", proto_vers.size(), " protocols with unknown interface");
+		for (Map.Entry<Integer, String> id_sig : proto_vers.entrySet())
+		{
+			getProtocolInterface(id_sig.getKey(), id_sig.getValue());
+		}
 
 		}
 		finally

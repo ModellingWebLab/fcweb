@@ -12,13 +12,14 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
+import uk.ac.ox.cs.chaste.fc.web.FileTransfer;
 import de.binfalse.bflog.LOGGER;
 
 
 
 public class DatabaseConnector
 {
-	public static final int DB_VERSION = 6;
+	public static final int DB_VERSION = 7;
 	private Connection connection;
 	private Notifications note;
 	
@@ -298,6 +299,35 @@ public class DatabaseConnector
 					catch (SQLException e)
 					{
 						LOGGER.error(e, "error upgrading DB to version 6");
+						throw new RuntimeException("failed to upgrade database");
+					}
+				}
+
+				if (currentVersion < 7)
+				{
+					// Add protocolinterface table to record the ontology terms comprising a protocol's interface
+					LOGGER.info("upgrading DB to version 7...");
+					try
+					{
+						st = this.prepareStatement ("CREATE TABLE IF NOT EXISTS `protocolinterface` ("
+							+ "  `protocolversion` int(11) NOT NULL,"
+							+ "  `optional` tinyint(1) NOT NULL,"
+							+ "  `term` varchar(500) NOT NULL,"
+							+ "  FOREIGN KEY (`protocolversion`) REFERENCES `protocolversions` (`id`) ON UPDATE CASCADE ON DELETE CASCADE"
+							+ ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+						st.execute();
+						closeRes(st);
+
+						st = this.prepareStatement("UPDATE `settings` SET `val`=7 WHERE `user`='-1' AND `key`='DBVERSION';");
+						st.execute();
+						closeRes(st);
+						
+						// Extract ontology terms for existing protocols in the background
+						FileTransfer.scheduleCleanUp();
+					}
+					catch (SQLException e)
+					{
+						LOGGER.error(e, "error upgrading DB to version 7");
 						throw new RuntimeException("failed to upgrade database");
 					}
 				}

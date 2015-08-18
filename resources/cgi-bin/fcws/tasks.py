@@ -21,29 +21,69 @@ app = celery.Celery('fcws.tasks')
 app.config_from_object(celeryconfig)
 
 
-def Callback(callbackUrl, signature, data, **kwargs):
+def Callback(callbackUrl, signature, data, json=False, **kwargs):
     """Make a callback to the front-end server."""
     data['signature'] = signature
-    return requests.post(callbackUrl, data=data, verify=False, **kwargs)
+    if json:
+        kwargs['json'] = data
+    else:
+        kwargs['data'] = data
+    return requests.post(callbackUrl, verify=False, **kwargs)
 
 
-def ReportError(callbackUrl, signature):
+def ReportError(callbackUrl, signature, prefix="failed due to unexpected error: ", json=False):
     """Report an unexpected error, with details, to the front-end, then re-raise."""
     import sys, traceback
-    message = "failed due to unexpected error: " + str(sys.exc_info()[1]) + "<br/>Full internal details follow:<br/>"
+    message = prefix + sys.exc_info()[0].__name__ + ": " + str(sys.exc_info()[1]) + "<br/>Full internal details follow:<br/>"
     message += traceback.format_exc().replace('\n', '<br/>')
-    Callback(callbackUrl, signature, {'returntype': 'failed', 'returnmsg': message})
+    Callback(callbackUrl, signature, {'returntype': 'failed', 'returnmsg': message}, json=json)
     raise
+
+
+def MakeTempDir():
+    """Make a temporary folder within the configured location."""
+    try:
+        os.makedirs(config['temp_dir'], 0775)
+    except os.error:
+        pass
+    return tempfile.mkdtemp(dir=config['temp_dir'])
+
+
+@app.task(name="fcws.tasks.GetProtocolInterface")
+def GetProtocolInterface(callbackUrl, signature, protocolUrl):
+    """Get the ontology terms forming the interface to a protocol.
+
+    Returns both required and optional terms via a callback to the website.
+
+    @param callbackUrl: URL to post status updates to
+    @param signature: unique identifier for this web service call
+    @param protocolUrl: where to download the protocol archive from
+    """
+    try:
+        # Download the protocol archive to a temporary folder & unpack
+        temp_dir = MakeTempDir()
+        proto_path = os.path.join(temp_dir, 'protocol.zip')
+        utils.Wget(protocolUrl, proto_path)
+        main_proto_path = utils.UnpackArchive(proto_path, temp_dir, 'proto')
+        # Determine the interface, getting sets of ontology terms
+        required_terms, optional_terms = utils.GetProtoInterface(main_proto_path)
+        # Report back
+        Callback(callbackUrl, signature,
+                 {'returntype': 'success', 'required': list(required_terms), 'optional': list(optional_terms)},
+                 json=True)
+    except:
+        ReportError(callbackUrl, signature, prefix="Unable to determine interface for protocol due to errors parsing file:\n",
+                    json=True)
 
 
 @app.task(name="fcws.tasks.CheckExperiment")
 def CheckExperiment(callbackUrl, signature, modelUrl, protocolUrl):
     """Check a model/protocol combination for compatibility.
-    
+
     If the interfaces match up, then the experiment can be run.
     Otherwise, we alert the front-end to update the experiment status.
     As a side effect this downloads & unpacks the model & protocol definitions, ready for the RunExperiment task.
-    
+
     @param callbackUrl: URL to post status updates to
     @param signature: unique identifier for this experiment run
     @param modelUrl: where to download the model archive from
@@ -51,11 +91,7 @@ def CheckExperiment(callbackUrl, signature, modelUrl, protocolUrl):
     """
     try:
         # Download the submitted COMBINE archives to disk in a temporary folder
-        try:
-            os.makedirs(config['temp_dir'], 0775)
-        except os.error:
-            pass
-        temp_dir = tempfile.mkdtemp(dir=config['temp_dir'])
+        temp_dir = MakeTempDir()
         model_path = os.path.join(temp_dir, 'model.zip')
         proto_path = os.path.join(temp_dir, 'protocol.zip')
         utils.Wget(modelUrl, model_path)

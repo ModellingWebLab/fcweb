@@ -3,7 +3,9 @@
  */
 package uk.ac.ox.cs.chaste.fc.beans;
 
+import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.Vector;
 
 import org.json.simple.JSONArray;
@@ -35,8 +37,12 @@ public class ChasteEntityVersion
 	private Vector<ChasteFile> files;
 	private Vector<ChasteExperiment> experiments;
 	private String commitMsg;
+	// These represent the protocol interface (at present model interface info is not stored)
+	private boolean hasInterface;
+	private int numOntologyTerms;
+	private HashMap<String, Boolean> ontologyTerms;
 	
-	public ChasteEntityVersion (ChasteEntity entity, int id, String version, User author, String filePath, Timestamp created, int numFiles, String visibility, String commitMsg)
+	public ChasteEntityVersion (ChasteEntity entity, int id, String version, User author, String filePath, Timestamp created, int numFiles, String visibility, String commitMsg, int numTerms)
 	{
 		this.entity = entity;
 		this.id = id;
@@ -50,6 +56,8 @@ public class ChasteEntityVersion
 		files = new Vector<ChasteFile> ();
 		experiments = new Vector<ChasteExperiment> ();
 		this.commitMsg = commitMsg;
+		this.numOntologyTerms = numTerms;
+		this.hasInterface = (numTerms > 1);
 	}
 	
 	public ChasteFile getFileById (int id)
@@ -156,12 +164,29 @@ public class ChasteEntityVersion
 		return version;
 	}
 
-	
 	public String getName ()
 	{
 		return entity.getName ();
 	}
 
+	public boolean hasInterface()
+	{
+		return hasInterface;
+	}
+	
+	public HashMap<String, Boolean> getOntologyTerms() throws IOException
+	{
+		if (this.ontologyTerms.isEmpty())
+			throw new IOException("Ontology terms for entity version have not yet been loaded.");
+		return ontologyTerms;
+	}
+
+	public void setOntologyTerms(HashMap<String, Boolean> ontologyTerms)
+	{
+		assert(ontologyTerms.size() == this.numOntologyTerms);
+		this.ontologyTerms = ontologyTerms;
+//		this.ontologyTerms.remove(""); // Remove the flag that says "we analysed this protocol's interface"
+	}
 
 	public void debug ()
 	{

@@ -41,6 +41,8 @@ public abstract class ChasteEntityManager
 	protected String entityFilesTable;
 	protected String entityStorageDir;
 	
+	protected boolean isProtocolManager;
+
 	public String getEntityColumn ()
 	{
 		return entityColumn;
@@ -64,6 +66,7 @@ public abstract class ChasteEntityManager
 		knownVersions = new HashMap<Integer, ChasteEntityVersion> ();
 		this.note = note;
 		this.user = user;
+		this.isProtocolManager = false;
 	}
 	
 	protected abstract ChasteEntity createEntity (ResultSet rs) throws SQLException;
@@ -79,7 +82,8 @@ public abstract class ChasteEntityManager
 			rs.getTimestamp ("versioncreated"),
 			rs.getInt ("numfiles"),
 			rs.getString ("visibility"),
-			rs.getString ("commitmsg")
+			rs.getString ("commitmsg"),
+			(isProtocolManager ? rs.getInt ("numterms") : 0)
 		);
 	}
 	

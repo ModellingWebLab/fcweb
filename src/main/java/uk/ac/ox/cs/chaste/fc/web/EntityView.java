@@ -216,8 +216,15 @@ public class EntityView extends WebModule
 		else
 			throw new IOException ("nothing to do.");
 		
+		ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt); 
 		
 		JSONObject answer = new JSONObject();
+		
+		if (req.length > 2 && req[2].equals("submitInterface.html"))
+		{
+			storeProtocolInterface(db, querry, user, answer, entityMgmt, fileMgmt);
+			return answer;
+		}
 		
 		Object task = querry.get ("task");
 		if (task == null)
@@ -225,8 +232,6 @@ public class EntityView extends WebModule
 			response.setStatus (HttpServletResponse.SC_BAD_REQUEST);
 			throw new IOException ("nothing to do.");
 		}
-		
-		ChasteFileManager fileMgmt = new ChasteFileManager (db, notifications, userMgmt); 
 		
 		if ((task.equals("createNewEntity") || task.equals("verifyNewEntity") || task.equals("updateEntityFile")) && type != TYPE_EXPERIMENT)
 		{
@@ -446,6 +451,106 @@ public class EntityView extends WebModule
 	}
 	
 	/**
+	 * Handle a callback from the backend reporting the (ontology-term) interface of a protocol version.
+	 * @param db  our database connection
+	 * @param query  the JSON object specifying the interface, with keys signature & returntype, and also:
+	 *     If error: returnmsg
+	 *     If success: optional & required
+	 * @param user  the 'user' representing the backend web service
+	 * @param answer  the JSON object providing a response to the backend (which will be ignored)
+	 * @param entityMgmt  manager for protocol versions
+	 * @param fileMgmt  manager for files
+	 * @throws IOException  if we can't save the information for some reason
+	 * @throws ChastePermissionException  shouldn't happen!
+	 */
+	private void storeProtocolInterface(DatabaseConnector db, JSONObject query, User user, JSONObject answer, ChasteEntityManager entityMgmt, ChasteFileManager fileMgmt) throws IOException, ChastePermissionException
+	{
+		ProtocolManager protoMgmt = (ProtocolManager)entityMgmt;
+		if (protoMgmt == null)
+			return; // Should be impossible unless web.xml has been incorrectly configured
+
+//		LOGGER.debug("storeProtocolInterface: query: " + query.toJSONString());
+		if (query.get("signature") == null)
+		{
+			LOGGER.error("Empty signature from protocolInterface callback");
+			return;
+		}
+		String signature = query.get("signature").toString().trim();
+//		LOGGER.debug("storeProtocolInterface: signature: ", signature);
+
+		// Gain admin privileges
+		String preRole = user.getRole();
+		String preMail = user.getRole();
+		user.setRole(User.ROLE_ADMIN);
+		user.setMail("somemail");
+
+		try
+		{
+			ChasteEntityVersion protoVer = protoMgmt.getVersionByPath(signature);
+			if (protoVer == null)
+			{
+				LOGGER.warn("storeProtocolInterface: no protocol for interface found");
+				return;
+			}
+			LOGGER.debug("storeProtocolInterface: protoVer: ", protoVer);
+			
+			JSONArray optionalTerms = new JSONArray();
+			JSONArray requiredTerms = new JSONArray();
+			
+			// Check for success/failure
+			String returnType;
+			if (query.get("returntype") == null)
+				returnType = "failed";
+			else
+				returnType = query.get("returntype").toString();
+			if (returnType.equals("success"))
+			{
+				// Check required info was supplied
+				optionalTerms = (JSONArray)query.get("optional");
+				if (optionalTerms == null)
+				{
+					LOGGER.error("missing optional terms for interface");
+					return;
+				}
+				requiredTerms = (JSONArray)query.get("required");
+				if (requiredTerms == null)
+				{
+					LOGGER.error("missing required terms for interface");
+					return;
+				}
+			}
+			else
+			{
+				// Store the errors in a new errors.txt file as part of the protocol version
+				LOGGER.debug("There were errors determining protocol interface, probably due to badly written protocol.");
+				String errors = (String)query.get("returnmsg");
+				if (errors == null)
+				{
+					LOGGER.error("malformed error return from backend");
+					return;
+				}
+				else
+				{
+					errors = errors.replace("<br/>", "\n");
+					File entityDir = new File(entityMgmt.getEntityStorageDir() + Tools.FILESEP + protoVer.getFilePath());
+					File realFile = writeFileForVersion(entityDir, "errors.txt", errors);
+					NewFile f = new NewFile(realFile, "errors.txt", "text/plain", false);
+					associateFile(f, fileMgmt, entityMgmt, protoVer.getAuthor(), entityDir, protoVer.getId(), new HashMap<String,NewFile>());
+				}
+			}
+			
+			// Need to call this even if there was no interface, to prevent the interface analysis being run again!
+			protoMgmt.updateInterface(protoVer, requiredTerms, optionalTerms);
+		}
+		finally
+		{
+			// Release admin privileges
+			user.setRole(preRole);
+			user.setMail(preMail);
+		}
+	}
+	
+	/**
 	 * Create a new version of an entity by altering one of its files.
 	 * @param notifications  used to provide error/info notifications to the user
 	 * @param db  our database connection
@@ -550,31 +655,15 @@ public class EntityView extends WebModule
 			}
 			
 			// Write new file version to disk directly in our storage folder
-			BufferedWriter bw = null;
 			try
 			{
-				File newFile = new File(entityDir + Tools.FILESEP + fileName);
-				bw = new BufferedWriter(new FileWriter(newFile));
-				bw.write(query.get("fileContents").toString());
-				bw.close();
-				bw = null;
+				File newFile = writeFileForVersion(entityDir, fileName, query.get("fileContents").toString());
 				files.get(fileName).tmpFile = newFile;
 			}
 			catch (Exception e)
 			{
 				cleanUp(entityDir, versionId, files, fileMgmt, entityMgmt);
-				LOGGER.error(e, "failed to write updated file version");
-				throw new IOException("failed to write updated file to disk.");
-			}
-			finally
-			{
-				if (bw != null)
-					try
-					{
-						bw.close();
-					}
-					catch (Exception e)
-					{}
+				throw e;
 			}
 			
 			// Copy other files into our storage dir, and make database associations
@@ -594,6 +683,43 @@ public class EntityView extends WebModule
 			rerunExperiments(notifications, db, query, user, entityMgmt, res, baseVersion, versionId);
 			
 			answer.put("updateEntityFile", res);
+		}
+	}
+	
+	/**
+	 * Create a new file with given contents to be part of an entity version.
+	 * @param entityDir  the storage folder for the entity version
+	 * @param fileName  the name of the new file to write
+	 * @param contents  the file's contents
+	 * @return  a handle for the newly created file
+	 * @throws IOException
+	 */
+	private File writeFileForVersion(File entityDir, String fileName, String contents) throws IOException
+	{
+		BufferedWriter bw = null;
+		try
+		{
+			File newFile = new File(entityDir + Tools.FILESEP + fileName);
+			bw = new BufferedWriter(new FileWriter(newFile));
+			bw.write(contents);
+			bw.close();
+			bw = null;
+			return newFile;
+		}
+		catch (Exception e)
+		{
+			LOGGER.error(e, "failed to write file to disk");
+			throw new IOException("failed to write file to disk.");
+		}
+		finally
+		{
+			if (bw != null)
+				try
+				{
+					bw.close();
+				}
+				catch (Exception e)
+				{}
 		}
 	}
 	
@@ -812,6 +938,8 @@ public class EntityView extends WebModule
 			JSONObject res = new JSONObject ();
 			res.put ("response", true);
 			
+			FileTransfer.getProtocolInterface(versionId, entityDir.getName());
+			
 			rerunExperiments(notifications, db, querry, user, entityMgmt, res, latestVersion, versionId);
 			
 			res.put ("responseText", "added version successfully");
@@ -937,7 +1065,8 @@ public class EntityView extends WebModule
 		int fileId = fileMgmt.addFile(f.name, f.type, user, f.tmpFile.length(), f.isMain);
 		if (fileId < 0)
 		{
-			cleanUp(entityDir, versionId, files, fileMgmt, entityMgmt);
+			if (!files.isEmpty())
+				cleanUp(entityDir, versionId, files, fileMgmt, entityMgmt);
 			LOGGER.error("error inserting file to db: ", f.name, " -> ", f.tmpFile);
 			throw new IOException("wasn't able to insert file " + f.name + " to database.");
 		}
@@ -946,7 +1075,8 @@ public class EntityView extends WebModule
 		// associate files+version
 		if (!fileMgmt.associateFile(fileId, versionId, entityMgmt.getEntityFilesTable(), entityMgmt.getEntityColumn()))
 		{
-			cleanUp(entityDir, versionId, files, fileMgmt, entityMgmt);
+			if (!files.isEmpty())
+				cleanUp(entityDir, versionId, files, fileMgmt, entityMgmt);
 			LOGGER.error("error inserting file to db: ", f.name, " -> ", f.tmpFile);
 			throw new IOException("wasn't able to insert file " + f.name + " to database.");
 		}
@@ -961,7 +1091,8 @@ public class EntityView extends WebModule
 			catch (IOException e)
 			{
 				e.printStackTrace();
-				cleanUp(entityDir, versionId, files, fileMgmt, entityMgmt);
+				if (!files.isEmpty())
+					cleanUp(entityDir, versionId, files, fileMgmt, entityMgmt);
 				LOGGER.error(e, "error copying file from tmp to ", entityMgmt.getEntityColumn(), " dir");
 				throw new IOException("wasn't able to copy a file. Sorry, our fault.");
 			}
