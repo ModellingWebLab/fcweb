@@ -89,6 +89,10 @@ cd ..
 scons -j4 b=GccOpt cl=1 exe=1 projects/FunctionalCuration/apps
 ```
 
+Note that the executable will be built as `projects/FunctionalCuration/apps/src/FunctionalCuration` by default,
+and the full path to this location should be given as `exe_path` in `config.json`.
+The `syntax_check_path` entry should point to `projects/FunctionalCuration/apps/CheckSyntax.py`.
+
 ### Extra simulation nodes
 
 If you wish to set up multiple machines for running experiments, the RabbitMQ broker will need to be configured to accept connections from the additional workers,

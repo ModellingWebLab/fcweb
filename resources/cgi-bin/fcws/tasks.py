@@ -59,21 +59,36 @@ def GetProtocolInterface(callbackUrl, signature, protocolUrl):
     @param signature: unique identifier for this web service call
     @param protocolUrl: where to download the protocol archive from
     """
+    temp_dir = None
+    error_prefix = "Unable to determine interface for protocol due to errors parsing file:\n"
     try:
         # Download the protocol archive to a temporary folder & unpack
         temp_dir = MakeTempDir()
         proto_path = os.path.join(temp_dir, 'protocol.zip')
         utils.Wget(protocolUrl, proto_path)
         main_proto_path = utils.UnpackArchive(proto_path, temp_dir, 'proto')
-        # Determine the interface, getting sets of ontology terms
-        required_terms, optional_terms = utils.GetProtoInterface(main_proto_path)
-        # Report back
-        Callback(callbackUrl, signature,
-                 {'returntype': 'success', 'required': list(required_terms), 'optional': list(optional_terms)},
-                 json=True)
+        # Check a full parse of the protocol succeeds; only continue if it does
+        for key, value in config['environment'].iteritems():
+            os.environ[key] = value
+        child = subprocess.Popen([config['syntax_check_path'], main_proto_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output, unused_err = child.communicate()
+        retcode = child.poll()
+        if retcode:
+            Callback(callbackUrl, signature, {'returntype': 'failed', 'returnmsg': error_prefix + output}, json=True)
+        else:
+            # Determine the interface, getting sets of ontology terms
+            required_terms, optional_terms = utils.GetProtoInterface(main_proto_path)
+            # Report back
+            Callback(callbackUrl, signature,
+                     {'returntype': 'success', 'required': list(required_terms), 'optional': list(optional_terms)},
+                     json=True)
     except:
-        ReportError(callbackUrl, signature, prefix="Unable to determine interface for protocol due to errors parsing file:\n",
-                    json=True)
+        ReportError(callbackUrl, signature, prefix=error_prefix, json=True)
+    finally:
+        # Remove the temporary folder, if created
+        if temp_dir and os.path.isdir(temp_dir):
+            shutil.rmtree(temp_dir)
+
 
 
 @app.task(name="fcws.tasks.CheckExperiment")
@@ -219,13 +234,13 @@ def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir):
             manifest.close()
             output_zip.write(os.path.join(tempDir, 'manifest.xml'), 'manifest.xml')
         output_zip.close()
-    
+
         files = {'experiment': open(output_path, 'rb')}
         r = Callback(callbackUrl, signature, {'returntype': outcome}, files=files)
-    
-        # Remove the temporary folder
-        shutil.rmtree(tempDir)
-    
+
         return r.status_code
     except:
         ReportError(callbackUrl, signature)
+    finally:
+        # Remove the temporary folder
+        shutil.rmtree(tempDir)
