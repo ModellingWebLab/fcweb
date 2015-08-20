@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import de.binfalse.bflog.LOGGER;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntity;
@@ -98,8 +99,6 @@ extends ChasteEntityManager
 			{
 				res.put(rs.getInt("id"), rs.getString("path"));
 			}
-			db.closeRes(st);
-			db.closeRes(rs);
 		}
 		catch (SQLException e)
 		{
@@ -113,6 +112,75 @@ extends ChasteEntityManager
 			db.closeRes(rs);
 		}
 		return res;
+	}
+	
+	/**
+	 * Get the interfaces for the latest versions of all protocols visible to this user, in a form suitable for returning to the JavaScript client code.
+	 * TODO: The only latest version part!
+	 * @param user  the user
+	 * @return  array of {name:string, required:array, optional:array}
+	 */
+	@SuppressWarnings("unchecked")
+	public JSONArray getProtocolInterfaces(User user)
+	{
+		JSONArray result = new JSONArray();
+		String restricted_vis_clause;
+		if (user.getRole().equals(User.ROLE_GUEST) || !user.isAuthorized())
+			restricted_vis_clause = "";
+		else
+			restricted_vis_clause = " OR pv.visibility = '" + ChasteEntityVersion.VISIBILITY_RESTRICTED + "'";
+		PreparedStatement st = db.prepareStatement("SELECT pv.id AS id, p.name AS name, pi.optional AS optional, pi.term AS term"
+				+ " FROM `protocolinterface` pi"
+				+ " INNER JOIN `protocolversions` pv ON pv.id = pi.protocolversion"
+				+ " INNER JOIN `protocols` p ON p.id = pv.protocol"
+				+ " WHERE term != '' AND (pv.visibility = '" + ChasteEntityVersion.VISIBILITY_PUBLIC + "'"
+						+ restricted_vis_clause
+						+ (user.isAuthorized() ? " OR (pv.visibility = '" + ChasteEntityVersion.VISIBILITY_PRIVATE + "' AND pv.author = ?)" : "")
+				+ ")");
+		ResultSet rs = null;
+		HashMap<Integer, Integer> id_index_map = new HashMap<Integer, Integer>(); // Track which protocol versions we've seen so far
+		try
+		{
+			st.setInt(1, user.getId());
+			st.execute();
+			rs = st.getResultSet();
+			while (rs != null && rs.next())
+			{
+				JSONObject entry;
+				Integer version_id = rs.getInt("id");
+				if (id_index_map.containsKey(version_id))
+					entry = (JSONObject)result.get(id_index_map.get(version_id));
+				else
+				{
+					entry = new JSONObject();
+					entry.put("name", rs.getString("name"));
+					entry.put("optional", new JSONArray());
+					entry.put("required", new JSONArray());
+					id_index_map.put(version_id, result.size());
+					result.add(entry);
+				}
+				boolean optional = rs.getBoolean("optional");
+				JSONArray term_list;
+				if (optional)
+					term_list = (JSONArray)entry.get("optional");
+				else
+					term_list = (JSONArray)entry.get("required");
+				String term = rs.getString("term");
+				term_list.add(term);
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+			LOGGER.error(e, "db problem while retrieving protocol interfaces");
+			result = null;
+		}
+		finally
+		{
+			db.closeRes(st);
+			db.closeRes(rs);
+		}
+		return result;
 	}
 	
 	/**

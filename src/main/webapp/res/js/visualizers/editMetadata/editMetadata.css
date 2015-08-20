@@ -54,12 +54,12 @@ li.editmeta_annotation {
     cursor: pointer;
 }
 
-/* Indications of sublists that can be expanded. */
-.editmeta_sublist_shown:before {
+/* Indications of sublists/divs that can be expanded. */
+.editmeta_content_shown:before {
     content: "[-]\00a0";
 }
 
-.editmeta_sublist_hidden:before {
+.editmeta_content_hidden:before {
     content: "[+]\00a0";
 }
 

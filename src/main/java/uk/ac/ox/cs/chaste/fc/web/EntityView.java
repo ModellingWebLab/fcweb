@@ -264,6 +264,10 @@ public class EntityView extends WebModule
 		{
 			answer.put ("deleteEntity", deleteEntity (querry.get ("entity"), notifications, answer, entityMgmt));
 		}
+		else if (task.equals("getInterface"))
+		{
+			getProtocolInterfaces(db, user, answer, (ProtocolManager)entityMgmt);
+		}
 		
 		return answer;
 	}
@@ -450,6 +454,24 @@ public class EntityView extends WebModule
 		return true;
 	}
 	
+	/**
+	 * Fill answer.interfaces with array of {name:string, required:array, optional:array} for the latest version of each visible protocol.
+	 * @param db  our database connection
+	 * @param user  the user requesting the interfaces
+	 * @param answer  the JSON response to the client
+	 * @param protoMgmt  manager for protocol versions
+	 */
+	@SuppressWarnings("unchecked")
+	private void getProtocolInterfaces(DatabaseConnector db, User user, JSONObject answer, ProtocolManager protoMgmt) {
+		if (protoMgmt == null)
+			return; // Should be impossible unless code elsewhere is wrong!
+		JSONArray interfaces = protoMgmt.getProtocolInterfaces(user);
+		if (interfaces == null)
+			answer.put("error", "error retrieving interfaces from database");
+		else
+			answer.put("interfaces", interfaces);
+	}
+
 	/**
 	 * Handle a callback from the backend reporting the (ontology-term) interface of a protocol version.
 	 * @param db  our database connection

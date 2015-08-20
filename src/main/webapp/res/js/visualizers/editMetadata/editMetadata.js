@@ -9,8 +9,10 @@ function metadataEditor(file, div)
     div.id = 'editmeta_main_div';
     this.loadedModel = false;
     this.loadedOntology = false;
+    this.loadedFilters = false;
+    // Set up main divs
     this.modelDiv = $('<div></div>', {id: 'editmeta_modelvars_div'}).text('loading model...');
-    this.ontoDiv = $('<div></div>', {id: 'editmeta_ontoterms_div'}).text('loading available annotations...');
+    this.ontoDiv = $('<div></div>', {id: 'editmeta_ontoterms_div'});
     otherContent = '<div class="clearer">\n'
         + '<p><label for="versionname">Version:</label>\n'
         + '<input type="text" name="versionname" id="versionname" placeholder="Version Identifier"/>\n'
@@ -24,8 +26,14 @@ function metadataEditor(file, div)
         + '<small>(this might take some time)</small></p>\n'
         + '<p><button id="savebutton">Save model annotations</button><span id="saveaction"></span></p>';
     this.dragDiv = $('<div></div>', {'class': 'editmeta_annotation', 'style': 'position: fixed;'});
-    $(div).append(this.modelDiv, this.ontoDiv, otherContent, this.dragDiv);
-    this.initRdf();
+    // Set up annotation filtering divs
+	this.filterDiv = $('<div></div>', {id: 'editmeta_filter_div'}).text('loading filters...');
+	this.mainAnnotDiv = $('<div></div>').text('loading available annotations...');
+	this.filtAnnotDiv = $('<div></div>').hide();
+	this.ontoDiv.append(this.filterDiv, this.mainAnnotDiv, this.filtAnnotDiv);
+	// Add everything to the page
+	$(div).append(this.modelDiv, this.ontoDiv, otherContent, this.dragDiv);
+	this.initRdf();
 };
 
 /**
@@ -128,13 +136,13 @@ metadataEditor.prototype.getContentsCallback = function (succ)
                 clist = document.createElement("ul"),
                 c = {li: li, ul: clist, elt: this, name: this.getAttribute('name'), vars: []};
             self.components[c.name] = c;
-            li.innerHTML = '<span class="editmeta_cname editmeta_sublist_hidden">' + c.name + '</span>';
+            li.innerHTML = '<span class="editmeta_cname editmeta_content_hidden">' + c.name + '</span>';
             li.appendChild(clist);
             var_list.appendChild(li);
             // Toggle display of this component's variables on click of the component name
             $('span', li).click(function (ev) {
                 $(clist).toggle();
-                $(this).toggleClass("editmeta_sublist_shown editmeta_sublist_hidden");
+                $(this).toggleClass("editmeta_content_shown editmeta_content_hidden");
             });
             $(clist).hide();
             // Find variables in this component
@@ -257,8 +265,12 @@ metadataEditor.prototype.ready = function ()
  * Given a parent HTML element (as a jQuery object) and an rdfQuery collection representing the members of a Category
  * in our ontology, create an unordered list representation of these members (if there are any) and append it to the parent.
  * We recurse for any members that are not Annotations, since these represent sub-categories.
+ * 
+ * @param acceptableUris  a 'set' of URIs that are allowed to appear in the list, used to filter the annotations displayed so only
+ *     those used by particular protocols appear.  (It's actually an object with the terms as keys.)
+ * @return  the ul element containing the list of annotations (as a jQuery object)
  */
-metadataEditor.prototype.fillCategoryList = function (parent, rdf_)
+metadataEditor.prototype.fillCategoryList = function (parent, rdf_, acceptableUris)
 {
 	if (rdf_.length > 0)
 	{
@@ -272,24 +284,34 @@ metadataEditor.prototype.fillCategoryList = function (parent, rdf_)
 		// First, process sub-categories
 		rdf.except(annotations).each(function (i, bindings, triples) {
 			var li = $('<li></li>').addClass("editmeta_category"),
-				span = $('<span></span>').addClass("editmeta_category_name editmeta_sublist_hidden");
+				span = $('<span></span>').addClass("editmeta_category_name editmeta_content_hidden");
 			span.text(bindings.label === undefined ? bindings.ann.value.fragment : bindings.label.value);
 			if (bindings.comment !== undefined)
 				span.attr('title', bindings.comment.value);
 			li.append(span);
 			ul.append(li);
 			// Process the sub-category's members
-			self.fillCategoryList(li, self.rdf.where('?ann a ' + bindings.ann.toString()));
-			// Toggle display of the sub-category's members on click of the category name
-			span.click(function (ev) {
-				var $this = $(this);
-				$this.toggleClass("editmeta_sublist_shown editmeta_sublist_hidden");
-				$this.next().toggle();
-			});
-			span.next().hide();
+			self.fillCategoryList(li, self.rdf.where('?ann a ' + bindings.ann.toString()), acceptableUris);
+			// If there were no members, don't show the category
+			if (li.find("li").length == 0)
+			{
+				li.remove();
+			}
+			else
+			{
+				// Toggle display of the sub-category's members on click of the category name
+				span.click(function (ev) {
+					var $this = $(this);
+					$this.toggleClass("editmeta_content_shown editmeta_content_hidden");
+					$this.next().toggle();
+				});
+				span.next().hide();
+			}
 		});
 		// Second, process annotations
 		annotations.each(function (i, bindings, triples) {
+			if (acceptableUris !== undefined && acceptableUris.indexOf(bindings.ann.value.toString()) == -1)
+				return; // Skip this annotation; it does not appear in the filter
 			var li = $('<li></li>').addClass("editmeta_annotation");
 			li.text(bindings.label === undefined ? bindings.ann.value.fragment : bindings.label.value);
 			if (bindings.comment !== undefined)
@@ -324,19 +346,103 @@ metadataEditor.prototype.ontologyLoaded = function (data, status, jqXHR)
         return;
     console.log("Ontology loaded");
     this.loadedOntology = true;
-    this.ontoDiv.empty();
-    
+    this.mainAnnotDiv.empty();
+
     // Parse XML
     this.ontoRdf.load(data, {});
-    
+
     // Show available terms
+    this.mainAnnotDiv.append("<h4>Available annotations</h4>");
     this.terms = [];
-    this.ontoDiv.append("<h4>Available annotations</h4>");
-    this.fillCategoryList(this.ontoDiv, this.rdf.where('?ann a oxmeta:Category'));
+    this.fillCategoryList(this.mainAnnotDiv, this.rdf.where('?ann a oxmeta:Category'));
 
     // If model is available too, set up linking functionality
     if (this.loadedModel)
         this.ready();
+}
+
+/**
+ * Callback function for when the filter data has been fetched from the server.
+ */
+metadataEditor.prototype.filtersLoaded = function (data, status, jqXHR)
+{
+    console.log("Interfaces loaded");
+	this.filterDiv.empty();
+	// Extract required & optional terms for each (visible) protocol.
+	// This is an array of {name: string, optional: array, required: array}.
+	if (data.interfaces === undefined)
+	{
+		this.filterDiv.append('Error loading filters');
+		return;
+	}
+	this.protocolInterfaces = data.interfaces;
+
+	// Create the filter controls
+	this.filterDiv.append('<h4 class="editmeta_content_hidden" id="editmeta_filter_header">Filter visible annotations</h4>\n'
+			+ '<div id="editmeta_filter_content">\n'
+			+ 'Show only terms used by:<br/>\n'
+			+ '<input type="checkbox" name="all" id="editmeta_input_all" value="1"/><label for="editmeta_input_all"> any protocol</label><br/>\n'
+			+ '</div>\n');
+	var self = this,
+		content_div = $('#editmeta_filter_content');
+	for (var i=0; i<this.protocolInterfaces.length; i++)
+	{
+		var name = this.protocolInterfaces[i].name;
+		content_div.append('<label><input type="checkbox" name="' + i + '" class="editmeta_input" value="1"/> "' + name + '" protocol</label><br/>\n');
+	}
+	content_div.append('<button style="float:left;" id="editmeta_filter_set">Filter annotations</button>\n'
+			+ '<button style="margin-left:5px; float:left;" id="editmeta_filter_clear">Clear filters</button>\n'
+			+ '<br style="clear:left;"/>');
+
+	// Visibility toggle handler
+	$('#editmeta_filter_header').click(function() {
+		$(this).toggleClass("editmeta_content_shown editmeta_content_hidden");
+		$('#editmeta_filter_content').toggle();
+	});
+	$('#editmeta_filter_content').hide();
+	// Update selections if the 'all protocols' checkbox changes
+	$('#editmeta_input_all').change(function() {
+		$('.editmeta_input').prop('checked', $(this).prop('checked'));
+	});
+
+	// Handler that applies filters when requested
+	$('#editmeta_filter_set').click(function() {
+		// Figure out which terms are required/optional
+		var required_terms = [], optional_terms = [];
+		$('.editmeta_input:checked').each(function() {
+			var iface = self.protocolInterfaces[this.name];
+//			console.log(iface);
+			for (var i=0; i<iface.required.length; i++)
+			{
+				term = iface.required[i];
+				if (required_terms.indexOf(term) == -1)
+					required_terms.push(term);
+			}
+			for (var i=0; i<iface.optional.length; i++)
+			{
+				term = iface.optional[i];
+				if (optional_terms.indexOf(term) == -1)
+					optional_terms.push(term);
+			}
+		});
+//		console.log(required_terms);
+//		console.log(optional_terms);
+		// Create annotation lists accordingly
+		self.mainAnnotDiv.hide();
+		self.filtAnnotDiv.empty();
+		self.filtAnnotDiv.append('<h4>Required annotations</h4>')
+		self.fillCategoryList(self.filtAnnotDiv, self.rdf.where('?ann a oxmeta:Category'), required_terms);
+		self.filtAnnotDiv.append('<h4>Optional annotations</h4>')
+		self.fillCategoryList(self.filtAnnotDiv, self.rdf.where('?ann a oxmeta:Category'), optional_terms);
+		self.filtAnnotDiv.show();
+	});
+
+	// Clear filters handler
+	$('#editmeta_filter_clear').click(function() {
+		self.filtAnnotDiv.hide();
+		self.filtAnnotDiv.empty(); // No need to keep it around - will be recreated afresh if needed
+		self.mainAnnotDiv.show();
+	});
 }
 
 /**
@@ -402,8 +508,7 @@ metadataEditor.prototype.saveNewVersion = function ()
 
 /**
  * Called to generate the content for this visualiser plugin.
- * Mainly triggers a fetch of the file contents, with our getContentsCallback method
- * doing the work when this completes.
+ * Mainly triggers a fetch of the file contents, with our getContentsCallback method doing the work when this completes.
  * But we also set up event handlers here, since our div's content isn't in the DOM until now.
  */
 metadataEditor.prototype.show = function ()
@@ -416,6 +521,14 @@ metadataEditor.prototype.show = function ()
                {dataType: 'xml',
                 success: function(d,s,j) {self.ontologyLoaded(d,s,j);}
                });
+	if (!this.loadedFilters)
+		$.ajax(contextPath + '/protocol/get_interfaces',
+				{method: 'post',
+				 contentType : 'application/json; charset=utf-8',
+				 data: JSON.stringify({task: 'getInterface'}),
+				 dataType: 'json',
+				 success: function(d,s,j) {self.filtersLoaded(d,s,j);}
+				});
 
     // Initialise some event handlers
     $('#versionname').blur(function() {
