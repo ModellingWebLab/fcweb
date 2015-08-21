@@ -129,16 +129,18 @@ extends ChasteEntityManager
 			restricted_vis_clause = "";
 		else
 			restricted_vis_clause = " OR pv.visibility = '" + ChasteEntityVersion.VISIBILITY_RESTRICTED + "'";
-		PreparedStatement st = db.prepareStatement("SELECT pv.id AS id, p.name AS name, pi.optional AS optional, pi.term AS term"
+		PreparedStatement st = db.prepareStatement("SELECT p.id AS proto_id, pv.id AS id, p.name AS name, pi.optional AS optional, pi.term AS term"
 				+ " FROM `protocolinterface` pi"
 				+ " INNER JOIN `protocolversions` pv ON pv.id = pi.protocolversion"
 				+ " INNER JOIN `protocols` p ON p.id = pv.protocol"
 				+ " WHERE term != '' AND (pv.visibility = '" + ChasteEntityVersion.VISIBILITY_PUBLIC + "'"
 						+ restricted_vis_clause
 						+ (user.isAuthorized() ? " OR (pv.visibility = '" + ChasteEntityVersion.VISIBILITY_PRIVATE + "' AND pv.author = ?)" : "")
-				+ ")");
+				+ ") ORDER BY proto_id, id DESC");
 		ResultSet rs = null;
 		HashMap<Integer, Integer> id_index_map = new HashMap<Integer, Integer>(); // Track which protocol versions we've seen so far
+		int last_proto_id = -1; // Ensure we only retain the latest version of each protocol
+		int last_version_id = -1;
 		try
 		{
 			st.setInt(1, user.getId());
@@ -146,8 +148,15 @@ extends ChasteEntityManager
 			rs = st.getResultSet();
 			while (rs != null && rs.next())
 			{
+				// Check if should skip this term because it belongs to an old version of this protocol
+				int proto_id = rs.getInt("proto_id");
+				int version_id = rs.getInt("id");
+				if (proto_id == last_proto_id && version_id != last_version_id)
+					continue; // Skip term
+				last_proto_id = proto_id;
+				last_version_id = version_id;
+				// Add another term to the entry for this version
 				JSONObject entry;
-				Integer version_id = rs.getInt("id");
 				if (id_index_map.containsKey(version_id))
 					entry = (JSONObject)result.get(id_index_map.get(version_id));
 				else
