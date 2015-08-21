@@ -5,13 +5,6 @@
 <t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}" contextPath="${contextPath}">
     <h1>Cardiac Electrophysiology Web Lab</h1>
 
-    <h2>Training Workshop on the Web Lab</h2>
-    <p>
-    We will be running a 2-day training workshop on the Web Lab on 10-11 September 2015.
-    See the <a href="https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/Workshop2015">workshop website</a> for details and to register.
-    The registration deadline is August 1st.
-    </p>
-    
     <h2>Quick start links</h2>
     <ul>
         <li><a href="${contextPath}/db.html">View results of experiments</a> stored on this site.</li>
@@ -52,7 +45,7 @@
     <p>
         This is our prototype system for cardiac electrophysiology.
         It brings together models encoded using <a href="http://www.cellml.org/">CellML</a> and
-        virtual experiment protocols encoded in our own language,
+        virtual experiment protocols encoded in <a href="https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax">our own language</a>,
         using <a href="https://chaste.cs.ox.ac.uk/trac/wiki/ChasteGuides/CodeGenerationFromCellML#Standardisednames">
         standardised tags</a> to generate interfaces between them, doing all the necessary units conversions.
         The <a href="${contextPath}/db.html">stored results of these experiments can be viewed</a> and compared.
