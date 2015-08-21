@@ -22,6 +22,11 @@ function sendFile (uploaded, file, name, types)
 		addNotification ("there is already a file with the name '" + name + "' - please remove that first.", "error");
 		return;
 	}
+	if (name == "errors.txt")
+	{
+		addNotification("the name 'errors.txt' is reserved for system use; please choose another file name.", "error");
+		return;
+	}
 	uploading.push(name);
 	
 	var table = document.getElementById("uploadedfiles");
@@ -195,11 +200,11 @@ function initUpload(uploaded, types)
 	dropZone.addEventListener('drop', handleFileSelect, false);
 	dropZone.addEventListener("click", function (event) { inp.click (); }, false);
 	inp.addEventListener('change', function(e) {
-	        var file = this.files[0];
+			var file = this.files[0];
 			var fullPath = inp.value;
 			var startIndex = (fullPath.indexOf('\\') >= 0 ? fullPath.lastIndexOf('\\') : fullPath.lastIndexOf('/'));
 			var filename = fullPath.substring(startIndex+1);
 			sendFile (uploaded, file, filename, types);
-	    }, false);
+		}, false);
 }
 
