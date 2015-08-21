@@ -41,6 +41,10 @@
     background-color: #ddd;
 }
 
+.editmeta_annotation_used {
+    background-image: url(../../../img/pattern.png);
+}
+
 /* The available annotations */
 li.editmeta_annotation {
     cursor: pointer;

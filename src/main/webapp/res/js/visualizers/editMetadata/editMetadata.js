@@ -202,7 +202,8 @@ metadataEditor.prototype.getContentsCallback = function (succ)
  */
 metadataEditor.prototype.addAnnotation = function (v, bindings)
 {
-    if (v.annotations[bindings.ann.value.toString()] !== undefined)
+	var term = bindings.ann.value.toString();
+    if (v.annotations[term] !== undefined)
     {
         console.log("Ignoring duplicate annotation " + bindings.ann + " on " + v.fullname);
         return;
@@ -214,10 +215,11 @@ metadataEditor.prototype.addAnnotation = function (v, bindings)
                           title: 'remove this annotation',
                           'class': 'editmeta_spaced pointer'});
     s.text(bindings.label === undefined ? bindings.ann.value.fragment : bindings.label.value);
+    s.data('term', term);
     s.append(del);
     if (bindings.comment !== undefined)
         s.attr('title', bindings.comment.value);
-    v.annotations[bindings.ann.value.toString()] = {ann: bindings.ann, span: s};
+    v.annotations[term] = {ann: bindings.ann, span: s};
     v.li.append(s);
     // Add to the RDF store, creating a unique cmeta:id for the variable if needed
     if (v.uri === undefined)
@@ -234,9 +236,28 @@ metadataEditor.prototype.addAnnotation = function (v, bindings)
     // Add the handler for deleting this annotation
     del.click(function (ev) {
 //        console.log("Removing annotation: <" + v.uri + '> bqbiol:is ' + bindings.ann);
-        delete v.annotations[bindings.ann.value.toString()];
+        delete v.annotations[term];
         self.modelRdf.remove('<' + v.uri + '> bqbiol:is ' + bindings.ann);
         s.remove();
+        $('li.editmeta_annotation').each(function() {
+        	var $this = $(this);
+        	if ($this.data('term') == term)
+        	{
+        		$this.removeClass('editmeta_annotation_used');
+        		$this.removeAttr('title');
+        		if (bindings.comment !== undefined)
+        	        $this.attr('title', bindings.comment.value);
+        	}
+        });
+    });
+    // Show in the annotations pane that this term has been used
+    $('li.editmeta_annotation').each(function() {
+    	var $this = $(this);
+    	if ($this.data('term') == term)
+    	{
+    		$this.addClass('editmeta_annotation_used');
+    		$this.attr('title', 'This term has been used');
+    	}
     });
 }
 
@@ -314,6 +335,7 @@ metadataEditor.prototype.fillCategoryList = function (parent, rdf_, acceptableUr
 				return; // Skip this annotation; it does not appear in the filter
 			var li = $('<li></li>').addClass("editmeta_annotation");
 			li.text(bindings.label === undefined ? bindings.ann.value.fragment : bindings.label.value);
+			li.data('term', bindings.ann.value.toString());
 			if (bindings.comment !== undefined)
 				li.attr('title', bindings.comment.value);
 			self.terms.push({uri: bindings.ann.value, li: li});
@@ -435,6 +457,18 @@ metadataEditor.prototype.filtersLoaded = function (data, status, jqXHR)
 		self.filtAnnotDiv.append('<h4>Optional annotations</h4>')
 		self.fillCategoryList(self.filtAnnotDiv, self.rdf.where('?ann a oxmeta:Category'), optional_terms);
 		self.filtAnnotDiv.show();
+		// Shade those annotations that are already used
+		$('span.editmeta_annotation').each(function() {
+			var $span = $(this);
+			$('li.editmeta_annotation').each(function() {
+				var $li = $(this);
+				if ($span.data('term') == $li.data('term'))
+				{
+					$li.addClass('editmeta_annotation_used');
+					$li.attr('title', 'This term has been used');
+				}
+			});
+		});
 	});
 
 	// Clear filters handler
