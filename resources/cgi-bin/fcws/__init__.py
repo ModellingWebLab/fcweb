@@ -4,6 +4,8 @@ import json
 import os
 
 config = json.load(open(os.path.join(os.path.dirname(__file__), 'config.json')))
+user_queue_map = json.load(open(os.path.join(os.path.dirname(__file__), 'usermap.json')))
+checked_queues = set(['default', 'admin'])
 
 
 def GetQueue(user, isAdmin):
@@ -11,7 +13,14 @@ def GetQueue(user, isAdmin):
     if isAdmin:
         queue = 'admin'
     else:
-        queue = 'default'
+        queue = user_queue_map.get(user, 'default')
+        # Check that the queue has (or at least, had!) consumers and fall back to default if not
+        if queue not in checked_queues:
+            from .tasks import app
+            if queue not in [q['name'] for l in app.control.inspect().active_queues().values() for q in l]:
+                queue = 'default'
+            else:
+                checked_queues.add(queue)
     return queue
 
 

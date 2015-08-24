@@ -12,6 +12,7 @@ However in general there are 4 components that need to be updated, and updating 
     A potential gotcha is needing to change `config.json` (usually in `/var/www/cgi-bin/fcws`) if the environment variables need to change
     (e.g. due to a different Chaste build type being used).
 2.  The back-end celery task queue that the web service calls.
+    You will need to copy manually any modified files from `resources/cgi-bin`, making sure not to overwrite the local `config.json`.
     Be aware of the need to change `/etc/default/celeryd` first if any changes to the queues workers should process are made.
 3.  The back-end web service.
     This should normally be done together with updating celery, although for some changes (that don't touch `__init__.py`) you can get away with skipping it.
@@ -28,7 +29,7 @@ scons -j4 b=GccOpt cl=1 exe=1 projects/FunctionalCuration/apps
 # 2 - celery
 sudo /etc/init.d/celeryd restart
 # 3 - apache
-sudo apache2ctl graceful
+sudo /etc/init.d/apache2 graceful
 # 4 - website
 mvn package && sudo cp target/FunctionalCuration.war /var/lib/tomcat7/webapps/
 ```
