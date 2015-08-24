@@ -49,9 +49,6 @@ A sample `/etc/rabbitmq/rabbitmq.conf.d/fcws.conf` is:
 NODE_IP_ADDRESS=127.0.0.1
 ```
 
-TODO: configuring multiple queues, so admin/internal users get dedicated workers for their experiments:
--Q arguments, possibly name workers for clarity.
-
 ### Web service setup
 
 Setup a webserver/vhost that is able to execute Python CGI scripts.
