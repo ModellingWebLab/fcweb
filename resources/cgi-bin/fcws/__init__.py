@@ -12,6 +12,7 @@ def GetQueue(user, isAdmin):
         queue = 'admin'
     else:
         queue = 'default'
+    return queue
 
 
 def ScheduleExperiment(callbackUrl, signature, modelUrl, protoUrl, user='', isAdmin=False):
