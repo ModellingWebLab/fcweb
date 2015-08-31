@@ -1,25 +1,24 @@
-// Contains information about each experiment being compared
-var entities = {};
-// Contains information about each unique (by name) file within the compared experiments,
-// including references to the experiments in which a file of that name appears
-var files = {};
-var entityType;
-var visualizers = {};
-var tableParsed = false;
-var fileName = null;
-var pluginName = null;
-var doc;
-var gotInfos = false;
-var plotDescription;
-var plotFiles = new Array ();
-var filesTable = {};
-// Used for determining what graph (if any) to show by default
-var metadataToParse = 0, metadataParsed = 0, defaultViz = null, defaultVizCount = 0;
-// State for figuring out whether we're comparing multiple protocols on a single model, or multiple models on a single protocol
-var firstModelName = "", firstModelVersion = "", firstProtoName = "", firstProtoVersion = "";
-var singleModel = true, singleProto = true;
-// Used for stripping out redundant (repeated) text in plot line labels
-var plotLabelStripText = null;
+var entities = {}, // Contains information about each experiment being compared
+	// `files` contains information about each unique (by name) file within the compared experiments,
+	// including references to the experiments in which a file of that name appears and that particular instance of the file.
+	files = {},
+	entityType,
+	visualizers = {},
+	tableParsed = false,
+	fileName = null,
+	pluginName = null,
+	doc,
+	gotInfos = false,
+	plotDescription,
+	plotFiles = new Array (),
+	filesTable = {},
+	// Used for determining what graph (if any) to show by default
+	metadataToParse = 0, metadataParsed = 0, defaultViz = null, defaultVizCount = 0,
+	// State for figuring out whether we're comparing multiple protocols on a single model, or multiple models on a single protocol
+	firstModelName = "", firstModelVersion = "", firstProtoName = "", firstProtoVersion = "",
+	singleModel = true, singleProto = true,
+	// Used for stripping out redundant (repeated) text in plot line labels
+	plotLabelStripText = null;
 
 
 function getFileContent (file, succ)
@@ -74,6 +73,12 @@ function registerFileDisplayer (elem)
     	}, true);
 }
 
+/**
+ * Add a `getContents` method to the file object f (a member of the global `files` collection) which will call
+ * `getFileContent` for the version of the file in each experiment being compared (but only on the first time
+ * it is called).
+ * @param f  the file
+ */
 function setupDownloadFileContents (f)
 {
 	f.getContents = function (callBack)
@@ -180,7 +185,7 @@ function highlightPlots (entity, showDefault)
 	// Show the default visualisation if this is the last experiment to be analysed
 	if (defaultViz && metadataParsed == metadataToParse)
 	{
-	    nextPage(defaultViz.href, true); // 'Invisible' redirect
+		nextPage(defaultViz.href, true); // 'Invisible' redirect
 	}
 }
 
@@ -246,42 +251,42 @@ function parsePlotDescription (entity, file, showDefault)
 function parseEntities (entityObj)
 {
 	//console.log (entityObj);
-    
-    // State for figuring out whether we're comparing multiple protocols on a single model, or multiple models on a single protocol,
+
+	// State for figuring out whether we're comparing multiple protocols on a single model, or multiple models on a single protocol,
 	// or indeed multiple versions of the same model / protocol, etc.
-    firstModelName = entityObj[0].modelName;
-    firstModelVersion = entityObj[0].modelVersion;
-    firstProtoName = entityObj[0].protoName;
-    firstProtoVersion = entityObj[0].protoVersion;
-    needsVersionInfo = {};
-    
+	firstModelName = entityObj[0].modelName;
+	firstModelVersion = entityObj[0].modelVersion;
+	firstProtoName = entityObj[0].protoName;
+	firstProtoVersion = entityObj[0].protoVersion;
+	needsVersionInfo = {};
+
     // Sort entityObj list by .name
     entityObj.sort(function(a,b) {return (a.name.toLocaleLowerCase() > b.name.toLocaleLowerCase()) ? 1 : ((b.name.toLocaleLowerCase() > a.name.toLocaleLowerCase()) ? -1 : 0);});
-    
+
 	for (var i = 0; i < entityObj.length; i++)
 	{
-	    var entity = entityObj[i];
+		var entity = entityObj[i];
 
-	    if (singleModel && (entity.modelName != firstModelName || entity.modelVersion != firstModelVersion))
-	        singleModel = false;
-	    if (singleProto && (entity.protoName != firstProtoName || entity.protoVersion != firstProtoVersion))
-            singleProto = false;
-	    if (needsVersionInfo[entity.modelName + "/" + entity.protoName] === false)
-	    	needsVersionInfo[entity.modelName + "/" + entity.protoName] = true;
-	    else if (needsVersionInfo[entity.modelName + "/" + entity.protoName] === undefined)
-	    	needsVersionInfo[entity.modelName + "/" + entity.protoName] = false;
-	
+		if (singleModel && (entity.modelName != firstModelName || entity.modelVersion != firstModelVersion))
+			singleModel = false;
+		if (singleProto && (entity.protoName != firstProtoName || entity.protoVersion != firstProtoVersion))
+			singleProto = false;
+		if (needsVersionInfo[entity.modelName + "/" + entity.protoName] === false)
+			needsVersionInfo[entity.modelName + "/" + entity.protoName] = true;
+		else if (needsVersionInfo[entity.modelName + "/" + entity.protoName] === undefined)
+			needsVersionInfo[entity.modelName + "/" + entity.protoName] = false;
+
+		// Fill in the entities and files entries for this entity
 		entities[entity.id] = entity;
 		if (entity.files)
 			for (var j = 0; j < entity.files.length; j++)
 			{
-			    var file = entity.files[j];
-				file.signature = file.name.hashCode ();
+				var file = entity.files[j],
+					sig = file.name.hashCode();
+				file.signature = sig;
 				file.url = contextPath + "/download/" + entityType.charAt(0) + "/" + convertForURL (entity.name) + "/" + entity.id + "/" + file.id + "/" + convertForURL (file.name);
-				var sig = file.signature;
 				if (!files[sig])
 				{
-					
 					files[sig] = {};
 					files[sig].sig = sig;
 					files[sig].name = file.name;

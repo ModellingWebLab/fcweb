@@ -1,12 +1,12 @@
-var choicesDivId = 'choices';
-var resetButtonDivId = 'flot-buttons-div';
-var colouredSpanIdPrefix = 'span';
-var legendDivId = 'legend';
-var tooltipId = 'flotTooltip';
-var plottedGraph = {}; // TODO: probably safer if this is an instance property!
-var resetButtonId = 'resetButton';
-var legendHideButtonId = 'hideButton';
-var selectTogglerId = 'selectToggler';
+var choicesDivId = 'choices',
+	resetButtonDivId = 'flot-buttons-div',
+	colouredSpanIdPrefix = 'span',
+	legendDivId = 'legend',
+	tooltipId = 'flotTooltip',
+	plottedGraph = {}, // TODO: probably safer if this is an instance property!
+	resetButtonId = 'resetButton',
+	legendHideButtonId = 'hideButton',
+	selectTogglerId = 'selectToggler';
 
 /* create and append the div for showing the plot choices */
 function createAppendChoicesDiv(parentDiv) {
@@ -37,14 +37,14 @@ function createAppendResetButton(parentDiv) {
     var resetButtonDiv = document.createElement("div");
     resetButtonDiv.id = resetButtonDivId;
     parentDiv.appendChild(resetButtonDiv);
-	
+
     var resetButton = document.createElement('input');
     resetButton.id = resetButtonId;
     resetButton.title = 'Reset graph zoom based on currently selected datasets';
     resetButton.type = 'button';
     resetButton.value = 'reset zoom';
     resetButtonDiv.appendChild (resetButton);
-	
+
     var legendHideButton = document.createElement('input');
     legendHideButton.id = legendHideButtonId;
     legendHideButton.title = 'Toggle the visibility of the legend.';
@@ -84,7 +84,7 @@ function plotAccordingToChoices(plotProperties, selectedCoords) {
         window.setTimeout(function(){plotAccordingToChoices(plotProperties, selectedCoords);}, 100);
         return;
     }
-    
+
     var choicesContainer = plotProperties.choicesContainer;
     var datasets = plotProperties.datasets;
     var styleLinespointsOrPoints = plotProperties.styleLinespointsOrPoints;
@@ -255,14 +255,14 @@ function setListeners(plotProperties, moreThanOneDataset) {
           plotAccordingToChoices(plotProperties, retrieveCurrentPlotCoords(plottedGraph));
       });
     }
-    
+
     // mouse over for legend
     var legend = $("#" + choicesDivId);
     legend.append ($("<div></div>").addClass ("clearer"));
     if (legend.height () > 100)
     {
         legend.append ($("<div></div>").addClass ("fadings").append ($("<small></small>").append ($("<strong></strong>").text ("hover or click 'toggle legend' to show all"))));
-        
+
     	legend.addClass ("legend-fade");
     	legend.mouseover (function ()
     	{
@@ -449,7 +449,7 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
         /* legend generated when graph plotted, so this must follow the plot creation! */
         transferLegendColours(datasets);
         setListeners(plotProperties, (datasetNumber > 1));
-        
+
         // Save data for export if user requests it
         allowPlotExport(thisFile.name, transformForExport(datasets), {'x': x_label, 'y': y_label});
     }
@@ -520,7 +520,6 @@ contentFlotPlotComparer.prototype.showContents = function ()
                 if (f.keyId && !f.keyFile.contents)
                 {
                     this.expectedKeyContents++;
-//                    console.log("Found key " + f.keyId);
                 }
             }
 //            console.log("Expecting " + this.expectedKeyContents + " keys");
