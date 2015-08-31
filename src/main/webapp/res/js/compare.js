@@ -91,44 +91,51 @@ function setupDownloadFileContents (f)
 	};
 }
 
+/**
+ * Called when we have loaded both the default-plots and output-contents files for an experiment from the server.
+ * Note that this will be called once per experiment being compared (at least, for those that have both metadata files).
+ * @param entity  the experiment object
+ * @param showDefault  whether to show a default visualisation (if available)
+ */
 function highlightPlots (entity, showDefault)
 {
 //    console.log(entity);
-    // Plot description has fields: Plot title,File name,Data file name,Line style,First variable id,Optional second variable id,Optional key variable id
-    // Output contents has fields: Variable id,Variable name,Units,Number of dimensions,File name,Type,Dimensions
-    plotDescription = entity.plotDescription;
-    outputContents = entity.outputContents;
-	for (var i = 1; i < plotDescription.length; i++)
+	// Plot description has fields: Plot title,File name,Data file name,Line style,First variable id,Optional second variable id,Optional key variable id
+	// Output contents has fields: Variable id,Variable name,Units,Number of dimensions,File name,Type,Dimensions
+	plotDescription = entity.plotDescription;
+	outputContents = entity.outputContents;
+	for (var i = 1 /* Skip first row - it's a header */; i < plotDescription.length; i++)
 	{
-		if (plotDescription[i].length < 2)
+		if (plotDescription[i].length < 3)
 			continue;
-        if (files[plotDescription[i][2].hashCode ()])
-        {
-            //console.log (files[plotDescription[i][2].hashCode ()]);
-            var f = files[plotDescription[i][2].hashCode ()];
+		var data_file_code = plotDescription[i][2].hashCode(),
+			f = files[data_file_code];
+		if (f)
+		{
+			//console.log(f);
 
-            // See if we should show this as the default plot.
-            // If a single protocol, we choose the first listed in the default-plots file
-            // (with the proviso that some experiments might have partial results, hence we need to check all default-plots files).
-            // Otherwise, we choose the first one appearing in the most experiments.
-    		var row = document.getElementById ("filerow-" + plotDescription[i][2].hashCode ());
-    		if (row)
-    		{
-    			if (showDefault)
-    			{
-    				var viz = document.getElementById ("filerow-" + plotDescription[i][2].hashCode () + "-viz-displayPlotFlot");
-    				if (viz)
-    				{
-    				    var thisCount = singleProto ? plotDescription.length : f.entities.length;
-    				    if ((!singleProto || i == 1) && thisCount > defaultVizCount)
-				        {
+			// See if we should show this as the default plot.
+			// If a single protocol, we choose the first listed in the default-plots file
+			// (with the proviso that some experiments might have partial results, hence we need to check all default-plots files).
+			// Otherwise, we choose the first one appearing in the most experiments.
+			var row = document.getElementById("filerow-" + data_file_code);
+			if (row)
+			{
+				if (showDefault)
+				{
+					var viz = document.getElementById("filerow-" + data_file_code + "-viz-displayPlotFlot");
+					if (viz)
+					{
+						var thisCount = singleProto ? plotDescription.length : f.entities.length;
+						if ((!singleProto || i == 1) && thisCount > defaultVizCount)
+						{
 //    				        console.log("Set default viz to " + plotDescription[i][0]);
-    				        defaultViz = viz;
-    				        defaultVizCount = thisCount;
-				        }
-    				}
-    			}
-    		}
+							defaultViz = viz;
+							defaultVizCount = thisCount;
+						}
+					}
+				}
+			}
 			
 			// Find the plot x and y object names and units from the output contents file.
 			for (var output_idx = 0; output_idx < outputContents.length; output_idx++)
@@ -143,23 +150,25 @@ function highlightPlots (entity, showDefault)
 					f.yAxes = outputContents[output_idx][1] + ' (' + outputContents[output_idx][2] + ')';
 					f.yUnits = outputContents[output_idx][2];
 				}
-                if (plotDescription[i].length > 6 && plotDescription[i][6] == outputContents[output_idx][0])
-                {
-//                    console.log("Key exists : " + outputContents[output_idx][0]);
-//                    console.log(f);
-                    // TODO: This may not handle keys differing between experiments. Does this matter?
-                    for (var ent_idx=0; ent_idx<f.entities.length; ent_idx++)
-                    {
-                        if (f.entities[ent_idx].entityLink === entity)
-                        {
-                            var ent_f = f.entities[ent_idx].entityFileLink;
-                            ent_f.keyId = outputContents[output_idx][0];
-                            ent_f.keyName = outputContents[output_idx][1];
-                            ent_f.keyUnits = outputContents[output_idx][2];
-                            ent_f.keyFile = files[outputContents[output_idx][4].hashCode()].entities[ent_idx].entityFileLink;
-                        }
-                    }
-                }
+				if (plotDescription[i].length > 6 && plotDescription[i][6] == outputContents[output_idx][0])
+				{
+					// When comparing, f.entities is a list of the experiments containing this output data file (`entityLink`),
+					// and the version of the file appearing in each experiment (`entityFileLink`).
+					var key_file = files[outputContents[output_idx][4].hashCode()],
+						ent_f = findEntityFileLink(f, entity); // This entity's version of f
+					if (ent_f && key_file)
+					{
+						var ent_key_file = findEntityFileLink(key_file, entity); // This entity's version of the key file
+						if (ent_key_file)
+						{
+							ent_f.keyId = outputContents[output_idx][0];
+							ent_f.keyName = outputContents[output_idx][1];
+							ent_f.keyUnits = outputContents[output_idx][2];
+							ent_f.keyFile = ent_key_file;
+//							console.log("Found key " + plotDescription[i][6] + " for plot " + plotDescription[i][0] + " entity " + entity.name);
+						}
+					}
+				}
 			}
 			f.title = plotDescription[i][0];
 			f.linestyle = plotDescription[i][3];
@@ -173,6 +182,19 @@ function highlightPlots (entity, showDefault)
 	{
 	    nextPage(defaultViz.href, true); // 'Invisible' redirect
 	}
+}
+
+/**
+ * Find the link to a particular entity's version of this file.
+ * @param f  the file to look for
+ * @param entity  the entity to look for
+ * @returns  f.entities[ent_idx].entityFileLink where f.entities[ent_idx].entityLink === entity
+ */
+function findEntityFileLink(f, entity)
+{
+	for (var ent_idx=0; ent_idx<f.entities.length; ent_idx++)
+		if (f.entities[ent_idx].entityLink === entity)
+			return f.entities[ent_idx].entityFileLink;
 }
 
 function parseOutputContents (entity, file, showDefault)
