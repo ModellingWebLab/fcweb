@@ -2,6 +2,9 @@
 /// Keep track of files sent to the server but not fully uploaded yet
 var uploading = new Array();
 
+// Names that aren't allowed to be uploaded
+var reserved_names = ['errors.txt', 'manifest.xml', 'metadata.rdf'];
+
 function alreadyExists (uploaded, name)
 {
     for (var i = 0; i < uploading.length; i++)
@@ -22,9 +25,9 @@ function sendFile (uploaded, file, name, types)
 		addNotification ("there is already a file with the name '" + name + "' - please remove that first.", "error");
 		return;
 	}
-	if (name == "errors.txt")
+	if (reserved_names.indexOf(name) != -1)
 	{
-		addNotification("the name 'errors.txt' is reserved for system use; please choose another file name.", "error");
+		addNotification("the name '" + name + "' is reserved for system use; please choose another file name.", "error");
 		return;
 	}
 	uploading.push(name);
