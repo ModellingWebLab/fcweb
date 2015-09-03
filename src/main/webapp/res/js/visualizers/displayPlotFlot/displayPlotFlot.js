@@ -19,7 +19,7 @@ function createAppendChoicesDiv(parentDiv) {
 function createAppendFlotPlotDiv(parentDiv, flotPlotDivId) {
     var flotPlotDiv = document.createElement("div");
     flotPlotDiv.id = flotPlotDivId;
-    flotPlotDiv.title = "Zoom available by selecting an area of the plot";
+    //flotPlotDiv.title = "Zoom available by selecting an area of the plot";
     flotPlotDiv.style.width = "780px";
     flotPlotDiv.style.height = "450px";
     parentDiv.appendChild(flotPlotDiv);
