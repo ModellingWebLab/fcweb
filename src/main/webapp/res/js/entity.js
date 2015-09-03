@@ -722,6 +722,29 @@ function updateFile (rf, v)
 	};
 }
 
+zoom_property_names = ['position', 'top', 'left', 'border-style', 'border-width', 'background-color'];
+function zoomHandler()
+{
+    var $div = $(doc.version.filedetails),
+        $button = $('#zoomFile'),
+        curr_width = $div.width(),
+        curr_css = $div.css(zoom_property_names),
+        last_width = $div.data('zoom_width'),
+        last_css = $div.data('zoom_css');
+    if (last_width !== undefined)
+    {
+        // Reset to normal
+        $div.css(last_css).width(last_width).removeData(['zoom_width', 'zoom_css']);
+    }
+    else
+    {
+        // Zoom to full-window
+        $div.css({'position': 'absolute', 'top': 5, 'left': 5, 'border-style': 'ridge', 'border-width': 5, 'background-color': '#ffffff'})
+            .width($(window).width()-40)
+            .data({'zoom_width': curr_width, 'zoom_css': curr_css});
+    }
+}
+
 function displayFile (version, id, pluginName)
 {
     if (version.plotDescription === null || version.outputContents === null)
@@ -737,7 +760,7 @@ function displayFile (version, id, pluginName)
 		addNotification ("no such file", "error");
 		return;
 	}
-    var df = doc.file;
+	var df = doc.file;
 	df.name.innerHTML = "<small>File: </small>" + f.name;
 	df.time.setAttribute ("datetime", f.created);
 	df.time.innerHTML = beautifyTimeStamp (f.created);
@@ -959,6 +982,7 @@ function initModel ()
 			nextPage (doc.file.close.href);
 		}
     }, true);
+        $('#zoomFile').click(zoomHandler);
 
 	var list = document.getElementById("entityversionlist");
 	if (list)
