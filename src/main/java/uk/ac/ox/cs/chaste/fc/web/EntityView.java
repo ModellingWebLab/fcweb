@@ -1214,7 +1214,7 @@ public class EntityView extends WebModule
 					answer.put("isNewVersion", true);
 				}
 				// Set visibility to match the latest version, if not already specified
-				if (info.visibility == null)
+				if (createOk && info.visibility == null)
 				{
 					info.visibility = info.entity.getLatestVersion().getVisibility();
 					answer.put("visibility", info.visibility);
