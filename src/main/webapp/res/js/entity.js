@@ -557,6 +557,11 @@ function displayVersion (id, showDefault)
 	if (v.plotDescription && v.outputContents)
 		highlightPlots (v, showDefault);
 	
+	$('#parse_status').empty();
+	if (v.parsedOk)
+	{
+		$('#parse_status').append('<small>All ' + entityType + ' files parsed successfully.</small>');
+	}
 	
 	doc.entity.details.style.display = "none";
 	doc.entity.version.style.display = "block";
@@ -605,6 +610,7 @@ function updateVersion (rv)
 	v.status = rv.status;
 	v.commitMessage = rv.commitMessage;
 	v.readme = null;
+	v.parsedOk = rv.parsedOk;
 	v.files = [];
 	if (rv.files)
     {

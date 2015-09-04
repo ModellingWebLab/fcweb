@@ -137,6 +137,7 @@
 			
 		    <div id="entityversionfiles">
 			    <h3>Files attached to this version</h3>
+			    <p id="parse_status"></p>
 			    <table id="entityversionfilestable">
 				</table>
 				<a id='downloadArchive' title="Download a 'combine' format archive of all the files">

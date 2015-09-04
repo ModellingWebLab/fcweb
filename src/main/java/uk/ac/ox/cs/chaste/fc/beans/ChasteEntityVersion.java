@@ -168,6 +168,11 @@ public class ChasteEntityVersion
 	{
 		return entity.getName ();
 	}
+	
+	public boolean parsedOk()
+	{
+		return numOntologyTerms > 0;
+	}
 
 	public boolean hasInterface()
 	{
@@ -208,6 +213,7 @@ public class ChasteEntityVersion
 		json.put ("entityId", entity.getId ());
 		json.put ("name", entity.getName ());
 		json.put ("commitMessage", getCommitMessage ());
+		json.put ("parsedOk", parsedOk());
 
 		if (files != null && files.size () > 0)
 		{
