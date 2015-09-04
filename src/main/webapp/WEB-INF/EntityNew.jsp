@@ -38,8 +38,9 @@
             <select id="visibility">
                 <option value="PUBLIC" id="visibility-PUBLIC">PUBLIC</option>
                 <option value="RESTRICTED" id="visibility-RESTRICTED">RESTRICTED</option>
-                <option value="PRIVATE" id="visibility-PRIVATE" selected="true">PRIVATE</option>
+                <option value="PRIVATE" id="visibility-PRIVATE" selected="selected">PRIVATE</option>
             </select>
+            <img src="${contextPath}/res/img/info.png" alt="help" title="Public = anyone can view &#10;Restricted = logged-in users can view &#10;Private = only you can view"/>
             <span id="visibilityaction"></span>
 	    </p>
 	    <t:upload/>

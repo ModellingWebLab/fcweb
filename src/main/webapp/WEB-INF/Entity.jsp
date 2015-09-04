@@ -94,6 +94,7 @@
 			    	<option value="RESTRICTED" id="visibility-RESTRICTED">RESTRICTED</option>
 			    	<option value="PRIVATE" id="visibility-PRIVATE">PRIVATE</option>
 		    	</select>
+                <img src="${contextPath}/res/img/info.png" alt="help" title="Public = anyone can view &#10;Restricted = logged-in users can view &#10;Private = only you can view"/>
 		    	<span id="versionVisibilityAction"></span>
 		    </c:if>
 		    <span id="exptStatus"></span>
