@@ -109,6 +109,12 @@ def GetProtoInterface(protoPath):
         AddTerm(res[0].tokens['name'])
     def ProcessOptional(res):
         AddTerm(res[0].tokens['name'], optional_terms)
+        if 'default' in res[0].tokens:
+            for match in var_ref.finditer(res[0].default_expr):
+                prefix, name = match.group(0).split(':')
+                nsuri = ns_maps.get(prefix, None)
+                if nsuri:
+                    optional_terms.add(nsuri + name)
     def ProcessNsDecl(res):
         ns_maps[res[0]['prefix']] = res[0]['uri']
     def ProcessImport(source_uri):
@@ -133,26 +139,30 @@ def GetProtoInterface(protoPath):
     in_conversion_rule = False
     for line in open(protoPath, 'rU'):
         stripped = line.strip()
+        default_check = True
         if stripped.startswith('convert'):
             in_conversion_rule = True
-            continue
-        for grammar, processor in grammars.items():
-            try:
-                match = grammar.parseString(line)
-                in_conversion_rule = False
-            except CSP.p.ParseBaseException:
-                continue
-            processor(match)
-            break
         else:
+            for grammar, processor in grammars.items():
+                try:
+                    match = grammar.parseString(line)
+                    in_conversion_rule = False
+                except CSP.p.ParseBaseException:
+                    continue
+                processor(match)
+                default_check = False
+                break
+        if default_check:
             if stripped.startswith('define ') or stripped.startswith('clamp ') or stripped.startswith('var ') or stripped == '}':
                 in_conversion_rule = False
-            if not in_conversion_rule:
-                # Default check: Scan for any variable references, and see if they're in a known namespace
-                for match in var_ref.finditer(line):
-                    prefix, name = match.group(0).split(':')
-                    nsuri = ns_maps.get(prefix, None)
-                    if nsuri:
+            # Default check: Scan for any variable references, and see if they're in a known namespace
+            for match in var_ref.finditer(line):
+                prefix, name = match.group(0).split(':')
+                nsuri = ns_maps.get(prefix, None)
+                if nsuri:
+                    if in_conversion_rule:
+                        optional_terms.add(nsuri + name)
+                    else:
                         terms.add(nsuri + name)
     return terms - optional_terms, optional_terms
 
