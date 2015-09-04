@@ -15,9 +15,6 @@ import org.json.simple.JSONObject;
 public class ChasteExperiment
 extends ChasteEntity
 {
-	/*private int modelId;
-	private int protocolId;*/
-
 	private ChasteEntityVersion model;
 	private ChasteEntityVersion protocol;
 	
@@ -38,6 +35,26 @@ extends ChasteEntity
 		return protocol;
 	}
 	
+	/**
+	 * Compare two experiments by 'name' but ensure that when comparing two experiments involving the same model and protocol (and which hence
+	 * have the same name) we put the newest model/protocol versions first.
+	 */
+	protected int compareNames(ChasteEntity b)
+	{
+		int result = getName().compareTo(b.getName());
+		if (result == 0)
+		{
+			// Try to disambiguate based on versions; first model then protocol
+			ChasteExperiment other = (ChasteExperiment) b;
+			if (other != null)
+			{
+				result = other.model.getId() - this.model.getId(); // Higher id means newer so should come first
+				if (result == 0)
+					result = other.protocol.getId() - this.protocol.getId();
+			}
+		}
+		return result;
+	}
 
 	@SuppressWarnings("unchecked")
 	public JSONObject toJson ()

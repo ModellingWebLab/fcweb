@@ -36,7 +36,7 @@ public class ChasteEntity
 		@Override
 		public int compare (ChasteEntity a, ChasteEntity b)
 		{
-			return a.name.compareTo (b.name);
+			return a.compareNames(b);
 		}
 	}
 
@@ -48,11 +48,20 @@ public class ChasteEntity
 		@Override
 		public int compare (ChasteEntity a, ChasteEntity b)
 		{
-			if (a.name.equals(b.name))
+			int name_compare = a.compareNames(b);
+			if (name_compare == 0)
 				return b.id - a.id; // a < b, i.e. prior in order, iff it has a higher id
 			else
-				return a.name.compareTo(b.name);
+				return name_compare;
 		}
+	}
+	
+	/**
+	 * Compare this entity with another by name.  Can be overridden by subclasses if raw name ordering doesn't make sense.
+	 */
+	protected int compareNames(ChasteEntity b)
+	{
+		return name.compareTo(b.name);
 	}
 
 	public ChasteEntity (int id, String name, User author, Timestamp created, String type)
