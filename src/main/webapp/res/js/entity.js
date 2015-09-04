@@ -557,11 +557,21 @@ function displayVersion (id, showDefault)
 	if (v.plotDescription && v.outputContents)
 		highlightPlots (v, showDefault);
 	
+	// Items related to a protocol's interface
 	$('#parse_status').empty();
 	if (v.parsedOk)
 	{
 		$('#parse_status').append('<small>All ' + entityType + ' files parsed successfully.</small>');
 	}
+	$('#updateInterface').off('click').click(function(){
+		$.post(document.location.href, JSON.stringify({'task': 'updateInterface', 'version': v.id}))
+		 .done(function(json){
+			 displayNotifications(json);
+		 })
+		 .fail(function(){
+			 addNotification("sorry, server-side error occurred", "error");
+		 });
+	});
 	
 	doc.entity.details.style.display = "none";
 	doc.entity.version.style.display = "block";

@@ -153,6 +153,7 @@ public class ChasteFileManager
 	}
 	
 
+	// TODO: Implement this method by calling the variant below!
 	public boolean associateFile (int fileId, ChasteEntityVersion entity, ChasteEntityManager entityMgmt)
 	{
 		PreparedStatement st = db.prepareStatement ("INSERT INTO `"+entityMgmt.getEntityFilesTable ()+"`(`"+entityMgmt.getEntityColumn ()+"`, `file`) VALUES (?,?)");

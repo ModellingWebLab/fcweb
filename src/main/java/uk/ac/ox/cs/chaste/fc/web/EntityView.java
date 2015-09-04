@@ -268,6 +268,27 @@ public class EntityView extends WebModule
 		{
 			getProtocolInterfaces(db, user, answer, (ProtocolManager)entityMgmt);
 		}
+		else if (task.equals("updateInterface"))
+		{
+			Object version = querry.get("version");
+			try
+			{
+				int versionId = Integer.parseInt(version.toString());
+				ChasteEntityVersion vers = entityMgmt.getVersionById(versionId);
+				if (vers == null)
+					notifications.addError("no version found");
+				else
+				{
+					FileTransfer.getProtocolInterface(versionId, vers.getFilePath());
+					notifications.addInfo("interface update request submitted");
+				}
+			}
+			catch (NullPointerException | NumberFormatException e)
+			{
+				LOGGER.warn("user provided version id not parseable: ", version, " (type: ", entityMgmt.getEntityColumn(), ")");
+				throw new IOException("version not found");
+			}
+		}
 		
 		return answer;
 	}

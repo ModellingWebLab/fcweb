@@ -102,7 +102,10 @@
 		    	Delete version: <a id='deleteVersion'><img src="${contextPath}/res/img/delete.png" alt="delete version" title="delete this version of the ${entity.type}" /></a>
 		    </c:if>
 		    <c:if test="${entity.type != 'experiment' && User.isAllowedToCreateNewExperiment()}">
-		        Run experiments: <a class='runExpts' title="Run experiments using this ${entity.type}"><img alt="Run experiments using this ${entity.type}" src="${contextPath}/res/img/batch.png"/></a>
+		        Run experiments: <a class='runExpts' title="run experiments using this ${entity.type}"><img alt="run experiments using this ${entity.type}" src="${contextPath}/res/img/batch.png"/></a>
+		    </c:if>
+		    <c:if test="${entity.type == 'protocol' && User.admin}">
+		        Refresh interface: <a id='updateInterface'><img src="${contextPath}/res/img/refresh.png" alt="refresh interface" title="recompute this protocol's ontology term interface"/></a>
 		    </c:if>
 		    </small>
 	    </div>
