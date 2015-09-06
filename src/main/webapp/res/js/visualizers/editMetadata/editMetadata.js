@@ -398,6 +398,7 @@ metadataEditor.prototype.filtersLoaded = function (data, status, jqXHR)
 		return;
 	}
 	this.protocolInterfaces = data.interfaces;
+	this.protocolInterfaces.sort(function(p1,p2){ return p1.name.localeCompare(p2.name); });
 
 	// Create the filter controls
 	this.filterDiv.append('<h4 class="editmeta_content_hidden" id="editmeta_filter_header">Filter visible annotations</h4>\n'
