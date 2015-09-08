@@ -258,7 +258,7 @@ public class FileTransfer extends WebModule
 		return "Hi " + nick + ",\n\nAn experiment you submitted has finished.\n"
 			+"Status: "+result+".\n"
 			+"The resulting files can be viewed at: "+url+"\n"
-			+ "\nYours sincerely,\nCardiac functional curation website";
+			+ "\nYours sincerely,\nCardiac Web Lab website";
 	}
 	
 	
@@ -354,7 +354,7 @@ public class FileTransfer extends WebModule
 			try
 			{
 				if (u.isSendMails ())
-					Tools.sendMail (u.getMail (), u.getNick (), "Functional curation experiment finished",
+					Tools.sendMail (u.getMail (), u.getNick (), "Web Lab experiment finished",
 							buildMailBody (u.getNick (), returntype, exp));
 			}
 			catch (MessagingException e)

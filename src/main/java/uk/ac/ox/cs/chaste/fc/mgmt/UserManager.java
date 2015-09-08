@@ -133,10 +133,10 @@ public class UserManager
 			String body = "Hi " + user.getNick() + ",\n\n"
 					+ "Your account permissions have been updated to:\n  " + user.getRoleDescription(false) + "\n"
 					+ "Visit the site at " + Tools.getThisUrl() + "\n\n"
-					+ "Yours sincerely,\nCardiac functional curation website";
+					+ "Yours sincerely,\nCardiac Electrophysiology Web Lab website";
 			try
 			{
-				Tools.sendMail(user.getMail(), user.getNick(), "Cardiac Functional Curation account updated", body);
+				Tools.sendMail(user.getMail(), user.getNick(), "Cardiac Web Lab account updated", body);
 			}
 			catch (MessagingException | UnsupportedEncodingException e)
 			{

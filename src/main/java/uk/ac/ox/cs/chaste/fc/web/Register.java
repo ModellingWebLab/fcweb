@@ -145,7 +145,7 @@ public class Register extends WebModule
 					
 					try
 					{
-						Tools.sendMail (mail, nick, "Successful Registration for Functional Curation", buildMailBody (nick, password));
+						Tools.sendMail (mail, nick, "Successful Registration for the Web Lab", buildMailBody (nick, password));
 						informAdmins (nick);
 						
 						JSONObject res = new JSONObject ();
@@ -177,10 +177,10 @@ public class Register extends WebModule
 	
 	private void informAdmins (String newUser)
 	{
-		String mailSubject = "New Registration at Cardiac Functional Curation Web Interface";
-		String mailBody = "Hi Admin,\n\nGood news: "+newUser+" just registered for the Cardiac Functional Curation Web Interface!"
+		String mailSubject = "New Registration at Cardiac Electrophysiology Web Lab";
+		String mailBody = "Hi Admin,\n\nGood news: "+newUser+" just registered for the Cardiac Web Lab!"
 			+ "\nPlease go to the Admin interface and check their role:\n\n" + Tools.getThisUrl () + "admin.html"
-			+ "\n\nBest wishes,\nCardiac functional curation website";
+			+ "\n\nBest wishes,\nCardiac Web Lab";
 		
 		Vector<User> users = userMgmt.getUsers ();
 		for (User u: users)
@@ -201,9 +201,9 @@ public class Register extends WebModule
 	
 	private final static String buildMailBody (String nick, String password)
 	{
-		return "Hi " + nick + ",\n\nWe successfully registered an account for you in the Cardiac Functional Curation system!\n\n"
+		return "Hi " + nick + ",\n\nWe successfully registered an account for you in the Cardiac Electrophysiology Web Lab!\n\n"
 				+ "Your password is: " + password + "\n\nNow go to " + Tools.getThisUrl () + " to see if everything's working.\n\n"
-				+ "Yours sincerely,\nCardiac functional curation website";
+				+ "Yours sincerely,\nCardiac Web Lab";
 	}
 	
 	@SuppressWarnings("unchecked")
