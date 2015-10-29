@@ -2,7 +2,7 @@
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}About - " contextPath="${contextPath}">
-    <h1>About Functional Curation</h1>
+    <h1>About Functional Curation and the Web Lab</h1>
     <p>
         The key idea underpinning functional curation is that when mathematical and computational models are
         being developed, a primary goal should be the continuous comparison of those models
@@ -16,12 +16,6 @@
         This website provides a front-end to a prototype of that language and software.
     </p>
     <p>
-        For more background on Functional Curation, our <a href="http://dx.doi.org/10.1016/j.pbiomolbio.2011.06.003">2011 reference publication</a> is a good place to start.
-        We also have a <a href="https://peerj.com/preprints/273/">recent preprint on the underlying concept of <i>virtual experiments</i></a>.
-        Full details about the <a href="https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration">open source software implementing the back-end for this system</a> can be found on the Chaste website.
-        Documentation on the protocol language can also be found there.
-    </p>
-    <p>
         Please <a href="${contextPath}/db.html">browse around</a> and view the results of protocols encoded so far, run on a range of cell models.
         If you wish to evaluate your own models under these protocols, you will need to <a href="${contextPath}/register.html">register for an account</a> and have it approved.
         By default your own models, protocols and experiments are private so that only you may view them.
@@ -31,6 +25,23 @@
         Currently only trusted users may upload new protocols, but if you have one you'd like to add to the system, please do
         <a href="${contextPath}/contact.html">contact us</a>.
     </p>
+
+    <h2>Further reading</h2>
+    <p>
+        A <a href="https://peerj.com/preprints/1338/">preprint publication about the Web Lab</a> is now available.
+    </p>
+    <p>
+        For more background on Functional Curation, our <a href="http://dx.doi.org/10.1016/j.pbiomolbio.2011.06.003">2011 reference publication</a> is a good place to start.
+        We also have a <a href="http://dx.doi.org/10.1016/j.pbiomolbio.2014.10.001">paper on the underlying concept of <i>virtual experiments</i></a>
+        (along with an <a href="https://peerj.com/preprints/273/">open access preprint</a>).
+        Full details about the <a href="https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration">open source software implementing the back-end for this system</a> can be found on the Chaste website.
+    </p>
+
+    <h2>User documentation</h2>
+    <ul>
+        <li>We ran a <a href="https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/Workshop2015">training workshop</a> in September 2015, materials from which are available.</li>
+        <li><a href="https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax">Documentation on the protocol language</a> is available on the Chaste website.</li>
+    </ul>
 
     <h2>Future plans</h2>
     <p>

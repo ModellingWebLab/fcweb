@@ -22,6 +22,7 @@
             </c:otherwise>
         </c:choose>
         <li><a href="${contextPath}/${analyseLink}">Analyse your own models/protocols</a>.</li>
+        <li>Learn from our <a href="https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/Workshop2015">training workshop materials</a>.</li>
         <li>Find out more about this site - read on!</li>
     </ul>
 
