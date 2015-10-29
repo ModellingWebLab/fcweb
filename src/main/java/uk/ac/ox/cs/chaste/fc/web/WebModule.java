@@ -95,16 +95,12 @@ extends HttpServlet
 		}
 		catch (Exception e)
 		{
-			response.setStatus (HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			e.printStackTrace();
-			obj = new JSONObject ();
-			JSONObject n = new JSONObject ();
-			JSONArray a = new JSONArray ();
-			a.add (e.getMessage ());
-			n.put ("errors", a);
-			obj.put ("notifications", n);
-			out.println (obj);
-			return;
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			LOGGER.setLogStackTrace(true);
+			LOGGER.error(e, "Unexpected unhandled exception");
+			LOGGER.setLogStackTrace(false);
+			obj = new JSONObject();
+			notifications.addError("uncaught exception: " + e.toString());
 		}
 		
 		if (obj != null)
