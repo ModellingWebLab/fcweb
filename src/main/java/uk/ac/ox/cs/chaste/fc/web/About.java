@@ -27,6 +27,8 @@ public class About extends WebModule {
 	protected String answerWebRequest (HttpServletRequest request, HttpServletResponse response, PageHeader header, DatabaseConnector db,
 		Notifications notifications, User user, HttpSession session)
 	{
+		if (request.getRequestURI().endsWith("for_authors.html"))
+			return "ForAuthors.jsp";
 		return "About.jsp";
 	}
 
@@ -35,7 +37,6 @@ public class About extends WebModule {
 		HttpServletResponse response, DatabaseConnector db,
 		Notifications notifications, JSONObject querry, User user, HttpSession session)
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 

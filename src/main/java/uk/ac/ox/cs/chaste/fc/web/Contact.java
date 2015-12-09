@@ -35,7 +35,6 @@ public class Contact extends WebModule {
 		HttpServletResponse response, DatabaseConnector db,
 		Notifications notifications, JSONObject querry, User user, HttpSession session)
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 

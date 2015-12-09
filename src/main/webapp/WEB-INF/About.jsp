@@ -42,6 +42,7 @@
         <li>We ran a <a href="https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/Workshop2015">training workshop</a> in September 2015, materials from which are available.</li>
         <li><a href="https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax">Documentation on the protocol language</a> is available on the Chaste website.</li>
         <li>A <a href="https://groups.google.com/forum/#!forum/cardiac-web-lab-users">users' mailing list</a> exists for asking questions about the Web Lab.</li>
+        <li>If you discover unexpected virtual experiment results, read our <a href="${contextPath}/for_authors.html">hints for model authors on diagnosing likely causes</a>.</li>
     </ul>
 
     <h2>Future plans</h2>

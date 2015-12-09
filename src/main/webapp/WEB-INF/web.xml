@@ -70,6 +70,7 @@
     <servlet-mapping>
         <servlet-name>About</servlet-name>
         <url-pattern>/about.html</url-pattern>
+        <url-pattern>/for_authors.html</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Db</servlet-name>
