@@ -202,7 +202,7 @@ public class Register extends WebModule
 	private final static String buildMailBody (String nick, String password)
 	{
 		return "Hi " + nick + ",\n\nWe successfully registered an account for you in the Cardiac Electrophysiology Web Lab!\n\n"
-				+ "Your password is: " + password + "\n\nNow go to " + Tools.getThisUrl () + " to see if everything's working.\n\n"
+				+ "Your password is: " + password + "\n\nNow go to " + Tools.getThisUrl () + " and explore the available experiments.\n\n"
 				+ "Yours sincerely,\nCardiac Web Lab";
 	}
 	
