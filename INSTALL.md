@@ -108,7 +108,9 @@ However `/etc/default/celeryd` will need modifying in two ways:
 ### Setup database
 
 Create a database 'chaste' with associated user account, and populate from `resources/chaste.sql`.
-With MySql, suitable commands are:
+
+To get a mysql shell on Ubuntu run `mysql -u debian-sys-maint -p` and use the password from `/etc/mysql/debian.cnf`.
+Suitable commands in the mysql shell are then:
 ```
 create database chaste;
 create user chaste identified by 'password';
@@ -116,7 +118,7 @@ grant all on chaste.* to 'chaste'@'localhost' identified by 'password';
 flush privileges;
 ```
 
-Then:
+Exit the mysql shell with ^D and then:
 ```
 mysql -u chaste chaste -p < resources/chaste.sql
 ```
