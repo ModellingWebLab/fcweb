@@ -136,7 +136,11 @@ including database credentials and link to the backend.
 You may also wish to change the `bivesWebService` parameter if you are running this model comparison service locally;
 by default it uses the author's endpoint at `http://bives.sems.uni-rostock.de/`.
 
-Add jdbc mysql driver to `/var/lib/tomcat7/lib`. (http://dev.mysql.com/downloads/connector/j/)
+Add the jdbc mysql driver to `/var/lib/tomcat7/lib`. (http://dev.mysql.com/downloads/connector/j/)
+If on Ubuntu you should just be able to
+```
+sudo ln -s /usr/share/java/mysql.jar /var/lib/tomcat7/lib/
+```
 
 ### Build project
 
