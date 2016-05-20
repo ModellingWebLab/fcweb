@@ -155,7 +155,7 @@ public abstract class ChasteEntityManager
 	
 	public int createEntity (String name, User u) throws ChastePermissionException
 	{
-		if (!user.isAllowedCreateEntity ())
+		if (!user.isAllowedToCreateEntity ())
 			throw new ChastePermissionException ("you are not allowed to create a new entity");
 		
 		PreparedStatement st = db.prepareStatement ("INSERT INTO `" + entityTable + "`(`name`, `author`) VALUES (?,?)");
@@ -194,7 +194,7 @@ public abstract class ChasteEntityManager
 	
 	public int createVersion (int entityid, String versionName, String commitMsg, String filePath, User u, String visibility) throws ChastePermissionException
 	{
-		if (!user.isAllowedCreateEntityVersion ())
+		if (!user.isAllowedToCreateEntityVersion ())
 			throw new ChastePermissionException ("you are not allowed to create a new entity version");
 		
 		PreparedStatement st = db.prepareStatement ("INSERT INTO `" + entityVersionsTable + "`(`author`, `" + entityColumn + "`, `version`, `filepath`, `visibility`, `commitmsg`) VALUES (?,?,?,?,?,?)");

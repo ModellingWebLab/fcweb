@@ -460,11 +460,8 @@ public class User
 		JSONObject obj = new JSONObject ();
 		obj.put ("isAllowedToForceNewExperiment", isAllowedToForceNewExperiment ());
 		obj.put ("isAllowedToCreateNewExperiment", isAllowedToCreateNewExperiment ());
-		obj.put ("isAllowedCreateEntity", isAllowedCreateEntity ());
-		obj.put ("isAllowedCreateEntityVersion", isAllowedCreateEntityVersion ());
-		/*obj.put ("",  ());
-		obj.put ("",  ());
-		obj.put ("",  ());*/
+		obj.put ("isAllowedToCreateEntity", isAllowedToCreateEntity ());
+		obj.put ("isAllowedToCreateEntityVersion", isAllowedToCreateEntityVersion ());
 		return obj.toJSONString ();
 	}
 	
@@ -493,22 +490,22 @@ public class User
 		return isAuthorized () && (((role.equals (ROLE_MODELER) || role.equals (ROLE_PROTO_AUTHOR)) && entity.getAuthor ().getId () == id) || role.equals (ROLE_ADMIN));
 	}
 	
-	public boolean isAllowedCreateModel ()
+	public boolean isAllowedToCreateModel ()
 	{
 		return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_PROTO_AUTHOR) || role.equals (ROLE_ADMIN));
 	}
 	
-	public boolean isAllowedCreateProtocol ()
+	public boolean isAllowedToCreateProtocol ()
 	{
 		return isAuthorized () && (role.equals (ROLE_PROTO_AUTHOR) || role.equals (ROLE_ADMIN));
 	}
 	
-	public boolean isAllowedCreateEntity ()
+	public boolean isAllowedToCreateEntity ()
 	{
 		return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_PROTO_AUTHOR) || role.equals (ROLE_ADMIN));
 	}
 	
-	public boolean isAllowedCreateEntityVersion ()
+	public boolean isAllowedToCreateEntityVersion ()
 	{
 		return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_PROTO_AUTHOR) || role.equals (ROLE_ADMIN));
 	}

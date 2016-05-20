@@ -46,7 +46,7 @@
     				<span class="experiment-SUCCESS">success</span>
     			</p>
     		</c:if>
-    		<c:if test="${User.allowedCreateEntityVersion and entity.type ne 'experiment'}">
+    		<c:if test="${User.allowedToCreateEntityVersion and entity.type ne 'experiment'}">
 				<small>(<a href="${contextPath}/${entity.type}/createnew/?newentityname=${entity.id}">add new version</a>)</small>
 			</c:if>
 			<div id="entityversionlist_content">
