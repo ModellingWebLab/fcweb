@@ -44,6 +44,9 @@ def Callback(callbackUrl, signature, data, json=False, isRetriedError=False, **k
         except requests.exceptions.RequestException as e:
             print "Error attempting callback at attempt %d: %s" % (attempt+1, str(e))
             time.sleep(60 * 2.0**attempt) # Exponential backoff, in seconds
+            # Rewind any file handles so we read from the beginning again
+            for fp in kwargs.get('files', {}).itervalues():
+                fp.seek(0)
         else:
             break # Callback successful so don't try again
     else:
