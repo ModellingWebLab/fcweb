@@ -11,7 +11,7 @@ import json
 import os
 import re
 import sys
-import urllib2
+import requests
 import xml.etree.ElementTree as ET
 import zipfile
 
@@ -35,15 +35,12 @@ import pycml
 
 def Wget(url, localPath):
     """Retrieve a binary file from the given URL and save it to disk."""
-    local_file = open(localPath, 'wb')
-    source = urllib2.urlopen(url)
-    while True:
-        chunk = source.read(10240)
-        if not chunk: break
-        local_file.write(chunk)
-    local_file.flush()
-    os.fsync(local_file)
-    local_file.close()
+    source = requests.get(url, stream=True, verify=False)
+    source.raise_for_status()
+    with open(localPath, 'wb') as local_file:
+        for chunk in source.iter_content(chunk_size=10240):
+            if chunk: # filter out keep-alive new chunks
+                local_file.write(chunk)
 
 
 def UnpackArchive(archivePath, tempPath, contentType):
