@@ -34,3 +34,7 @@ CELERY_IGNORE_RESULT = True
 
 # We don't make use of rate limiting, so turn it off for a performance boost
 CELERY_DISABLE_RATE_LIMITS = True
+
+# How many times to try calling back to the front-end before giving up.
+# We employ an exponential backoff on attempts, so delay 1, 2, 4, etc. minutes.
+WEB_LAB_MAX_CALLBACK_ATTEMPTS = 3

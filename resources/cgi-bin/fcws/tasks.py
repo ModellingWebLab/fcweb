@@ -28,7 +28,18 @@ def Callback(callbackUrl, signature, data, json=False, **kwargs):
         kwargs['json'] = data
     else:
         kwargs['data'] = data
-    return requests.post(callbackUrl, verify=False, **kwargs)
+    for attempt in range(celeryconfig.WEB_LAB_MAX_CALLBACK_ATTEMPTS):
+        try:
+            r = requests.post(callbackUrl, verify=False, **kwargs)
+            r.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            print "Error attempting callback at attempt %d: %s" % (attempt+1, str(e))
+            time.sleep(60 * 2.0**attempt) # Exponential backoff, in seconds
+        else:
+            break # Callback successful so don't try again
+    else:
+        print "Giving up on callback after %d attempts." % celeryconfig.WEB_LAB_MAX_CALLBACK_ATTEMPTS
+    return r
 
 
 def ReportError(callbackUrl, signature, prefix="failed due to unexpected error: ", json=False):
