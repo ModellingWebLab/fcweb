@@ -16,13 +16,22 @@ import requests
 from . import config
 from . import celeryconfig
 from . import utils
+from . import GetQueue
 
 app = celery.Celery('fcws.tasks')
 app.config_from_object(celeryconfig)
 
 
-def Callback(callbackUrl, signature, data, json=False, **kwargs):
-    """Make a callback to the front-end server."""
+def Callback(callbackUrl, signature, data, json=False, isRetriedError=False, **kwargs):
+    """Make a callback to the front-end server.
+    
+    @param callbackUrl: URL to send callback to
+    @param signature: unique identifier for this web service call
+    @param data: the data to POST
+    @param json: whether to send data as JSON
+    @param isRetriedError: whether this callback is simply to report that a previous callback timed out
+    @param kwargs: extra parameters for requests.post
+    """
     data['signature'] = signature
     if json:
         kwargs['json'] = data
@@ -39,6 +48,10 @@ def Callback(callbackUrl, signature, data, json=False, **kwargs):
             break # Callback successful so don't try again
     else:
         print "Giving up on callback after %d attempts." % celeryconfig.WEB_LAB_MAX_CALLBACK_ATTEMPTS
+        if not isRetriedError:
+            # This is the first time we're giving up, so define an error message for later delivery
+            data = {'returntype': 'failed', 'returnmsg': 'No response received from server'}
+        NotifyOfError.apply_async((callbackUrl, signature, data), queue=GetQueue('', True), countdown=60*5)
     return r
 
 
@@ -255,3 +268,14 @@ def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir):
     finally:
         # Remove the temporary folder
         shutil.rmtree(tempDir)
+
+
+@app.task(name="fcws.tasks.NotifyOfError")
+def NotifyOfError(callbackUrl, signature, data):
+    """Keep trying to contact the front-end with a short error message.
+    
+    @param callbackUrl: URL to post error to
+    @param signature: unique identifier for this web service call
+    @param data: POST data containing the error message string (see Callback for construction)
+    """
+    Callback(callbackUrl, signature, data, isRetriedError=True)
