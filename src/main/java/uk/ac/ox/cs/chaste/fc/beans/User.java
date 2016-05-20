@@ -490,6 +490,16 @@ public class User
 		return isAuthorized () && (((role.equals (ROLE_MODELER) || role.equals (ROLE_PROTO_AUTHOR)) && entity.getAuthor ().getId () == id) || role.equals (ROLE_ADMIN));
 	}
 	
+	public boolean isAllowedToUpdateEntityVersion(ChasteEntityVersion version)
+	{
+		return isAuthorized() && (role.equals(ROLE_ADMIN) || version.getAuthor().getId() == id);
+	}
+	
+	public boolean isAllowedToUpdateEntity(ChasteEntity entity)
+	{
+		return isAuthorized() && (role.equals(ROLE_ADMIN) || entity.getAuthor().getId() == id);
+	}
+	
 	public boolean isAllowedToCreateModel ()
 	{
 		return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_PROTO_AUTHOR) || role.equals (ROLE_ADMIN));

@@ -318,7 +318,7 @@ public class EntityView extends WebModule
 	}
 	
 	@SuppressWarnings("unchecked")
-	private JSONObject updateVisibility (Object version, Object visibility, Notifications notifications, JSONObject answer, ChasteEntityManager entityMgmt) throws IOException
+	private JSONObject updateVisibility (Object version, Object visibility, Notifications notifications, JSONObject answer, ChasteEntityManager entityMgmt) throws IOException, ChastePermissionException
 	{
 		try
 		{

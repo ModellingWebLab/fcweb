@@ -87,7 +87,7 @@
     	    <c:otherwise>Created</c:otherwise>
 	    </c:choose>
 	    <time id="entityversiontime"></time> by <em id="entityversionauthor"></em>.
-		    <c:if test="${entity.author == User.nick && entity.type != 'experiment'}">
+		    <c:if test="${User.isAllowedToUpdateEntity(entity) && entity.type != 'experiment'}">
 		    	Change visibility: 
 		    	<select id="versionVisibility">
 			    	<option value="PUBLIC" id="visibility-PUBLIC">PUBLIC</option>

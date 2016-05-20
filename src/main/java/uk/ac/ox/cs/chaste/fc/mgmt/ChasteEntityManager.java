@@ -573,20 +573,18 @@ public abstract class ChasteEntityManager
 	}
 	
 	
-	public boolean updateVisibility (ChasteEntityVersion version, String visibility)
+	public boolean updateVisibility (ChasteEntityVersion version, String visibility) throws ChastePermissionException
 	{
-		//System.out.println ("version" + version);
-		//System.out.println ("visibility" + visibility);
 		if (version == null)
 			return false;
 		if (!(visibility.equals ("PUBLIC") || visibility.equals ("RESTRICTED") || visibility.equals ("PRIVATE")))
 			return false;
-		
-		//System.out.println ("go sql");
+		if (!user.isAllowedToUpdateEntityVersion(version))
+			throw new ChastePermissionException ("you are not allowed to update this entity version");
 		
 		PreparedStatement st = db.prepareStatement ("UPDATE `" + entityVersionsTable + 
 			"` SET `visibility`=? WHERE id=?");
-    ResultSet rs = null;
+		ResultSet rs = null;
 		
 		try
 		{
@@ -594,11 +592,11 @@ public abstract class ChasteEntityManager
 			st.setInt (2, version.getId ());
 			
 			int affectedRows = st.executeUpdate();
-      if (affectedRows == 0)
-      {
-          throw new SQLException("Updating visibility of version failed, no rows affected. (" + entityVersionsTable + ")");
-      }
-      return true;
+			if (affectedRows == 0)
+			{
+				throw new SQLException("Updating visibility of version failed, no rows affected. (" + entityVersionsTable + ")");
+			}
+			return true;
 		}
 		catch (SQLException e)
 		{
