@@ -210,6 +210,7 @@ metadataEditor.prototype.addAnnotation = function (v, bindings)
     }
     var self = this,
         s = $('<span></span>', {'class': 'editmeta_annotation editmeta_spaced'}),
+        title = 'Use oxmeta:' + bindings.ann.value.fragment + ' to refer to this variable in a protocol.',
         del = $('<img>', {src: contextPath + '/res/img/delete.png',
                           alt: 'remove this annotation',
                           title: 'remove this annotation',
@@ -218,7 +219,8 @@ metadataEditor.prototype.addAnnotation = function (v, bindings)
     s.data('term', term);
     s.append(del);
     if (bindings.comment !== undefined)
-        s.attr('title', bindings.comment.value);
+    	title = bindings.comment.value + " \n" + title;
+    s.attr('title', title);
     v.annotations[term] = {ann: bindings.ann, span: s};
     v.li.append(s);
     // Add to the RDF store, creating a unique cmeta:id for the variable if needed
