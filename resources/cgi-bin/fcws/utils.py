@@ -20,7 +20,7 @@ from . import config
 CHASTE_ROOT = config['chaste_root']
 FC_ROOT = os.path.join(CHASTE_ROOT, 'projects', 'FunctionalCuration')
 
-EXPECTED_EXTENSIONS = {'model': ['.cellml'],
+EXPECTED_EXTENSIONS = {'model': ['.txt','.cellml'],
                        'proto': ['.txt', '.xml']}
 
 MANIFEST = 'manifest.xml'

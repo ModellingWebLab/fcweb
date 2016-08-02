@@ -31,7 +31,7 @@ elif 'getProtoInterface' in form:
         if field not in form:
             SendError("Missing required field.")
     print "Content-Type: text/plain\n\n"
-    fcws.GetProtocolInterface(form['callBack'].value, form['signature'].value, form['getProtoInterface'].value)
+    #fcws.GetProtocolInterface(form['callBack'].value, form['signature'].value, form['getProtoInterface'].value)
 else:
     for field in ['callBack', 'signature', 'model', 'protocol', 'user', 'isAdmin']:
         if field not in form:

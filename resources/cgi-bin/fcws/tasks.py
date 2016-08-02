@@ -117,7 +117,7 @@ def CheckExperiment(callbackUrl, signature, modelUrl, protocolUrl):
         main_proto_path = utils.UnpackArchive(proto_path, temp_dir, 'proto')
     
         # Check whether their interfaces are compatible
-        missing_terms, missing_optional_terms = utils.DetermineCompatibility(main_proto_path, main_model_path)
+        '''missing_terms, missing_optional_terms = utils.DetermineCompatibility(main_proto_path, main_model_path)
         if missing_terms:
             message = "inapplicable - required ontology terms are not present in the model. Missing terms are:<br/>"
             for term in missing_terms:
@@ -129,9 +129,9 @@ def CheckExperiment(callbackUrl, signature, modelUrl, protocolUrl):
             # Report & clean up temporary files
             Callback(callbackUrl, signature, {'returntype': 'inapplicable', 'returnmsg': message})
             shutil.rmtree(temp_dir)
-        else:
-            # Run the experiment directly in this task, to ensure it has access to the unpacked model & protocol
-            RunExperiment(callbackUrl, signature, main_model_path, main_proto_path, temp_dir)
+        else:'''
+        # Run the experiment directly in this task, to ensure it has access to the unpacked model & protocol
+        RunExperiment(callbackUrl, signature, main_model_path, main_proto_path, temp_dir)
     except:
         ReportError(callbackUrl, signature)
 
@@ -155,7 +155,8 @@ def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir):
         # Also redirect stdout and stderr so we can debug any issues.
         for key, value in config['environment'].iteritems():
             os.environ[key] = value
-        args = [config['exe_path'], modelPath, protoPath, os.path.join(tempDir, 'output')]
+        #args = [config['exe_path'], modelPath, protoPath, os.path.join(tempDir, 'output')]
+        args = ["python", "/home/adaly/AidanDaly/src/ec_sim.py", modelPath, protoPath, os.path.join(tempDir, 'output')]
         child_stdout_name = os.path.join(tempDir, 'stdout.txt')
         output_file = open(child_stdout_name, 'w')
         timeout = False
@@ -170,6 +171,7 @@ def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir):
             timeout = True
         except:
             # If any other error happens, just make sure the child is dead then report it
+            print "Something went horribly wrong..."
             child.terminate()
             time.sleep(5)
             child.kill()
@@ -178,7 +180,7 @@ def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir):
     
         # Zip up the outputs and post them to the callback
         output_path = os.path.join(tempDir, 'output.zip')
-        output_files = glob.glob(os.path.join(tempDir, 'output', '*', '*', '*')) # Yuck!
+        output_files = glob.glob(os.path.join(tempDir, 'output', '*')) # Yuck!
         output_zip = zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED)
         output_zip.write(child_stdout_name, 'stdout.txt')
         if timeout:
