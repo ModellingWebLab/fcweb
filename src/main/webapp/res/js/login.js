@@ -60,16 +60,20 @@ function initRegForm ()
 	
 	var btn = document.getElementById("loginsubmit");
 	btn.addEventListener("click", 
-	        function (event)
-	        {
+			function (event)
+			{
 		verifyLogin ({
-			    	task: "logmein",
-			    	password: pwInput.value,
-			    	mail: mailInput.value,
-			    	remember: rememberInput.checked
-			    }, action);
-	        }, 
-	        false);
+			task: "logmein",
+			password: pwInput.value,
+			mail: mailInput.value,
+			remember: rememberInput.checked
+		}, action);
+	}, false);
+	$('#loginform').keydown(function(e) {
+		if (e.keyCode == 13) {
+			$(btn).click();
+		}
+	});
 }
 
 
