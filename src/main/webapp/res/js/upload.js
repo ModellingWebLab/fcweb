@@ -30,6 +30,11 @@ function sendFile (uploaded, file, name, types)
 		addNotification("the name '" + name + "' is reserved for system use; please choose another file name.", "error");
 		return;
 	}
+	if (!/^[a-zA-Z0-9._]+$/.test(name))
+	{
+		addNotification("the name '" + name + "' contains reserved characters; only alpha-numeric characters, underscores and periods are allowed.", "error");
+		return;
+	}
 	uploading.push(name);
 	
 	var table = document.getElementById("uploadedfiles");
