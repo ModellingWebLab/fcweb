@@ -70,12 +70,7 @@ function D3Plot ()
 
 D3Plot.prototype.canRead = function (file)
 {
-    return file.name.endsWith("gnuplot_data.csv");
-//	if (file.name && file.name == "outputs-default-plots.csv")
-//		return false;
-//	if (file.name && file.name == "outputs-contents.csv")
-//		return false;
-//	return file.type.match (/csv/gi) || file.name.split('.').pop() == "csv";
+    return file.name.endsWith("plot_data.csv");
 };
 
 D3Plot.prototype.getName = function ()
