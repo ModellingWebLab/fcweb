@@ -113,10 +113,10 @@ public class FileTransfer extends WebModule
 		}
 		catch (NullPointerException | NumberFormatException e)
 		{
-			LOGGER.warn ("user provided unparsebale ids. download impossible: ", req[4], " / ", req[5]);
+			LOGGER.warn ("user provided unparseable ids. download impossible: ", req[4], " / ", req[5]);
 			return errorPage (request, response, null);
 		}
-		LOGGER.debug ("transfer ", entityId, " ", fileId);
+		LOGGER.debug ("transfer ", req[2], " ", entityId, " ", fileId);
 		
 		if (entityId < 0 || (fileId < 0 && !archive))
 			return errorPage (request, response, null);

@@ -981,7 +981,8 @@ public class EntityView extends WebModule
 			JSONObject res = new JSONObject ();
 			res.put ("response", true);
 			
-			FileTransfer.getProtocolInterface(versionId, entityDir.getName());
+			if (entityMgmt.getEntityColumn().equals("protocol"))
+				FileTransfer.getProtocolInterface(versionId, entityDir.getName());
 			
 			rerunExperiments(notifications, db, querry, user, entityMgmt, res, latestVersion, versionId);
 			

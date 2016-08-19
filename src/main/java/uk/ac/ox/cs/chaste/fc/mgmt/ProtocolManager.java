@@ -123,6 +123,11 @@ extends ChasteEntityManager
 	@SuppressWarnings("unchecked")
 	public JSONArray getProtocolInterfaces(User user)
 	{
+		if (user == null)
+		{
+			LOGGER.error("Null user passed to getProtocolInterfaces");
+			return null;
+		}
 		JSONArray result = new JSONArray();
 		String restricted_vis_clause;
 		if (user.getRole().equals(User.ROLE_GUEST) || !user.isAuthorized())
