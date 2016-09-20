@@ -141,7 +141,7 @@ function retrieveCurrentPlotCoords(plottedGraph) {
 /* Retrieve generic plot settings */
 function retrieveGenericSettings(legendContainer) {
   var genericSettings = {
-      xaxis: { tickDecimals: 0,
+      xaxis: { //tickDecimals: 0,
                position: 'bottom',
                axisLabelPadding: 10,
                axisLabelUseCanvas: true },
