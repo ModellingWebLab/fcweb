@@ -119,6 +119,12 @@ function plotAccordingToChoices(plotProperties, selectedCoords) {
 
     if (styleLinespointsOrPoints)
         settings.points = { show: true, radius: 2 };
+    if (plotProperties.histogram)
+    {
+    	settings.points = { show: false };
+    	settings.lines = { show: false };
+    	settings.bars = { show: true, barWidth : data[0].data[1][0] - data[0].data[0][0], align : 'left' }; // add in width & any other settings needed
+    }
 
     plottedGraph = $.plot("#" + flotPlotDivId, data, settings);
 };
@@ -440,6 +446,7 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
           'choicesContainer': choicesContainer,
           'datasets': datasets,
           'styleLinespointsOrPoints': styleLinespointsOrPoints,
+          'histogram': thisFile.linestyle == 'hist',
           'flotPlotDivId': flotPlotDivId,
           'x_label': x_label,
           'y_label': y_label
@@ -622,6 +629,7 @@ contentFlotPlotComparer.prototype.showContents = function ()
             'choicesContainer': choicesContainer,
             'datasets': datasets,
             'styleLinespointsOrPoints': styleLinespointsOrPoints,
+            'histogram': thisFile.linestyle == 'hist',
             'flotPlotDivId': flotPlotDivId,
             'x_label': x_label,
             'y_label': y_label
