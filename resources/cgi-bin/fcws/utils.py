@@ -14,6 +14,7 @@ import sys
 import urllib2
 import xml.etree.ElementTree as ET
 import zipfile
+import glob
 
 from . import config
 
@@ -190,3 +191,18 @@ def DetermineCompatibility(protoPath, modelPath):
     missing_optional_terms = list(optional_terms - model_terms)
     missing_optional_terms.sort()
     return needed_terms, missing_optional_terms
+
+def FindFittingSpecification(protoPath):
+    protoDir = os.path.dirname(protoPath)
+
+    txtfiles = glob.glob(os.path.join(protoDir,"*.txt"))
+    csvfiles = glob.glob(os.path.join(protoDir,"*.csv"))
+    
+    if len(txtfiles) == 1 and len(csvfiles) == 0:
+        return None, None
+    elif len(txtfiles) == 2 and len(csvfiles) == 1:
+        simProtoPath = filter(lambda x: x != protoPath, txtfiles)[0]
+        dataPath = csvfiles[0]
+        return simProtoPath, dataPath
+    else:
+        raise ValueError("Incorrect specification of either fitting or simulation experiment")

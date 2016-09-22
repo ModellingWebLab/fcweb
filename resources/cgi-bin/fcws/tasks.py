@@ -117,27 +117,16 @@ def CheckExperiment(callbackUrl, signature, modelUrl, protocolUrl):
         main_proto_path = utils.UnpackArchive(proto_path, temp_dir, 'proto')
     
         # Check whether their interfaces are compatible
-        '''missing_terms, missing_optional_terms = utils.DetermineCompatibility(main_proto_path, main_model_path)
-        if missing_terms:
-            message = "inapplicable - required ontology terms are not present in the model. Missing terms are:<br/>"
-            for term in missing_terms:
-                message += "&nbsp;" * 4 + term + "<br/>"
-            if missing_optional_terms:
-                message += "Missing optional terms are:<br/>"
-                for term in missing_optional_terms:
-                    message +="&nbsp;" * 4 + term + "<br/>"
-            # Report & clean up temporary files
-            Callback(callbackUrl, signature, {'returntype': 'inapplicable', 'returnmsg': message})
-            shutil.rmtree(temp_dir)
-        else:'''
+        sim_proto,data = utils.FindFittingSpecification(main_proto_path)
+
         # Run the experiment directly in this task, to ensure it has access to the unpacked model & protocol
-        RunExperiment(callbackUrl, signature, main_model_path, main_proto_path, temp_dir)
+        RunExperiment(callbackUrl, signature, main_model_path, main_proto_path, temp_dir, sim_proto, data)
     except:
         ReportError(callbackUrl, signature)
 
 
 @app.task(name="fcws.tasks.RunExperiment")
-def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir):
+def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir, simProtoPath=None, dataPath=None):
     """Run a functional curation experiment.
     
     @param callbackUrl: URL to post status updates and results to
@@ -156,7 +145,12 @@ def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir):
         for key, value in config['environment'].iteritems():
             os.environ[key] = value
         #args = [config['exe_path'], modelPath, protoPath, os.path.join(tempDir, 'output')]
-        args = ["python", "/home/adaly/AidanDaly/src/ec_sim.py", modelPath, protoPath, os.path.join(tempDir, 'output')]
+        
+        if simProtoPath == None and dataPath == None:
+            args = ["python", "/home/adaly/AidanDaly/src/ec_sim.py", modelPath, protoPath, os.path.join(tempDir, 'output')]
+        else:
+            args = ["python", "/home/adaly/AidanDaly/src/ec_sim.py", modelPath, protoPath, os.path.join(tempDir, 'output'), simProtoPath, dataPath]
+
         child_stdout_name = os.path.join(tempDir, 'stdout.txt')
         output_file = open(child_stdout_name, 'w')
         timeout = False
