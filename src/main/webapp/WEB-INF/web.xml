@@ -58,6 +58,10 @@
         <servlet-name>Batch</servlet-name>
         <servlet-class>uk.ac.ox.cs.chaste.fc.web.Batch</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>Fitting</servlet-name>
+        <servlet-class>uk.ac.ox.cs.chaste.fc.web.Fitting</servlet-class>
+    </servlet>
 
     <servlet-mapping>
         <servlet-name>Register</servlet-name>
@@ -121,6 +125,11 @@
     <servlet-mapping>
         <servlet-name>Batch</servlet-name>
         <url-pattern>/batch/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Fitting</servlet-name>
+        <url-pattern>/fitting.html</url-pattern>
+        <url-pattern>/fitting/*</url-pattern>
     </servlet-mapping>
 
     <welcome-file-list>
