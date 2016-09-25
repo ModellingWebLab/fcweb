@@ -12,4 +12,20 @@
  We can include the outlines of both views here, and the JS will hide whichever is not currently being shown.
  See Entity.jsp for potentially useful snippets.
   -->
+  <h1>Fit models to user-supplied data</h1>
+
+  <div id="template_select">
+    <!-- The interface for choosing a parameter fitting template protocol to specialise & run -->
+    <h2>Available parameter fitting templates</h2>
+    <ul>
+      <c:forEach items="${FittingProtocols}" var="proto">
+        <li id="proto_${proto.id}"><a id="link_${proto.id}" class="template_link">${proto.entity.name} -- created by ${proto.author} on <time>${proto.created}</time></a></li>
+      </c:forEach>
+    </ul>
+    <div id="template_list"></div>
+  </div>
+
+  <div id="fitting_spec" style="display: none;">
+    <!-- The interface for specifying settings based on a particular template fitting protocol -->
+  </div>
 </t:skeleton>
