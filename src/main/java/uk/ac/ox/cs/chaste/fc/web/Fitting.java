@@ -14,6 +14,7 @@ import org.json.simple.JSONObject;
 
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntity;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntityVersion;
+import uk.ac.ox.cs.chaste.fc.beans.ChasteFile;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeader;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeaderScript;
@@ -85,13 +86,38 @@ public class Fitting extends WebModule
 			throw new IOException("nothing to do.");
 		}
 		
-		if (task.equals("TODO define tasks!"))
+		if (task.equals("getFittingProtocol"))
 		{
-			// Can send data back to JS like:
-//			JSONObject obj = new JSONObject();
-//			obj.put("response", true);
-//			obj.put("responseText", "updated user permissions");
-//			answer.put("updateUserRole", obj);
+			ProtocolManager protocolMgmt = new ProtocolManager(db, notifications, userMgmt, user);
+			ChasteFileManager fileMgmt = new ChasteFileManager(db, notifications, userMgmt);
+
+			int protoId = ((Long)querry.get("id")).intValue();
+
+			TreeSet<ChasteEntity> entity = protocolMgmt.getAll(false, true);
+			for (ChasteEntity e : entity)
+			{
+				ChasteEntityVersion v = e.getLatestVersion(); // Show just latest version of each; probably better than listing all versions?
+				fileMgmt.getFiles(v, protocolMgmt.getEntityFilesTable(), protocolMgmt.getEntityColumn());
+				if (v.getId() == protoId)
+				{
+					answer.put("name",v.getName());
+
+					Vector<ChasteFile> files = v.getFiles();
+					for (ChasteFile f : files)
+					{
+						JSONObject fileRep = f.toJson();
+
+						if (f.isMasterFile())
+							answer.put("fitProto",fileRep);	
+						else if (f.getFiletype().equals("CSV"))
+							answer.put("dataFile",fileRep);
+						else
+							answer.put("simProto",fileRep);
+					}
+				}
+			}
+
+			answer.put ("response", querry.get("id"));
 		}
 		
 		return answer;

@@ -11,6 +11,7 @@
  */
 function getTemplateId(location)
 {
+	var cont = contextPath;
 	var contextLen = contextPath.length,
 		t = location.pathname.substr(contextLen+1).split('/');
 	if (location.pathname.substr(0, contextLen) != contextPath || t.length < 3 || t[0] != 'fitting' || t[1] != 'p')
@@ -41,6 +42,7 @@ function render()
 	if (templateId)
 	{
 		// We're specialising a particular fitting protocol
+		preFillTemplate(templateId);
 		$('#fitting_spec').show();
 		$('#template_select').hide();
 	}
@@ -50,6 +52,97 @@ function render()
 		$('#fitting_spec').hide();
 		$('#template_select').show();
 	}
+}
+
+/*
+ * Receives fitting protocol files via JSON, parses contents, and populates fitting spec view
+ */
+function preFillTemplate(templateId)
+{
+	// Post JSON request for files, receive JSON
+	// Parse files
+	// Populate fields
+	var fileRequest = {
+		task: "getFittingProtocol",
+		id: parseInt(templateId)
+	};
+	console.log(fileRequest);
+
+    var xmlhttp = null;
+    // !IE
+    if (window.XMLHttpRequest)
+    {
+        xmlhttp = new XMLHttpRequest();
+    }
+    // IE -- microsoft, we really hate you. every single day.
+    else if (window.ActiveXObject)
+    {
+        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    
+    //var queryURL = document.location.href.split("fitting")[0].concat("fitting.html");
+    var queryURL = contextPath.concat("/fitting.html");
+    console.log(queryURL);
+
+    xmlhttp.open("POST", queryURL, true);
+    xmlhttp.setRequestHeader("Content-type", "application/json");
+
+    xmlhttp.onreadystatechange = function()
+    {
+        if(xmlhttp.readyState != 4)
+        	return;
+        
+    	var json = JSON.parse(xmlhttp.responseText);
+    	console.log (json);
+    	displayNotifications (json);
+    	
+        if(xmlhttp.status == 200)
+        {
+        	console.log("Success!");
+        	//console.log(json.fitProto);
+        	//console.log(json.simProto);
+        	//console.log(json.dataFile);
+
+        	/* PARSE FITTING PROTOCOL FILE */
+        	fileUrl = getFileUrl(json.fitProto,json.name,templateId);
+        	xmlhttp.open("GET", fileUrl, true);
+
+		    xmlhttp.onreadystatechange = function()
+		    {
+		        if(xmlhttp.readyState != 4)
+		        	return;
+		    	
+		        if(xmlhttp.status == 200)
+		        {
+		        	contents = JSON.parse(xmlhttp.responseText);
+		        	console.log(contents);
+
+		        	// Set algorithm name
+		        	document.getElementById("algName").value = contents.algorithm;
+		        }
+		    };
+		    xmlhttp.send(null);
+
+		    /* PARSE SIMULATION PROTOCOL FILE */
+		    /* PARSE DATA FILE */
+        }
+        else
+        	console.log("Failed");
+    };
+    xmlhttp.send(JSON.stringify(fileRequest));
+
+	return true;
+}
+
+/*
+ * Generate URL for a GET request for a file given the JSON representation of the corresponding
+ *  ChasterFile object, along with the name and id of the ChasteEntityVersion that contains it.
+ */
+function getFileUrl(f, vname, vid)
+{
+	entityType = "protocol";
+	fileUrl = contextPath + "/download/" + entityType.charAt(0) + "/" + convertForURL (vname) + "/" + vid + "/" + f.id + "/" + convertForURL (f.name);
+	return fileUrl;
 }
 
 /*
@@ -67,9 +160,12 @@ function initFitting()
 	render();
 	
 	// Set up clicks on entries in the template protocols list to bring us to the specification view
-	$("li.template_link").click(function(){
+	$("a.template_link").click(function(){
 		// TODO: get the protocol id from the li element's id, and use nextPage to change view
 		var proto_id = this.id.replace("link_", ""); // I think!
+		var url = "fitting/p/".concat(proto_id);
+		console.log(url);
+		nextPage(url,false);
 	});
 }
 

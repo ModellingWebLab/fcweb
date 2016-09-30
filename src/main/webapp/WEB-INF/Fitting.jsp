@@ -27,5 +27,12 @@
 
   <div id="fitting_spec" style="display: none;">
     <!-- The interface for specifying settings based on a particular template fitting protocol -->
+    <h2>Fitting experiment specification</h2>
+    <table id="fittingtable" class="leftright">
+      <tr>
+        <th>Algorithm</th>
+        <td><input type="text" id="algName"></td>
+      </tr>
+    </table>
   </div>
 </t:skeleton>
