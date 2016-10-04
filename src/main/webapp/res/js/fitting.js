@@ -1,3 +1,5 @@
+// Global data
+var fittingProtocol = null;
 
 // Helper functions for interface go here - callback handlers etc.
 // Useful places to look for handy bits of code:
@@ -42,9 +44,9 @@ function render()
 	if (templateId)
 	{
 		// We're specialising a particular fitting protocol
-		preFillTemplate(templateId);
-		$('#fitting_spec').show();
 		$('#template_select').hide();
+		fittingProtocol = new FittingProtocol(templateId);
+		$('#fitting_spec').show();
 	}
 	else
 	{
@@ -54,131 +56,101 @@ function render()
 	}
 }
 
+/**
+ * An object encapsulating all the information about a parameter fitting protocol,
+ * along with methods to simplify guiding a user through creating a new version of it.
+ *
+ * @param templateId  ID number of the protocol version serving as our template
+ */
+function FittingProtocol(templateId)
+{
+	// Member data
+	this.templateId = parseInt(templateId);
+	// Constructor actions
+	$.ajax(contextPath + '/fitting.html',
+			{data: JSON.stringify({task: "getFittingProtocol", id: this.templateId}),
+			 method: 'post',
+			 context: this})
+		.done(this.gotTemplateInfo)
+		.fail(this.ajaxFailed);
+}
+
+FittingProtocol.prototype.gotTemplateInfo = function(json) {
+	console.log(json);
+	displayNotifications(json);
+	var fileUrl = getFileUrl(json.fitProto, json.name, this.templateId);
+	console.log(fileUrl);
+	$.ajax(fileUrl, {method: 'get', context: this})
+		.done(this.gotTemplateProtocol)
+		.fail(this.ajaxFailed);
+}
+
+FittingProtocol.prototype.ajaxFailed = function() {
+	addNotification('server error retrieving template details', 'error');
+}
+
 /*
  * Receives fitting protocol files via JSON, parses contents, and populates fitting spec view
  */
-function preFillTemplate(templateId)
+FittingProtocol.prototype.gotTemplateProtocol = function(templateFileContents)
 {
-	// Post JSON request for files, receive JSON
-	// Parse files
-	// Populate fields
-	var fileRequest = {
-		task: "getFittingProtocol",
-		id: parseInt(templateId)
-	};
-	console.log(fileRequest);
+	templateFileContents = JSON.parse(templateFileContents);
+	console.log(templateFileContents);
+	// Set algorithm name
+	document.getElementById("algName").value = templateFileContents.algorithm;
 
-	var xmlhttp = null;
-	// !IE
-	if (window.XMLHttpRequest)
+	// Set algorithm arguments
+	var argTable = document.getElementById("algArgs");
+	console.log(templateFileContents.arguments);
+	for (var arg in templateFileContents.arguments)
 	{
-		xmlhttp = new XMLHttpRequest();
-	}
-	// IE -- microsoft, we really hate you. every single day.
-	else if (window.ActiveXObject)
-	{
-		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-	}
-	
-	//var queryURL = document.location.href.split("fitting")[0].concat("fitting.html");
-	var queryURL = contextPath.concat("/fitting.html");
-	console.log(queryURL);
-
-	xmlhttp.open("POST", queryURL, true);
-	xmlhttp.setRequestHeader("Content-type", "application/json");
-
-	xmlhttp.onreadystatechange = function()
-	{
-		if(xmlhttp.readyState != 4)
-			return;
-		
-		var json = JSON.parse(xmlhttp.responseText);
-		console.log (json);
-		displayNotifications (json);
-		
-		if(xmlhttp.status == 200)
+		if (templateFileContents.arguments.hasOwnProperty(arg))
 		{
-			console.log("Success!");
-			//console.log(json.fitProto);
-			//console.log(json.simProto);
-			//console.log(json.dataFile);
+			var row = argTable.insertRow(0);
+			
+			var rowlabel = document.createElement("th");
+			rowlabel.innerHTML = arg;
+			row.appendChild(rowlabel);
 
-			/* PARSE FITTING PROTOCOL FILE */
-			fileUrl = getFileUrl(json.fitProto,json.name,templateId);
-			xmlhttp.open("GET", fileUrl, true);
-
-			xmlhttp.onreadystatechange = function()
-			{
-				if(xmlhttp.readyState != 4)
-					return;
-				
-				if(xmlhttp.status == 200)
-				{
-					contents = JSON.parse(xmlhttp.responseText);
-					console.log(contents);
-
-					// Set algorithm name
-					document.getElementById("algName").value = contents.algorithm;
-
-					// Set algorithm arguments
-					var argTable = document.getElementById("algArgs");
-					console.log(contents.arguments);
-					for (var arg in Object.keys(contents.arguments))
-					{
-						var row = argTable.insertRow(0);
-						
-						var rowlabel = document.createElement("th");
-						rowlabel.innerHTML = arg;
-						row.appendChild(rowlabel);
-
-						var rowcontent = document.createElement("td");
-						input = document.createElement("input");
-						input.value = contents.arguments[arg];
-						rowcontent.appendChild(input);
-						row.appendChild(rowcontent);
-					}
-
-					// Set model prior information
-					// TODO: Must merge with defaults specified in selected model
-					var modelTable = document.getElementById("modelParams");
-					console.log(contents.prior);
-					for (var arg in Object.keys(contents.prior))
-					{
-						var row = modelTable.insertRow(0);
-						
-						var rowlabel = document.createElement("th");
-						rowlabel.innerHTML = arg;
-						row.appendChild(rowlabel);
-
-						var rowcontent = document.createElement("td");
-						input = document.createElement("input");
-						input.value = contents.prior[arg];
-						rowcontent.appendChild(input);
-						row.appendChild(rowcontent);
-					}
-				}
-			};
-			xmlhttp.send(null);
-
-			/* PARSE SIMULATION PROTOCOL FILE */
-			/* PARSE DATA FILE */
+			var rowcontent = document.createElement("td");
+			input = document.createElement("input");
+			input.value = templateFileContents.arguments[arg];
+			rowcontent.appendChild(input);
+			row.appendChild(rowcontent);
 		}
-		else
-			console.log("Failed");
-	};
-	xmlhttp.send(JSON.stringify(fileRequest));
+	}
 
-	return true;
+	// Set model prior information
+	// TODO: Must merge with defaults specified in selected model
+	var modelTable = document.getElementById("modelParams");
+	console.log(templateFileContents.prior);
+	for (var arg in templateFileContents.prior)
+	{
+		if (templateFileContents.prior.hasOwnProperty(arg))
+		{
+			var row = modelTable.insertRow(0);
+			
+			var rowlabel = document.createElement("th");
+			rowlabel.innerHTML = arg;
+			row.appendChild(rowlabel);
+
+			var rowcontent = document.createElement("td");
+			input = document.createElement("input");
+			input.value = templateFileContents.prior[arg];
+			rowcontent.appendChild(input);
+			row.appendChild(rowcontent);
+		}
+	}
 }
 
 /*
  * Generate URL for a GET request for a file given the JSON representation of the corresponding
- *  ChasterFile object, along with the name and id of the ChasteEntityVersion that contains it.
+ * ChasteFile object, along with the name and id of the ChasteEntityVersion that contains it.
  */
 function getFileUrl(f, vname, vid)
 {
 	entityType = "protocol";
-	fileUrl = contextPath + "/download/" + entityType.charAt(0) + "/" + convertForURL (vname) + "/" + vid + "/" + f.id + "/" + convertForURL (f.name);
+	fileUrl = contextPath + "/download/" + entityType.charAt(0) + "/" + convertForURL(vname) + "/" + vid + "/" + f.id + "/" + convertForURL(f.name);
 	return fileUrl;
 }
 
