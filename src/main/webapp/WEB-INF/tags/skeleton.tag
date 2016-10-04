@@ -80,6 +80,7 @@
 				<ul class="navbar">
 					<li><a href="${contextPath}/index.html">Home</a></li>
 					<li><a href="${contextPath}/db.html">Experiments</a></li>
+					<li><a href="${contextPath}/fitting.html">Fit data</a></li>
 					<li><a href="${contextPath}/contact.html">Contact/Team</a></li>
 					<li><a href="${contextPath}/about.html">About</a></li>
 					<c:choose>
@@ -154,7 +155,7 @@
 		
 		<%-- finish the site --%>
 		<footer>
-			Cardiac Electrophysiology Web Lab &copy; 2013-2015 University of Oxford
+			Electrochemistry Web Lab &copy; 2016 University of Oxford
 		</footer>
 		
 		

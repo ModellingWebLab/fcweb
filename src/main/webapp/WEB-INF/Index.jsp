@@ -3,16 +3,12 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <t:skeleton headerImports="${PageHeader}" notes="${Notifications}" user="${User}" title="${Title}" contextPath="${contextPath}">
-    <h1>Cardiac Electrophysiology Web Lab</h1>
+    <h1>Electrochemistry Web Lab</h1>
 
     <h2>Quick start links</h2>
     <ul>
-        <li><a href="${contextPath}/db.html">View results of experiments</a> stored on this site.</li>
-        <li>Compare the results of different experiments, e.g.
-            <a href="${contextPath}/compare/e/925/1231/1307/929/930/931/932/933/934/1432/1451/935/1288/937/1385/938/940/1540/942/944/945/">action potentials under steady 1Hz pacing</a>,
-            <a href="${contextPath}/compare/e/326/327/458/330/345/331/333/334/335/337/338/339/400/341/">an IV curve of the fast sodium current</a>, or
-            <a href="${contextPath}/compare/e/145/131/">S1-S2 and steady state restitution</a>;
-            or <a href="${contextPath}/db.html">set up your own comparisons</a>.</li>
+        <li><a href="${contextPath}/db.html">View and compare results of experiments</a> stored on this site.</li>
+        <li><a href="${contextPath}/fitting.html">Fit models to your own data</a>.</li>
         <c:choose>
             <c:when test="${User != null && User.authorized}">
                 <c:set var="analyseLink" value="myfiles.html"/>
@@ -22,7 +18,6 @@
             </c:otherwise>
         </c:choose>
         <li><a href="${contextPath}/${analyseLink}">Analyse your own models/protocols</a>.</li>
-        <li>Learn from our <a href="https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/Workshop2015">training workshop materials</a>.</li>
         <li>Find out more about this site - read on!</li>
     </ul>
 
@@ -44,22 +39,9 @@
 
     <h2>What is this website?</h2>
     <p>
-        This is our prototype system for cardiac electrophysiology.
-        It brings together models encoded using <a href="http://www.cellml.org/">CellML</a> and
-        virtual experiment protocols encoded in <a href="https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration/ProtocolSyntax">our own language</a>,
-        using <a href="https://chaste.cs.ox.ac.uk/trac/wiki/ChasteGuides/CodeGenerationFromCellML#Standardisednames">
-        standardised tags</a> to generate interfaces between them, doing all the necessary units conversions.
+        This is our prototype system for electrochemistry.
+        More description TODO!
         The <a href="${contextPath}/db.html">stored results of these experiments can be viewed</a> and compared.
-    </p>
-
-    <p>
-        Comparison examples:<br/>
-        <a href="${contextPath}/compare/e/508/509/510/511/512/514/515/516/517/518/519/521/522/523/524/525/526/">
-            <button>Action potentials under steady 1Hz pacing</button></a>
-        <a href="${contextPath}/compare/e/326/327/458/330/345/331/333/334/335/337/338/339/400/341/">
-            <button>An IV curve of the fast sodium current</button></a>
-        <a href="${contextPath}/compare/e/145/131/">
-            <button>S1-S2 and steady state restitution</button></a>
     </p>
 
     <p>
