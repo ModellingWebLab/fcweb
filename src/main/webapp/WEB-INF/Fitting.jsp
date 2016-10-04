@@ -31,7 +31,19 @@
     <table id="fittingtable" class="leftright">
       <tr>
         <th>Algorithm</th>
-        <td><input type="text" id="algName"></td>
+        <td>
+          <input type="text" id="algName">
+          <table id="algArgs" class="leftright">
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <th>Model</th>
+        <td>
+          <input type="text" id="model" value="1E, oneD">
+          <table id="modelParams" class="leftright">
+          </table>
+        </td>
       </tr>
     </table>
   </div>

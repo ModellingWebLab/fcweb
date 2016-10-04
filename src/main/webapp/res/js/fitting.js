@@ -119,6 +119,49 @@ function preFillTemplate(templateId)
 
 		        	// Set algorithm name
 		        	document.getElementById("algName").value = contents.algorithm;
+
+		        	// Set algorithm arguments
+		        	var argTable = document.getElementById("algArgs");
+		        	console.log(contents.arguments);
+		        	for (var arg in contents.arguments)
+		        	{
+		        		if (contents.arguments.hasOwnProperty(arg))
+		        		{
+		        			var row = argTable.insertRow(0);
+		        			
+		        			var rowlabel = document.createElement("th");
+		        			rowlabel.innerHTML = arg;
+		        			row.appendChild(rowlabel);
+
+		        			var rowcontent = document.createElement("td");
+		        			input = document.createElement("input");
+		        			input.value = contents.arguments[arg];
+		        			rowcontent.appendChild(input);
+		        			row.appendChild(rowcontent);
+		        		}
+		        	}
+
+		        	// Set model prior information
+		        	// TODO: Must merge with defaults specified in selected model
+		        	var modelTable = document.getElementById("modelParams");
+		        	console.log(contents.prior);
+		        	for (var arg in contents.prior)
+		        	{
+		        		if (contents.prior.hasOwnProperty(arg))
+		        		{
+		        			var row = modelTable.insertRow(0);
+		        			
+		        			var rowlabel = document.createElement("th");
+		        			rowlabel.innerHTML = arg;
+		        			row.appendChild(rowlabel);
+
+		        			var rowcontent = document.createElement("td");
+		        			input = document.createElement("input");
+		        			input.value = contents.prior[arg];
+		        			rowcontent.appendChild(input);
+		        			row.appendChild(rowcontent);
+		        		}
+		        	}
 		        }
 		    };
 		    xmlhttp.send(null);
