@@ -30,21 +30,36 @@
     <h2>Fitting experiment specification</h2>
     <table id="fittingtable" class="leftright">
       <tr>
-        <th>Algorithm</th>
+        <th>Fitting algorithm</th>
         <td>
-          <input type="text" id="algName">
+          <label for="algName">Name:</label>
+          <select id="algName">
+            <option value="" selected="selected"/>
+          </select>
           <table id="algArgs" class="leftright">
           </table>
         </td>
       </tr>
       <tr>
-        <th>Model</th>
+        <th>Model to fit</th>
         <td>
-          <input type="text" id="model" value="1E, oneD">
+          <select id="model"></select>
+        </td>
+      </tr>
+      <tr>
+        <th>Ranges for model parameters</th>
+        <td>
           <table id="modelParams" class="leftright">
           </table>
         </td>
       </tr>
+      <tr>
+        <th>Experimental data</th>
+        <td>
+          TODO! File upload, link outputs to CSV columns.
+        </td>
+      </tr>
     </table>
+    <button id="submit">Run fitting</button>
   </div>
 </t:skeleton>

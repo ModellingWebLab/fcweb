@@ -67,18 +67,30 @@ function FittingProtocol(templateId)
 	// Member data
 	this.templateId = parseInt(templateId);
 	// Constructor actions
+	console.log(this);
+	// Get info about the chosen template
 	$.ajax(contextPath + '/fitting.html',
 			{data: JSON.stringify({task: "getFittingProtocol", id: this.templateId}),
 			 method: 'post',
 			 context: this})
 		.done(this.gotTemplateInfo)
 		.fail(this.ajaxFailed);
+	// Get list of available models
+	$.ajax(contextPath + '/fitting.html',
+			{data: JSON.stringify({task: "getModelList"}),
+			 method: 'post',
+			 context: this})
+		.done(this.gotModelList)
+		.fail(this.ajaxFailed);
 }
 
 FittingProtocol.prototype.gotTemplateInfo = function(json) {
+	console.log('Template info');
 	console.log(json);
 	displayNotifications(json);
-	var fileUrl = getFileUrl(json.fitProto, json.name, this.templateId);
+	this.templateName = json.name;
+	this.templateFileInfo = { fitProto: json.fitProto, simProto: json.simProto, dataFile: json.dataFile };
+	var fileUrl = getFileUrl(json.fitProto, 'protocol', json.name, this.templateId);
 	console.log(fileUrl);
 	$.ajax(fileUrl, {method: 'get', context: this})
 		.done(this.gotTemplateProtocol)
@@ -89,15 +101,49 @@ FittingProtocol.prototype.ajaxFailed = function() {
 	addNotification('server error retrieving template details', 'error');
 }
 
+/**
+ * Callback when list of available models has been retrieved from the server.
+ * Stores the list, populates a drop-down select for model to fit,
+ * and triggers loading the model files so we can parse the parameters and compare to our prior settings.
+ */
+FittingProtocol.prototype.gotModelList = function(json) {
+	console.log('Model list');
+	console.log(json);
+	displayNotifications(json);
+	this.models = json.latestVersions;
+	for (var versionId in this.models)
+		if (this.models.hasOwnProperty(versionId))
+		{
+			var model = this.models[versionId],
+				file = model.files[0],
+				fileUrl = getFileUrl(file, 'model', model.name, model.id),
+				$select = $('#model');
+			console.log('Retrieving model ' + model.name + ' from ' + fileUrl);
+			$.ajax(fileUrl, {method: 'get', context: this})
+				.done(function(contents) { this.gotModelFile(versionId, contents); })
+				.fail(this.ajaxFailed);
+			$select.append('<option value=""></option>')
+				.children(':last-child').attr('value', model.id).text(model.name);
+		}
+}
+
+FittingProtocol.prototype.gotModelFile = function(versionId, contents)
+{
+	console.log('Got contents for model ' + this.models[versionId].name);
+	this.models[versionId].contents = contents;
+}
+
 /*
  * Receives fitting protocol files via JSON, parses contents, and populates fitting spec view
  */
 FittingProtocol.prototype.gotTemplateProtocol = function(templateFileContents)
 {
+	console.log('got proto');
 	templateFileContents = JSON.parse(templateFileContents);
 	console.log(templateFileContents);
+	this.fittingProtocol = templateFileContents;
 	// Set algorithm name
-	document.getElementById("algName").value = templateFileContents.algorithm;
+	$('#algName > option').attr('value', templateFileContents.algorithm).text(templateFileContents.algorithm);
 
 	// Set algorithm arguments
 	var argTable = document.getElementById("algArgs");
@@ -147,9 +193,8 @@ FittingProtocol.prototype.gotTemplateProtocol = function(templateFileContents)
  * Generate URL for a GET request for a file given the JSON representation of the corresponding
  * ChasteFile object, along with the name and id of the ChasteEntityVersion that contains it.
  */
-function getFileUrl(f, vname, vid)
+function getFileUrl(f, entityType, vname, vid)
 {
-	entityType = "protocol";
 	fileUrl = contextPath + "/download/" + entityType.charAt(0) + "/" + convertForURL(vname) + "/" + vid + "/" + f.id + "/" + convertForURL(f.name);
 	return fileUrl;
 }

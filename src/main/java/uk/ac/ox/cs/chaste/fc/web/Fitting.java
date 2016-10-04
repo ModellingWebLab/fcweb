@@ -19,9 +19,11 @@ import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeader;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeaderScript;
 import uk.ac.ox.cs.chaste.fc.beans.User;
+import uk.ac.ox.cs.chaste.fc.mgmt.ChasteEntityManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.ChasteFileManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.ChastePermissionException;
 import uk.ac.ox.cs.chaste.fc.mgmt.DatabaseConnector;
+import uk.ac.ox.cs.chaste.fc.mgmt.ModelManager;
 import uk.ac.ox.cs.chaste.fc.mgmt.ProtocolManager;
 import de.binfalse.bflog.LOGGER;
 
@@ -69,7 +71,7 @@ public class Fitting extends WebModule
 	@SuppressWarnings("unchecked")
 	@Override
 	protected JSONObject answerApiRequest(HttpServletRequest request, HttpServletResponse response, DatabaseConnector db,
-		Notifications notifications, JSONObject querry, User user, HttpSession session) throws IOException, ChastePermissionException
+		Notifications notifications, JSONObject query, User user, HttpSession session) throws IOException, ChastePermissionException
 	{
 		if (!user.isAuthorized() || !user.isAllowedCreateEntityVersion())
 		{
@@ -79,7 +81,7 @@ public class Fitting extends WebModule
 		
 		JSONObject answer = new JSONObject();
 		
-		Object task = querry.get("task");
+		Object task = query.get("task");
 		if (task == null)
 		{
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -91,7 +93,7 @@ public class Fitting extends WebModule
 			ProtocolManager protocolMgmt = new ProtocolManager(db, notifications, userMgmt, user);
 			ChasteFileManager fileMgmt = new ChasteFileManager(db, notifications, userMgmt);
 
-			int protoId = ((Long)querry.get("id")).intValue();
+			int protoId = ((Long)query.get("id")).intValue();
 
 			TreeSet<ChasteEntity> entity = protocolMgmt.getAll(false, true);
 			for (ChasteEntity e : entity)
@@ -117,7 +119,21 @@ public class Fitting extends WebModule
 				}
 			}
 
-			answer.put ("response", querry.get("id"));
+			answer.put ("response", query.get("id"));
+		}
+		else if (task.equals("getModelList"))
+		{
+			JSONObject obj = new JSONObject();
+			answer.put("latestVersions", obj);
+			
+			ChasteEntityManager modelMgmt = new ModelManager(db, notifications, userMgmt, user);
+			ChasteFileManager fileMgmt = new ChasteFileManager(db, notifications, userMgmt);
+			for (ChasteEntity entity : modelMgmt.getAll(false, true))
+			{
+				ChasteEntityVersion version = entity.getLatestVersion();
+				fileMgmt.getFiles(version, modelMgmt.getEntityFilesTable(), modelMgmt.getEntityColumn());
+				obj.put(version.getId(), version.toJson());
+			}
 		}
 		
 		return answer;
