@@ -25,11 +25,11 @@ function getTemplateId(location)
  */
 function nextPage(url, replace)
 {
-    if (replace)
-        window.history.replaceState(document.location.href, "", url);
-    else
-        window.history.pushState(document.location.href, "", url);
-    render();
+	if (replace)
+		window.history.replaceState(document.location.href, "", url);
+	else
+		window.history.pushState(document.location.href, "", url);
+	render();
 }
 
 /*
@@ -68,105 +68,105 @@ function preFillTemplate(templateId)
 	};
 	console.log(fileRequest);
 
-    var xmlhttp = null;
-    // !IE
-    if (window.XMLHttpRequest)
-    {
-        xmlhttp = new XMLHttpRequest();
-    }
-    // IE -- microsoft, we really hate you. every single day.
-    else if (window.ActiveXObject)
-    {
-        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-    }
-    
-    //var queryURL = document.location.href.split("fitting")[0].concat("fitting.html");
-    var queryURL = contextPath.concat("/fitting.html");
-    console.log(queryURL);
+	var xmlhttp = null;
+	// !IE
+	if (window.XMLHttpRequest)
+	{
+		xmlhttp = new XMLHttpRequest();
+	}
+	// IE -- microsoft, we really hate you. every single day.
+	else if (window.ActiveXObject)
+	{
+		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	
+	//var queryURL = document.location.href.split("fitting")[0].concat("fitting.html");
+	var queryURL = contextPath.concat("/fitting.html");
+	console.log(queryURL);
 
-    xmlhttp.open("POST", queryURL, true);
-    xmlhttp.setRequestHeader("Content-type", "application/json");
+	xmlhttp.open("POST", queryURL, true);
+	xmlhttp.setRequestHeader("Content-type", "application/json");
 
-    xmlhttp.onreadystatechange = function()
-    {
-        if(xmlhttp.readyState != 4)
-        	return;
-        
-    	var json = JSON.parse(xmlhttp.responseText);
-    	console.log (json);
-    	displayNotifications (json);
-    	
-        if(xmlhttp.status == 200)
-        {
-        	console.log("Success!");
-        	//console.log(json.fitProto);
-        	//console.log(json.simProto);
-        	//console.log(json.dataFile);
+	xmlhttp.onreadystatechange = function()
+	{
+		if(xmlhttp.readyState != 4)
+			return;
+		
+		var json = JSON.parse(xmlhttp.responseText);
+		console.log (json);
+		displayNotifications (json);
+		
+		if(xmlhttp.status == 200)
+		{
+			console.log("Success!");
+			//console.log(json.fitProto);
+			//console.log(json.simProto);
+			//console.log(json.dataFile);
 
-        	/* PARSE FITTING PROTOCOL FILE */
-        	fileUrl = getFileUrl(json.fitProto,json.name,templateId);
-        	xmlhttp.open("GET", fileUrl, true);
+			/* PARSE FITTING PROTOCOL FILE */
+			fileUrl = getFileUrl(json.fitProto,json.name,templateId);
+			xmlhttp.open("GET", fileUrl, true);
 
-		    xmlhttp.onreadystatechange = function()
-		    {
-		        if(xmlhttp.readyState != 4)
-		        	return;
-		    	
-		        if(xmlhttp.status == 200)
-		        {
-		        	contents = JSON.parse(xmlhttp.responseText);
-		        	console.log(contents);
+			xmlhttp.onreadystatechange = function()
+			{
+				if(xmlhttp.readyState != 4)
+					return;
+				
+				if(xmlhttp.status == 200)
+				{
+					contents = JSON.parse(xmlhttp.responseText);
+					console.log(contents);
 
-		        	// Set algorithm name
-		        	document.getElementById("algName").value = contents.algorithm;
+					// Set algorithm name
+					document.getElementById("algName").value = contents.algorithm;
 
-		        	// Set algorithm arguments
-		        	var argTable = document.getElementById("algArgs");
-		        	console.log(contents.arguments);
-		        	for (var arg in Object.keys(contents.arguments))
-		        	{
-	        			var row = argTable.insertRow(0);
-	        			
-	        			var rowlabel = document.createElement("th");
-	        			rowlabel.innerHTML = arg;
-	        			row.appendChild(rowlabel);
+					// Set algorithm arguments
+					var argTable = document.getElementById("algArgs");
+					console.log(contents.arguments);
+					for (var arg in Object.keys(contents.arguments))
+					{
+						var row = argTable.insertRow(0);
+						
+						var rowlabel = document.createElement("th");
+						rowlabel.innerHTML = arg;
+						row.appendChild(rowlabel);
 
-	        			var rowcontent = document.createElement("td");
-	        			input = document.createElement("input");
-	        			input.value = contents.arguments[arg];
-	        			rowcontent.appendChild(input);
-	        			row.appendChild(rowcontent);
-		        	}
+						var rowcontent = document.createElement("td");
+						input = document.createElement("input");
+						input.value = contents.arguments[arg];
+						rowcontent.appendChild(input);
+						row.appendChild(rowcontent);
+					}
 
-		        	// Set model prior information
-		        	// TODO: Must merge with defaults specified in selected model
-		        	var modelTable = document.getElementById("modelParams");
-		        	console.log(contents.prior);
-		        	for (var arg in Object.keys(contents.prior))
-	        		{
-	        			var row = modelTable.insertRow(0);
-	        			
-	        			var rowlabel = document.createElement("th");
-	        			rowlabel.innerHTML = arg;
-	        			row.appendChild(rowlabel);
+					// Set model prior information
+					// TODO: Must merge with defaults specified in selected model
+					var modelTable = document.getElementById("modelParams");
+					console.log(contents.prior);
+					for (var arg in Object.keys(contents.prior))
+					{
+						var row = modelTable.insertRow(0);
+						
+						var rowlabel = document.createElement("th");
+						rowlabel.innerHTML = arg;
+						row.appendChild(rowlabel);
 
-	        			var rowcontent = document.createElement("td");
-	        			input = document.createElement("input");
-	        			input.value = contents.prior[arg];
-	        			rowcontent.appendChild(input);
-	        			row.appendChild(rowcontent);
-	        		}
-		        }
-		    };
-		    xmlhttp.send(null);
+						var rowcontent = document.createElement("td");
+						input = document.createElement("input");
+						input.value = contents.prior[arg];
+						rowcontent.appendChild(input);
+						row.appendChild(rowcontent);
+					}
+				}
+			};
+			xmlhttp.send(null);
 
-		    /* PARSE SIMULATION PROTOCOL FILE */
-		    /* PARSE DATA FILE */
-        }
-        else
-        	console.log("Failed");
-    };
-    xmlhttp.send(JSON.stringify(fileRequest));
+			/* PARSE SIMULATION PROTOCOL FILE */
+			/* PARSE DATA FILE */
+		}
+		else
+			console.log("Failed");
+	};
+	xmlhttp.send(JSON.stringify(fileRequest));
 
 	return true;
 }
