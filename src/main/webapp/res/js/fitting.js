@@ -82,8 +82,24 @@ function FittingProtocol(templateId)
 			 context: this})
 		.done(this.gotModelList)
 		.fail(this.ajaxFailed);
+	// Add some event handlers
+	var self = this;
+	$('#model').on('change', function (event) { self.modelChanged(event.target); });
+	$('#algName').on('change', function (event) { alert('Algorithm change not yet implemented.'); });
 }
 
+/**
+ * Event handler for a change in the model selected to fit.
+ * Will update the displayed prior selection interface to grey out inapplicable parameters.
+ */
+FittingProtocol.prototype.modelChanged = function(modelElt) {
+	console.log('Model changed to ' + $(modelElt).val());
+	this.checkModelParameters($(modelElt).val());
+}
+
+/**
+ * Callback when the basic info for this fitting protocol template has been retrieved from the server.
+ */
 FittingProtocol.prototype.gotTemplateInfo = function(json) {
 	console.log('Template info');
 	console.log(json);
@@ -97,6 +113,9 @@ FittingProtocol.prototype.gotTemplateInfo = function(json) {
 		.fail(this.ajaxFailed);
 }
 
+/**
+ * Generic error callback for AJAX requests.
+ */
 FittingProtocol.prototype.ajaxFailed = function() {
 	addNotification('server error retrieving template details', 'error');
 }
@@ -111,13 +130,13 @@ FittingProtocol.prototype.gotModelList = function(json) {
 	console.log(json);
 	displayNotifications(json);
 	this.models = json.latestVersions;
+	var $select = $('#model');
 	for (var versionId in this.models)
 		if (this.models.hasOwnProperty(versionId))
 		{
 			var model = this.models[versionId],
 				file = model.files[0],
-				fileUrl = getFileUrl(file, 'model', model.name, model.id),
-				$select = $('#model');
+				fileUrl = getFileUrl(file, 'model', model.name, model.id);
 			console.log('Retrieving model ' + model.name + ' from ' + fileUrl);
 			$.ajax(fileUrl, {method: 'get', context: this})
 				.done(function(contents) { this.gotModelFile(versionId, contents); })
@@ -125,15 +144,56 @@ FittingProtocol.prototype.gotModelList = function(json) {
 			$select.append('<option value=""></option>')
 				.children(':last-child').attr('value', model.id).text(model.name);
 		}
+	$select.trigger('change');
 }
 
+/**
+ * Called when the selected model has changed (or that model's details have been loaded) to grey out
+ * any parameter inputs that aren't relevant.
+ *
+ * Also adds text to each td that gives the default values for the parameters.
+ */
+FittingProtocol.prototype.checkModelParameters = function(versionId)
+{
+	console.log('Check params ' + versionId);
+	var model = this.models[versionId],
+		params = model.params;
+	if (params)
+	{
+		$('#modelParams input').prop('disabled', true);
+		$('#modelParams td span').remove();
+		for (var name in params)
+		{
+			if (params.hasOwnProperty(name))
+			{
+				$('#'+name+'-td')
+					.append('<span>(default: '+params[name]+')</span>')
+					.children('input').prop('disabled', false);
+			}
+		}
+	}
+}
+
+/**
+ * Callback for when a model definition file has been retrieved from the server.
+ * Stores & parses the file contents, which consist of lines "<param name>\t<param value>".
+ * Will also trigger greying out inapplicable model parameters if this is the currently selected model.
+ */
 FittingProtocol.prototype.gotModelFile = function(versionId, contents)
 {
-	console.log('Got contents for model ' + this.models[versionId].name);
-	this.models[versionId].contents = contents;
+	var model = this.models[versionId];
+	console.log('Got contents for model ' + model.name);
+	model.contents = contents;
+	model.params = {};
+	contents.split('\n').forEach(function (value, index, array) {
+		var items = value.split('\t');
+		model.params[items[0]] = items[1];
+	});
+	if ($('#model').val() == versionId)
+		this.checkModelParameters(versionId);
 }
 
-/*
+/**
  * Receives fitting protocol files via JSON, parses contents, and populates fitting spec view
  */
 FittingProtocol.prototype.gotTemplateProtocol = function(templateFileContents)
@@ -168,23 +228,33 @@ FittingProtocol.prototype.gotTemplateProtocol = function(templateFileContents)
 
 	// Set model prior information
 	// TODO: Must merge with defaults specified in selected model
-	var modelTable = document.getElementById("modelParams");
-	console.log(templateFileContents.prior);
-	for (var arg in templateFileContents.prior)
+	var modelTable = $("#modelParams"),
+		objTable = $("#objParams"),
+		priors = templateFileContents.prior;
+	console.log(priors);
+	for (var arg in priors)
 	{
-		if (templateFileContents.prior.hasOwnProperty(arg))
+		if (priors.hasOwnProperty(arg))
 		{
-			var row = modelTable.insertRow(0);
-			
-			var rowlabel = document.createElement("th");
-			rowlabel.innerHTML = arg;
-			row.appendChild(rowlabel);
-
-			var rowcontent = document.createElement("td");
-			input = document.createElement("input");
-			input.value = templateFileContents.prior[arg];
-			rowcontent.appendChild(input);
-			row.appendChild(rowcontent);
+			var isObj = (arg.substr(0,4) == 'obj:'),
+				table = (isObj ? objTable : modelTable),
+				row = $('<tr/>').appendTo(table),
+				th = $('<th/>').text(arg),
+				td = $('<td id="'+arg+'-td"/>'),
+				ids = [arg+'-low', arg+'-high'],
+				labels = ['From', 'to'];
+			row.append(th, td);
+			if (priors[arg] instanceof Array)
+			{
+				for (var i=0; i<2; i++)
+				{
+					td.append('<label for="'+ids[i]+'">'+labels[i]+'</label> <input id="'+ids[i]+'" size="5" value="'+priors[arg][i]+'"/> ');
+				}
+			}
+			else
+			{
+				td.append('<input id="'+arg+'-val" size="5" value="'+priors[arg]+'"/>');
+			}
 		}
 	}
 }

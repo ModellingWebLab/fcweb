@@ -47,9 +47,18 @@
         </td>
       </tr>
       <tr>
-        <th>Ranges for model parameters</th>
+        <th>Ranges for model parameters<br/>
+            <small>TODO: In dimensionless form? Set both ends same to fix value?</small>
+        </th>
         <td>
           <table id="modelParams" class="leftright">
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <th>Objective function parameters</th>
+        <td>
+          <table id="objParams" class="leftright">
           </table>
         </td>
       </tr>
