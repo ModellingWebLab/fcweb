@@ -331,6 +331,11 @@ tr:nth-child(1)
     border-top:1px dashed #ccc;
 }
 
+table.allborders > tbody > tr
+{
+    border-top: 1px dashed #ccc;
+    border-bottom: 1px dashed #ccc;
+}
 
 
 /*#modellist ul,

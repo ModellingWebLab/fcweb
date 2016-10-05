@@ -28,7 +28,7 @@
   <div id="fitting_spec" style="display: none;">
     <!-- The interface for specifying settings based on a particular template fitting protocol -->
     <h2>Fitting experiment specification</h2>
-    <table id="fittingtable" class="leftright">
+    <table id="fittingtable" class="leftright allborders">
       <tr>
         <th>Fitting algorithm</th>
         <td>
@@ -65,7 +65,14 @@
       <tr>
         <th>Experimental data</th>
         <td>
-          TODO! File upload, link outputs to CSV columns.
+          <span id="uploadaction"></span>
+          <table id="dataColumns" class="leftright">
+          </table>
+          <div id="dropbox">
+            Drop File Here<br />
+            <a>Open Dialog</a>
+            <input type="file" id="fileupload" />
+          </div>
         </td>
       </tr>
     </table>

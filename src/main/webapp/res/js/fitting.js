@@ -86,13 +86,121 @@ function FittingProtocol(templateId)
 	var self = this;
 	$('#model').on('change', function (event) { self.modelChanged(event.target); });
 	$('#algName').on('change', function (event) { alert('Algorithm change not yet implemented.'); });
+	// Handlers relating to file uploads
+	var $dropbox = $('#dropbox'),
+		$upload = $('#fileupload');
+	$dropbox.on('dragenter dragover drop', function (event) {
+		event.originalEvent.dataTransfer.dropEffect = 'copy';
+		return false; // Stop propagation & default behaviour
+	});
+	$dropbox.on('drop', function(event) {
+		var file = event.originalEvent.dataTransfer.files[0];
+		self.uploadDataFile(file, file.name);
+	});
+	$dropbox.get(0).addEventListener('click', function(event) { $upload.click(); }, false);
+	$upload.on('change', function(event) {
+		var file = this.files[0],
+			fullPath = $upload.val(),
+			startIndex = (fullPath.indexOf('\\') >= 0 ? fullPath.lastIndexOf('\\') : fullPath.lastIndexOf('/')),
+			name = fullPath.substring(startIndex+1);
+		self.uploadDataFile(file, name);
+	});
+}
+
+/**
+ * File upload handler, called when user has chosen a (CSV) data file to upload.
+ */
+FittingProtocol.prototype.uploadDataFile = function(file, name)
+{
+	console.log('Upload ' + name);
+	console.log(file);
+	if (!name.toLowerCase().endsWith('.csv'))
+	{
+		alert("Only CSV data files are supported, with data in columns.");
+		return;
+	}
+	// Upload the file asynchronously
+	$('#uploadaction').text('uploading '+name+'...');
+	var self = this,
+		fd = new FormData,
+		reader = new FileReader();
+	fd.append('file', file);
+	$.ajax(contextPath + '/upload.html',
+			{data: fd,
+			 method: 'post',
+			 processData: false, // Don't try to transform the file into a query string
+			 contentType: false, // Don't set a contentType header
+			 context: this})
+//		.progress(function(e) {
+//			console.log(e)
+//			var done = e.position || e.loaded,
+//				total = e.totalSize || e.total;
+//			$('#uploadaction').text('uploading... ' + (Math.floor(done/total*1000)/10) + "%");
+//		})
+		.done(function (json) { self.uploadDone(json, file, name); })
+		.fail(function () {
+			$('#uploadaction').text('file upload failed; try again');
+		});
+	// Read the file ourselves to discover its columns
+	reader.addEventListener('load', function () { self.readDataFile(reader.result); });
+	reader.readAsText(file);
+}
+
+/**
+ * The data file has been uploaded to the server; notify the user and record its temporary name.
+ */
+FittingProtocol.prototype.uploadDone = function(json, file, name)
+{
+	console.log(json);
+	displayNotifications(json);
+	if (json.upload && json.upload.response)
+	{
+		$('#uploadaction').text('Uploaded ' + name + ' (' + humanReadableBytes(file.size) + ')');
+		this.dataTmpName = json.upload.tmpName;
+	}
+	else
+	{
+		$('#uploadaction').text('file upload failed; try again');
+	}
+}
+
+/**
+ * We have loaded the CSV data into memory.
+ * Parse the header and display the UI to associate columns in the file with simulation outputs.
+ */
+FittingProtocol.prototype.readDataFile = function(csvData)
+{
+	console.log('Read CSV file');
+	var data = { contents: csvData },
+		$table = $('#dataColumns'),
+		outputMap = this.fittingProtocol.output,
+		numOutputs = Object.keys(outputMap).length;
+	parseCsvRaw(data);
+	console.log(data.csv);
+	if (data.csv[0].length < numOutputs)
+		alert("Insufficient columns in data file: should be at least " + numOutputs);
+	for (var outputName in outputMap)
+	{
+		if (outputMap.hasOwnProperty(outputName))
+		{
+			$table.append('<tr><th>'+outputName+'</th><td><select class="outputMap" id="'+outputName+'-col-select"/></td></tr>');
+		}
+	}
+	for (var i=0; i<data.csv[0].length; i++)
+	{
+		$table.find("select").append('<option value="'+i+'">'+i+'</option>');
+	}
+	$.each(outputMap, function (name, value) {
+		$table.find("#"+name+"-col-select option[value="+value+"]").prop('selected', true);
+	});
 }
 
 /**
  * Event handler for a change in the model selected to fit.
  * Will update the displayed prior selection interface to grey out inapplicable parameters.
  */
-FittingProtocol.prototype.modelChanged = function(modelElt) {
+FittingProtocol.prototype.modelChanged = function(modelElt)
+{
 	console.log('Model changed to ' + $(modelElt).val());
 	this.checkModelParameters($(modelElt).val());
 }
@@ -100,7 +208,8 @@ FittingProtocol.prototype.modelChanged = function(modelElt) {
 /**
  * Callback when the basic info for this fitting protocol template has been retrieved from the server.
  */
-FittingProtocol.prototype.gotTemplateInfo = function(json) {
+FittingProtocol.prototype.gotTemplateInfo = function(json)
+{
 	console.log('Template info');
 	console.log(json);
 	displayNotifications(json);
@@ -116,7 +225,8 @@ FittingProtocol.prototype.gotTemplateInfo = function(json) {
 /**
  * Generic error callback for AJAX requests.
  */
-FittingProtocol.prototype.ajaxFailed = function() {
+FittingProtocol.prototype.ajaxFailed = function()
+{
 	addNotification('server error retrieving template details', 'error');
 }
 
@@ -125,7 +235,8 @@ FittingProtocol.prototype.ajaxFailed = function() {
  * Stores the list, populates a drop-down select for model to fit,
  * and triggers loading the model files so we can parse the parameters and compare to our prior settings.
  */
-FittingProtocol.prototype.gotModelList = function(json) {
+FittingProtocol.prototype.gotModelList = function(json)
+{
 	console.log('Model list');
 	console.log(json);
 	displayNotifications(json);
