@@ -143,20 +143,21 @@ function highlightPlots (entity, showDefault)
 			}
 			
 			// Find the plot x and y object names and units from the output contents file.
-			for (var output_idx = 0; output_idx < outputContents.length; output_idx++)
+			for (var output_idx = 1; output_idx < outputContents.length; output_idx++)
 			{
-				if (plotDescription[i][4] == outputContents[output_idx][0])
+				if (plotDescription[i][4] == outputContents[output_idx][0]) // Plot first variable id
 				{
 					f.xAxes = outputContents[output_idx][1] + ' (' + outputContents[output_idx][2] + ')';
 					f.xUnits = outputContents[output_idx][2];
 				}
-				if (plotDescription[i][5] == outputContents[output_idx][0])
+				if (plotDescription[i][5] == outputContents[output_idx][0]) // Plot second variable id
 				{
 					f.yAxes = outputContents[output_idx][1] + ' (' + outputContents[output_idx][2] + ')';
 					f.yUnits = outputContents[output_idx][2];
 				}
-				if (plotDescription[i].length > 6 && plotDescription[i][6] == outputContents[output_idx][0])
+				if (plotDescription[i][6] && plotDescription[i][6] == outputContents[output_idx][0])
 				{
+					// A key variable is defined for this plot.
 					// When comparing, f.entities is a list of the experiments containing this output data file (`entityLink`),
 					// and the version of the file appearing in each experiment (`entityFileLink`).
 					var key_file = files[outputContents[output_idx][4].hashCode()],
