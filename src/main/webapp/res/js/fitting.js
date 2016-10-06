@@ -86,6 +86,10 @@ function FittingProtocol(templateId)
 	var self = this;
 	$('#model').on('change', function (event) { self.modelChanged(event.target); });
 	$('#algName').on('change', function (event) { alert('Algorithm change not yet implemented.'); });
+	$('#dateInserter').on('click', function (event) {
+		$('#versionName').focus().val(getYMDHMS(new Date())).blur();
+	});
+	$('#versionName').on('blur', function (event) { self.checkVersionName(this.value); });
 	// Handlers relating to file uploads
 	var $dropbox = $('#dropbox'),
 		$upload = $('#fileupload');
@@ -214,12 +218,14 @@ FittingProtocol.prototype.gotTemplateInfo = function(json)
 	console.log(json);
 	displayNotifications(json);
 	this.templateName = json.name;
+	this.templateVisibility = json.visibility;
 	this.templateFileInfo = { fitProto: json.fitProto, simProto: json.simProto, dataFile: json.dataFile };
 	var fileUrl = getFileUrl(json.fitProto, 'protocol', json.name, this.templateId);
-	console.log(fileUrl);
 	$.ajax(fileUrl, {method: 'get', context: this})
 		.done(this.gotTemplateProtocol)
 		.fail(this.ajaxFailed);
+	$('#uploadaction').text('Existing data file: ' + json.dataFile.name + ' (' +humanReadableBytes(json.dataFile.size) + ')');
+	$('#visibility-' + this.templateVisibility).prop('selected', true);
 }
 
 /**
@@ -370,7 +376,32 @@ FittingProtocol.prototype.gotTemplateProtocol = function(templateFileContents)
 	}
 }
 
-/*
+/**
+ * Check that there doesn't already exist a version of this protocol with the chosen name.
+ */
+FittingProtocol.prototype.checkVersionName = function (versionName)
+{
+	var $actionElt = $('#versionAction');
+	$actionElt.html("<img src='"+contextPath+"/res/img/loading2-new.gif' alt='loading' />");
+	$.ajax(contextPath+'/protocol/createnew',
+		   {data: JSON.stringify({task: 'verifyNewEntity', entityName: this.templateName, versionName: versionName}),
+			method: 'post',
+			context: this})
+		.fail(function () {
+			$actionElt.html("<img src='"+contextPath+"/res/img/failed.png' alt='error' /> sorry, serverside error occurred.");
+		})
+		.done(function (json) {
+			console.log(json);
+			displayNotifications(json);
+			var msg = json.versionName.responseText;
+			if (json.versionName.response)
+				$actionElt.html("<img src='"+contextPath+"/res/img/check.png' alt='valid' /> " + msg);
+			else
+				$actionElt.html("<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + msg);
+		});
+}
+
+/**
  * Generate URL for a GET request for a file given the JSON representation of the corresponding
  * ChasteFile object, along with the name and id of the ChasteEntityVersion that contains it.
  */
@@ -380,7 +411,7 @@ function getFileUrl(f, entityType, vname, vid)
 	return fileUrl;
 }
 
-/*
+/**
  * Called when the page content has fully loaded to do JS initialisation.
  */
 function initFitting()

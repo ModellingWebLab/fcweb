@@ -28,6 +28,12 @@
   <div id="fitting_spec" style="display: none;">
     <!-- The interface for specifying settings based on a particular template fitting protocol -->
     <h2>Fitting experiment specification</h2>
+    <p>
+      The settings below have been filled in from your chosen template, and may now be varied.
+      You may adjust any of the fitting algorithm parameters, select a different model to fit,
+      specify allowed ranges for the model parameters (or fix some to specific values rather than fitting them),
+      and/or upload a new experimental data set.
+    </p>
     <table id="fittingtable" class="leftright allborders">
       <tr>
         <th>Fitting algorithm</th>
@@ -66,16 +72,37 @@
         <th>Experimental data</th>
         <td>
           <span id="uploadaction"></span>
+          <span id="dataColumnsInstructions" style="display:none;"></span>
           <table id="dataColumns" class="leftright">
           </table>
           <div id="dropbox">
-            Drop File Here<br />
+            Drop Replacement Data File Here<br />
             <a>Open Dialog</a>
             <input type="file" id="fileupload" />
           </div>
         </td>
       </tr>
     </table>
+    <p>
+      <label for="versionName">Label:</label><br/>
+      <input type="text" name="versionName" id="versionName" placeholder="short label for this experiment" size="35"/>
+      <a class="pointer" id="dateInserter"><small>use current date &amp; time</small></a>
+      <span id="versionAction"></span>
+    </p>
+    <p>
+      <label for="commitMsg">Description:</label><br/>
+      <textarea cols="70" rows="3" name="commitMsg" id="commitMsg" placeholder="optional message to describe this fitting experiment"></textarea>
+    </p>
+    <p>
+      <label for="visibility">Visibility:</label>
+      <select id="visibility">
+        <option value="PUBLIC" id="visibility-PUBLIC">PUBLIC</option>
+        <option value="RESTRICTED" id="visibility-RESTRICTED">RESTRICTED</option>
+        <option value="PRIVATE" id="visibility-PRIVATE" selected="selected">PRIVATE</option>
+      </select>
+      <img src="${contextPath}/res/img/info.png" alt="help" title="Public = anyone can view &#10;Restricted = logged-in users can view &#10;Private = only you can view"/>
+      <span id="visibilityAction"></span>
+    </p>
     <button id="submit">Run fitting</button>
   </div>
 </t:skeleton>
