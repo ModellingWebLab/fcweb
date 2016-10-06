@@ -795,6 +795,7 @@ public class EntityView extends WebModule
 					String tmpName = null;
 					String name = null;
 					String type = null;
+					int dbId = -1;
 					try
 					{
 						tmpName = file.get ("tmpName").toString ();
@@ -818,7 +819,31 @@ public class EntityView extends WebModule
 					if (type == null || type.length () < 1)
 						type = "unknown";
 					
-					File tmp = FileTransfer.getTempFile (tmpName);
+					if (file.get("fileId") != null)
+					{
+						String fileId = file.get("fileId").toString();
+						try
+						{
+							dbId = Integer.parseInt(fileId);
+						}
+						catch (NullPointerException | NumberFormatException e)
+						{
+							e.printStackTrace ();
+							LOGGER.warn("user provided file id not parseable: ", fileId);
+							throw new IOException("file not found");
+						}
+					}
+					
+					File tmp;
+					if (dbId == -1)
+					{
+						tmp = FileTransfer.getTempFile(tmpName);
+					}
+					else
+					{
+						// TODO: Add some permissions checks that we're allowed to see the referenced file
+						tmp = fileMgmt.getFileById(dbId, entityMgmt);
+					}
 					if (tmp == null)
 					{
 						notifications.addError ("cannot find file " + name + ". Please upload again.");
@@ -1102,24 +1127,27 @@ public class EntityView extends WebModule
 	private void associateFile(NewFile f, ChasteFileManager fileMgmt, ChasteEntityManager entityMgmt, User user,
 							   File entityDir, int versionId, HashMap<String, NewFile> files) throws ChastePermissionException, IOException
 	{
-		// insert to db
-		int fileId = fileMgmt.addFile(f.name, f.type, user, f.tmpFile.length(), f.isMain);
-		if (fileId < 0)
+		// insert to db, if not there already
+		if (f.dbId == -1)
 		{
-			if (!files.isEmpty())
-				cleanUp(entityDir, versionId, files, fileMgmt, entityMgmt);
-			LOGGER.error("error inserting file to db: ", f.name, " -> ", f.tmpFile);
-			throw new IOException("wasn't able to insert file " + f.name + " to database.");
+			int fileId = fileMgmt.addFile(f.name, f.type, user, f.tmpFile.length(), f.isMain);
+			if (fileId < 0)
+			{
+				if (!files.isEmpty())
+					cleanUp(entityDir, versionId, files, fileMgmt, entityMgmt);
+				LOGGER.error("error inserting file to db: ", f.name, " -> ", f.tmpFile);
+				throw new IOException("wasn't able to insert file " + f.name + " to database.");
+			}
+			f.dbId = fileId;
 		}
-		f.dbId = fileId;
 		
 		// associate files+version
-		if (!fileMgmt.associateFile(fileId, versionId, entityMgmt.getEntityFilesTable(), entityMgmt.getEntityColumn()))
+		if (!fileMgmt.associateFile(f.dbId, versionId, entityMgmt.getEntityFilesTable(), entityMgmt.getEntityColumn()))
 		{
 			if (!files.isEmpty())
 				cleanUp(entityDir, versionId, files, fileMgmt, entityMgmt);
-			LOGGER.error("error inserting file to db: ", f.name, " -> ", f.tmpFile);
-			throw new IOException("wasn't able to insert file " + f.name + " to database.");
+			LOGGER.error("error associating file ", f.name, " with new entity version");
+			throw new IOException("wasn't able to associate file " + f.name + " in database.");
 		}
 		
 		// copy file, if not already in target folder

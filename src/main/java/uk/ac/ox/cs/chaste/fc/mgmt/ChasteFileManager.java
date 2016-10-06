@@ -219,105 +219,6 @@ public class ChasteFileManager
 		return ok;
 	}
 
-
-	/*public boolean associateFileToExperiment (int fileId, int versionId)
-	{
-		PreparedStatement st = db.prepareStatement ("INSERT INTO `experiment_files`(`experiment`, `file`) VALUES (?,?)");
-    ResultSet rs = null;
-    boolean ok = false;
-		
-		try
-		{
-			st.setInt (1, versionId);
-			st.setInt (2, fileId);
-			
-			int affectedRows = st.executeUpdate();
-      if (affectedRows == 0)
-          throw new SQLException("Associating file to experiment failed, no rows affected.");
-      ok = true;
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			note.addError ("sql err associating file to experiment: " + e.getMessage ());
-			LOGGER.error ("db problem while associating file to experiment", e);
-			ok = false;
-		}
-		finally
-		{
-			db.closeRes (st);
-			db.closeRes (rs);
-		}
-		
-		return ok;
-	}
-
-
-	public boolean associateFileToProtocol (int fileId, int versionId)
-	{
-		PreparedStatement st = db.prepareStatement ("INSERT INTO `protocol_files`(`protocol`, `file`) VALUES (?,?)");
-    ResultSet rs = null;
-    boolean ok = false;
-		
-		try
-		{
-			st.setInt (1, versionId);
-			st.setInt (2, fileId);
-			
-			int affectedRows = st.executeUpdate();
-      if (affectedRows == 0)
-          throw new SQLException("Associating file to protocol failed, no rows affected.");
-      ok = true;
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			note.addError ("sql err associating file to protocol: " + e.getMessage ());
-			LOGGER.error ("db problem while associating file to ptotocol", e);
-			ok = false;
-		}
-		finally
-		{
-			db.closeRes (st);
-			db.closeRes (rs);
-		}
-		
-		return ok;
-	}
-	
-	public boolean associateFileToModel (int fileId, int versionId)
-	{
-		PreparedStatement st = db.prepareStatement ("INSERT INTO `model_files`(`model`, `file`) VALUES (?,?)");
-    ResultSet rs = null;
-    boolean ok = false;
-		
-		try
-		{
-			st.setInt (1, versionId);
-			st.setInt (2, fileId);
-			
-			int affectedRows = st.executeUpdate();
-      if (affectedRows == 0)
-          throw new SQLException("Associating file to model failed, no rows affected.");
-      ok = true;
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			note.addError ("sql err associating file to model: " + e.getMessage ());
-			LOGGER.error ("db problem while associating file to model", e);
-			ok = false;
-		}
-		finally
-		{
-			db.closeRes (st);
-			db.closeRes (rs);
-		}
-		
-		return ok;
-	}*/
-
-
 	public boolean getFiles (ChasteEntityVersion vers, String filesTable, String enityColumn)
 	{
 		int id = vers.getId ();
@@ -355,10 +256,43 @@ public class ChasteFileManager
 	}
 
 
-	/*public ChasteFile getFileById (int fileId)
+	public File getFileById(int fileId, ChasteEntityManager entityMgmt)
 	{
-		return null;
-	}*/
+		File f = null;
+		ResultSet rs = null;
+
+		PreparedStatement st = db.prepareStatement("SELECT f.id AS fileid, f.relpath AS filename, v.filepath AS dirname"
+				+ " FROM `files` f"
+				+ " INNER JOIN `" + entityMgmt.getEntityFilesTable() + "` vf ON vf.file = f.id"
+				+ " INNER JOIN `" + entityMgmt.getEntityVersionsTable() + "` v ON v.id = vf." + entityMgmt.getEntityColumn()
+				+ " WHERE f.id=?");
+		try
+		{
+			st.setInt(1, fileId);
+			st.execute();
+			rs = st.getResultSet();
+			while (rs != null && rs.next())
+			{
+				String name = rs.getString("filename");
+				String dir = rs.getString("dirname");
+				String fullPath = entityMgmt.getEntityStorageDir() + Tools.FILESEP + dir + Tools.FILESEP + name;
+				f = new File(fullPath);
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+			note.addError("sql err retrieving file: " + e.getMessage ());
+			LOGGER.error(e, "db problem while retrieving file " + fileId);
+		}
+		finally
+		{
+			db.closeRes(st);
+			db.closeRes(rs);
+		}
+		
+		return f;
+	}
 
 
 	public static File createArchive (ChasteEntityVersion version, String storageDir) throws Exception

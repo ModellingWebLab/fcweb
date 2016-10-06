@@ -114,6 +114,8 @@ function sendFile (uploaded, file, name, types)
         	    array.fileType = "CellML";
         	else if (name.endsWith(".txt"))
         	    array.fileType = "TXTPROTOCOL";
+        	else if (name.endsWith(".csv"))
+        		array.fileType = "CSV";
         	else if (name.endsWith(".xml"))
         	    array.fileType = "XMLPROTOCOL";
             else if (name.endsWith(".zip") || name.endsWith(".omex"))

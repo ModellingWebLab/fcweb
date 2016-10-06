@@ -53,6 +53,11 @@ public abstract class ChasteEntityManager
 		return entityFilesTable;
 	}
 	
+	public String getEntityVersionsTable ()
+	{
+		return entityVersionsTable;
+	}
+	
 	public String getEntityStorageDir ()
 	{
 		return entityStorageDir;

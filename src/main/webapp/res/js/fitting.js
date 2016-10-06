@@ -90,6 +90,7 @@ function FittingProtocol(templateId)
 		$('#versionName').focus().val(getYMDHMS(new Date())).blur();
 	});
 	$('#versionName').on('blur', function (event) { self.checkVersionName(this.value); });
+	$('#submit').on('click', function (event) { self.submitVersion(); });
 	// Handlers relating to file uploads
 	var $dropbox = $('#dropbox'),
 		$upload = $('#fileupload');
@@ -332,7 +333,7 @@ FittingProtocol.prototype.gotTemplateProtocol = function(templateFileContents)
 			var row = argTable.insertRow(0);
 			
 			var rowlabel = document.createElement("th");
-			rowlabel.innerHTML = arg;
+			rowlabel.textContent = arg;
 			row.appendChild(rowlabel);
 
 			var rowcontent = document.createElement("td");
@@ -344,11 +345,11 @@ FittingProtocol.prototype.gotTemplateProtocol = function(templateFileContents)
 	}
 
 	// Set model prior information
-	// TODO: Must merge with defaults specified in selected model
 	var modelTable = $("#modelParams"),
 		objTable = $("#objParams"),
 		priors = templateFileContents.prior;
 	console.log(priors);
+	this.paramMap = []; // Maps from index (used for CSS id) to parameter name
 	for (var arg in priors)
 	{
 		if (priors.hasOwnProperty(arg))
@@ -357,9 +358,11 @@ FittingProtocol.prototype.gotTemplateProtocol = function(templateFileContents)
 				table = (isObj ? objTable : modelTable),
 				row = $('<tr/>').appendTo(table),
 				th = $('<th/>').text(arg),
-				td = $('<td id="'+arg+'-td"/>'),
-				ids = [arg+'-low', arg+'-high'],
+				idBase = 'param-'+this.paramMap.length,
+				td = $('<td/>'),
+				ids = [idBase+'-low', idBase+'-high'],
 				labels = ['From', 'to'];
+			this.paramMap.push(arg);
 			row.append(th, td);
 			if (priors[arg] instanceof Array)
 			{
@@ -370,7 +373,7 @@ FittingProtocol.prototype.gotTemplateProtocol = function(templateFileContents)
 			}
 			else
 			{
-				td.append('<input id="'+arg+'-val" size="5" value="'+priors[arg]+'"/>');
+				td.append('<input id="'+idBase+'-val" size="5" value="'+priors[arg]+'"/>');
 			}
 		}
 	}
@@ -399,6 +402,85 @@ FittingProtocol.prototype.checkVersionName = function (versionName)
 			else
 				$actionElt.html("<img src='"+contextPath+"/res/img/failed.png' alt='invalid' /> " + msg);
 		});
+}
+
+/**
+ * Translate the current form selections into a fitting protocol "file" (i.e. plain object that can be serialised to JSON).
+ */
+FittingProtocol.prototype.getFitProtoFromForm = function()
+{
+	var protoSkeleton = { 
+		algorithm: $('#algName').val(),
+		arguments: {},
+		output: {},
+		prior: {}
+	};
+	$('#algArgs tr').each(function () {
+		protoSkeleton.arguments[this.children[0].textContent] = this.children[1].children[0].value;
+	});
+	for (var i=0; i<this.paramMap.length; i++)
+	{
+		var paramName = this.paramMap[i],
+			idBase = 'param-'+i,
+			$val = $('#'+idBase+'-val');
+		if ($val.length > 0)
+		{
+			protoSkeleton.prior[paramName] = $val.val();
+		}
+		else
+		{
+			protoSkeleton.prior[paramName] = [$('#'+idBase+'-low').val(), $('#'+idBase+'-high').val()];
+		}
+	}
+	if (this.dataTmpName)
+	{
+		// New data file has been supplied -> we have a UI to map columns
+		$('#dataColumns tr').each(function () {
+			protoSkeleton.output[this.children[0].textContent] = $(this).find('select').val();
+		});
+	}
+	else
+	{
+		// Data file hasn't changed -> reuse original column mapping
+		protoSkeleton.output = this.fittingProtocol.output;
+	}
+	return protoSkeleton;
+}
+
+/**
+ * Submit the specialised version of the fitting protocol to the server.
+ */
+FittingProtocol.prototype.submitVersion = function()
+{
+	console.log('Submit clicked');
+	if (!this.templateFileInfo)
+		return; // Not loaded template yet!
+	var simFile = this.templateFileInfo.simProto,
+		dataFile = this.templateFileInfo.dataFile,
+		fitFile = this.templateFileInfo.fitProto,
+		files = [{fileName: simFile.name, fileType: simFile.filetype, fileId: simFile.id},
+		         {fileName: dataFile.name, fileType: dataFile.filetype, fileId: (this.dataTmpName ? -1 : dataFile.id)},
+		         {fileName: fitFile.name, fileType: fitFile.filetype, fileId: fitFile.id}];
+	if (this.dataTmpName)
+	{
+		files[1].tmpName = this.dataTmpName;
+	}
+	console.log(files);
+	// Send updated fitting protocol file if needed
+	var newFitProto = this.getFitProtoFromForm();
+	console.log(newFitProto);
+	// Details of the new version to send
+	var details = {
+		task: "createNewEntity",
+		entityName: this.templateName,
+		versionName: $('#versionName').val(),
+		commitMsg: $('#commitMsg').val(),
+		visibility: $('#visibility').val(),
+		files: files,
+		mainFile: files[2].fileName,
+		rerunExperiments: false
+	};
+	console.log(details);
 }
 
 /**
