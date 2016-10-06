@@ -94,32 +94,31 @@ public class Fitting extends WebModule
 			ChasteFileManager fileMgmt = new ChasteFileManager(db, notifications, userMgmt);
 
 			int protoId = ((Long)query.get("id")).intValue();
-
-			TreeSet<ChasteEntity> entity = protocolMgmt.getAll(false, true);
-			for (ChasteEntity e : entity)
+			ChasteEntityVersion v = protocolMgmt.getVersionById(protoId);
+			if (v == null)
 			{
-				ChasteEntityVersion v = e.getLatestVersion(); // Show just latest version of each; probably better than listing all versions?
+				notifications.addError("requested template not found");
+			}
+			else
+			{
+				answer.put("name", v.getName());
+				answer.put("visibility", v.getVisibility());
+				
 				fileMgmt.getFiles(v, protocolMgmt.getEntityFilesTable(), protocolMgmt.getEntityColumn());
-				if (v.getId() == protoId)
+				Vector<ChasteFile> files = v.getFiles();
+				for (ChasteFile f : files)
 				{
-					answer.put("name",v.getName());
-
-					Vector<ChasteFile> files = v.getFiles();
-					for (ChasteFile f : files)
-					{
-						JSONObject fileRep = f.toJson();
-
-						if (f.isMasterFile())
-							answer.put("fitProto",fileRep);	
-						else if (f.getFiletype().equals("CSV"))
-							answer.put("dataFile",fileRep);
-						else
-							answer.put("simProto",fileRep);
-					}
+					JSONObject fileRep = f.toJson();
+					if (f.isMasterFile())
+						answer.put("fitProto",fileRep);	
+					else if (f.getFiletype().equals("CSV"))
+						answer.put("dataFile",fileRep);
+					else
+						answer.put("simProto",fileRep);
 				}
 			}
 
-			answer.put ("response", query.get("id"));
+			answer.put("response", query.get("id"));
 		}
 		else if (task.equals("getModelList"))
 		{
