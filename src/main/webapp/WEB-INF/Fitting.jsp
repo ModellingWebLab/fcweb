@@ -104,5 +104,7 @@
       <span id="visibilityAction"></span>
     </p>
     <button id="submit">Run fitting</button>
+    <span id="submitAction"></span>
+    <p id="successMsg"></p>
   </div>
 </t:skeleton>

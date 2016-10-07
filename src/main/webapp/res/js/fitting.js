@@ -13,7 +13,6 @@ var fittingProtocol = null;
  */
 function getTemplateId(location)
 {
-	var cont = contextPath;
 	var contextLen = contextPath.length,
 		t = location.pathname.substr(contextLen+1).split('/');
 	if (location.pathname.substr(0, contextLen) != contextPath || t.length < 3 || t[0] != 'fitting' || t[1] != 'p')
@@ -270,6 +269,8 @@ FittingProtocol.prototype.gotModelList = function(json)
  * any parameter inputs that aren't relevant.
  *
  * Also adds text to each td that gives the default values for the parameters.
+ * 
+ * TODO: IF the model loads after the protocol it looks like all these get greyed out!
  */
 FittingProtocol.prototype.checkModelParameters = function(versionId)
 {
@@ -416,7 +417,7 @@ FittingProtocol.prototype.getFitProtoFromForm = function()
 		prior: {}
 	};
 	$('#algArgs tr').each(function () {
-		protoSkeleton.arguments[this.children[0].textContent] = this.children[1].children[0].value;
+		protoSkeleton.arguments[this.children[0].textContent] = parseFloat(this.children[1].children[0].value);
 	});
 	for (var i=0; i<this.paramMap.length; i++)
 	{
@@ -425,18 +426,19 @@ FittingProtocol.prototype.getFitProtoFromForm = function()
 			$val = $('#'+idBase+'-val');
 		if ($val.length > 0)
 		{
-			protoSkeleton.prior[paramName] = $val.val();
+			protoSkeleton.prior[paramName] = parseFloat($val.val());
 		}
 		else
 		{
-			protoSkeleton.prior[paramName] = [$('#'+idBase+'-low').val(), $('#'+idBase+'-high').val()];
+			protoSkeleton.prior[paramName] = [parseFloat($('#'+idBase+'-low').val()),
+			                                  parseFloat($('#'+idBase+'-high').val())];
 		}
 	}
 	if (this.dataTmpName)
 	{
 		// New data file has been supplied -> we have a UI to map columns
 		$('#dataColumns tr').each(function () {
-			protoSkeleton.output[this.children[0].textContent] = $(this).find('select').val();
+			protoSkeleton.output[this.children[0].textContent] = parseFloat($(this).find('select').val());
 		});
 	}
 	else
@@ -449,6 +451,8 @@ FittingProtocol.prototype.getFitProtoFromForm = function()
 
 /**
  * Submit the specialised version of the fitting protocol to the server.
+ * 
+ * TODO: If we are not the owner of the original, we need to create a new entity instead of a new version!
  */
 FittingProtocol.prototype.submitVersion = function()
 {
@@ -458,29 +462,150 @@ FittingProtocol.prototype.submitVersion = function()
 	var simFile = this.templateFileInfo.simProto,
 		dataFile = this.templateFileInfo.dataFile,
 		fitFile = this.templateFileInfo.fitProto,
-		files = [{fileName: simFile.name, fileType: simFile.filetype, fileId: simFile.id},
-		         {fileName: dataFile.name, fileType: dataFile.filetype, fileId: (this.dataTmpName ? -1 : dataFile.id)},
-		         {fileName: fitFile.name, fileType: fitFile.filetype, fileId: fitFile.id}];
+		files = [{fileName: simFile.name, tmpName: 'sim', fileType: simFile.filetype, fileId: simFile.id},
+		         {fileName: dataFile.name, tmpName: 'dat', fileType: dataFile.filetype, fileId: (this.dataTmpName ? -1 : dataFile.id)},
+		         {fileName: fitFile.name, tmpName: 'fit', fileType: fitFile.filetype, fileId: fitFile.id}];
 	if (this.dataTmpName)
 	{
 		files[1].tmpName = this.dataTmpName;
 	}
 	console.log(files);
 	// Send updated fitting protocol file if needed
-	var newFitProto = this.getFitProtoFromForm();
+	// TODO: The 'if needed' part!  Doing a compare even of the stringified form isn't enough, as object property ordering isn't conserved.
+	var newFitProto = this.getFitProtoFromForm(),
+		blob = new Blob([JSON.stringify(newFitProto)], {type: 'text/plain'}),
+		fd = new FormData;
 	console.log(newFitProto);
-	// Details of the new version to send
-	var details = {
-		task: "createNewEntity",
-		entityName: this.templateName,
-		versionName: $('#versionName').val(),
-		commitMsg: $('#commitMsg').val(),
-		visibility: $('#visibility').val(),
-		files: files,
-		mainFile: files[2].fileName,
-		rerunExperiments: false
-	};
-	console.log(details);
+	$('#submitAction').html("<img src='"+contextPath+"/res/img/loading2-new.gif' alt='uploading' /> sending protocol to server...");
+	fd.append('file', blob);
+	$.ajax(contextPath + '/upload.html',
+			{data: fd,
+			 method: 'post',
+			 processData: false, // Don't try to transform the file into a query string
+			 contentType: false, // Don't set a contentType header
+			 context: this})
+		.fail(function () {
+			showOkFail($('#submitAction'), false, "sorry, server error uploading; try again");
+		})
+		.done(function (json) {
+			console.log(json);
+			displayNotifications(json);
+			if (json.upload && json.upload.response)
+			{
+				$('#submitAction').text('Uploaded protocol');
+				files[2].tmpName = json.upload.tmpName;
+				files[2].fileId = -1;
+				// Details of the new version to send
+				var details = {
+					task: "createNewEntity",
+					entityName: this.templateName,
+					versionName: $('#versionName').val(),
+					commitMsg: $('#commitMsg').val(),
+					visibility: $('#visibility').val(),
+					files: files,
+					mainFile: files[2].fileName,
+					rerunExperiments: false
+				};
+				console.log(details);
+				$.ajax(contextPath + '/protocol/createnew',
+						{data: JSON.stringify(details),
+						 method: 'post',
+						 context: this})
+					.fail(function () {
+						showOkFail($('#submitAction'), false, "sorry, server error creating protocol; try again");
+					})
+					.done(this.runFitting);
+				}
+			else
+			{
+				showOkFail($('#submitAction'), false, "file upload failed; see above");
+			}
+		});
+}
+
+/**
+ * Having created a new version of the fitting protocol (we hope - errors are checked for here),
+ * run it against the selected model!
+ */
+FittingProtocol.prototype.runFitting = function (json)
+{
+	console.log('Run fitting!');
+	console.log(json);
+	displayNotifications(json);
+	if (!json.createNewEntity)
+	{
+		showOkFail($('#submitAction'), false, "unexpected server response");
+	}
+	else if (json.entityName && !json.entityName.response)
+	{
+		showOkFail($('#submitAction'), false, json.entityName.responseText);
+	}
+	else if (json.versionName && !json.versionName.response)
+	{
+		showOkFail($('#versionAction'), false, json.versionName.responseText);
+	}
+	if (json.createNewEntity)
+	{
+		var $action = $('#submitAction');
+		if (!json.createNewEntity.response)
+		{
+			showOkFail($action, json.createNewEntity.response, json.createNewEntity.responseText);
+		}
+		else
+		{
+			// Submit the run request
+			$action.html("<img src='"+contextPath+"/res/img/loading2-new.gif' alt='submitting...' /> starting fitting process...");
+			var newProto = json.createNewEntity,
+				request = {
+					task: "newExperiment",
+					model: parseInt($('#model').val()),
+					protocol: newProto.versionId
+				},
+				protoUrl = contextPath + "/" + newProto.versionType + "/id/" + newProto.entityId + "/version/" + newProto.versionId,
+				templateUrl = contextPath + "/fitting/p/" + newProto.versionId,
+				$success = $('#successMsg');
+			$success.html("Your <a href='"+protoUrl+"'>specialised fitting protocol can be viewed here</a>.<br/>"
+					+"You can also <a href='"+templateUrl+"'>use it as a template for new fitting experiments</a>.");
+			console.log(request);
+			$.ajax(contextPath+'/newexperiment.html',
+					{data: JSON.stringify(request),
+					 method: 'post',
+					 context: this})
+				.done(function (json) {
+					console.log(json);
+					displayNotifications(json);
+					showOkFail($action, json.newExperiment && json.newExperiment.response, json.newExperiment.responseText);
+					if (json.newExperiment && json.newExperiment.response)
+					{
+						// Show links to view the experiment results
+						var exp = json.newExperiment,
+							expUrl = contextPath + "/experiment/" + convertForURL(exp.expName) + "/" + exp.expId + "/latest",
+							msg = "View your <a href='"+expUrl+"'>new fitting experiment</a> &mdash; results will appear there when it completes.";
+						$success.append("<br/>"+msg);
+						$('html, body').animate({ scrollTop: $success.offset().top }, 2000);
+						// Disable the 'run fitting' link
+						$('#submit').off('click').prop('disabled', true).hide();
+					}
+				})
+				.fail(function () {
+					showOkFail($action, false, 'server error starting fitting; try again');
+				});
+		}
+	}
+}
+
+/**
+ * Show a success or failure message in the given element.
+ * @param $elt  the (jQuery wrapper for) the element in which to display the message
+ * @param status  whether this is success or failure
+ * @param msg  the message itself
+ */
+function showOkFail($elt, status, msg)
+{
+	if (status)
+		$elt.html("<img src='"+contextPath+"/res/img/check.png' alt='success' /> " + msg);
+	else
+		$elt.html("<img src='"+contextPath+"/res/img/failed.png' alt='error' /> " + msg);
 }
 
 /**
@@ -509,11 +634,10 @@ function initFitting()
 	
 	// Set up clicks on entries in the template protocols list to bring us to the specification view
 	$("a.template_link").click(function(){
-		// TODO: get the protocol id from the li element's id, and use nextPage to change view
-		var proto_id = this.id.replace("link_", ""); // I think!
-		var url = "fitting/p/".concat(proto_id);
+		var proto_id = this.id.replace("link_", ""),
+			url = "fitting/p/".concat(proto_id);
 		console.log(url);
-		nextPage(url,false);
+		nextPage(url, false);
 	});
 }
 
