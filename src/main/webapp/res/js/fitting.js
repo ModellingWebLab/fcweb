@@ -430,8 +430,14 @@ FittingProtocol.prototype.getFitProtoFromForm = function()
 		}
 		else
 		{
-			protoSkeleton.prior[paramName] = [parseFloat($('#'+idBase+'-low').val()),
-			                                  parseFloat($('#'+idBase+'-high').val())];
+			// TODO: We will need to change the form creation code so it lets users put a uniform prior on a parameter that was fixed!
+			// TODO: This only seems to work if you fix just one parameter...
+			var low = parseFloat($('#'+idBase+'-low').val()),
+				high = parseFloat($('#'+idBase+'-high').val());
+			if (low == high)
+				protoSkeleton.prior[paramName] = low;
+			else
+				protoSkeleton.prior[paramName] = [low, high];
 		}
 	}
 	if (this.dataTmpName)
