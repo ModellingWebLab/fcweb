@@ -65,6 +65,9 @@ function FittingProtocol(templateId)
 {
 	// Member data
 	this.templateId = parseInt(templateId);
+	this.paramMap = [];
+	this.paramMapInv = {};
+	this.models = {};
 	// Constructor actions
 	console.log(this);
 	// Get info about the chosen template
@@ -269,23 +272,21 @@ FittingProtocol.prototype.gotModelList = function(json)
  * any parameter inputs that aren't relevant.
  *
  * Also adds text to each td that gives the default values for the parameters.
- * 
- * TODO: IF the model loads after the protocol it looks like all these get greyed out!
  */
 FittingProtocol.prototype.checkModelParameters = function(versionId)
 {
-	console.log('Check params ' + versionId);
 	var model = this.models[versionId],
 		params = model.params;
+	console.log('Check params ' + versionId + (params ? '':' (no-op)'));
 	if (params)
 	{
 		$('#modelParams input').prop('disabled', true);
 		$('#modelParams td span').remove();
 		for (var name in params)
 		{
-			if (params.hasOwnProperty(name))
+			if (params.hasOwnProperty(name) && this.paramMapInv[name] !== undefined)
 			{
-				$('#'+name+'-td')
+				$('#param-'+this.paramMapInv[name]+'-td')
 					.append('<span>(default: '+params[name]+')</span>')
 					.children('input').prop('disabled', false);
 			}
@@ -350,7 +351,8 @@ FittingProtocol.prototype.gotTemplateProtocol = function(templateFileContents)
 		objTable = $("#objParams"),
 		priors = templateFileContents.prior;
 	console.log(priors);
-	this.paramMap = []; // Maps from index (used for CSS id) to parameter name
+	this.paramMap = [];    // Maps from index (used for CSS id) to parameter name
+	this.paramMapInv = {}; // Inverse map, from parameter name to index
 	for (var arg in priors)
 	{
 		if (priors.hasOwnProperty(arg))
@@ -360,9 +362,10 @@ FittingProtocol.prototype.gotTemplateProtocol = function(templateFileContents)
 				row = $('<tr/>').appendTo(table),
 				th = $('<th/>').text(arg),
 				idBase = 'param-'+this.paramMap.length,
-				td = $('<td/>'),
+				td = $('<td id="' + idBase + '-td"/>'),
 				ids = [idBase+'-low', idBase+'-high'],
 				labels = ['From', 'to'];
+			this.paramMapInv[arg] = this.paramMap.length;
 			this.paramMap.push(arg);
 			row.append(th, td);
 			if (priors[arg] instanceof Array)
@@ -378,6 +381,7 @@ FittingProtocol.prototype.gotTemplateProtocol = function(templateFileContents)
 			}
 		}
 	}
+	this.checkModelParameters($('#model').val()); // If model has loaded first, add default parameter values to display
 }
 
 /**
