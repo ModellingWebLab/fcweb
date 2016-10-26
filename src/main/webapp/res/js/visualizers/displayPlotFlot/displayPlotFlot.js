@@ -123,7 +123,14 @@ function plotAccordingToChoices(plotProperties, selectedCoords) {
     {
     	settings.points = { show: false };
     	settings.lines = { show: false };
-    	settings.bars = { show: true, barWidth : data[0].data[1][0] - data[0].data[0][0], align : 'left' };
+      for (var i=0; i<data.length; i++)
+      {
+        data[i].bars = {
+          show : true,
+          barWidth : data[i].data[1][0] - data[i].data[0][0],
+          align : 'left'
+        };
+      }
     }
 
     plottedGraph = $.plot("#" + flotPlotDivId, data, settings);
