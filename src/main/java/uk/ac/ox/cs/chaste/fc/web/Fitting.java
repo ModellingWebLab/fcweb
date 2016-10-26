@@ -110,11 +110,11 @@ public class Fitting extends WebModule
 				{
 					JSONObject fileRep = f.toJson();
 					if (f.isMasterFile())
-						answer.put("fitProto",fileRep);	
-					else if (f.getFiletype().equals("CSV"))
-						answer.put("dataFile",fileRep);
+						answer.put("fitProto", fileRep);
+					else if (f.getName().toLowerCase().endsWith(".csv"))
+						answer.put("dataFile", fileRep);
 					else
-						answer.put("simProto",fileRep);
+						answer.put("simProto", fileRep);
 				}
 			}
 
