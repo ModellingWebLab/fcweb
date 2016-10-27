@@ -364,12 +364,20 @@ FittingProtocol.prototype.gotTemplateProtocol = function(templateFileContents)
 				idBase = 'param-'+this.paramMap.length,
 				td = $('<td id="' + idBase + '-td"/>'),
 				ids = [idBase+'-low', idBase+'-high'],
-				labels = ['From', 'to'];
+				labels = ['  from', 'to'];
 			this.paramMapInv[arg] = this.paramMap.length;
 			this.paramMap.push(arg);
 			row.append(th, td);
+
+			var priorTypeId = idBase+'-type';
+			var priorType = $('<select id="'+priorTypeId+'"><option value="range">Range</option><option value="fixed">Fixed</option></select>');
+			priorType.on('change', function (event) { updatePriorInput(event.target); });
+
+			td.append(priorType);
+
 			if (priors[arg] instanceof Array)
 			{
+				document.getElementById(priorTypeId).value = 'range';
 				for (var i=0; i<2; i++)
 				{
 					td.append('<label for="'+ids[i]+'">'+labels[i]+'</label> <input id="'+ids[i]+'" size="5" value="'+priors[arg][i]+'"/> ');
@@ -377,11 +385,49 @@ FittingProtocol.prototype.gotTemplateProtocol = function(templateFileContents)
 			}
 			else
 			{
+				document.getElementById(priorTypeId).value = 'fixed';
 				td.append('<input id="'+idBase+'-val" size="5" value="'+priors[arg]+'"/>');
 			}
 		}
 	}
 	this.checkModelParameters($('#model').val()); // If model has loaded first, add default parameter values to display
+}
+
+function updatePriorInput (priorTypeElt)
+{
+	var newVal = $(priorTypeElt).val();
+	var idBase = priorTypeElt.id.replace('-type','');
+
+	var td = document.getElementById(idBase+'-td');
+
+	// If parameter previously specified as fixed, save this value to populate new inputs.
+	// Otherwise, assume it was specified as low-high range and save low value for this purpose.
+	var $val = $('#'+idBase+'-val');
+	if ($val.length > 0)
+		var oldVal = $val.val();
+	else
+		var oldVal = $('#'+idBase+'-low').val();
+
+	// Clear old inputs/labels before repopulating
+	var oldSpan = "<span/>";
+	$(td).find("input").each(function() { td.removeChild(this); } );
+	$(td).find("label").each(function() { td.removeChild(this); } );
+	$(td).find("span").each(function() { oldSpan = this; td.removeChild(this); } )
+
+	if (newVal == 'range')
+	{
+		var ids = [idBase+'-low', idBase+'-high'],
+			labels = ['  from', 'to'];
+		for (var i=0; i<2; i++)
+		{
+			$(td).append('<label for="'+ids[i]+'">'+labels[i]+'</label> <input id="'+ids[i]+'" size="5" value="'+oldVal+'"/> ');
+		}
+	}
+	else
+	{
+		$(td).append('<input id="'+idBase+'-val" size="5" value="'+oldVal+'"/>');
+	}
+	$(td).append(oldSpan);
 }
 
 /**
