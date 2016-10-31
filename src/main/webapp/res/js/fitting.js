@@ -364,35 +364,28 @@ FittingProtocol.prototype.gotTemplateProtocol = function(templateFileContents)
 				idBase = 'param-'+this.paramMap.length,
 				td = $('<td id="' + idBase + '-td"/>'),
 				ids = [idBase+'-low', idBase+'-high'],
-				labels = ['  from', 'to'];
+				labels = ['  from', 'to'],
+				priorTypeId = idBase+'-type',
+				priorType = $('<select id="'+priorTypeId+'"><option value="range">Range</option><option value="fixed">Fixed</option></select>');
+
 			this.paramMapInv[arg] = this.paramMap.length;
 			this.paramMap.push(arg);
 			row.append(th, td);
-
-			var priorTypeId = idBase+'-type';
-			var priorType = $('<select id="'+priorTypeId+'"><option value="range">Range</option><option value="fixed">Fixed</option></select>');
+			
 			priorType.on('change', function (event) { updatePriorInput(event.target); });
-
 			td.append(priorType);
 
-			if (priors[arg] instanceof Array)
-			{
-				document.getElementById(priorTypeId).value = 'range';
-				for (var i=0; i<2; i++)
-				{
-					td.append('<label for="'+ids[i]+'">'+labels[i]+'</label> <input id="'+ids[i]+'" size="5" value="'+priors[arg][i]+'"/> ');
-				}
-			}
-			else
-			{
-				document.getElementById(priorTypeId).value = 'fixed';
-				td.append('<input id="'+idBase+'-val" size="5" value="'+priors[arg]+'"/>');
-			}
+			addParameterInputs((priors[arg] instanceof Array), idBase, priors[arg]);
 		}
 	}
 	this.checkModelParameters($('#model').val()); // If model has loaded first, add default parameter values to display
 }
 
+/**
+ * Called on change of prior type between "Range" and "Fixed"
+ * - Range->Fixed: Updates td element associated with parameter to have a single input
+ * - Fixed->Range: Updates td element associated with parameter to have two inputs (lo, hi)
+ */
 function updatePriorInput (priorTypeElt)
 {
 	var newVal = $(priorTypeElt).val();
@@ -404,30 +397,45 @@ function updatePriorInput (priorTypeElt)
 	// Otherwise, assume it was specified as low-high range and save low value for this purpose.
 	var $val = $('#'+idBase+'-val');
 	if ($val.length > 0)
-		var oldVal = $val.val();
+		var oldVal = [$val.val(), $val.val()];
 	else
 		var oldVal = $('#'+idBase+'-low').val();
 
 	// Clear old inputs/labels before repopulating
 	var oldSpan = "<span/>";
-	$(td).find("input").each(function() { td.removeChild(this); } );
-	$(td).find("label").each(function() { td.removeChild(this); } );
+	$(td).find("input,label").each(function() { td.removeChild(this); } );
 	$(td).find("span").each(function() { oldSpan = this; td.removeChild(this); } )
 
-	if (newVal == 'range')
+	addParameterInputs(newVal == 'range', idBase, oldVal);
+	$(td).append(oldSpan);
+}
+
+/** 
+ * For a parameter indicated by idBase, adds either one or two inputs to the td element,
+ *  dependeing on whether the parameter is specified as a fixed value or a range.
+ * Used both on initialization of template and when parameter types are changed.
+ */
+function addParameterInputs (isRange, idBase, val)
+{
+	var td = document.getElementById(idBase+'-td'),
+		priorTypeId = idBase+'-type',
+		ids = [idBase+'-low', idBase+'-high'],
+		labels = ['  from', 'to'];
+
+	if (isRange)
 	{
-		var ids = [idBase+'-low', idBase+'-high'],
-			labels = ['  from', 'to'];
 		for (var i=0; i<2; i++)
 		{
-			$(td).append('<label for="'+ids[i]+'">'+labels[i]+'</label> <input id="'+ids[i]+'" size="5" value="'+oldVal+'"/> ');
+			// Necessary when initializing template -- make sure correct dropdown option displayed
+			document.getElementById(priorTypeId).value = 'range';
+			$(td).append('<label for="'+ids[i]+'">'+labels[i]+'</label> <input id="'+ids[i]+'" size="5" value="'+val[i]+'"/> ');
 		}
 	}
 	else
 	{
-		$(td).append('<input id="'+idBase+'-val" size="5" value="'+oldVal+'"/>');
+		document.getElementById(priorTypeId).value = 'fixed';
+		$(td).append('<input id="'+idBase+'-val" size="5" value="'+val+'"/>');
 	}
-	$(td).append(oldSpan);
 }
 
 /**
