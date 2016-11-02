@@ -424,10 +424,10 @@ function addParameterInputs (isRange, idBase, val)
 
 	if (isRange)
 	{
+		// Necessary when initializing template -- make sure correct dropdown option displayed
+		document.getElementById(priorTypeId).value = 'range';
 		for (var i=0; i<2; i++)
 		{
-			// Necessary when initializing template -- make sure correct dropdown option displayed
-			document.getElementById(priorTypeId).value = 'range';
 			$(td).append('<label for="'+ids[i]+'">'+labels[i]+'</label> <input id="'+ids[i]+'" size="5" value="'+val[i]+'"/> ');
 		}
 	}
