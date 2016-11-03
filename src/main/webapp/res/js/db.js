@@ -475,6 +475,7 @@ function getMatrix (jsonObject, actionIndicator)
  * Parse the current location URL to determine what part of the matrix to show.
  * The URL pathname should look like: {contextPath}/db/models/id1/id2/protocols/id3/id4
  * If no models or protocols are given, we show everything.
+ * The URL can also be {contextPath}/db/public to show only what anonymous users can view.
  * Returns a JSON object to be passed to getMatrix();
  */
 function parseLocation ()
@@ -491,7 +492,8 @@ function parseLocation ()
 			protoIndex = items.indexOf("protocols");
 		if (protoIndex != -1)
 		{
-			ret.modelIds = items.slice(modelIndex + 1, protoIndex);
+			if (modelIndex != -1)
+				ret.modelIds = items.slice(modelIndex + 1, protoIndex);
 			ret.protoIds = items.slice(protoIndex + 1);
 		}
 		else if (modelIndex != -1)
@@ -500,6 +502,8 @@ function parseLocation ()
 			baseUrls.row = "/models/" + ret.modelIds.join("/");
 		if (protoIndex != -1)
 			baseUrls.col = "/protocols/" + ret.protoIds.join("/");
+		if (items[0] == "public")
+			ret.publicOnly = "1";
 	}
 	return ret;
 }

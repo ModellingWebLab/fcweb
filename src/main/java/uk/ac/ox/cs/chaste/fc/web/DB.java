@@ -60,28 +60,36 @@ public class DB extends WebModule
 			response.setStatus (HttpServletResponse.SC_BAD_REQUEST);
 			throw new IOException ("nothing to do.");
 		}
-		
+
 		if (task.equals ("getMatrix"))
 		{
+			// Check whether we need to pretend to be a guest
+			if (query.get("publicOnly") != null)
+				if (query.get("publicOnly").toString().equals("1"))
+				{
+					user = new User(db, notifications, null);
+					user.setRole(User.ROLE_GUEST);
+				}
+
 			ModelManager modelMgmt = new ModelManager (db, notifications, userMgmt, user);
 			ProtocolManager protocolMgmt = new ProtocolManager (db, notifications, userMgmt, user);
 			JSONObject obj = new JSONObject ();
 
 			Vector<ChasteEntityVersion> modelVersions = getEntityVersions (modelMgmt, getIds(query, "modelIds"));
 			Vector<ChasteEntityVersion> protocolVersions = getEntityVersions (protocolMgmt, getIds(query, "protoIds"));
-			
+
 			Vector<ChasteEntity> experiments = getExperimentVersions (modelVersions, protocolVersions, new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt));
-			
+
 			obj.put ("models", versionsToJson (modelVersions));
 			obj.put ("protocols", versionsToJson (protocolVersions));
 			obj.put ("experiments", entitiesToJson (experiments));
-			
+
 			answer.put ("getMatrix", obj);
 		}
-		
+
 		return answer;
 	}
-	
+
 	/**
 	 * Get a list of numeric ids from a JSON object.  Returns an empty list if the requested attribute is not present.
 	 * @param obj  the object to get ids from
