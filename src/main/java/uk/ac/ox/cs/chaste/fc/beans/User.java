@@ -475,7 +475,7 @@ public class User
 	
 	public boolean isAllowedToForceNewExperiment ()
 	{
-		return isAuthorized () && role.equals (ROLE_ADMIN);
+		return isAuthorized () && !role.equals (ROLE_GUEST);
 	}
 	
 	public boolean isAllowedToCreateNewExperiment ()
