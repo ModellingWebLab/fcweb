@@ -142,6 +142,7 @@ def GetProtoInterface(protoPath):
         else:
             for grammar, processor in grammars.items():
                 try:
+                    # TODO: This breaks with multi-line items!
                     match = grammar.parseString(line)
                     in_conversion_rule = False
                 except CSP.p.ParseBaseException:
