@@ -86,7 +86,9 @@ def GetProtoInterface(protoPath):
     """Get the set of ontology terms used by the given protocol, recursively processing imports."""
     parser = CSP.CompactSyntaxParser
     nested_proto = CSP.MakeKw('nests') + CSP.MakeKw('protocol') - parser.quotedUri
+    # The cut-down import parser just looks at the URI, ignoring any overrides which may follow within braces.
     import_stmt = CSP.p.Group(CSP.MakeKw('import') - CSP.Optional(parser.ncIdent + parser.eq, default='') + parser.quotedUri)
+    # Interface section starts with: modelInterface = p.Group(MakeKw('model') - MakeKw('interface') - obrace
     var_ref = parser.cIdent.re
     ns_maps = {}
     terms = set()
@@ -108,6 +110,7 @@ def GetProtoInterface(protoPath):
         AddTerm(res[0].tokens['name'], optional_terms)
         if 'default' in res[0].tokens:
             for match in var_ref.finditer(res[0].default_expr):
+                # Note that var_ref guarantees only a single colon
                 prefix, name = match.group(0).split(':')
                 nsuri = ns_maps.get(prefix, None)
                 if nsuri:
