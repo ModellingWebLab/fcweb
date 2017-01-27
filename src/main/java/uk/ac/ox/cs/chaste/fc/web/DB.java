@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.TreeSet;
 import java.util.Vector;
-
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,7 +19,6 @@ import uk.ac.ox.cs.chaste.fc.beans.ChasteEntity;
 import uk.ac.ox.cs.chaste.fc.beans.ChasteEntityVersion;
 import uk.ac.ox.cs.chaste.fc.beans.Notifications;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeader;
-import uk.ac.ox.cs.chaste.fc.beans.PageHeaderLink;
 import uk.ac.ox.cs.chaste.fc.beans.PageHeaderScript;
 import uk.ac.ox.cs.chaste.fc.beans.User;
 import uk.ac.ox.cs.chaste.fc.mgmt.ChasteEntityManager;
@@ -122,18 +120,21 @@ public class DB extends WebModule
 	 * Get the latest visible version of all visible entities from the given manager.
 	 * The list will be sorted by name by the manager.
 	 * @param entityIds  if given, only retrieve entities with these ids
-	 *     TODO: Implement this by only retrieving desired entities from the DB, rather than filtering afterwards
 	 */
 	private Vector<ChasteEntityVersion> getEntityVersions (ChasteEntityManager entityMgmt, ArrayList<Integer> entityIds)
 	{
-		Vector<ChasteEntityVersion> entities = new Vector<ChasteEntityVersion> ();
+		Vector<ChasteEntityVersion> versions = new Vector<ChasteEntityVersion>();
 
-		TreeSet<ChasteEntity> entity = entityMgmt.getAll (false, true);
-		for (ChasteEntity e : entity)
-			if (entityIds.isEmpty() || entityIds.contains(e.getId()))
-				entities.add (e.getLatestVersion ());
+		TreeSet<ChasteEntity> entities;
+		if (entityIds.isEmpty())
+			entities = entityMgmt.getAll(false, true);
+		else
+			entities = entityMgmt.getEntities(entityIds, false, true);
+
+		for (ChasteEntity e : entities)
+			versions.add(e.getLatestVersion());
 		
-		return entities;
+		return versions;
 	}
 	
 	/**

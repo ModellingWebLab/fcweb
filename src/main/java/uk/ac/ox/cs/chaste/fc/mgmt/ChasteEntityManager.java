@@ -387,6 +387,48 @@ public abstract class ChasteEntityManager
 		}
 		return null;
 	}
+
+	/**
+	 * Get the requested entities from the DB, if user can see them.
+	 * @param entityIds  the entities to fetch
+	 * @param neglectPermissions  if false, only return entity versions the current user has permission to view
+	 * @param filterEmptyEntities  if true, don't return entities for which the current user can't see any versions
+	 * @return  a set of all (visible) entities of this manager's type
+	 */
+	public TreeSet<ChasteEntity> getEntities(ArrayList<Integer> entityIds, boolean neglectPermissions, boolean filterEmptyEntities)
+	{
+		if (entityIds.isEmpty())
+			return new TreeSet<ChasteEntity>();
+		StringBuilder query_marks = new StringBuilder();
+		for (int i=1; i<entityIds.size(); i++)
+			query_marks.append("?,");
+		query_marks.append("?");
+		PreparedStatement st = db.prepareStatement(buildSelectQuery(" WHERE mo.id IN (" + query_marks.toString() + ")"));
+		ResultSet rs = null;
+		try
+		{
+			for (int i=0; i<entityIds.size(); i++)
+				st.setInt(i+1, entityIds.get(i));
+			st.execute();
+			rs = st.getResultSet();
+			TreeSet<ChasteEntity> res = evaluateResult(rs, neglectPermissions, filterEmptyEntities, false);
+			db.closeRes(st);
+			db.closeRes(rs);
+			return res;
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+			note.addError("sql err retrieving entities: " + e.getMessage());
+			LOGGER.error(e, "db problem while retrieving entities (", entityColumn, ")");
+		}
+		finally
+		{
+			db.closeRes(st);
+			db.closeRes(rs);
+		}
+		return null;
+	}
 	
 	/**
 	 * @param neglectPermissions  if false, only return entity versions the current user has permission to view
