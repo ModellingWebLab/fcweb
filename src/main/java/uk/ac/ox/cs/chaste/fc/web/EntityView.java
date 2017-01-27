@@ -1184,6 +1184,11 @@ public class EntityView extends WebModule
 				notifications.addError("Invalid visibility '" + userVisibility + "' sent.");
 				createOk = false;
 			}
+			else if (userVisibility.equals(ChasteEntityVersion.VISIBILITY_MODERATED))
+			{
+				// We don't allow the moderated flag to be set on creation; only after the fact.
+				info.visibility = ChasteEntityVersion.VISIBILITY_PUBLIC;
+			}
 			else
 			{
 				info.visibility = userVisibility;
@@ -1237,6 +1242,8 @@ public class EntityView extends WebModule
 				if (createOk && info.visibility == null)
 				{
 					info.visibility = info.entity.getLatestVersion().getVisibility();
+					if (info.visibility.equals(ChasteEntityVersion.VISIBILITY_MODERATED))
+						info.visibility = ChasteEntityVersion.VISIBILITY_PUBLIC;
 					answer.put("visibility", info.visibility);
 				}
 			}

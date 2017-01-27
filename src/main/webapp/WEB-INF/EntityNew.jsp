@@ -36,9 +36,6 @@
 	    <p>
             <label for="visibility">Visibility:</label>
             <select id="visibility">
-                <c:if test="${User.admin}">
-                    <option VALUE="MODERATED" id="visibility-MODERATED">MODERATED</option>
-                </c:if>
                 <option value="PUBLIC" id="visibility-PUBLIC">PUBLIC</option>
                 <option value="RESTRICTED" id="visibility-RESTRICTED">RESTRICTED</option>
                 <option value="PRIVATE" id="visibility-PRIVATE" selected="selected">PRIVATE</option>
