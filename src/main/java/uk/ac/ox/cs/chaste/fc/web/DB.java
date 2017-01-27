@@ -61,13 +61,13 @@ public class DB extends WebModule
 
 		if (task.equals ("getMatrix"))
 		{
-			// Check whether we need to pretend to be a guest
-			if (query.get("publicOnly") != null)
-				if (query.get("publicOnly").toString().equals("1"))
-				{
-					user = new User(db, notifications, null);
-					user.setRole(User.ROLE_GUEST);
-				}
+			// Check whether we need to pretend to be a guest, and display all public experiments
+			boolean show_public = (query.get("publicOnly") != null && query.get("publicOnly").toString().equals("1"));
+			if (show_public)
+			{
+				user = new User(db, notifications, null);
+				user.setRole(User.ROLE_GUEST);
+			}
 
 			ModelManager modelMgmt = new ModelManager (db, notifications, userMgmt, user);
 			ProtocolManager protocolMgmt = new ProtocolManager (db, notifications, userMgmt, user);
@@ -75,6 +75,22 @@ public class DB extends WebModule
 
 			Vector<ChasteEntityVersion> modelVersions = getEntityVersions (modelMgmt, getIds(query, "modelIds"));
 			Vector<ChasteEntityVersion> protocolVersions = getEntityVersions (protocolMgmt, getIds(query, "protoIds"));
+
+			// Check whether to filter out experiments not related to the user's own models/protocols
+			if (query.get("mineOnly") != null && query.get("mineOnly").toString().equals("1"))
+			{
+				boolean includeModeratedModels = (query.get("includeModeratedModels") == null || query.get("includeModeratedModels").toString().equals("1"));
+				filterVersions(modelVersions, user.getId(), includeModeratedModels);
+
+				boolean includeModeratedProtocols = (query.get("includeModeratedProtocols") == null || query.get("includeModeratedProtocols").toString().equals("1"));
+				filterVersions(protocolVersions, user.getId(), includeModeratedProtocols);
+			}
+			else if (!show_public)
+			{
+				// Show *only* moderated models & protocols
+				filterVersions(modelVersions, -1, true);
+				filterVersions(protocolVersions, -1, true);
+			}
 
 			Vector<ChasteEntity> experiments = getExperimentVersions (modelVersions, protocolVersions, new ExperimentManager (db, notifications, userMgmt, user, modelMgmt, protocolMgmt));
 
@@ -87,7 +103,22 @@ public class DB extends WebModule
 
 		return answer;
 	}
-
+	
+	/**
+	 * Filter out versions from the given list that aren't owned or moderated, depending on arguments.
+	 * @param versions  the base list of versions to filter
+	 * @param userId  keep versions authored by this user
+	 * @param includeModerated  whether to keep moderated versions as well
+	 */
+	private void filterVersions(Vector<ChasteEntityVersion> versions, int userId, boolean includeModerated)
+	{
+		Vector<ChasteEntityVersion> kept = new Vector<ChasteEntityVersion>(versions.size());
+		for (ChasteEntityVersion v: versions)
+			if (v.getAuthor().getId() == userId || (includeModerated && v.getVisibility().equals(ChasteEntityVersion.VISIBILITY_MODERATED)))
+				kept.add(v);
+		versions.retainAll(kept);
+	}
+	
 	/**
 	 * Get a list of numeric ids from a JSON object.  Returns an empty list if the requested attribute is not present.
 	 * @param obj  the object to get ids from

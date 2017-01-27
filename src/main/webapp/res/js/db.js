@@ -485,6 +485,8 @@ function parseLocation ()
 		ret = { task: "getMatrix" };
 	if (document.location.pathname.substr(0, base.length) == base)
 		rest = document.location.pathname.substr(base.length);
+	$('.showButton').removeClass("selected");
+	$('.showMyButton').hide();
 	if (rest.length > 0)
 	{
 		var items = rest.split("/"),
@@ -502,9 +504,41 @@ function parseLocation ()
 			baseUrls.row = "/models/" + ret.modelIds.join("/");
 		if (protoIndex != -1)
 			baseUrls.col = "/protocols/" + ret.protoIds.join("/");
-		if (items[0] == "public")
-			ret.publicOnly = "1";
+		if (modelIndex == -1 && protoIndex == -1)
+		{
+			if (items[0] == "public")
+			{
+				$('#showPublicExpts').addClass("selected");
+				ret.publicOnly = "1";
+			}
+			else if (items[0].substr(0,4) == "mine")
+			{
+				$('#showMyExpts').addClass("selected");
+				$('.showMyButton').show();
+				ret.mineOnly = "1";
+				if (items[0].indexOf("-m") != -1)
+				{
+					ret.includeModeratedModels = "0";
+					console.log('Show model');
+					$('#showMyExptsModels').text("Show moderated models");
+				}
+				else
+					$('#showMyExptsModels').text("Hide moderated models");
+				if (items[0].indexOf("-p") != -1)
+				{
+					ret.includeModeratedProtocols = "0";
+					console.log('Show proto');
+					$('#showMyExptsProtocols').text("Show moderated protocols");
+				}
+				else
+					$('#showMyExptsProtocols').text("Hide moderated protocols");
+			}
+			else
+				$('#showModeratedExpts').addClass("selected");
+		}
 	}
+	else
+		$('#showModeratedExpts').addClass("selected");
 	return ret;
 }
 
@@ -559,6 +593,56 @@ function prepareMatrix ()
 	});
 	$("#comparisonLink").hide();
 	$("#comparisonMatrix").hide();
+	
+	// The my/public/moderated view buttons
+	$("#showModeratedExpts").click(function () {
+		if (!$(this).hasClass("selected"))
+			document.location.href = contextPath + "/db";
+	});
+	$("#showPublicExpts").click(function () {
+		if (!$(this).hasClass("selected"))
+			document.location.href = contextPath + "/db/public";
+	});
+	$("#showMyExpts").click(function () {
+		if (!$(this).hasClass("selected"))
+			document.location.href = contextPath + "/db/mine";
+	});
+	$("#showMyExptsModels").click(function () {
+		var hideModels = hiddenToggle($(this)),
+			hideProtocols = $("#showMyExptsProtocols").text().substr(0,4) == 'Show';
+		console.log('M.click ' + hideModels + ' ' + hideProtocols);
+		document.location.href = contextPath + "/db/mine"
+			+ (hideModels ? "-m" : "") + (hideProtocols ? "-p" : "");
+	});
+	$("#showMyExptsProtocols").click(function () {
+		var hideModels = $("#showMyExptsModels").text().substr(0,4) == 'Show',
+			hideProtocols = hiddenToggle($(this));
+		console.log('P.click ' + hideModels + ' ' + hideProtocols);
+		document.location.href = contextPath + "/db/mine"
+			+ (hideModels ? "-m" : "") + (hideProtocols ? "-p" : "");
+	});
+}
+
+/**
+ * Toggle whether a button's text starts 'Hide' or 'Show'.
+ * @param $button  the button to check
+ * @returns true iff the text previously started 'Hide' (so the state was shown, now hidden)
+ */
+function hiddenToggle($button)
+{
+	var oldText = $button.text(),
+		hide;
+	if (oldText.substr(0,4) == 'Show')
+	{
+		hide = false;
+		$button.text('Hide' + oldText.substr(4));
+	}
+	else
+	{
+		hide = true;
+		$button.text('Show' + oldText.substr(4));
+	}
+	return hide;
 }
 
 function switchPage (page)

@@ -19,6 +19,17 @@
     <section id="matrixTab">
         <!-- <h2>Matrix overview</h2> -->
         <p>
+	        Show:
+	        <button class="showButton" id="showModeratedExpts" title="Only show experiments where the model and protocol have been approved by a site admin">Moderated experiments</button>
+	        <button class="showButton" id="showPublicExpts">All public experiments</button>
+	        <c:if test="${User != null && User.authorized}">
+	            <button class="showButton" id="showMyExpts">My experiments</button>
+	            <br/>
+	            <button class="showButton showMyButton" id="showMyExptsModels" title="Select whether to include moderated models, or just those owned by you">Hide moderated models</button>
+	            <button class="showButton showMyButton" id="showMyExptsProtocols" title="Select whether to include moderated protocols, or just those owned by you">Hide moderated protocols</button>
+	        </c:if>
+        </p>
+        <p>
         This matrix shows the latest versions (visible to you) of the models and protocols in our database, with the corresponding experiments.
         <c:if test="${User.isAllowedToCreateNewExperiment()}">
             If you can't see experiments you expect to be there, this is probably because they are associated with an older version of a listed model or protocol.
