@@ -58,6 +58,11 @@ public abstract class ChasteEntityManager
 		return entityStorageDir;
 	}
 	
+	public User getUser()
+	{
+		return this.user;
+	}
+	
 	public ChasteEntityManager (DatabaseConnector db, Notifications note, UserManager userMgmt, User user)
 	{
 		this.userMgmt = userMgmt;

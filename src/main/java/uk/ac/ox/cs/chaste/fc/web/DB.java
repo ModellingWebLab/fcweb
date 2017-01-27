@@ -3,6 +3,7 @@ package uk.ac.ox.cs.chaste.fc.web;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.Vector;
 import javax.naming.NamingException;
@@ -61,8 +62,10 @@ public class DB extends WebModule
 
 		if (task.equals ("getMatrix"))
 		{
-			// Check whether we need to pretend to be a guest, and display all public experiments
+			// Check whether we need to pretend to be a guest, and display only public experiments
+			boolean show_all = (query.get("showAll") != null && query.get("showAll").toString().equals("1"));
 			boolean show_public = (query.get("publicOnly") != null && query.get("publicOnly").toString().equals("1"));
+			boolean show_mine = (query.get("mineOnly") != null && query.get("mineOnly").toString().equals("1"));
 			if (show_public)
 			{
 				user = new User(db, notifications, null);
@@ -73,11 +76,14 @@ public class DB extends WebModule
 			ProtocolManager protocolMgmt = new ProtocolManager (db, notifications, userMgmt, user);
 			JSONObject obj = new JSONObject ();
 
-			Vector<ChasteEntityVersion> modelVersions = getEntityVersions (modelMgmt, getIds(query, "modelIds"));
-			Vector<ChasteEntityVersion> protocolVersions = getEntityVersions (protocolMgmt, getIds(query, "protoIds"));
+			// If we're showing just moderated entities (whether by themselves or along with our own)
+			// we need to ignore newer versions that aren't moderated.
+			boolean retrive_latest_moderated = (!show_public && !show_all) || show_mine;
+			Vector<ChasteEntityVersion> modelVersions = getEntityVersions(modelMgmt, getIds(query, "modelIds"), retrive_latest_moderated);
+			Vector<ChasteEntityVersion> protocolVersions = getEntityVersions(protocolMgmt, getIds(query, "protoIds"), retrive_latest_moderated);
 
 			// Check whether to filter out experiments not related to the user's own models/protocols
-			if (query.get("mineOnly") != null && query.get("mineOnly").toString().equals("1"))
+			if (show_mine)
 			{
 				boolean includeModeratedModels = (query.get("includeModeratedModels") == null || query.get("includeModeratedModels").toString().equals("1"));
 				filterVersions(modelVersions, user.getId(), includeModeratedModels);
@@ -85,7 +91,7 @@ public class DB extends WebModule
 				boolean includeModeratedProtocols = (query.get("includeModeratedProtocols") == null || query.get("includeModeratedProtocols").toString().equals("1"));
 				filterVersions(protocolVersions, user.getId(), includeModeratedProtocols);
 			}
-			else if (!show_public)
+			else if (!show_public && !show_all)
 			{
 				// Show *only* moderated models & protocols
 				filterVersions(modelVersions, -1, true);
@@ -151,8 +157,11 @@ public class DB extends WebModule
 	 * Get the latest visible version of all visible entities from the given manager.
 	 * The list will be sorted by name by the manager.
 	 * @param entityIds  if given, only retrieve entities with these ids
+	 * @param moderatedOrOwnedOnly  if set, ignore newer versions of non-owned entities that aren't moderated
+	 *     and return the latest moderated version
 	 */
-	private Vector<ChasteEntityVersion> getEntityVersions (ChasteEntityManager entityMgmt, ArrayList<Integer> entityIds)
+	private Vector<ChasteEntityVersion> getEntityVersions (ChasteEntityManager entityMgmt, ArrayList<Integer> entityIds,
+														   boolean moderatedOrOwnedOnly)
 	{
 		Vector<ChasteEntityVersion> versions = new Vector<ChasteEntityVersion>();
 
@@ -162,8 +171,21 @@ public class DB extends WebModule
 		else
 			entities = entityMgmt.getEntities(entityIds, false, true);
 
+		int author_id = entityMgmt.getUser().getId();
 		for (ChasteEntity e : entities)
-			versions.add(e.getLatestVersion());
+		{
+			Map<Integer, ChasteEntityVersion> vs = e.getOrderedVersions();
+			for (ChasteEntityVersion v : vs.values())
+			{
+				if (!moderatedOrOwnedOnly
+						|| v.getAuthor().getId() == author_id
+						|| v.getVisibility().equals(ChasteEntityVersion.VISIBILITY_MODERATED))
+				{
+					versions.add(v);
+					break;
+				}
+			}
+		}
 		
 		return versions;
 	}

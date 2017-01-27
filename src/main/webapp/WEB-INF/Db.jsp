@@ -23,6 +23,7 @@
 	        <button class="showButton" id="showModeratedExpts" title="Only show experiments where the model and protocol have been approved by a site admin">Moderated experiments</button>
 	        <button class="showButton" id="showPublicExpts">All public experiments</button>
 	        <c:if test="${User != null && User.authorized}">
+	            <button class="showButton" id="showAllExpts" title="Show all experiments I have permissions to see">All visible experiments</button>
 	            <button class="showButton" id="showMyExpts">My experiments</button>
 	            <br/>
 	            <button class="showButton showMyButton" id="showMyExptsModels" title="Select whether to include moderated models, or just those owned by you">Hide moderated models</button>

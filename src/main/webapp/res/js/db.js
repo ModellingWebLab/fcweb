@@ -539,6 +539,11 @@ function parseLocation ()
 				else
 					$('#showMyExptsProtocols').text("Hide moderated protocols");
 			}
+			else if (items[0] == "all")
+			{
+				$('#showAllExpts').addClass("selected");
+				ret.showAll = "1";
+			}
 			else
 				$('#showModeratedExpts').addClass("selected");
 		}
@@ -608,6 +613,10 @@ function prepareMatrix ()
 	$("#showPublicExpts").click(function () {
 		if (!$(this).hasClass("selected"))
 			document.location.href = contextPath + "/db/public";
+	});
+	$("#showAllExpts").click(function () {
+		if (!$(this).hasClass("selected"))
+			document.location.href = contextPath + "/db/all";
 	});
 	$("#showMyExpts").click(function () {
 		if (!$(this).hasClass("selected"))

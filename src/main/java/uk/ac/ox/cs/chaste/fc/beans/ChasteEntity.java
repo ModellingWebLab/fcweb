@@ -106,6 +106,9 @@ public class ChasteEntity
 		return versions;
 	}
 
+	/**
+	 * @return our versions in newest first ordering
+	 */
 	public Map<Integer, ChasteEntityVersion> getOrderedVersions()
 	{
 		Map<Integer, ChasteEntityVersion> sorted = new TreeMap<Integer, ChasteEntityVersion>(Collections.reverseOrder());
