@@ -145,6 +145,12 @@ function drawMatrix (matrix)
 	table.setAttribute("class", "matrixTable");
 	div.appendChild(table);
 
+	if (mat.length == 0)
+	{
+		table.innerHTML = "<p class='failed'>No experiments found matching the selected view criteria.</p>";
+		return;
+	}
+
 	for (var row = -1; row < mat.length; row++)
 	{
 		var tr = document.createElement("tr");
