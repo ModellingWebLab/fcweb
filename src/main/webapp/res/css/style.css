@@ -436,7 +436,8 @@ p.entityviz-PRIVATE
 	background: url(../img/red-dot.png) no-repeat left top 5px;
 }
 
-p.entityviz-PUBLIC
+p.entityviz-PUBLIC,
+p.entityviz-MODERATED
 {
 	padding-left:20px;
 	background: url(../img/green-dot.png) no-repeat left top 5px;
@@ -453,14 +454,16 @@ p.entityviz-PUBLIC
 
 li.entityviz-RESTRICTED,
 li.entityviz-PRIVATE,
-li.entityviz-PUBLIC
+li.entityviz-PUBLIC,
+li.entityviz-MODERATED
 {
 	padding-left: 25px; 
 	background-repeat: no-repeat;
 	background-position: 0px 5px; 
 }
 
-li.entityviz-PUBLIC
+li.entityviz-PUBLIC,
+li.entityviz-MODERATED
 {
 	background-image: url(../img/green-dot.png);
 }

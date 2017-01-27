@@ -19,7 +19,7 @@ import de.binfalse.bflog.LOGGER;
 
 public class DatabaseConnector
 {
-	public static final int DB_VERSION = 7;
+	public static final int DB_VERSION = 8;
 	private Connection connection;
 	private Notifications note;
 	
@@ -143,7 +143,7 @@ public class DatabaseConnector
 			if (!rs.next ())
 			{
 				// this is db version 1.0 -> lets upgrade the database to version
-				LOGGER.info ("this is db version 1 -> going to upgrate to 2");
+				LOGGER.info ("this is db version 1 -> going to upgrade to 2");
 				
 				st = this.prepareStatement ("CREATE TABLE IF NOT EXISTS `settings` ("
 					+ "  `user` int(11) NOT NULL,"
@@ -331,19 +331,36 @@ public class DatabaseConnector
 						throw new RuntimeException("failed to upgrade database");
 					}
 				}
-
-				// prepare for version 99
-				if (currentVersion < -99)
+				
+				if (currentVersion < 8)
 				{
-					LOGGER.info ("upgrading db to version -99..");
-					// do something that is necessary for db version -99
-					// ...
-					st = this.prepareStatement ("UPDATE `settings` SET `val`=-99 WHERE `user`='-1' AND `key`='DBVERSION';");
-					st.execute ();
-					closeRes (st);
+					// Add a 'MODERATED' visibility option
+					LOGGER.info("upgrading DB to version 8...");
+					try
+					{
+						String viscol = "CHANGE `visibility` `visibility` enum('PRIVATE','RESTRICTED','PUBLIC','MODERATED') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'PRIVATE'";
+						st = this.prepareStatement("ALTER TABLE `modelversions` " + viscol);
+						st.execute();
+						closeRes(st);
+						st = this.prepareStatement("ALTER TABLE `protocolversions` " + viscol);
+						st.execute();
+						closeRes(st);
+						st = this.prepareStatement("ALTER TABLE `experimentversions` " + viscol);
+						st.execute();
+						closeRes(st);
+
+						st = this.prepareStatement("UPDATE `settings` SET `val`=8 WHERE `user`='-1' AND `key`='DBVERSION';");
+						st.execute();
+						closeRes(st);
+					}
+					catch (SQLException e)
+					{
+						LOGGER.error(e, "error upgrading DB to version 8");
+						throw new RuntimeException("failed to upgrade database");
+					}
 				}
 				
-				// and so on..
+				// All upgrades done
 				LOGGER.info ("successfully upgraded db");
 			}
 			

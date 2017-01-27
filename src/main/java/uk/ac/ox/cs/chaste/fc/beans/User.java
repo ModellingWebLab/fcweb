@@ -529,7 +529,7 @@ public class User
 	{
 		String vis = version.getVisibility ();
 
-		if (vis.equals (ChasteEntityVersion.VISIBILITY_PUBLIC))
+		if (vis.equals(ChasteEntityVersion.VISIBILITY_PUBLIC) || vis.equals(ChasteEntityVersion.VISIBILITY_MODERATED))
 			return true;
 		if (vis.equals (ChasteEntityVersion.VISIBILITY_RESTRICTED))
 			return isAuthorized () && (role.equals (ROLE_MODELER) || role.equals (ROLE_PROTO_AUTHOR) || role.equals (ROLE_ADMIN));

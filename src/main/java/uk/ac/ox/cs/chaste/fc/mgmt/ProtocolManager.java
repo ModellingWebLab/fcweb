@@ -139,6 +139,7 @@ extends ChasteEntityManager
 				+ " INNER JOIN `protocolversions` pv ON pv.id = pi.protocolversion"
 				+ " INNER JOIN `protocols` p ON p.id = pv.protocol"
 				+ " WHERE term != '' AND (pv.visibility = '" + ChasteEntityVersion.VISIBILITY_PUBLIC + "'"
+						+ " OR pv.visibility = '" + ChasteEntityVersion.VISIBILITY_MODERATED + "'"
 						+ restricted_vis_clause
 						+ (user.isAuthorized() ? " OR (pv.visibility = '" + ChasteEntityVersion.VISIBILITY_PRIVATE + "' AND pv.author = ?)" : "")
 				+ ") ORDER BY proto_id, id DESC");

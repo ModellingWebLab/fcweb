@@ -24,6 +24,7 @@ public class ChasteEntityVersion
 	public static final String VISIBILITY_PRIVATE = "PRIVATE";
 	public static final String VISIBILITY_RESTRICTED = "RESTRICTED";
 	public static final String VISIBILITY_PUBLIC = "PUBLIC";
+	public static final String VISIBILITY_MODERATED = "MODERATED";
 	
 	private ChasteEntity entity;
 	private int id;
@@ -135,13 +136,38 @@ public class ChasteEntityVersion
 		return visibility;
 	}
 	
+	/**
+	 * Get the index of a visibility string for easy comparison of 'privateness'.
+	 * @param visibility a ChasteEntityVersion.VISIBILITY_* string
+	 * @return an index in [1,4] where 1 is PRIVATE, 4 is MODERATED; 0 if bad input
+	 */
+	public static int getVisibilityIndex(String visibility)
+	{
+		int result;
+		if (visibility.equals(ChasteEntityVersion.VISIBILITY_PRIVATE))
+			result = 1;
+		else if (visibility.equals(ChasteEntityVersion.VISIBILITY_RESTRICTED))
+			result = 2;
+		else if (visibility.equals(ChasteEntityVersion.VISIBILITY_PUBLIC))
+			result = 3;
+		else if (visibility.equals(ChasteEntityVersion.VISIBILITY_MODERATED))
+			result = 4;
+		else
+			result = 0;
+		return result;
+	}
+	
+	public static boolean isValidVisibility(String visibility)
+	{
+		return (getVisibilityIndex(visibility) != 0);
+	}
+	
 	public String getJointVisibility(ChasteEntityVersion other)
 	{
 		String result = this.visibility;
-		if ((other.visibility.equals(ChasteEntityVersion.VISIBILITY_PRIVATE)) ||
-				(other.visibility.equals(ChasteEntityVersion.VISIBILITY_RESTRICTED)
-				 && this.visibility.equals(ChasteEntityVersion.VISIBILITY_PUBLIC)))
+		if (getVisibilityIndex(this.visibility) > getVisibilityIndex(other.visibility))
 		{
+			// other is less public than we are
 			result = other.visibility;
 		}
 		return result;

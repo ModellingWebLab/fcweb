@@ -196,6 +196,8 @@ public abstract class ChasteEntityManager
 	{
 		if (!user.isAllowedToCreateEntityVersion ())
 			throw new ChastePermissionException ("you are not allowed to create a new entity version");
+		if (visibility.equals(ChasteEntityVersion.VISIBILITY_MODERATED) && !user.isAdmin())
+			throw new ChastePermissionException ("only an admin may set MODERATED visibility");
 		
 		PreparedStatement st = db.prepareStatement ("INSERT INTO `" + entityVersionsTable + "`(`author`, `" + entityColumn + "`, `version`, `filepath`, `visibility`, `commitmsg`) VALUES (?,?,?,?,?,?)");
 		ResultSet rs = null;
@@ -577,10 +579,12 @@ public abstract class ChasteEntityManager
 	{
 		if (version == null)
 			return false;
-		if (!(visibility.equals ("PUBLIC") || visibility.equals ("RESTRICTED") || visibility.equals ("PRIVATE")))
+		if (!version.isValidVisibility(visibility))
 			return false;
 		if (!user.isAllowedToUpdateEntityVersion(version))
 			throw new ChastePermissionException ("you are not allowed to update this entity version");
+		if (visibility.equals(ChasteEntityVersion.VISIBILITY_MODERATED) && !user.isAdmin())
+			throw new ChastePermissionException ("only admins may set MODERATED visibility");
 		
 		PreparedStatement st = db.prepareStatement ("UPDATE `" + entityVersionsTable + 
 			"` SET `visibility`=? WHERE id=?");

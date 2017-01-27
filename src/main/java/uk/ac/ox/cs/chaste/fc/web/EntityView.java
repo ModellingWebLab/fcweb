@@ -1178,9 +1178,7 @@ public class EntityView extends WebModule
 		if (query.get ("visibility") != null)
 		{
 			String userVisibility = query.get ("visibility").toString();
-			if (!userVisibility.equals(ChasteEntityVersion.VISIBILITY_PRIVATE)
-				&& !userVisibility.equals(ChasteEntityVersion.VISIBILITY_RESTRICTED)
-				&& !userVisibility.equals(ChasteEntityVersion.VISIBILITY_PUBLIC))
+			if (!ChasteEntityVersion.isValidVisibility(userVisibility))
 			{
 				LOGGER.warn("Invalid visibility '", userVisibility, "' sent.");
 				notifications.addError("Invalid visibility '" + userVisibility + "' sent.");
