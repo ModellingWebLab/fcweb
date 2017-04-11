@@ -79,7 +79,7 @@ You should then be able to build the project executable.
 For instance, to build using 4 cores:
 
 ```
-svn co https://chaste.cs.ox.ac.uk/svn/chaste/trunk Chaste
+git clone -b develop https://chaste.cs.ox.ac.uk/git/chaste.git Chaste
 cd Chaste/projects
 svn co https://chaste.cs.ox.ac.uk/svn/chaste/projects/FunctionalCuration
 cd ..
