@@ -157,14 +157,17 @@ def CheckExperiment(callbackUrl, signature, modelUrl, protocolUrl):
             Callback(callbackUrl, signature, {'returntype': 'inapplicable', 'returnmsg': message})
             shutil.rmtree(temp_dir)
         else:
+            # Check whether their interfaces are compatible
+            fit_proto,data = utils.FindFittingSpecification(main_proto_path)
+
             # Run the experiment directly in this task, to ensure it has access to the unpacked model & protocol
-            RunExperiment(callbackUrl, signature, main_model_path, main_proto_path, temp_dir)
+            RunExperiment(callbackUrl, signature, main_model_path, main_proto_path, temp_dir, fit_proto, data)
     except:
         ReportError(callbackUrl, signature)
 
 
 @app.task(name="fcws.tasks.RunExperiment")
-def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir):
+def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir, fitProtoPath=None, dataPath=None):
     """Run a functional curation experiment.
     
     @param callbackUrl: URL to post status updates and results to
@@ -182,7 +185,14 @@ def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir):
         # Also redirect stdout and stderr so we can debug any issues.
         for key, value in config['environment'].iteritems():
             os.environ[key] = value
-        args = [config['exe_path'], modelPath, protoPath, os.path.join(tempDir, 'output')]
+        
+        # Call FC executable for simulation tasks
+        if fitProtoPath == None and dataPath == None:
+            args = [config['exe_path'], modelPath, protoPath, os.path.join(tempDir, 'output')]
+        # Call custom executable for fitting tasks (TODO: specify link location in config file)
+        else:
+            args = ["python", "/home/adaly/Chaste/projects/AidanDaly/src/python/weblab/cardiac.py", modelPath, protoPath, os.path.join(tempDir, 'output'), fitProtoPath, dataPath]
+
         child_stdout_name = os.path.join(tempDir, 'stdout.txt')
         output_file = open(child_stdout_name, 'w')
         timeout = False
