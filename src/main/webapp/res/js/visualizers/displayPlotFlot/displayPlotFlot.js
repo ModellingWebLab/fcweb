@@ -120,6 +120,20 @@ function plotAccordingToChoices(plotProperties, selectedCoords) {
     if (styleLinespointsOrPoints)
         settings.points = { show: true, radius: 2 };
 
+    if (plotProperties.histogram)
+    {
+      settings.points = {show: false};
+      settings.lines = {show: false};
+      for (var i=0; i<data.length; i++)
+      {
+        data[i].bars = {
+          show : true,
+          barWidth : data[i].data[1][0] - data[i].data[0][0],
+          align : 'left'
+        };
+      }
+    }
+
     plottedGraph = $.plot("#" + flotPlotDivId, data, settings);
 };
 
@@ -135,7 +149,7 @@ function retrieveCurrentPlotCoords(plottedGraph) {
 /* Retrieve generic plot settings */
 function retrieveGenericSettings(legendContainer) {
   var genericSettings = {
-      xaxis: { tickDecimals: 0,
+      xaxis: { //tickDecimals: 0,
                position: 'bottom',
                axisLabelPadding: 10,
                axisLabelUseCanvas: true },
@@ -440,6 +454,7 @@ contentFlotPlot.prototype.getContentsCallback = function (succ)
           'choicesContainer': choicesContainer,
           'datasets': datasets,
           'styleLinespointsOrPoints': styleLinespointsOrPoints,
+          'histogram': thisFile.linestyle == 'hist',
           'flotPlotDivId': flotPlotDivId,
           'x_label': x_label,
           'y_label': y_label
@@ -622,6 +637,7 @@ contentFlotPlotComparer.prototype.showContents = function ()
             'choicesContainer': choicesContainer,
             'datasets': datasets,
             'styleLinespointsOrPoints': styleLinespointsOrPoints,
+            'histogram': thisFile.linestyle == 'hist',
             'flotPlotDivId': flotPlotDivId,
             'x_label': x_label,
             'y_label': y_label
