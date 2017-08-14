@@ -22,7 +22,7 @@ CELERY_TRACK_STARTED = True
 # Just in case, restart workers once they've run this many jobs
 CELERYD_MAX_TASKS_PER_CHILD = 50
 
-CELERYD_TASK_SOFT_TIME_LIMIT = 60 * 60 * 15  # 15 hours
+CELERYD_TASK_SOFT_TIME_LIMIT = 60 * 60 * 24 * 14  # 14 days
 # TODO: Check default time limits; should probably differ for admin & normal users
 # can set with decorator: @app.task(soft_time_limit=) or config CELERYD_TASK_SOFT_TIME_LIMIT or as soft_time_limit option to apply_async.
 # Also need to look into creating per-user queues dynamically - tricky bit is getting a worker to consume them!
