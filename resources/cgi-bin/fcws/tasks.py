@@ -191,7 +191,7 @@ def RunExperiment(callbackUrl, signature, modelPath, protoPath, tempDir, fitProt
             args = [config['exe_path'], modelPath, protoPath, os.path.join(tempDir, 'output')]
         # Call custom executable for fitting tasks (TODO: specify link location in config file)
         else:
-            args = ["python", "/home/adaly/Chaste/projects/AidanDaly/src/python/weblab/cardiac.py", modelPath, protoPath, os.path.join(tempDir, 'output'), fitProtoPath, dataPath]
+            args = ["python", config['fit_path'], modelPath, protoPath, os.path.join(tempDir, 'output'), fitProtoPath, dataPath]
 
         child_stdout_name = os.path.join(tempDir, 'stdout.txt')
         output_file = open(child_stdout_name, 'w')
