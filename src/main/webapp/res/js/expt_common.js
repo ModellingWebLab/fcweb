@@ -165,13 +165,19 @@ function parseCSVContent (file)
         for (var j = 0; j < csv.length; j++)
             if (csv[j][i])
             {
-                file.columns[i][j] = Number(csv[j][i]);
-                if (i > 0)
+                // Handles non-numeric CSVs, such as labels for graphs
+                if (isNaN(csv[j][i]))
+                    file.columns[i][j] = csv[j][i];
+                else 
                 {
-                    if (max < file.columns[i][j])
-                        max = file.columns[i][j];
-                    if (min > file.columns[i][j])
-                        min = file.columns[i][j];
+                    file.columns[i][j] = Number(csv[j][i]);
+                    if (i > 0)
+                    {
+                        if (max < file.columns[i][j])
+                            max = file.columns[i][j];
+                        if (min > file.columns[i][j])
+                            min = file.columns[i][j];
+                    }
                 }
             }
         dropDist.push ( (max - min) / 500.0 );
