@@ -136,7 +136,7 @@ Then, context files are stored in `/var/lib/tomcat7/context` and your apps are e
 Copy `resources/FunctionalCuration.xml` to `/var/lib/tomcat7/context` and configure the file properly,
 including database credentials and link to the backend.
 You may also wish to change the `bivesWebService` parameter if you are running this model comparison service locally;
-by default it uses the author's endpoint at `http://bives.sems.uni-rostock.de/`.
+by default it uses the author's endpoint at `https://bives.bio.informatik.uni-rostock.de/`.
 
 Add the jdbc mysql driver to `/var/lib/tomcat7/lib`. (http://dev.mysql.com/downloads/connector/j/)
 If on Ubuntu you should just be able to
