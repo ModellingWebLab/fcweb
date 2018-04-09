@@ -209,7 +209,7 @@ Go to http://server:8080/FunctionalCuration and hopefully you'll see the web int
 
 The default admin credentials are:
 
-    user: root
+    email: root@localhost
     pass: admin
 
 For security reasons you should change the admin password, register a new user and get the password via mail.
