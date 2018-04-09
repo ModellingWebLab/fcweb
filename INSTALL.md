@@ -259,5 +259,10 @@ A sample vhost configuration for Apache 2.2 might look like:
 Note that for Apache 2.4 you need to replace the 'Order' and 'Allow' directives with 'Require' directives.
 `Require all granted` allows access (replacing the first pair above) and `Require all denied` replaces the second pair to deny access to the config file.
 
+Restart apache and tomcat
+
+    $ service apache2 restart
+    $ service tomcat7 restart
+
 Try to access http://your.company/FunctionalCuration
 
