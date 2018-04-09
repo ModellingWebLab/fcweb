@@ -220,8 +220,15 @@ Now you can start uploading models and protocols.
 
 ### Integrate tomcat into apache2
 
-Follow for example http://www.dreamchain.com/apache-server-tomcat-mod_jk-on-debian-6-0-squeeze/
+Install apache2 and tomcat:
 
+    $ apt-get install apache2 tomcat7 libapache2-mod-jk
+
+Enable jk
+
+    $ a2enmod jk
+
+Set up a virtual host by editing `/etc/apache2/sites-available/000-default.conf`
 A sample vhost configuration for Apache 2.2 might look like:
 
 	<VirtualHost *:80>
