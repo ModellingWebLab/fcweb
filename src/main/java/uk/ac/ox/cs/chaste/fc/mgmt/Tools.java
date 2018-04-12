@@ -38,7 +38,7 @@ public class Tools
 	private static String tempDir = "/tmp/chasteTempDir";
 	private static String storageDir = "/tmp/chasteStorageDir";
 	
-	private static String bivesWebService = "http://bives.sems.uni-rostock.de/";
+	private static String bivesWebService = "https://bives.bio.informatik.uni-rostock.de/";
 	
 	public static final String NEWLINE = System.getProperty("line.separator");
 	public static final String FILESEP = System.getProperty("file.separator");

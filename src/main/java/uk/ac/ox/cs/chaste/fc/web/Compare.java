@@ -281,8 +281,9 @@ public class Compare extends WebModule
 				bivesRequest.addCommand (BivesComparisonRequest.COMMAND_REPORT_HTML);
 				bivesRequest.addCommand (BivesComparisonRequest.COMMAND_XML_DIFF);
 				
-				BivesWs bives = new HttpBivesClient("http://bives.sems.uni-rostock.de/");
-				LOGGER.debug ("Calling BiVeS at http://bives.sems.uni-rostock.de/");
+				String bivesUrl = Tools.getBivesWebServiceUrl ();
+				BivesWs bives = new HttpBivesClient(bivesUrl);
+				LOGGER.debug ("Calling BiVeS at " + bivesUrl);
 				BivesComparisonResponse result;
 				try
 				{

@@ -136,7 +136,7 @@ Then, context files are stored in `/var/lib/tomcat7/context` and your apps are e
 Copy `resources/FunctionalCuration.xml` to `/var/lib/tomcat7/context` and configure the file properly,
 including database credentials and link to the backend.
 You may also wish to change the `bivesWebService` parameter if you are running this model comparison service locally;
-by default it uses the author's endpoint at `http://bives.sems.uni-rostock.de/`.
+by default it uses the author's endpoint at `https://bives.bio.informatik.uni-rostock.de/`.
 
 Add the jdbc mysql driver to `/var/lib/tomcat7/lib`. (http://dev.mysql.com/downloads/connector/j/)
 If on Ubuntu you should just be able to
@@ -209,7 +209,7 @@ Go to http://server:8080/FunctionalCuration and hopefully you'll see the web int
 
 The default admin credentials are:
 
-    user: root
+    email: root@localhost
     pass: admin
 
 For security reasons you should change the admin password, register a new user and get the password via mail.
@@ -220,8 +220,15 @@ Now you can start uploading models and protocols.
 
 ### Integrate tomcat into apache2
 
-Follow for example http://www.dreamchain.com/apache-server-tomcat-mod_jk-on-debian-6-0-squeeze/
+Install apache2 and tomcat:
 
+    $ apt-get install apache2 tomcat7 libapache2-mod-jk
+
+Enable jk
+
+    $ a2enmod jk
+
+Set up a virtual host by editing `/etc/apache2/sites-available/000-default.conf`
 A sample vhost configuration for Apache 2.2 might look like:
 
 	<VirtualHost *:80>
@@ -251,6 +258,11 @@ A sample vhost configuration for Apache 2.2 might look like:
 
 Note that for Apache 2.4 you need to replace the 'Order' and 'Allow' directives with 'Require' directives.
 `Require all granted` allows access (replacing the first pair above) and `Require all denied` replaces the second pair to deny access to the config file.
+
+Restart apache and tomcat
+
+    $ service apache2 restart
+    $ service tomcat7 restart
 
 Try to access http://your.company/FunctionalCuration
 

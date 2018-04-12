@@ -195,6 +195,10 @@ public class DatabaseConnector
 					LOGGER.info ("upgrading db to version 3..");
 					try
 					{
+						st = this.prepareStatement("ALTER TABLE `experimentversions` modify column `finished` timestamp not null default '1970-01-01 01:01:01';");
+						st.execute ();
+						closeRes (st);
+
 						st = this.prepareStatement ("ALTER TABLE  `modelversions` ADD  `commitmsg` TEXT NOT NULL");
 						st.execute ();
 						closeRes (st);

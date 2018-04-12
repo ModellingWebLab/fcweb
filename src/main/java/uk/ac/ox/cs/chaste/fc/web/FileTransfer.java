@@ -818,7 +818,8 @@ public class FileTransfer extends WebModule
 		for (File f : files)
 		{
 			// is there a model in that dir?
-			if (modelMgmt.getVersionByPath (f.getName ()) == null)
+			if (modelMgmt.getVersionByPath (f.getName ()) == null
+				&& !notifications.isError())
 				try
 				{
 					LOGGER.info ("remove file ", f.getAbsolutePath (), " because it's not in db");
@@ -837,7 +838,8 @@ public class FileTransfer extends WebModule
 		for (File f : files)
 		{
 			// is there a protocol in that dir?
-			if (protocolMgmt.getVersionByPath (f.getName ()) == null)
+			if (protocolMgmt.getVersionByPath (f.getName ()) == null
+				&& !notifications.isError())
 				try
 				{
 					LOGGER.info ("remove file ", f.getAbsolutePath (), " because it's not in db");
@@ -856,7 +858,8 @@ public class FileTransfer extends WebModule
 		for (File f : files)
 		{
 			// is there a exp in that dir?
-			if (expMgmt.getVersionByPath (f.getName ()) == null)
+			if (expMgmt.getVersionByPath (f.getName ()) == null
+				&& !notifications.isError())
 				try
 				{
 					LOGGER.info ("remove file ", f.getAbsolutePath (), " because it's not in db");
