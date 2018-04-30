@@ -144,6 +144,13 @@ If on Ubuntu you should just be able to
 sudo ln -s /usr/share/java/mysql.jar /var/lib/tomcat7/lib/
 ```
 
+#### Ubuntu 16 or 18
+
+Make sure you're using Java 8 by editing `etc/default/tomcat7` and setting
+```
+JAVA_HOME=/usr/lib/jvm/java-8 -openjdk-amd64
+```
+
 ### Build project
 
 Add the sems maven repository to your list of repositories: http://sems.uni-rostock.de/2013/10/maven-repository/
