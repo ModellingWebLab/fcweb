@@ -61,11 +61,16 @@
             and begin to think about auto-fitting, and even auto-developing models!</li>
     </ul>
     <p>
+        You can read more in a <a href="https://www.biorxiv.org/content/early/2018/01/31/257683">preprint of our next Web Lab paper</a>.
         Please <a href="${contextPath}/contact.html">get in touch</a> if you would like to join forces to help with any of these.
     </p>
     <p>
         As well as the <a href="https://chaste.cs.ox.ac.uk/trac/wiki/FunctionalCuration">back-end simulation tool</a> being open source,
-        the <a href="https://bitbucket.org/joncooper/fcweb">code for this website</a> is also available under the same open source licence.
+        the <a href="https://github.com/ModellingWebLab/fcweb">code for this website</a> is also available under the same open source licence.
+        The experimental prototype incorporating parameter fitting can be found in the <a href="https://github.com/ModellingWebLab/fcweb/tree/cardiac-fitting">‘cardiac-fitting’ branch</a>.
+        All work on the next version of the Web Lab is taking place within the <a href="https://github.com/ModellingWebLab">ModellingWebLab</a> GitHub organisation.
+    </p>
+    <p>
         We would welcome collaborations with any who would be interested in producing a similar resource for a different scientific domain.
         Equally, anyone interested in contributing new plugins for displaying or comparing results is encouraged to <a href="${contextPath}/contact.html">contact us</a>.
     </p>
@@ -74,7 +79,8 @@
     <img style="float:left;margin:0 5px 10px 0;" src="${contextPath}/res/img/chaste.jpg" alt="Chaste project logo"/>
     <p>
         We would like to thank Steve Niederer and the Noble modelling group for discussions on ways to test cell model behaviour.
-        We gratefully acknowledge funding from the <a href="http://www.2020science.net/research/functional-curation">2020 Science Programme</a>.
+        We gratefully acknowledge funding from the <a href="http://www.2020science.net/research/functional-curation">2020 Science Programme</a>
+        and <a href="https://bbsrc.ukri.org/research/grants-search/AwardDetails/?FundingReference=BB%2fP010008%2f1">BBRSC</a>.
         The functional curation software is built on top of <a href="https://chaste.cs.ox.ac.uk">Chaste</a>.
     </p>
 </t:skeleton>
